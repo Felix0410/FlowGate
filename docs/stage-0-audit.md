@@ -583,3 +583,118 @@ FlowGate/
 ```
 
 **功能块验收补充项**：在该块的总结里说明新增依赖、复用 Plus 的类与改造理由；审查核心业务中文注释与 1/2/3 分点；只执行本块新增、修改和直接受影响测试。最终统一大测试节奏不变。
+
+## 十二、本地 Codex 功能块 0 任务书（2026-11-04）
+
+> **执行状态**：任务书已准备，源码未实现。此章节是给本地 Codex 的当前唯一实施指令；以功能为块，不逐接口分批申请确认；不自动进入功能块 1。
+>
+> **仓库**：https://github.com/Felix0410/FlowGate 。**审计依据**：本文件前面的 Plus 源码审计与 B01—B13 业务设计。**本块目标**：从零建立可运行的 Gateway + Demo，把安全限定的静态路由、HTTP 透传、Trace ID 和基础指标连成真实端到端业务闭环。
+
+### 12.1 先检查工作环境与边界
+
+1. 在用户本地项目目录确认 Git 远端、当前分支、\`git status\`、Java 17、Maven，以及本机端口占用；如工作区有未提交修改，禁止覆盖并报告解决方式。
+2. 从最新 \`main\` 建立独立分支 \`feat/block0-gateway-foundation\`；不要在 \`main\` 上提交功能代码。不要自动合并。
+3. 阅读 \`README.md\` 的第 1/3/4/5/6 节及最小技术和中文注释规范，阅读本文件第十/十一/十二节，确保“FlowGate 是新网关业务，不是保留点评系统”。
+4. 本块**绝不复制整个 Plus 工程**。原 Plus 作为只读参考，不迁移商户、券、订单业务；本块不需要数据库、Redis、Lua、Redisson、Kafka、注册中心、配置中心、前端、Docker/K8s。不要为展示技术而引入新依赖。
+
+### 12.2 技术与项目结构
+
+**候选固定基线**：JDK 17、Spring Boot \`4.0.9\`、Spring Cloud BOM \`2025.1.4\`、Gateway Server WebFlux（通过 BOM 获得 Gateway \`5.0.4\`）、Maven 多模块。先验证实际依赖解析成功。若本地环境与网络导致无法解析，不要擅自切换到测试/RC 版本，说明明确阻塞原因。官方资料：
+
+- https://spring.io/blog/2026/10/23/spring-boot-4-0-9-available-now/
+- https://spring.io/blog/2026/10/23/spring-cloud-2025-1-4-has-been-released/
+- https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway-server-webflux/starter.html
+- https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway-server-webflux/configuring-route-predicate-factories-and-filter-factories.html
+
+**本块建议最小工程树**（按实际必要文件生成，不盲建空接口）：
+
+\`\`\`text
+pom.xml                        # 父 POM：聚合模块、Java 17、Boot 4.0.9、Cloud BOM
+.gitignore                     # IDE/target/本地秘密文件
+flowgate-gateway/
+  pom.xml
+  src/main/java/com/flowgate/gateway/...
+  src/main/resources/application.yml
+  src/test/...                 # 当前改动相关测试
+flowgate-demo/
+  pom.xml
+  src/main/java/com/flowgate/demo/...
+  src/main/resources/application.yml
+  src/test/...
+README.md                      # 现有，保留/必要时小幅补充启动命令
+docs/stage-0-audit.md          # 现有，保留历史设计内容
+\`\`\`
+
+首个功能块**不建立** \`flowgate-control\`，且无需凭空建立 \`flowgate-contract\`。Demo 是普通 Spring MVC 进程，Gateway 是单独的 WebFlux/Netty 进程；不要在网关依赖链中引入 \`spring-boot-starter-web\`、JDBC、旧 Servlet 工具。
+
+**依赖原则**：使用最少 Starter；Gateway 必需的 WebFlux Gateway Starter 与 Actuator，Demo 只需 MVC Web Starter 和当前所需测试 Starter。不要因为“将来有监控”现在就安装 Prometheus/Grafana；基础 HTTP 请求统计优先复用框架内置指标。
+
+### 12.3 本块完整业务能力
+
+**A. 两个进程能独立启动**
+
+- Gateway 开发端口：\`127.0.0.1:8080\`；Demo 开发端口：\`127.0.0.1:8085\`。如本机端口已被占用，支持从配置或环境变量覆盖，并在交付报告给出实际值。
+- Gateway 使用 Spring Cloud Gateway Server WebFlux，不能变成 MVC Controller 里用同步 HttpClient 转发。
+- 应用可用 Maven 单独构建、单独运行。没有 MySQL/Redis/Kafka 时也必须可启动。
+
+**B. 三个最小 Demo HTTP API**
+
+| Demo 原始路径 | 业务行为 / 关键输入输出 | 目的 |
+|---|---|---|
+| \`GET /demo/fast/{id}?tag=abc\` | 返回 200 JSON，包含 id、接收到的 tag；可返回接收到的 \`X-Request-Id\` | 验证路径变量、查询参数和 Trace 透传 |
+| \`POST /demo/echo\` | 接收 JSON Body，原样回显有效 JSON，返回 201；可回显请求中指定的 \`X-Demo-Header\` | 验证方法、Body、Content-Type、HTTP 状态和自定义 Header |
+| \`GET /demo/slow?delayMs=100\` | 人工慢调用，参数允许 0～2000ms，超出返回 400；无需 CPU 密集型算法 | 为后续热点/超时治理留出最小下游；只允许受控范围 |
+
+Demo 可以通过最简单的 Controller 实现；慢请求的等待只在 MVC Demo 内执行，**不得在 Gateway Netty Event Loop 中 \`Thread.sleep\`**。无需数据库与缓存。
+
+**C. 静态受控路由**
+
+- 外部路由仅匹配 \`/api/demo/**\`，代理到 Demo 的 \`http://127.0.0.1:8085/demo/**\`。
+- 用 Gateway 内置的 \`Path\` Predicate 和 \`StripPrefix=1\` 或等价安全配置；路由设置使用 Gateway 5.0 对应的 \`spring.cloud.gateway.server.webflux.routes\`，不能照抄旧版 \`spring.cloud.gateway.routes\`。
+- 使用静态、可信的本地上游地址；不得实现“用户请求传 URL、网关按该 URL 转发”的开放代理。
+- 未匹配的普通路径返回 404。不要创建动态路由数据库或额外规则接口，它们属于功能块 1。
+
+**D. 最简 Trace ID 与基础指标**
+
+- Gateway 为进入的请求生成唯一 \`X-Request-Id\`（可简单采用 UUID），无条件覆盖不可信客户端传入的同名 Header，确保转发给 Demo 且返回给客户端。
+- 选择简单的 WebFlux \`WebFilter\` 或其他合适的前置入口机制，确保路由内请求都能传播该 ID；优先考虑 404 情况也能保留响应 ID；避免依赖 ThreadLocal/MDC 传播身份。
+- Gateway 启用 Actuator 的 health 和 metrics，**仅本地开发可访问**；不暴露 env、beans、heapdump、gateway 管理写入等敏感端点。
+- 优先使用 Gateway 现成的请求耗时/状态计数指标，不另外造复杂指标框架；5.0.x 的属性重点检查 \`spring.cloud.gateway.server.webflux.metrics.enabled=true\`，实际通过 \`/actuator/metrics\` 的输出确认指标名称，避免旧版属性误用。
+- 不记录原始 Authorization、Cookie、密码或整个请求 Body。当前只需要能观察调用是否经过网关及简单请求统计。
+
+### 12.4 当前功能块定向测试
+
+**只运行新增/修改/直接受影响的测试，不运行全量历史回归、不做大压力测试。**
+
+1. **构建与启动**：\`mvn -pl flowgate-gateway,flowgate-demo -am test\`（或受影响模块分别执行）；两个进程实际可启动，无数据库/Redis/Kafka 依赖。
+2. **GET**：\`GET http://127.0.0.1:8080/api/demo/fast/123?tag=abc\` 返回 200，内容含 \`123\`、\`abc\`，与直接请求 \`8085/demo/fast/123?tag=abc\` 的业务结果一致。
+3. **POST**：\`POST /api/demo/echo\` 使用 JSON 请求体及 \`X-Demo-Header: hello\`；返回 201、JSON 结构与 Header 含义正确，证明请求未被错误吞掉或改变方法。
+4. **慢请求边界**：\`/api/demo/slow?delayMs=100\` 成功；负数或超过 2000 返回 400；不存在任意无界的阻塞参数。
+5. **Trace**：两次请求拥有不同 \`X-Request-Id\`；Demo 能收到与客户端响应一致的 ID；客户端伪造 \`X-Request-Id\` 时 Gateway 能覆盖。
+6. **错误**：\`/unknown\` 返回 404；Demo 停止后的已匹配请求返回明确的网关失败响应，不得伪造 200。出错状态不必强行实现高级统一异常平台。
+7. **指标**：调用网关后 \`/actuator/health\` 正常、\`/actuator/metrics\` 可读，能确认框架采集到了请求相关指标；敏感管理端点不暴露。
+
+可以使用 Spring Boot Test + JUnit 及必要的简单 HTTP 冒烟脚本；**不引入 Testcontainers、WireMock、Docker 或复杂测试平台**。若本机条件不支持实际运行，按“未验证/阻塞”报告，不得声称通过。测试命令与真实响应留在提交总结或 PR 描述，避免新增长期规划文档。
+
+### 12.5 代码质量与中文注释
+
+- 代码职责清晰、少建通用抽象、不重造 Gateway 底层。单个类承担单一关键职责，避免大而全工具类和自建 Starter。
+- 核心业务类、公共方法、路由配置、WebFlux Filter 使用准确中文注释；**长代码块按 \`// 1. ...\`、\`// 2. ...\`、\`// 3. ...\` 分点说明验证、执行、收尾**，必要时继续编号，不机械逐行注释。
+- Gateway 事件循环不能执行 JDBC、同步 Redis/Redisson、\`Thread.sleep\` 或阻塞 HTTP；Demo 作为 MVC 阻塞服务可进行有边界的模拟延时。
+- 不迁移 Plus 旧业务命名、旧演示凭证、敏感配置、商户/优惠券/订单 Entity。现阶段不引入额外的中间件或管理 UI。
+
+### 12.6 Git 交付、停止条件与回传格式
+
+**建议分支**：\`feat/block0-gateway-foundation\`。在不覆盖用户工作区的前提下提交本功能块；如允许，可推送独立功能分支供 ChatGPT/负责人从 GitHub 审查，**不得直接推送/合并 main**。不要创建第三份长期项目方案文档。完成功能块 0 后停止，不实现功能块 1 的 Control、Redis Token、动态发布、多维限流等。
+
+必须在结束时输出以下信息：
+
+1. **完成情况**：本块哪些能力已完成，哪些未完成；对照本任务书说明。
+2. **代码提交**：分支名、提交 SHA、远端分支/PR URL（如已推送）、主要新增/修改文件。
+3. **依赖与复用**：实际依赖版本及构建状态；说明为什么本块尚未直接复制 Plus 代码；若有新增依赖须说明必要性。
+4. **定向测试报告**：逐项给出实际命令、关键响应、通过/失败/未运行，特别是 GET/POST/Trace/404/下游不可用/Actuator。
+5. **中文注释检查**：核心类和较长逻辑是否有准确中文解释、\`1./2./3.\` 分点是否达标。
+6. **问题与风险**：未解决问题、阻塞项、是否出现范围外修改，说明可能影响的后续工作。
+7. **最后一句**：\`功能块 0 已完成，等待 ChatGPT 和项目负责人审核\`，或 \`功能块 0 未完成：具体阻塞原因\`。
+
+**验收通过标准**：最小 Gateway + Demo 能真实启动；安全限定的路由和三类 Demo API 能正常访问；方法、Query、JSON Body、必要 Header、状态码透传；Trace ID 能贯穿；有最低限度指标和明确错误语义；源码中文注释充分；本块定向测试有真实记录；无多余基础设施。**除上述范围外不提前开发。**
