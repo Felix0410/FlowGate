@@ -14,16 +14,35 @@ spring:
             enabled: true
             path-tags:
               enabled: false
-          routes:
-            - id: demo-route
-              # 由部署方配置可信 Demo 地址，绝不从请求参数或 Header 取目标。
-              uri: ${DEMO_UPSTREAM_URI:http://127.0.0.1:8085}
-              predicates:
-                - Path=/api/demo/**
-              filters:
-                - StripPrefix=1
+          # 不保留块 0 的通配静态路由：所有业务入口必须先经过可信发布。
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: ${FLOWGATE_CONSOLE_ORIGIN:http://127.0.0.1:8081}
+                allowedMethods: GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS
+                allowedHeaders: Authorization,Content-Type,X-Demo-Header,X-Request-Id
+                exposedHeaders: X-Request-Id
+spring.data.redis:
+  host: ${FG_REDIS_HOST:127.0.0.1}
+  port: ${FG_REDIS_PORT:6379}
+  password: ${FG_REDIS_PASSWORD:}
+  database: ${FG_REDIS_DATABASE:0}
+  timeout: 2s
+  connect-timeout: 2s
+flowgate:
+  control-uri: ${FLOWGATE_CONTROL_URI:http://127.0.0.1:8081}
+  internal-key: ${FLOWGATE_INTERNAL_KEY}
+  node-id: ${FLOWGATE_NODE_ID:local-gateway}
+  allowed-upstreams: ${FLOWGATE_ALLOWED_UPSTREAMS:http://127.0.0.1:8085}
+  poll-ms: ${FLOWGATE_POLL_MS:5000}
 management:
   endpoints:
     web:
       exposure:
         include: health,metrics
+      # Actuator 使用独立 HandlerMapping，需单独允许本地测试台读取状态与指标。
+      cors:
+        allowed-origins: ${FLOWGATE_CONSOLE_ORIGIN:http://127.0.0.1:8081}
+        allowed-methods: GET
+        exposed-headers: X-Request-Id

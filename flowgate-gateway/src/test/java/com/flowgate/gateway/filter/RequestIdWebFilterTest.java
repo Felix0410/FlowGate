@@ -13,11 +13,16 @@ class RequestIdWebFilterTest {
     void replacesUntrustedHeadersAndPreservesIdAtCommit() {
         RequestIdWebFilter filter = new RequestIdWebFilter();
         var first = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown")
-                .header(RequestIdWebFilter.HEADER, "forged", "duplicate"));
+                .header(RequestIdWebFilter.HEADER, "forged", "duplicate")
+                .header("X-User-Id", "admin").header("X-Principal-Id", "1")
+                .header("X-Scopes", "all").header("X-FlowGate-Internal-Key", "forged"));
         String[] forwarded = new String[1];
         filter.filter(first, exchange -> {
             var ids = exchange.getRequest().getHeaders().get(RequestIdWebFilter.HEADER);
             assertEquals(1, ids.size());
+            for (String untrusted : java.util.List.of("X-User-Id", "X-Principal-Id", "X-Scopes", "X-FlowGate-Internal-Key")) {
+                assertNull(exchange.getRequest().getHeaders().getFirst(untrusted));
+            }
             forwarded[0] = ids.get(0);
             assertDoesNotThrow(() -> UUID.fromString(forwarded[0]));
             exchange.getResponse().getHeaders().set(RequestIdWebFilter.HEADER, "downstream");

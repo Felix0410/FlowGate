@@ -21,7 +21,13 @@ public class RequestIdWebFilter implements WebFilter {
         // 1. 每次入口生成独立标识，不信任客户端提供的一个或多个同名头。
         String requestId = UUID.randomUUID().toString();
         ServerWebExchange traced = exchange.mutate().request(request ->
-                request.headers(headers -> headers.set(HEADER, requestId))).build();
+                request.headers(headers -> {
+                    headers.set(HEADER, requestId);
+                    // 客户端不能注入可信身份或内部控制密钥；Caller 凭证另由路由过滤器验证。
+                    for (String untrusted : java.util.List.of("X-User-Id", "X-Principal-Id", "X-Scopes", "X-FlowGate-Internal-Key")) {
+                        headers.remove(untrusted);
+                    }
+                })).build();
         // 2. 提前设置响应头，框架错误处理重置响应时在提交前恢复，覆盖下游同名头。
         exchange.getResponse().getHeaders().set(HEADER, requestId);
         exchange.getResponse().beforeCommit(() -> {

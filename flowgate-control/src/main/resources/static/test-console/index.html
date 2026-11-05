@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowGate 本地测试台</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head>
+<body><header><span>FLOWGATE / LOCAL</span><h1>网关功能实验台</h1><p>配置依赖 → 登录 → 初始化三个 Demo API → 发布 → 核对节点 → 测试公开与私有请求 → 变更及回滚。</p></header>
+<main>
+<section><h2>A · 服务状态</h2><p>只展示实际探测结果；发布持久化 PERSISTED 与节点 appliedVersion 分开核对。</p>
+<label>Gateway 地址 <input id="gateway" value="http://127.0.0.1:8080"></label><button id="probe">探测服务</button><pre id="health">尚未探测</pre>
+<table><tr><th>能力</th><th>实现状态</th></tr><tr><td>块 0 fast / echo / slow / Trace / metrics</td><td>已实现，须先发布动态路由</td></tr><tr><td>身份、目录、CAS 发布、回滚、节点与审计</td><td>已实现，依赖 MySQL / Redis</td></tr><tr><td>限流 / 并发许可 / 熔断</td><td>待功能块 2/3 生效</td></tr></table></section>
+<section><h2>B · 基础 HTTP 与 Caller 测试</h2>
+<div class="row"><label>ID <input id="fast-id" value="123"></label><label>tag <input id="tag" value="abc"></label><button id="fast">GET fast</button></div>
+<label>Echo JSON <textarea id="echo-body">{"name":"flowgate"}</textarea></label><label>X-Demo-Header <input id="demo-header" value="hello"></label><button id="echo">POST echo</button>
+<div class="row"><label>delayMs <input id="delay" value="100"></label><button id="slow">GET slow</button><button id="metrics">读取网关指标</button></div>
+<label>Caller Token（仅页面内存）<input id="caller-token" type="password" autocomplete="off"></label>
+<label>私有路径 <input id="private-path" value="/api/private/fast/123"></label><button id="private">请求私有 API</button><button id="clear-caller">清空 Caller 凭证</button>
+<p>不带 Token 为 401；错误 Scope 为 403；有效 Scope 为 200。回滚 V1 后私有路由应为 404。</p></section>
+<section><h2>C · 管理员与身份</h2><form id="login-form"><label>用户名 <input id="username" autocomplete="username" required></label><label>密码 <input id="password" type="password" autocomplete="current-password" required></label><button>登录</button></form>
+<p id="role">尚未登录；刷新页面后所有凭证清空。</p><button id="logout" data-admin disabled>退出并清空凭证</button>
+<div class="row"><label>Caller 名称 <input id="caller-name"></label><label>Scopes（逗号分隔）<input id="scopes" value="demo:read"></label><button id="create-caller" data-admin data-role="ADMIN" disabled>创建 Caller</button></div>
+<label>最近一次 Caller Token（仅本次可见，可复制）<input id="issued-token" type="password" readonly></label><button id="show-token">显示 / 隐藏</button>
+<label>吊销 Caller ID <input id="revoke-id" type="number" min="1"></label><button id="revoke" data-admin data-role="ADMIN" disabled>吊销</button></section>
+<section><h2>D · 目录草稿与发布</h2><p>JSON 编辑只保存草稿，发布后才影响网关。初始化只补齐缺失的 Demo 服务与三条公共规则。</p>
+<button id="seed" data-admin data-write disabled>初始化公共 Demo 草稿</button><button id="seed-private" data-admin data-write disabled>添加私有 Demo 草稿</button>
+<div class="row"><label>目录 <select id="kind"><option>services</option><option>apis</option><option>routes</option><option>policies</option></select></label><label>更新 ID（创建时留空）<input id="entity-id" type="number" min="1"></label></div>
+<label>完整 JSON <textarea id="entity-body" rows="6">{"code":"demo","name":"本地 Demo","upstreamUri":"http://127.0.0.1:8085","enabled":true}</textarea></label>
+<button id="list" data-admin disabled>查询目录</button><button id="save" data-admin data-write disabled>创建 / 更新草稿</button>
+<div class="row"><label>expectedVersion <input id="expected" type="number" min="0" value="0"></label><button id="publish" data-admin data-write disabled>发布完整配置</button></div>
+<div class="row"><button id="current" data-admin disabled>当前持久化版本</button><button id="history" data-admin disabled>发布历史</button><button id="nodes" data-admin disabled>节点实际应用版本</button></div>
+<label>回滚来源版本 <input id="rollback-version" type="number" min="1" value="1"></label><button id="rollback" data-admin data-write disabled>回滚为更大新版本</button></section>
+<section><h2>E · 策略与审计</h2><p>策略使用上方 policies JSON 编辑器。配置会进入快照，限流/熔断执行尚未完成。</p>
+<p>参数示例：RATE_LIMIT {"capacity":100,"refillPerSecond":10}；CONCURRENCY {"maxConcurrent":10}；TIMEOUT {"timeoutMs":1000}。scope 为 GLOBAL / SERVICE / API / ROUTE / CALLER。</p>
+<label>Policy ID <input id="policy-id" type="number" min="1"></label><label>绑定 JSON <textarea id="binding">{"targetType":"GLOBAL","targetId":0}</textarea></label><button id="bind" data-admin data-write disabled>绑定策略草稿</button><button id="audits" data-admin disabled>查看最近审计</button><button disabled>限流 / 熔断执行：待功能块 2/3</button></section>
+<section class="result"><h2>实际 HTTP 结果</h2><p id="result-meta">尚无请求。凭证会从响应原文中遮罩，不写入浏览器持久化存储。</p><pre id="result" aria-live="polite"></pre></section>
+</main><footer>仅本机实验环境 · 未进行生产验收或性能压测</footer></body></html>
