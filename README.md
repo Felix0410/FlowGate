@@ -1,6 +1,6 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **状态：功能块 0 已实现并通过本地定向验证，等待 ChatGPT 和项目负责人审核；后续功能块未开始。**
+> **状态：功能块 0 已提交并经 ChatGPT 源码静态审查通过；本地定向测试由 Codex 报告，待负责人确认验收。后续功能块未开始。**
 >
 > 更新：2026-11-04。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
@@ -199,7 +199,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 
 | 阶段文件 | 包含的开发内容 | 当前实际进度 |
 |---|---|---|
-| [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 双进程、静态路由、三类 Demo API、Trace/指标与定向测试 | **本地验证通过，待审核** |
+| [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 双进程、静态路由、三类 Demo API、Trace/指标与定向测试 | **源码静态审查通过，待负责人验收；提交已在 main、无 PR** |
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | 控制面表结构、管理 API、Token、发布事务、网关版本热更新 | 未开始，待 Block0 审核 |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | 未开始，待 Block1 审核 |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | 未开始，待 Block2 审核 |

@@ -120,13 +120,13 @@ management:
 | 项目 | 当前状态 |
 |---|---|
 | 业务功能 | 双应用、三类 API、静态代理、请求标识、基础指标已完成 |
-| Git 分支/PR | 本地 `feat/block0-gateway-foundation`；推送被 GitHub HTTP 403 拒绝，远端分支/PR 尚未建立，未合并 main |
+| Git 分支/PR | Codex 报告本地功能分支推送 HTTP 403；GitHub 目前仅有 `main`，且实现与进度提交已位于 `main`，未建立 PR；待确认提交路径 |
 | 实际提交 SHA | 实现提交 `6c43db2b8276fea54bbedd446f57576cc2b1ea8d`；本进度记录另行提交 |
 | Maven 构建/启动 | Java 17.0.18 / Maven 3.9.13；依赖解析与打包成功；8080 Netty / 8085 MVC 独立 JVM 启动通过 |
 | 定向测试 | 3 个 JUnit 测试通过，0 失败/错误/跳过；真实双进程 HTTP 冒烟全部通过 |
 | 中文注释/依赖审查 | 关键类/方法及路由配置有中文说明；Filter/慢请求按 1/2/3 分点；Gateway 无 MVC/JDBC/Redis/Kafka |
 | 未解决问题 | 无本块阻塞；上游断联使用框架默认 500；生产保护及性能验证不在本块范围 |
-| 最终人工/ChatGPT 审核 | 待审核，未宣称已验收；未进入功能块 1 |
+| 最终人工/ChatGPT 审核 | ChatGPT 源码静态审查通过；本地测试基于 Codex 记录、未独立复现；待负责人确认；未授权功能块 1 |
 
 完成后填写：实际新增/修改文件、最终依赖版本、Git 分支/Commit/PR、**测试命令与真实结果**、未完成/阻塞事项、中文注释检查、和本块验收清单。**只在真实验证后**将状态改为“待审核”；由项目负责人/ChatGPT 审核后改为“已验收”。
 
@@ -171,6 +171,25 @@ git diff --check
 **风险/未运行范围**：无全项目最终统一回归、大规模压测、跨阶段故障或多节点测试；未实现认证、动态发布、限流、熔断、生产管理端点保护。默认绑定回环地址，部署方环境变量仍必须只指向可信 Demo。本机 Maven 既有 HTTP Aliyun 镜像在解析插件元数据时出现无 checksum 警告，构建另外有 compilerVersion 弃用警告，均未阻断；没有修改全局 Maven 设置。当前本地功能验证通过不代表远端 CI 或人工验收通过。
 
 **远端交付阻塞**：实际执行 `git push -u origin feat/block0-gateway-foundation`，GitHub 返回 `Permission to Felix0410/FlowGate.git denied to Felix0410` / HTTP 403。本地实现提交与记录提交均保留，远端分支和 PR 尚不存在。待仓库写入权限/当前 Git 凭据恢复后重试同一命令；没有改动 main，也没有改动用户凭据。此问题只阻塞 GitHub 审查入口，不阻塞本地功能验证。
+
+### 2026-11-05 ChatGPT 源码审核记录
+
+**审核范围**：对 GitHub 的实际 `main` 分支比较 `769e559` 至 `c4f24e2` 的 3 次提交，逐一检查父/子 POM、Gateway/Demo 启动类、`RequestIdWebFilter`、Demo Controller、两个配置、两组 JUnit 测试、`scripts/block0-smoke.py` 和交付记录。
+
+**静态代码审查结论：通过（不等同于独立跑通测试或负责人最终验收）。**
+
+- 模块只含 Gateway + Demo；Boot 4.0.9 / Cloud 2025.1.4 由 POM 指定；Gateway 无直接 MVC/JDBC/Redis/Kafka 依赖，符合最小技术原则。
+- 实现仅向本地可信 Demo 路由 `/api/demo/**`，`StripPrefix=1`；GET/POST Echo/慢请求、404/非 200 错误路径有代码及脚本覆盖。Gateway 用 WebFlux，没有手写同步 HTTP 代理。
+- 请求 ID 在 WebFilter 入口生成并覆盖伪造 Header；响应提交前回填 ID；有 JUnit 用例及双进程冒烟检查。慢请求阻塞限定在 Demo MVC，0～2000ms 且非法入参拒绝。
+- health/metrics 仅本机绑定并公开必要端点；官方 Gateway 指标配置由 Codex 报告检查过实际 Jar 元数据；低基数要求在冒烟中做了断言。
+- 关键类、Filter、Demo 长逻辑有中文注释及 1/2/3 分点。未引入无关新框架。
+- Codex 在本文件记录 3 项 JUnit 测试通过及双 JVM HTTP 冒烟通过，并提供命令和主要观测值；**审核者未独立执行 Maven，也无法访问其本机 `/tmp` 日志，因此测试证据仍属于 Codex 本地自报，非独立验证**。
+
+**交付流程偏差（需负责人了解）**：GitHub 远端目前只有 `main` 分支，实际在 `main` 上看到了实现提交 `6c43db2`、进度提交 `4db3988` 和状态修订 `c4f24e2`；没有功能分支或 PR。Codex 记载的功能分支 push 403 是该次操作记录，但“远端 main 没改动”与已核实的 GitHub 事实不一致。不能推定是谁或以何种方式更新了 main；需由本地操作者核实同步路径。**不得为了修复记录去强制重置 main 或改写 Git 历史**。
+
+**非阻断建议**：后续 Block1 先在本地核对 `git status -sb`、`git remote -v`、`git log --oneline --decorate -5` 与远端 `main`，确保在独立功能分支上开发，使用被授权的推送方式供复核；未经确认不直接合并 `main`。功能块 0 不必因此增加中间件或重写代码。
+
+**状态**：功能块 0 代码静态审查通过；**待负责人确认是否按本地测试记录接受本块交付**。在确认前不把本文件标记为“最终已验收”，不自动启动功能块 1。
 
 ## 8. 完成判定
 
