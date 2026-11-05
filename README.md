@@ -1,10 +1,10 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **状态：功能块 0 已提交并经 ChatGPT 源码静态审查通过；本地定向测试由 Codex 报告，待负责人确认验收。后续功能块未开始。**
+> **状态：功能块 0 已实现并通过静态审查及 Codex 报告的本地定向测试；负责人手动验收统一推迟到功能块 1 最小 Demo。功能块 1 的任务文档已提交至 `feat/block1-control-publish`，业务代码尚未开始。**
 >
-> 更新：2026-11-04。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
+> 更新：2026-11-05。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
-> 阅读顺序：**本 README（定位、架构、业务目录与 4+1 开发计划） → [阶段 0 审计与完整业务设计](docs/stage-0-audit.md)（Plus 复用证据、B01–B13/E01–E03 细则、决策及测试边界）**。
+> 阅读顺序：**本 README → [功能块 1 开发任务书](docs/progress/block-1-control.md) → [前端同步规范](docs/standards/frontend-sync-rule.md) → [Codex 执行说明](CODEX_BLOCK1_PROMPT.md)**。历史源码证据与业务设计见 [阶段 0 审计](docs/stage-0-audit.md)。
 
 ## 1. 核心定位：复用技术，重构业务
 
@@ -191,16 +191,16 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 5. 完成后整理文件清单、Git 提交、实际运行命令及通过/失败结果、未覆盖风险；可推送**独立功能分支**供复核，但不得直接修改/合并 main 或自行开启下个功能块。需要用户权限的远端操作按本地权限和用户授权处理。
 6. ChatGPT 和负责人审核后的问题在**同一功能块**修复、做相关定向复测；审核通过才开启下一功能块。
 
-**当前入口**：只执行 [第十二节任务书](docs/stage-0-audit.md)（功能块 0）。其余 B01—B13 的后续功能在当前回合均未授权实现。
+**当前入口**：Codex 执行 [功能块 1 任务书](docs/progress/block-1-control.md)；从远端已有的 `feat/block1-control-publish` 分支开始，依照根目录 [CODEX_BLOCK1_PROMPT.md](CODEX_BLOCK1_PROMPT.md) 和 [前端同步规范](docs/standards/frontend-sync-rule.md) 编码。功能块 0 的人工验收延至功能块 1 最小可执行 Demo；功能块 2 尚未授权。
 
 ### 6.3 按功能块管理任务与开发进度（2026-11-04 新约定）
 
-**文件组织已由“长期只维护两份文档”调整为“2 份长期总览/审计文档 + 每个功能块 1 份任务兼进度文件”。** 这是负责人新授权的开发进度记录方式，不应再按旧“两份文档上限”阻止新增阶段文件。
+**文件组织已由“长期只维护两份文档”调整为“总览/审计文档 + 每个功能块 1 份任务兼进度文件 + 1 份长期前端同步规范 + 当前块 Codex 提示词”。** 这是负责人新授权的开发进度记录方式，不应再按旧“两份文档上限”阻止新增阶段文件。
 
 | 阶段文件 | 包含的开发内容 | 当前实际进度 |
 |---|---|---|
 | [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 双进程、静态路由、三类 Demo API、Trace/指标与定向测试 | **源码静态审查通过，待负责人验收；提交已在 main、无 PR** |
-| [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | 控制面表结构、管理 API、Token、发布事务、网关版本热更新 | 未开始，待 Block0 审核 |
+| [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **任务 V2.0 已提交至 feature 分支；功能代码未开始；最小 Demo 后再人工验收** |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | 未开始，待 Block1 审核 |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | 未开始，待 Block2 审核 |
 | [最终验收：统一大测试](docs/progress/final-acceptance.md) | 全量回归、跨模块安全、多实例与故障注入、三组性能对照 | 未开始，待全部功能块完成 |
@@ -250,6 +250,14 @@ python3 scripts/block0-smoke.py
 ```
 
 脚本检查空闲端口、自行启动两个 Jar，验证业务与断联，最后只清理自己启动的进程，并打印临时应用日志目录。实际结果见[功能块 0 进度记录](docs/progress/block-0-gateway.md#7-进度记录codex-完工后原地更新本节)。
+
+### 6.5 功能块 1 文档交接与测试前端规则（2026-11-05）
+
+**任务交付路径**：远端分支 `feat/block1-control-publish` 已包含完整的 [功能块 1 任务书](docs/progress/block-1-control.md)、[前端同步规范](docs/standards/frontend-sync-rule.md)、[Codex 提示词](CODEX_BLOCK1_PROMPT.md)。本地 Codex 先 `git fetch origin` 并检出该**已有分支**，不能再从 main 创建同名空白分支。具体步骤及冲突处理以提示词为准。
+
+**从本块起的硬性要求**：新增 `flowgate-control` 内的原生 HTML/CSS/JavaScript 测试台，固定 `http://127.0.0.1:8081/test-console/`；展示块 0 已有 fast/echo/slow/Trace/状态码与块 1 管理、认证、发布、回滚功能。每后续块完成时同步维护前端、定向测试、进度记录。测试台是**本机开发工具**，不是公开生产管理门户。
+
+**验收节奏**：Codex 在本块编码期间执行自动定向测试、真实最小三 JVM + MySQL/Redis 冒烟；负责人只在最小可执行 Demo 完成后开始人工测试。发布持久化 `PERSISTED` 不等于节点真正 `applied`；未实现的限流/熔断按钮不得伪造成功。未完成时 README/进度文件必须标示未完成，且不提前开发块 2。
 
 ## 7. 风险与未决定事项
 
