@@ -1,9 +1,9 @@
 # FlowGate 功能块 1｜控制面、身份认证、动态路由发布与简易测试前端
 
-> 文档版本：V2.0（2026-11-05）  
-> 状态：**设计及 Codex 实施契约已完成；代码未开始，本块测试未执行，人工验收未进行**。  
-> 实施分支：`feat/block1-control-publish`（已在 GitHub 创建；本地 Codex 必须先检出该远端分支）。  
-> 唯一实施契约：**本文件**；全阶段前端规范见 `docs/standards/frontend-sync-rule.md`。  
+> 文档版本：V2.0（2026-11-05）
+> 状态：**后端与五区测试台已实现，本地定向测试和三进程联调通过；远端推送 403，人工验收与 ChatGPT 审核待进行**。
+> 实施分支：`feat/block1-control-publish`（已在 GitHub 创建；本地 Codex 必须先检出该远端分支）。
+> 唯一实施契约：**本文件**；全阶段前端规范见 `docs/standards/frontend-sync-rule.md`。
 > 前置事实：Block 0 已实现独立 Gateway + Demo、静态代理、Trace ID、Actuator 指标；按仓库记录已通过本地定向测试和静态代码审核，但负责人尚未手动验收。根据负责人新指示，**不要求先完成人工测试，统一在最小可执行 Demo 形成后手动验收**。
 
 ## 1. 本块定位和最终交付
@@ -251,23 +251,109 @@ MySQL 不保存任何明文 Token，也不允许将原始 Token 作为审计摘�
 - 只在 `feat/block1-control-publish` 本地/远端分支提交（如果有推送权限）；**禁止直接在 main 开发或执行 merge/rebase --force/push --force**。如果没有仓库权限，保留本地 commit SHA 并报告，不因 push 失败宣称整块完全交付。
 - 不把测试报告、Commit、PR 与实际功能成功混淆。Codex 最后一条回复需写：模块清单、依赖变化、实现对照、前端状态、运行命令及真实结果、提交 SHA、阻塞、已知缺陷，等待负责人审核；不执行块 2。
 
-## 12. Codex 原地回填（请仅填真实情况）
+## 12. Codex 原地回填（2026-11-05）
 
-| 项目 | 当前状态／Codex 完工后更新 |
+| 项目 | 真实状态 |
 |---|---|
-| 负责人要求 | Block 1 首版简易前端；Block 0 功能继续可测；手动测试延至最小可执行 Demo |
-| 设计文档 | V2.0 已完成 |
-| Block 0 关联 | 已有代码与定向记录；负责人尚未手动验收 |
-| Block 1 分支及 SHA | 远端任务分支 `feat/block1-control-publish` 已创建；功能代码未开始，实施 SHA 待 Codex 回填 |
-| Control 与 SQL | 未开始 |
-| Admin/Caller 身份认证 | 未开始 |
-| API/路由/策略管理 | 未开始 |
-| 发布/CAS/回滚/审计 | 未开始 |
-| Gateway 动态路由与非阻塞鉴权 | 未开始 |
-| 简易前端五区（含块 0） | 未开始 |
-| 定向测试命令与结果 | 未执行 |
-| 实际三服务最小 Demo | 未完成 |
-| 负责人第一次手动验收 | 未执行 |
-| 源码审核、已知风险与差异 | 待 Codex 真实记录 |
+| 负责人要求 | 本轮仅功能块 1，三 JVM + MySQL/Redis + 原生测试台；未进入块 2 |
+| 设计文档 | 按 V2.0 实现；最小适配列于下文 |
+| Block 0 关联 | 三类接口契约保留并通过动态发布后的最小回归；无静态通配旁路 |
+| 分支与功能 SHA | `feat/block1-control-publish`；Control `22d8b11`；Gateway/测试台/冒烟 `16e3d0f5f0921013b451a945924e2c6e6fc90844`；文档另行提交 |
+| Control / SQL | 独立 MVC + 10 张表，可重复 DDL，环境变量初始化 BCrypt ADMIN |
+| Admin / Caller | 管理角色、用途分离、摘要 Redis key、TTL、退出、原子 Caller 索引/撤销通过真实联调 |
+| API / 路由 / 策略 | CRUD、引用、路径冲突、URI 白名单、策略结构与绑定校验通过；策略未执行 |
+| 发布 / CAS / 回滚 / 审计 | MySQL 同事务 CAS + 不可变快照 + SHA；并发唯一成功；回滚生成新版本，审计写入 |
+| Gateway | 非阻塞同步与 Caller 认证；实际缓存确认后上报；旧 Route 的同版本权限保留 |
+| 简易前端五区 | 已实现并通过浏览器真实按钮验证，包含块 0 能力及本块新增操作 |
+| 定向测试 | 10 个不同 JUnit 用例通过；6 组真实集成冒烟通过；JS/依赖/差异检查通过 |
+| 最小 Demo | 真实本地三服务与隔离 MySQL/Redis 保持运行，测试台 `http://127.0.0.1:8081/test-console/` |
+| GitHub / PR | 实际推送 HTTP 403；远端任务分支已有文档，但本轮功能提交未上传；未创建 PR、未合并 main |
+| 人工验收 / 审核 | 待负责人及 ChatGPT 审核；不等同于已验收 |
 
-**停止条件**：完成并记录本块后等待 ChatGPT/负责人审查；在没有完成最小可运行环境或真实测试前，状态只能是“部分完成/存在阻塞”，不可写“已验收”。
+### 12.1 实际文件与依赖
+
+- 根 `pom.xml` 增加 Control/Contract；`.env.example` 为无真实秘密的环境模板。
+- `flowgate-contract`：`RouteSpec`、`Session`、`Snapshot`、`SnapshotCodec`、`Rules`。只共享稳定 DTO、JSON 编码及安全约束；无 Web/Redis/JDBC。Jackson 由 Boot 管理，两端复用同一校验规范，防 MySQL JSON 字段重排误判。
+- `flowgate-control`：MVC 启动类、目录/身份/发布/审计服务、认证拦截器、错误处理、实体与 Mapper、配置、五区测试台。四类相同 CRUD 合并为 `CatalogController`，没有为表再造 Repository/Adapter 层。
+- `sql/flowgate-init.sql`：10 张表、唯一键/外键与固定配置状态行；`CREATE TABLE IF NOT EXISTS` / `INSERT IGNORE`，不删除既有数据。
+- Gateway：`ActiveSnapshotStore`、`SnapshotPollingService`、`SnapshotRouteDefinitionLocator`、`CallerAuthFilter`；扩展入口伪造身份头清理；移除静态通配，保留 Request ID 与 metrics。
+- `scripts/block1-smoke.py`：标准库轻量真实联调；`scripts/PasswordHashTool.java`、`scripts/hash-password.sh`：本地 BCrypt 生成器，不接受密码命令行参数；README 启动、SQL、网页演示说明已同步；块 0 文档注明迁移边界。
+
+实际构建版本：Java 17.0.18、Maven 3.9.13、Boot 4.0.9、Cloud 2025.1.4、Gateway 5.0.4、MyBatis-Plus Boot4 Starter 3.5.18。新增的 MySQL 驱动用于控制面持久化；Control Redis Starter 用于管理会话；Gateway Reactive Redis 用于非阻塞 Caller 校验；Validation 与 BCrypt 支撑参数/密码边界；Jackson 为两端协议编码。未引入前端构建链、完整 Spring Security 过滤链、Flyway、Testcontainers、Kafka、Redisson 或其他后续治理中间件。
+
+本轮没有复制 Plus 业务类、实体或旧 Starter；沿用其 MVC / MyBatis / Redis 技术经验，新增网关快照与认证业务。Gateway 的实际依赖树无 MVC、JDBC、MySQL 驱动、MyBatis 或阻塞 Redis Starter；只使用 ReactiveStringRedisTemplate。
+
+### 12.2 实测命令及结果
+
+在根目录选择 JDK17 后执行：
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package
+mvn -B -ntp -pl flowgate-gateway -am test
+mvn -B -ntp -pl flowgate-gateway -am dependency:tree
+FG_SMOKE_MYSQL_SOCKET=/tmp/flowgate-block1-infra/mysql.sock FG_SMOKE_KEEP=1 python3 scripts/block1-smoke.py
+node --check flowgate-control/src/main/resources/static/test-console/app.js
+git diff --check
+```
+
+- 构建和打包通过。首个最终构建包含 8 个 JUnit 测试；补充“未应用/失败刷新不能误报”和“Redis 失败不调用下游”用例后，Gateway/Contract 增量集合 8 个通过（Gateway 6 + Contract 2），Demo 原有相关 2 个也已通过，**合计 10 个不同用例，0 失败/错误/跳过**。Control HTTP/事务/Redis 使用下面真实联调验证，未冒称有 Control JUnit 用例。
+- 冒烟最终 6/6 组通过，使用独立 MySQL 8.4.9（13306、临时随机库）、脚本自有 Redis 8.2.6（随机回环端口），不会清空用户已有 Redis 或修改原 3306/6379 服务。DDL 连续执行两次通过。
+- JS 语法检查、BCrypt 标准输入工具、依赖隔离与 `git diff --check` 通过。
+- 没有执行统一压测、跨多节点长期故障、后续阶段联调、远端 CI 或负责人手动验收。
+
+| 真实场景 | 结果 |
+|---|---|
+| 三进程启动与 V0 | Gateway 8080、Control 8081、Demo 8085 均监听 127.0.0.1；发布前 API 404，nodes 为空 |
+| 管理认证/角色 | 正确登录 200；未知用户/错密码同为 401；无会话 401；VIEWER 可读不可写 403；OPERATOR 可写和发布、不能创建 Caller 403 |
+| 草稿/白名单/策略 | GET/POST/PUT 通过；错误引用、通配路径、管理/元数据/非白名单 URI 400；策略错误参数及非法 JSON 400；错误作用域绑定 400 |
+| V1 发布 | `expectedVersion=0` → version=1 / PERSISTED；只有缓存确认后节点 appliedVersion=1；重复 expectedVersion 为 409 |
+| 块 0 最小回归 | fast 200，路径/Query/直连业务语义保持；echo 201，嵌套 JSON/中文/null/Header 透传；慢请求 0/100/2000 成功、-1/2001/abc 为 400；JSON 数组 400；Trace 响应与下游一致、伪造覆盖、请求间不同 |
+| 编码边界 | 路径 `a%20b` 到达下游为 `a b`；Query 中中文、`&`、`+`、`%` 保持；编码路径分隔符拒绝，不允许变量变成目标路径穿越 |
+| V2 与 Caller | 新私有路由生效；无/过期/管理 Token 401；错 Scope 403；正确 Scope 200；Caller Token 不能访问 admin；Redis 摘要索引、固定 TTL、原子吊销均验证 |
+| Redis 断联 | 真实私有请求 503；另有过滤器用例确认下游链未被调用；管理会话查询 503；公共已发布 API 仍 200；恢复后重新登录可操作 |
+| 回滚 V3 | 复制 V1 内容产生 V3；公共 API 保持，私有路由 404；V1 snapshot_json 与发布后原文完全相同 |
+| 事务/CAS | 冲突路径发布 400，state/history 无孤立版本；两次并发 expectedVersion=3，结果恰为 200/409，只有 V4；再回滚为 V5 |
+| Control 故障 | 停止 Control 后原内存路由继续转发；Control 离线时重启 Gateway 不开启静态代理，业务 404；Control 恢复后重新拉取可信快照 |
+| 快照/缓存用例 | SHA、schema、非法 URI、非递增版本拒绝；缓存切换时旧 Route 权限与新版本隔离；PENDING/刷新失败均不确认 applied，保留旧快照 |
+| Actuator/CORS | health UP、metrics 可读且含 spring.cloud.gateway.requests；业务与 Actuator 均允许固定 Origin；外部 Origin 不授权；OPTIONS 预检通过，实际业务仍鉴权 |
+| 注销与管理到期 | 退出后 401；实际 Redis TTL 缩短至 1 秒并等待，管理/Caller 会话均到期拒绝 |
+
+本机原始日志：`/tmp/flowgate-block1-build.log`、`/tmp/flowgate-block1-cache-test.log`、`/tmp/flowgate-block1-smoke.log`、`/tmp/flowgate-block1-dependencies.log`；日志不提交仓库。临时基础设施目录 `/tmp/flowgate-block1-infra/`。本轮没有输出随机密码/Token，也没有提交临时登录信息。
+
+### 12.3 网页实测与首次人工入口
+
+实际使用 ego-browser 对原生页面进行按钮操作，不只是静态 HTTP 200 检查：
+
+- 服务探测显示 Control/MySQL/Redis/Demo/Gateway 全部 UP；浏览器读取网关 metrics 为 200。
+- fast 200、echo 201、越界 slow 400 均显示真实状态、耗时和 Request ID；无效 JSON 输入显示本地错误；旧 expectedVersion 发布显示 HTTP 409 与 VERSION_CONFLICT 原文。
+- 管理员登录后显示 ADMIN，密码输入立即清空，响应中的 token 被遮罩；刷新后管理按钮禁用且凭证清空。
+- “添加私有 Demo 草稿” → 发布 V6 → 私有请求无 Token 401 → 创建 Caller（遮罩一次性字段）→ 私有请求 200 → 吊销 204 → 回滚 V1 为 V7 → 私有路由 404。
+- 节点页面真实返回 `appliedVersion=7`，checksum=`38d3ddc3d1ca2b982a4d6978e615b08f5f01c9cf732df91089625c78a235182a`；审计页面包含 ROLLBACK；退出后管理/Caller 凭证清空。
+- 页面无外部 CDN、无 localStorage/sessionStorage/cookie；内部密钥不进入网页；限流/熔断明确待开发且按钮禁用。未保存截图，使用 DOM 与实际 HTTP 状态验证。
+
+**当前最小 Demo 已保持运行**。打开 `http://127.0.0.1:8081/test-console/`，临时登录文件路径见本机 `/tmp/flowgate-block1-smoke.log` 最后几行；文件权限 0600，仅保存本次随机测试凭证与自有进程/库信息，不是项目默认密码。当前版本为 V7（公共规则），手动操作前先查询 current 并使用真实 expectedVersion。三个 API 可直接测试。干净环境从 V0 初始化及点击步骤见 README 6.5；负责人第一次手动测试仍未执行。
+
+### 12.4 最小适配、注释与风险
+
+1. Boot4 Gateway Starter 未提供自动注册的 WebClient.Builder Bean；改用已传递依赖的 `WebClient.builder()`，未额外加框架。Gateway 5.0.4 的 `CachingRouteLocator` 字节码确认：成功事件在缓存写入后发布；实现进一步比对实际缓存完整 RouteSpec 才上报。
+2. 浏览器实测发现 Actuator 使用独立 HandlerMapping，已补独立精确 Origin CORS；并非以业务接口 CORS 通过冒充 health 已可读。
+3. 联调发现首次初始化把 VIEWER/OPERATOR 误当已有 ADMIN，以及直接读取 Spring 事务代理字段导致发布空指针；均已修复并经真实链路复测。脚本 Redis 就绪/TIME_WAIT 竞争也已修复。早期失败未记成通过，最终 6 组完整跑通。
+4. 安全补充：单级变量拒绝编码分隔符/目录跳转；入口清理四种伪造身份/内部头；代理不向 Demo 转发 opaque Authorization。URI 缺失、非法 JSON/媒体类型均归参数错误，不泄露 SQL/凭证。
+5. 关键类、发布 CAS、Redis Lua、WebFlux 缓存切换及页面流程有中文注释；长业务流程有 1/2/3 编号。实际依赖和新增文件人工审查通过。
+6. 这是本地单节点/单机演示；未验证生产部署、Redis Cluster、多节点广泛故障或大规模性能。本块没有治理策略执行，也不宣称具备生产认证体系。MySQL 与 Redis 之间没有分布式事务：Caller 创建失败回滚时会清理会话，凭证只在成功提交后返回；撤销失败不宣称成功。后续扩展多存储故障恢复仍须专项设计。
+7. 构建有上游 compilerVersion 弃用/测试工具 JVM agent 提示，Control 日志有可选 macOS DNS provider 缺失警告；本地显式 IP 链路均通过，未因此增加非必要依赖。
+
+### 12.5 Git 交付事实
+
+开发前检出并跟踪远端已有任务分支，从 `151de70` 起实施；本轮全部代码/文档只在 `feat/block1-control-publish`。提交前逐次检查分支、工作区、变更和暂存范围，仅按明确路径暂存，没有使用 `git add .`。
+
+实际执行：
+
+```bash
+git push origin HEAD:refs/heads/feat/block1-control-publish
+```
+
+结果：GitHub 返回 `Permission to Felix0410/FlowGate.git denied to Felix0410` / HTTP 403。**本轮功能提交尚未上传，远端现有分支仍是任务文档**；未创建 PR，不把已有远端 URL 当成代码已交付。没有改推 main、强推、merge/rebase、改凭据或共享历史。恢复仓库写权限后只需重试上述当前功能分支推送命令。
+
+**本地功能实现与定向验证完成，远端交付被写权限阻塞；等待 ChatGPT 和项目负责人审查。没有自动开启功能块 2。**
