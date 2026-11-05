@@ -1,6 +1,6 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **状态：业务设计和 4+1 开发方案已确认；功能块 0 待实现，细节逐块审查。**
+> **状态：功能块 0 已实现并通过本地定向验证，等待 ChatGPT 和项目负责人审核；后续功能块未开始。**
 >
 > 更新：2026-11-04。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
@@ -199,7 +199,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 
 | 阶段文件 | 包含的开发内容 | 当前实际进度 |
 |---|---|---|
-| [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 已固定依赖、代码目录、静态路由、Demo HTTP 契约、Trace/指标与定向测试 | **待本地 Codex 编码** |
+| [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 双进程、静态路由、三类 Demo API、Trace/指标与定向测试 | **本地验证通过，待审核** |
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | 控制面表结构、管理 API、Token、发布事务、网关版本热更新 | 未开始，待 Block0 审核 |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | 未开始，待 Block1 审核 |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | 未开始，待 Block2 审核 |
@@ -210,6 +210,46 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 **每阶段交接工作流**：ChatGPT 写好目标、目录/类名、接口、数据结构、关键算法/流程、测试命令和完成判定 → Codex 只执行当前文件并写代码、做本块定向测试 → Codex 在**对应阶段文件的进度节**回填分支、SHA、测试实况、问题和风险 → ChatGPT/负责人审核 → 通过后更新 README 状态、细化下一阶段文件并授权实施。**不能自行跨阶段或在 main 直接交付未审核代码。**
 
 **本地 Codex 不承担开放式系统设计**：若当前功能块文件已有明确实现方案，不自行换技术栈、改架构、扩展需求；若实际编译、框架版本或安全问题与任务书冲突，只做最小可验证修正并在进度文件中记录。无论如何不能虚报测试成功。长方法/代码块中文注释遵循 1、2、3 分点原则。
+
+### 6.4 功能块 0 本地启动与验证
+
+需要 JDK 17、Maven 3.9+；冒烟脚本另外使用 Python 3 标准库。macOS 可先选择 JDK：
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+mvn -pl flowgate-demo,flowgate-gateway -am package
+```
+
+在两个终端分别启动（也支持 `mvn -pl flowgate-demo spring-boot:run` 和 `mvn -pl flowgate-gateway spring-boot:run`）：
+
+```bash
+"$JAVA_HOME/bin/java" -jar flowgate-demo/target/flowgate-demo-0.0.1-SNAPSHOT.jar
+```
+
+```bash
+"$JAVA_HOME/bin/java" -jar flowgate-gateway/target/flowgate-gateway-0.0.1-SNAPSHOT.jar
+```
+
+默认只监听 `127.0.0.1:8085`（Demo）和 `127.0.0.1:8080`（Gateway）。可用 `DEMO_PORT`、`GATEWAY_PORT` 覆盖端口；Demo 改端口时，给 Gateway 设置 `DEMO_UPSTREAM_URI=http://127.0.0.1:<新端口>`。该变量仅供部署方指定可信本地 Demo，本块不提供任意请求 URL 转发功能，不适合直接开放到公网。
+
+```bash
+curl -i 'http://127.0.0.1:8080/api/demo/fast/123?tag=abc'
+curl -i 'http://127.0.0.1:8080/api/demo/echo' -H 'Content-Type: application/json' -H 'X-Demo-Header: hello' -d '{"name":"flowgate"}'
+curl -i 'http://127.0.0.1:8080/api/demo/slow?delayMs=100'
+curl 'http://127.0.0.1:8080/actuator/metrics/spring.cloud.gateway.requests'
+```
+
+Echo 返回 201，JSON 对象包含 `body`、`demoHeader`、`requestId`；快速查询和慢请求返回 200。Gateway 每次生成并覆盖 `X-Request-Id`，下游回显的 ID 与响应头相同。慢请求范围为 0～2000ms，非法参数返回 400。下游不可用目前采用框架默认 500，未匹配路径返回 404。Actuator 仅暴露 health、metrics，网关指标不带动态路径标签。
+
+定向测试及双进程自动验证：
+
+```bash
+mvn -pl flowgate-demo,flowgate-gateway -am test
+# 先停止手动启动的应用，确保两个端口空闲；先 package 生成当前 Jar。
+python3 scripts/block0-smoke.py
+```
+
+脚本检查空闲端口、自行启动两个 Jar，验证业务与断联，最后只清理自己启动的进程，并打印临时应用日志目录。实际结果见[功能块 0 进度记录](docs/progress/block-0-gateway.md#7-进度记录codex-完工后原地更新本节)。
 
 ## 7. 风险与未决定事项
 

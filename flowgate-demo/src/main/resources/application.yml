@@ -1,0 +1,7 @@
+# Demo 的有界阻塞只发生在独立 MVC 进程；默认仅本机可访问。
+server:
+  address: 127.0.0.1
+  port: ${DEMO_PORT:8085}
+spring:
+  application:
+    name: flowgate-demo
