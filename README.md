@@ -222,22 +222,37 @@ fast GET、echo POST、slow GET 的路径与返回语义保持不变；Gateway �
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am package
-cp .env.example .env
+cp -n .env.example .env
 chmod 600 .env
 ```
 
-编辑未跟踪的 `.env`，填写实际数据库账号、密码、Redis 地址/密码；数据库用户须有目标库的读写权限。创建专用 `flowgate` 数据库并执行可重复 DDL（按本机连接配置增加 host/port）：
+编辑未跟踪的 `.env`，填写实际 JDK 路径、数据库密码、Redis 密码、管理员哈希和内部密钥。推荐使用 `compose.local.yml`：独立的 MySQL 8.4 / Redis 7 容器、持久化数据卷，默认仅绑定 `127.0.0.1:13307` / `127.0.0.1:16380`，不占用其他项目的 3306/6379。MySQL 的 root 密码由 `FG_MYSQL_ROOT_PASSWORD` 配置，应用使用 `flowgate` 用户；容器首次创建数据卷时自动执行 `sql/flowgate-init.sql`。
+
+配置完成后，可一条命令启动 Docker 依赖及三个 JVM：
 
 ```bash
-mysql -u root -p -e 'CREATE DATABASE IF NOT EXISTS flowgate CHARACTER SET utf8mb4'
-# 先在 .env 填写数据库用户名，使用交互输入对应密码。
+python3 scripts/run-local.py start
+python3 scripts/run-local.py status
+# 重启/停止本脚本管理的 JVM，均不删除数据库数据卷。
+python3 scripts/run-local.py restart
+python3 scripts/run-local.py stop
+# 单独停止 Docker 依赖（数据卷保留）。
+docker compose -f compose.local.yml stop
+```
+
+脚本自动读取根目录 `.env`，只管理经过 PID/Jar 路径核对的本项目进程；日志在 `.local/run/`（已忽略）。修改 Java 代码后先重新 Maven package，再 restart。Docker Desktop 需保持运行；数据库卷已存在时，修改 `.env` 不会自动重置 MySQL 账号密码，不要通过删除数据卷处理配置变更。
+
+如果不用 Compose 而是自行维护 MySQL，需要创建专用数据库及有权限的应用账号，并执行 DDL（端口使用 `.env` 的实际值）：
+
+```bash
 source .env
-mysql -u "$FG_MYSQL_USERNAME" -p flowgate < sql/flowgate-init.sql
+mysql -h 127.0.0.1 -P "${FG_MYSQL_PORT:-3306}" -u root -p -e 'CREATE DATABASE IF NOT EXISTS flowgate CHARACTER SET utf8mb4'
+mysql -h 127.0.0.1 -P "${FG_MYSQL_PORT:-3306}" -u "$FG_MYSQL_USERNAME" -p flowgate < sql/flowgate-init.sql
 ```
 
 `sh scripts/hash-password.sh` 隐藏读取管理员密码并输出 BCrypt 哈希，将结果填写到 `.env` 的 `FG_BOOTSTRAP_ADMIN_BCRYPT`（使用单引号保留 `$`）；同时设置用户名。内部密钥可本机运行 `openssl rand -hex 32` 生成，填写 `FLOWGATE_INTERNAL_KEY`；Control/Gateway 必须使用相同的至少 32 字符密钥。不要提交 `.env`、密码或生成结果。初始化只在 ADMIN 不存在时运行，绝不覆盖已有账号；不提供默认密码。
 
-在三个终端分别 `source .env` 后启动：
+若不使用上述一键脚本，也可在三个终端分别 `source .env` 后启动（两种方式选一种，避免端口冲突）：
 
 ```bash
 "$JAVA_HOME/bin/java" -jar flowgate-demo/target/flowgate-demo-0.0.1-SNAPSHOT.jar

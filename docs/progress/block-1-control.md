@@ -357,3 +357,14 @@ git push origin HEAD:refs/heads/feat/block1-control-publish
 结果：GitHub 返回 `Permission to Felix0410/FlowGate.git denied to Felix0410` / HTTP 403。**本轮功能提交尚未上传，远端现有分支仍是任务文档**；未创建 PR，不把已有远端 URL 当成代码已交付。没有改推 main、强推、merge/rebase、改凭据或共享历史。恢复仓库写权限后只需重试上述当前功能分支推送命令。
 
 **本地功能实现与定向验证完成，远端交付被写权限阻塞；等待 ChatGPT 和项目负责人审查。没有自动开启功能块 2。**
+
+### 12.6 后续本地 Docker 配置（负责人明确授权）
+
+负责人要求用 Docker 配置数据库/Redis，并统一本地密码。本轮新增 `compose.local.yml`，使用本机已有 `mysql:8.4`、`redis:7-alpine`；独立项目 `flowgate-local`、独立持久化数据卷、回环端口 13307/16380。用户已有 mysql84、redis 等其他容器未修改，3306/6379 未占用或替换。仅部署本块所需依赖，未增加 Kafka 等组件。
+
+- `.env` 已备份后配置真实 JDK17、Docker 连接、MySQL root/应用密码、Redis 密码、管理员 BCrypt 与随机内部密钥；仅本地保存且权限 0600，不提交密码或生成结果。
+- `scripts/run-local.py` 自动读取 `.env`，支持 start/stop/restart/status，核对 PID 和 Jar 路径后才停止自有 JVM；`.local/` 日志和 PID 已加入忽略；`.env.example` 只提供无密码模板。
+- 实测 `docker compose -f compose.local.yml up -d --wait --wait-timeout 180`：两个容器 healthy；MySQL 自动初始化 10 张表，应用用户/root 均认证成功；Redis 认证返回 PONG，未认证返回 NOAUTH。
+- 实测 `python3 scripts/run-local.py start`、`restart`、`status`：三个 JVM 就绪，Control/MySQL/Redis/Demo 为 UP、Gateway health 为 UP；管理员登录 200；新独立库中通过正式 API 初始化三条公共 Demo 规则并发布 V1，节点已应用；GET 200、Echo 201、Trace ID 一致、慢请求越界 400。
+- 此部署使用新独立 FlowGate 数据库；之前冒烟的 V7 临时库和数据文件保留，旧原生临时 MySQL/Redis 已停止。此时人工入口改用本地 `.env` 配置的管理员，当前新库版本 V1，不再使用前述临时凭证文件。
+- Docker 本地开发配置按负责人本次新授权加入，不表示原本的功能块 1 任务要求生产 Docker 部署；无需修改 Java 业务代码，也没有进入块 2。之后通过 README 6.5 的一键脚本启动即可。
