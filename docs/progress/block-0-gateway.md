@@ -1,6 +1,6 @@
 # 功能块 0｜基础网关与请求代理（交给本地 Codex）
 
-> **状态**：待编码（2026-11-04 建立任务文件）  
+> **状态**：已实现、本地定向验证通过，待 ChatGPT 和项目负责人审核（2026-11-05）
 > **唯一执行依据**：本文件是功能块 0 的实施与进度记录；README 负责索引，`docs/stage-0-audit.md` 负责项目背景与源码审计。旧文档第十二节相似方案仅作参考，出现冲突**以本文件为准**。  
 > **分支**：`feat/block0-gateway-foundation`；不得直接修改或合并 main。  
 > **约束**：本轮做完一个完整业务块就停，不自动进入功能块 1；只测新增、修改和直接受影响内容。
@@ -119,16 +119,56 @@ management:
 
 | 项目 | 当前状态 |
 |---|---|
-| 业务功能 | 未开始 |
-| Git 分支/PR | 待创建 |
-| 实际提交 SHA | 无 |
-| Maven 构建/启动 | 未执行 |
-| 定向测试 | 未执行 |
-| 中文注释/依赖审查 | 未执行 |
-| 未解决问题 | 无记录（不代表无问题） |
-| 最终人工/ChatGPT 审核 | 未通过（待开发） |
+| 业务功能 | 双应用、三类 API、静态代理、请求标识、基础指标已完成 |
+| Git 分支/PR | `feat/block0-gateway-foundation`；[分支审查地址](https://github.com/Felix0410/FlowGate/tree/feat/block0-gateway-foundation)，未合并 main |
+| 实际提交 SHA | 实现提交 `6c43db2b8276fea54bbedd446f57576cc2b1ea8d`；本进度记录另行提交 |
+| Maven 构建/启动 | Java 17.0.18 / Maven 3.9.13；依赖解析与打包成功；8080 Netty / 8085 MVC 独立 JVM 启动通过 |
+| 定向测试 | 3 个 JUnit 测试通过，0 失败/错误/跳过；真实双进程 HTTP 冒烟全部通过 |
+| 中文注释/依赖审查 | 关键类/方法及路由配置有中文说明；Filter/慢请求按 1/2/3 分点；Gateway 无 MVC/JDBC/Redis/Kafka |
+| 未解决问题 | 无本块阻塞；上游断联使用框架默认 500；生产保护及性能验证不在本块范围 |
+| 最终人工/ChatGPT 审核 | 待审核，未宣称已验收；未进入功能块 1 |
 
 完成后填写：实际新增/修改文件、最终依赖版本、Git 分支/Commit/PR、**测试命令与真实结果**、未完成/阻塞事项、中文注释检查、和本块验收清单。**只在真实验证后**将状态改为“待审核”；由项目负责人/ChatGPT 审核后改为“已验收”。
+
+### 2026-11-05 实际交付记录
+
+**主要文件**：根 `pom.xml` 和 `.gitignore`；两个模块的 `pom.xml`、启动类和 `application.yml`；`RequestIdWebFilter`、`DemoController`；`RequestIdWebFilterTest`、`DemoHttpTest`；`scripts/block0-smoke.py`；README 启动说明和本节。原 `.idea/` 未覆盖、未提交；未创建 Control/Contract，未修改后续功能块文件或历史审计内容。
+
+**依赖与复用**：父 POM Boot 4.0.9、Cloud BOM 2025.1.4 均实际解析成功，Gateway 5.0.4 由 BOM 提供；Micrometer 1.16.8 随 Actuator 引入。Gateway 仅直接引入 WebFlux Gateway、Actuator 和测试 Starter；Demo 仅直接引入 WebMVC 和测试 Starter。HTTP 客户端测试使用 JDK，冒烟使用 Python 标准库，无额外测试平台。未复制 Plus 源码：当前业务不需要其 Servlet/数据库/Redis 业务封装，只沿用 MVC 和 Actuator 使用经验，代理直接复用官方 Gateway。
+
+**最小配置修正**：实际检查 `spring-cloud-gateway-server-webflux-5.0.4.jar` 中的 `META-INF/spring-configuration-metadata.json`，确认指标开关是 `spring.cloud.gateway.server.webflux.metrics.enabled`（默认 false），因此显式设为 true；同时设置 `spring.cloud.gateway.server.webflux.metrics.path-tags.enabled=false`。没有采用本任务文件第 4 节中待核对的旧属性猜测。真实计时器输出确认该配置生效。
+
+**实际执行命令**（均在根目录；先 `export JAVA_HOME=$(/usr/libexec/java_home -v 17)`）：
+
+```bash
+git fetch origin
+git switch -c feat/block0-gateway-foundation origin/main
+mvn -U -pl flowgate-gateway,flowgate-demo -am dependency:resolve
+mvn -B -ntp -pl flowgate-demo,flowgate-gateway -am test package
+python3 scripts/block0-smoke.py
+mvn -B -ntp -pl flowgate-gateway dependency:tree
+git diff --check
+```
+
+依赖解析、构建打包、3 个测试、冒烟和差异格式检查均通过。冒烟脚本实际启动命令为 `java -jar flowgate-demo/target/flowgate-demo-0.0.1-SNAPSHOT.jar` 和 `java -jar flowgate-gateway/target/flowgate-gateway-0.0.1-SNAPSHOT.jar`，结束后清理了自己的两个 JVM。README 的 `spring-boot:run` 替代启动方式未另行执行，不列为实测通过项。
+
+| 验收项 | 实际结果 |
+|---|---|
+| 两进程/本地监听 | `127.0.0.1:8080` Gateway Netty、`127.0.0.1:8085` Demo MVC 独立运行，无数据库/Redis/Kafka |
+| GET/直连对照 | `/api/demo/fast/123?tag=abc` 200；JSON `id=123,tag=abc` 与直连一致 |
+| POST | JSON 含中文/嵌套/数组/null；201，Content-Type 为 application/json；`body` 原样，`demoHeader=hello` |
+| 非法 JSON | 数组、null、标量、截断 JSON 为 400（单测和/或冒烟覆盖） |
+| 慢请求 | 默认 100、0/100/2000 成功；-1/2001/abc 返回 400，超长整数转换也为 400 |
+| ID | GET ID `6dc49350-7582-4542-92d3-1511285b6f88`；POST ID `128cdf16-3be7-476c-9f6b-5a92f90e5cc8`，两者不同；响应头与下游字段一致；客户端伪造被覆盖 |
+| 路由与 404 | `/unknown`、`/admin/routes`、直接 `/demo/fast/123` 为 404 且带 ID |
+| 下游不可用 | 脚本停止自身 Demo 后，同一已匹配代理请求返回 500，响应带 ID，无伪造成功 |
+| Actuator | health 为 UP；metrics 可读；env/beans/heapdump/gateway routes 返回 404 |
+| 网关计时器 | `spring.cloud.gateway.requests`，COUNT=12，TOTAL_TIME=2.372198582s，MAX=2.009110791s；包含 200/201/400 状态及 demo-route；无 path 标签 |
+| 依赖隔离/注释 | dependency:tree 确认 Gateway 无 MVC、JDBC、Redis、Kafka；核心中文注释与长流程编号人工检查通过 |
+
+以上计时器只是少量功能请求的观测，**不是性能基线或压测结论**。原始本机输出：`/tmp/flowgate-build.log`、`/tmp/flowgate-smoke.log`、`/tmp/flowgate-dependencies.log`；应用日志位于脚本打印的临时目录，未提交日志或敏感请求信息。
+
+**风险/未运行范围**：无全项目最终统一回归、大规模压测、跨阶段故障或多节点测试；未实现认证、动态发布、限流、熔断、生产管理端点保护。默认绑定回环地址，部署方环境变量仍必须只指向可信 Demo。本机 Maven 既有 HTTP Aliyun 镜像在解析插件元数据时出现无 checksum 警告，构建另外有 compilerVersion 弃用警告，均未阻断；没有修改全局 Maven 设置。当前本地功能验证通过不代表远端 CI 或人工验收通过。
 
 ## 8. 完成判定
 
