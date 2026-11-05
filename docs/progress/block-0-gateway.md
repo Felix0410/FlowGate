@@ -120,7 +120,7 @@ management:
 | 项目 | 当前状态 |
 |---|---|
 | 业务功能 | 双应用、三类 API、静态代理、请求标识、基础指标已完成 |
-| Git 分支/PR | `feat/block0-gateway-foundation`；[分支审查地址](https://github.com/Felix0410/FlowGate/tree/feat/block0-gateway-foundation)，未合并 main |
+| Git 分支/PR | 本地 `feat/block0-gateway-foundation`；推送被 GitHub HTTP 403 拒绝，远端分支/PR 尚未建立，未合并 main |
 | 实际提交 SHA | 实现提交 `6c43db2b8276fea54bbedd446f57576cc2b1ea8d`；本进度记录另行提交 |
 | Maven 构建/启动 | Java 17.0.18 / Maven 3.9.13；依赖解析与打包成功；8080 Netty / 8085 MVC 独立 JVM 启动通过 |
 | 定向测试 | 3 个 JUnit 测试通过，0 失败/错误/跳过；真实双进程 HTTP 冒烟全部通过 |
@@ -169,6 +169,8 @@ git diff --check
 以上计时器只是少量功能请求的观测，**不是性能基线或压测结论**。原始本机输出：`/tmp/flowgate-build.log`、`/tmp/flowgate-smoke.log`、`/tmp/flowgate-dependencies.log`；应用日志位于脚本打印的临时目录，未提交日志或敏感请求信息。
 
 **风险/未运行范围**：无全项目最终统一回归、大规模压测、跨阶段故障或多节点测试；未实现认证、动态发布、限流、熔断、生产管理端点保护。默认绑定回环地址，部署方环境变量仍必须只指向可信 Demo。本机 Maven 既有 HTTP Aliyun 镜像在解析插件元数据时出现无 checksum 警告，构建另外有 compilerVersion 弃用警告，均未阻断；没有修改全局 Maven 设置。当前本地功能验证通过不代表远端 CI 或人工验收通过。
+
+**远端交付阻塞**：实际执行 `git push -u origin feat/block0-gateway-foundation`，GitHub 返回 `Permission to Felix0410/FlowGate.git denied to Felix0410` / HTTP 403。本地实现提交与记录提交均保留，远端分支和 PR 尚不存在。待仓库写入权限/当前 Git 凭据恢复后重试同一命令；没有改动 main，也没有改动用户凭据。此问题只阻塞 GitHub 审查入口，不阻塞本地功能验证。
 
 ## 8. 完成判定
 
