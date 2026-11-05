@@ -13,6 +13,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>flowgate-contract</module>
+        <module>flowgate-control</module>
         <module>flowgate-gateway</module>
         <module>flowgate-demo</module>
     </modules>
