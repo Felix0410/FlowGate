@@ -3,7 +3,7 @@
 <title>FlowGate V1 统一验收说明</title><link rel="stylesheet" href="style.css"></head>
 <body>
 <header><span>FLOWGATE / LOCAL</span><h1>V1 综合验收说明</h1>
-<p>这里提供功能验证顺序和三组性能模式说明。**不运行压测、不收集凭证、不显示伪造的测试通过状态。**</p>
+<p>这里提供功能验证顺序和三组性能模式说明。<strong>不运行压测、不收集凭证、不显示伪造的测试通过状态。</strong></p>
 <a class="manual-link" href="index.html">返回业务管理</a>
 <a class="manual-link" href="guide.html" target="_blank" rel="noopener">完整中文业务手册</a></header>
 <main>
@@ -28,7 +28,7 @@
 mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am package
 python3 scripts/test-block4-performance.py
 python3 scripts/block4-performance.py --seconds 30 --warmup 3 --repeats 2 --output .local/acceptance/block4-performance-run1.json</pre>
-<p>上面是供本地终端执行的命令，**页面本身不会执行这些命令**。脚本只在本次创建的隔离MySQL/Redis及双Gateway环境中运行；原始结果保留在本机受限目录，不会自动上传。</p></section>
+<p>上面是供本地终端执行的命令，<strong>页面本身不会执行这些命令</strong>。脚本只在本次创建的隔离MySQL/Redis及双Gateway环境中运行；原始结果保留在本机受限目录，不会自动上传。</p></section>
 <section><h2>看哪些证据才算通过？</h2>
 <p>全工程JUnit与HTTP回归的真实命令、三组的总数/业务成功RPS/fast成功P95/P99/429/503、节点版本与容错结果、未执行项、负责人浏览器检查结果、Git审核记录，缺一都不能宣称V1已经完成。</p>
 <p>仓库权威阶段文件：<a href="https://github.com/Felix0410/FlowGate/blob/test/block4-final-acceptance/docs/progress/block-4-acceptance.md" target="_blank" rel="noopener">Block4 验收任务与进度</a>（联网时可查看）；详细报告只有在真实执行后才填写。</p>
