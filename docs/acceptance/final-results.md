@@ -7,7 +7,7 @@
 - 工作分支：`test/block4-final-acceptance`，任务基线`df00937a8403be4912101d2b0344707e2ce5e290`；性能与补充边界脚本提交`d59acf9`。未改变Java业务源码、依赖或数据库schema；正式性能JSON另记录完整Git SHA和脚本SHA256。
 - JDK：Microsoft OpenJDK17.0.18+8-LTS；Maven3.9.13；macOS27.0/Darwin27 ARM64；宿主10逻辑CPU、64GiB内存；Docker29.8.0，VM10CPU、8319504384字节内存（约7.75GiB）。未为测试设置额外容器CPU/内存配额或JVM堆上限。
 - MySQL8.4、Redis7-alpine各用独立随机名称容器、随机回环端口和全新临时数据；两Gateway、一个Control、一个Demo JVM均自建。正式负载仅经过Gateway0，第二节点只供正确性验证；Demo Tomcat最大8线程、最小空闲2线程。
-- 原有IDEA/其他Java服务和`flowgate-local-mysql-1`/`flowgate-local-redis-1`继续运行，未重启或停止；因此这不是独占宿主性能实验。没有覆盖.env、删除用户数据卷、clean工程、改凭据或使用电脑界面控制。
+- 未由脚本重启或停止原有IDEA/其他Java服务；收尾时原三IDEA PID已不在，原因未调查，两个原Docker数据库容器仍在。因此不能声称全部原进程持续运行，也不是独占宿主性能实验。没有覆盖.env、删除用户数据卷、clean工程、改凭据或使用电脑界面控制。
 - 只读GitHub核对PR#1–#4均open/draft、未合并，叠加base依次main→Block1→Block2设计→Block2实现；本轮开始远端main为`84a25d5a7b9545dff3556299efec3c310fc321cf`。不修改PR的base或main。
 
 ## 2. 实际命令、退出码与自动化结果
@@ -106,4 +106,12 @@ CPU以自有PID累计CPU秒差/采样墙钟计算，100%表示占满一核心；
 
 ## 7. 本轮结论与Git交付
 
-Block4自动化实施与本机统一测试、正式三组两轮对照已完成；有界容量风险已实证并保留。**等待ChatGPT和项目负责人复审及负责人浏览器验收，FlowGate V1尚未最终验收/合并。** Git最终提交与推送实际结果在阶段进度末尾单独记录，不把早期历史403当成本次必然结果。
+原任务书df00937基线的自动化与三组两轮对照已实跑，有界容量风险已实证并保留；本报告不能代表新产品后台的整体最终验收。产品后台实现/定向测试另见阶段进度5.3。**等待ChatGPT和项目负责人复审及负责人浏览器验收，Block4尚未最终验收，FlowGate V1未合并。** Git实际结果见阶段进度末尾。
+
+## 8. 后续产品后台实施与本轮真实状态
+
+在合入产品P0要求后，新增独立`/console/`及只读绑定API，主实现`0758787`。完整实现、定向命令/失败修正和已知API边界见[产品合同第8节](../design/product-console-v1.md#8-2026-11-06-codex真实实施记录)及[块4进度5.3](../progress/block-4-acceptance.md#53-新产品后台p0实施与定向验证)。产品指南`/console/guide.html`与仓库[任务式指南](../guides/product-console-guide.md)同步。
+
+Java17定向`-pl flowgate-control -am test package`共10项JUnit通过（Contract7/Control3），产品真实ES模块与模拟DOM契约两组、旧Node两套、两份指南同步/语法/本地HTML安全检查通过。产品真实JS模块在隔离Control/Gateway/MySQL/Redis上完成目录完整创建编辑、真实绑定GET/RBAC、双节点发布、Caller吊销401、CAS409、回滚；[64条脱敏记录](../progress/evidence/product-console-smoke.json)passed=true（不包含子进程辅助登录/网络包总数）。首次目录404已补Spring forward并复测。
+
+产品化后没有重新运行完整工程verify或三组正式长对照，遵守先产品体验/反馈、再新版最终验收门槛。1280px/375px/键盘/角色真人体验仍待负责人执行。没有新增运行依赖、数据表或服务；没有操作浏览器、覆盖.env或修改main。**本轮产品后台可交复审，功能块4整体和V1最终验收仍未完成。**

@@ -38,6 +38,7 @@ function dashboard(ctx) {
   return h('div', {}, stats, ...issues.map(text => notice(text)), h('div', {class: 'grid-two'}, healthCard, steps), h('section', {class: 'card'}, h('h2', {}, versionLabel(ctx.data.current, ctx.data.nodes)), nodesTable(ctx.data.nodes, ctx.data.current?.version)));
 }
 export function start(documentRef = document) {
+  // 1. 会话结束同时清空数据、回执与模态内容，旧请求用序号隔离。
   const el = id => documentRef.getElementById(id); let renderNumber = 0, refreshing = false;
   function sessionEnded(message = '') {
     renderNumber++; api.clear(); ctx.role = ''; ctx.data = {}; ctx.callers = []; ctx.issued = null;
@@ -89,6 +90,8 @@ export function start(documentRef = document) {
     if (group) el('navigation').append(h('span', {class: 'nav-group'}, group));
     const link = h('a', {href: '#' + key, 'data-view': key, onclick: event => { event.preventDefault(); ctx.navigate(key); }}, label); el('navigation').append(link);
   }
+  el('home-link').addEventListener('click', event => { event.preventDefault(); ctx.navigate('dashboard'); });
+  // 3. 绑定显式的登录/退出/刷新动作，不定时造状态，不在前端持久化会话。
   el('login-form').addEventListener('submit', async event => {
     event.preventDefault(); if (el('login-submit').disabled) return;
     el('login-submit').disabled = true; el('login-error').replaceChildren();

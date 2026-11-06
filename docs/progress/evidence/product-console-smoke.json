@@ -1,0 +1,270 @@
+{
+  "passed": true,
+  "recordedAt": "2026-11-06T11:30:09.929107+00:00",
+  "testedGitSha": "075878747ea45590cefda41f6fcd185cc163afa2",
+  "requests": [
+    {
+      "path": "/status",
+      "status": 200
+    },
+    {
+      "path": "/actuator/health",
+      "status": 200
+    },
+    {
+      "path": "/actuator/health",
+      "status": 200
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/console/",
+      "status": 200
+    },
+    {
+      "path": "/console/style.css",
+      "status": 200
+    },
+    {
+      "path": "/console/api.js",
+      "status": 200
+    },
+    {
+      "path": "/console/ui.js",
+      "status": 200
+    },
+    {
+      "path": "/console/app.js",
+      "status": 200
+    },
+    {
+      "path": "/console/catalog.js",
+      "status": 200
+    },
+    {
+      "path": "/console/governance.js",
+      "status": 200
+    },
+    {
+      "path": "/console/operations.js",
+      "status": 200
+    },
+    {
+      "path": "/console/guide.html",
+      "status": 200
+    },
+    {
+      "path": "/test-console/",
+      "status": 200
+    },
+    {
+      "path": "/test-console/guide.html",
+      "status": 200
+    },
+    {
+      "path": "/admin/policies/1/bindings",
+      "status": 401
+    },
+    {
+      "path": "/admin/policies/99999/bindings",
+      "status": 404
+    }
+  ],
+  "productModuleResult": {
+    "passed": true,
+    "records": [
+      {
+        "path": "/admin/auth/login",
+        "status": 200
+      },
+      {
+        "path": "/admin/services",
+        "status": 201
+      },
+      {
+        "path": "/admin/services/2",
+        "status": 200
+      },
+      {
+        "path": "/admin/apis",
+        "status": 201
+      },
+      {
+        "path": "/admin/apis/5",
+        "status": 200
+      },
+      {
+        "path": "/admin/routes",
+        "status": 201
+      },
+      {
+        "path": "/admin/policies",
+        "status": 201
+      },
+      {
+        "path": "/admin/policies/1/bindings",
+        "status": 201
+      },
+      {
+        "path": "/admin/policies/1/bindings",
+        "status": 200
+      },
+      {
+        "path": "/admin/policies/1",
+        "status": 200
+      },
+      {
+        "path": "/admin/policies/1/bindings",
+        "status": 200
+      },
+      {
+        "path": "/admin/auth/login",
+        "status": 200
+      },
+      {
+        "path": "/admin/policies/1/bindings",
+        "status": 200
+      },
+      {
+        "path": "/admin/services",
+        "status": 403
+      },
+      {
+        "path": "/admin/auth/logout",
+        "status": 204
+      },
+      {
+        "path": "/admin/auth/login",
+        "status": 200
+      },
+      {
+        "path": "/admin/policies/1/bindings",
+        "status": 200
+      },
+      {
+        "path": "/admin/callers",
+        "status": 403
+      },
+      {
+        "path": "/admin/auth/logout",
+        "status": 204
+      },
+      {
+        "path": "/admin/releases/current",
+        "status": 200
+      },
+      {
+        "path": "/admin/releases/publish",
+        "status": 200
+      },
+      {
+        "path": "/admin/nodes",
+        "status": 200
+      },
+      {
+        "path": "/admin/nodes",
+        "status": 200
+      },
+      {
+        "path": "/admin/callers",
+        "status": 201
+      },
+      {
+        "path": "/api/product/fast/123",
+        "status": 200
+      },
+      {
+        "path": "/admin/callers/5/revoke",
+        "status": 204
+      },
+      {
+        "path": "/api/product/fast/123",
+        "status": 401
+      },
+      {
+        "path": "/admin/releases/publish",
+        "status": 409
+      },
+      {
+        "path": "/admin/releases/1/rollback",
+        "status": 200
+      },
+      {
+        "path": "/admin/nodes",
+        "status": 200
+      },
+      {
+        "path": "/admin/nodes",
+        "status": 200
+      },
+      {
+        "path": "/api/product/fast/123",
+        "status": 404
+      },
+      {
+        "path": "/admin/auth/logout",
+        "status": 204
+      }
+    ],
+    "publishedVersion": 2,
+    "rolledVersion": 3
+  }
+}

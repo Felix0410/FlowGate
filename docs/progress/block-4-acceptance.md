@@ -221,3 +221,37 @@ git diff --check
 ### 5.2 执行期间的远端要求更新
 
 收尾fetch发现远端df00937到823556f新增产品后台P0门槛。5.1是原任务书基线的历史实跑事实，不代表新版Block4完成。新/console/尚未实现，不以旧测试台/性能替代产品验收；保留原证据，合入新要求后先执行PC-00..06，不再追加正式长对照。
+
+### 5.3 新产品后台P0实施与定向验证
+
+按合入后的产品合同执行PC-00..06，代码提交`0758787`；完整任务式指南`docs/guides/product-console-guide.md`及`/console/guide.html`已同步。产品入口`http://127.0.0.1:8081/console/`，根路径自动跳转；旧`/test-console/`保留开发功能。
+
+- 已实现：独立登录/闭包会话、角色禁用提示、工作台真实数量/依赖/版本/节点；服务/API/路由搜索/创建/编辑完整PUT；速率/并发/超时/熔断独立表单、真实绑定只读、GET降级限制、草稿提示；发布CAS二次确认、409不重试、历史摘要/回滚；Caller一次性内存回执和吊销；真实节点/低基数指标/审计分页；帮助、空状态、失败重读、dialog焦点/Escape、响应式菜单/表格。
+- 后端最小增量：`GET /admin/policies/{id}/bindings`复用既有mapper/RBAC；DTO只返回bindingId/policyId/targetType/targetId/targetLabel/targetRouteId。缺失404，无新写操作/表/模块/运行依赖。新增Java2个定向用例检查真实目标、空绑定/缺失和不暴露Caller秘密。
+- 产品限制明确：没有差异预览/逐对象发布状态/完整历史快照查询，不把目录标成已上线；没有Caller全量列表，规则新绑定Caller只能选本次签发记录，吊销已有Caller需已知签发编号；无绑定移动/删除。绑定读取失败时禁止编辑，部分保存失败不重复创建规则。
+
+实际命令与结果：
+
+```bash
+source .env
+mvn -B -ntp -pl flowgate-control -am test package          # 退出0，Contract7/Control3共10通过，无失败/跳过
+node scripts/product-console-test.mjs                    # 退出0，真实ES模块+模拟DOM两组通过
+node scripts/block2-console-test.js                       # 退出0
+node scripts/block3-console-test.js                       # 退出0
+node --check flowgate-control/src/main/resources/static/console/app.js
+# api/ui/catalog/governance/operations.js也分别node --check通过
+python3 scripts/build-console-guide.py --product --check  # 退出0，7节产品指南
+python3 scripts/build-console-guide.py --check            # 退出0，旧14章保留
+PYTHONPYCACHEPREFIX=/tmp/flowgate-product-pycache python3 -m py_compile scripts/product-console-smoke.py scripts/build-console-guide.py
+python3 scripts/product-console-smoke.py                  # 最终退出0，独占Lab+真实产品JS实际HTTP
+mvn -B -ntp -pl flowgate-control -am package -DskipTests    # 最终静态资源更新，退出0，明确不是重跑Java测试
+git diff --check
+```
+
+首次产品HTTP返回/console/404，补Spring目录forward后复测通过；首次Node命令使用不支持的选项/夹具健康404误期望已修正，均未改生产语义掩盖失败。本阶段未操作电脑界面、未重跑完整工程/正式长压测、未停止用户应用、未修改.env或持久化容器数据。脚本finally仅清理自有资源。产品/开发两套入口及离线帮助都真实200，最终HTTP状态数和脱敏文件见本节随后补记。
+
+中文关键路径注释和长逻辑编号已检查；无innerHTML注入/外部CDN/凭证持久化。负责人1280px/375px/Tab/角色实际体验**未执行**，应先在产品页反馈并修复，之后才能按新门槛继续正式整体验收；旧5.1结果仅是旧基线证据。
+
+产品最终脱敏HTTP证据：`docs/progress/evidence/product-console-smoke.json`，passed=true。Lab初始化/静态/边界31条（200×20、201×9、401×1、404×1），真实产品JS模块33条（200×18、201×6、204×4、401×1、403×2、404×1、409×1），共64条已记录请求。Node子进程用stdin传随机凭证，记录不包含密码/Token/Header/Body。Node用于读取回执的辅助登录请求不在这64条计数内，不将此数字宣称为全部网络包数量。产品Root/目录入口、9项静态资源、旧工具和旧指南均可HTTP访问。
+
+最终补充本地HTMLParser资源链接/手册锚点/静态label与ID、6个JS模块语法、安全渲染/无持久化检查均通过。页面视觉与真实浏览器交互仍未代验。产品化后只进行了上述定向验证，旧基线长性能记录不作为新产品最终通过。**当前状态：产品编码与定向验证完成，等待ChatGPT和项目负责人复审及真实浏览器验收；功能块4整体验收尚未完成。**

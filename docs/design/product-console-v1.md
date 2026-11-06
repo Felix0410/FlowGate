@@ -195,3 +195,19 @@ flowgate-control/src/main/resources/static/
 7. **PC-06**：产品控制台定向测试、真实 Control/Gateway 最小链路；更新README/帮助/Block4进度和验收门槛，提交 `feat(console): ...` / `test(console): ...`。**产品后台真实可用后，才能执行 Block4 最终统一回归与正式三组性能测试。**
 
 本任务要落成 **“真实可用的产品后台”**，不是截图、仅一个空壳、静态假数据或开发测试台更换配色。没有真实执行的测试不得声明通过。
+
+## 8. 2026-11-06 Codex真实实施记录
+
+产品实现提交`0758787`（完整SHA以Git日志为准）。PC-00核对现有Controller、实体和RBAC后，新增**唯一业务API** `GET /admin/policies/{id}/bindings`，三类管理角色可读，返回固定BindingView，缺失策略404、不暴露Caller实体/凭证；没有新增删除/移动绑定API、表、依赖或Gateway逻辑。
+
+PC-01..04已落成`static/console/`独立产品入口：登录/真实工作台，服务/API/路由搜索列表及完整回填PUT，四类规则和只读绑定，发布确认/CAS409/历史回滚、一次性Caller回执/吊销、节点/指标/审计。没有后端差异/Caller全量列表/历史快照详情API的部分均明确标出限制，不造假。保存草稿、发布持久化、真实节点应用分开显示；Token仅闭包/当前页面内存，离开领取页清空Caller Token。
+
+PC-05代码已实现深色240px侧栏、64px顶部、业务卡与表格、原生dialog、桌面/平板/375px媒体规则、关闭导航的隐藏焦点、明确label及错误、Escape和焦点返回。**没有操作浏览器，没有声称1280px/375px真人布局与可用性已通过**；负责人仍需完成第6节人工清单。
+
+PC-06定向验证：`mvn -B -ntp -pl flowgate-control -am test package`退出0，Contract7+Control3=10项JUnit成功（新增2项绑定读取/缺失/不泄密测试）；`node scripts/product-console-test.mjs`真实ES模块+模拟DOM两组通过，包含完整PUT/角色/部分绑定失败后PUT修正/409不重试/草稿提示/安全文本/会话清密。旧块2/3 Node契约通过，两份离线指南一致性检查通过。`scripts/product-console-smoke.py`使用独占随机端口Lab，产品页面和模块真实HTTP200，产品真实JS操作真实Control，验证完整创建编辑、绑定GET与三角色RBAC、双节点发布、Caller401吊销、409、回滚。证据见`docs/progress/evidence/product-console-smoke.json`和块4进度5.3。
+
+首次HTTP测试/console/404，确认为Spring没有目录入口转发；在ControlWebConfig增加根入口跳转、/console标准化跳转和目录forward后复测通过，没有修改Gateway。Node首次测试误把mock的健康404当成功、命令使用了Node24不支持的旧选项，修正测试夹具/命令后实际运行通过；未把失败写成通过。
+
+产品中文指南：`docs/guides/product-console-guide.md`与`/console/guide.html`，按7个用户任务组织。`python3 scripts/build-console-guide.py --product`生成，`--product --check`核对。旧14章测试指南及全部开发功能继续保留。
+
+**状态：产品编码及定向验证完成，待ChatGPT复审和负责人真实浏览器反馈；不进行后续正式长压测，不合并main，不宣告V1完成。**

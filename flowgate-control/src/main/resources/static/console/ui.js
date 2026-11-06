@@ -37,6 +37,7 @@ export function formFields(definitions) {
 }
 /** 原生dialog提供焦点约束和Escape；提交中禁止关闭，避免请求完成后写入另一个表单。 */
 export function openDialog(title, content, save, {submitLabel = '保存草稿', danger = false, onClose = () => {}} = {}) {
+  // 1. 记录触发焦点并构造原生模态表单，不复用上一次的输入或凭证。
   const dialog = document.getElementById('entity-dialog'), previous = document.activeElement;
   if (dialog.open) dialog.close();
   let busy = false;
@@ -50,12 +51,13 @@ export function openDialog(title, content, save, {submitLabel = '保存草稿', 
   dialog.onclose = () => { onClose(); dialog.replaceChildren(); if (previous?.isConnected) previous.focus(); else document.getElementById('main')?.focus(); };
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!save || busy || !form.reportValidity()) return;
-    // 1. 保持表单和错误在原位置，失败不关闭，不自动重试发布或创建。
+    // 2. 保持表单和错误在原位置，失败不关闭，不自动重试发布或创建。
     busy = true; errors.replaceChildren(); const buttons = [...form.querySelectorAll('button')]; buttons.forEach(b => b.disabled = true); submit.textContent = '正在保存…';
     try { await save(); dialog.close(); }
     catch (error) { errors.replaceChildren(notice(error.message, 'error')); errors.focus(); }
     finally { busy = false; buttons.forEach(b => b.disabled = false); submit.textContent = submitLabel; }
   });
+  // 3. 进入时定位首个输入，关闭时由onclose恢复焦点；提交中Escape不能意外关闭。
   dialog.showModal();
   (form.querySelector('input:not([disabled]), select:not([disabled])') || cancel).focus();
   return dialog;

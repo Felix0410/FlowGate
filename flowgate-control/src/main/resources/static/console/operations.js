@@ -55,16 +55,19 @@ function receipt(ctx) {
     h('div', {class: 'actions'}, button('显示/隐藏', () => { token.type = token.type === 'password' ? 'text' : 'password'; }), button('清空凭证', () => { token.value = ''; ctx.issued = null; ctx.render(); })));
 }
 export function renderCallers(ctx) {
+  // 1. 按真实角色禁用写操作，不伪造后端不存在的全量Caller列表。
   ctx.heading('调用方管理', '签发访问私有API的凭证，授权范围必须与API要求匹配。仅管理员可签发或吊销。');
   const allowed = canManageCallers(ctx.role);
   const create = formFields([{name: 'username', label: '调用方名称（唯一）', value: '', placeholder: '例如：报表系统', disabled: !allowed}, {name: 'scopes', label: '授权范围', value: '', placeholder: 'demo:read,orders:read', help: '以逗号或空格分隔，与私有API所需范围一致。', required: false, disabled: !allowed}]);
   const revoke = formFields([{name: 'id', label: '调用方编号', value: '', type: 'number', min: 1, step: 1, help: '后端暂无调用方查询接口。仅使用签发回执中的编号，不猜测他人的编号。', disabled: !allowed}]);
   const issueForm = h('form', {}, create.node, h('button', {type: 'submit', class: 'primary', disabled: !allowed}, '签发调用方凭证'));
+  // 2. 签发先确认，凭证只进入当前页回执，不进入列表、日志或技术详情。
   issueForm.addEventListener('submit', event => { event.preventDefault(); const values = create.values(); openDialog('确认签发调用方凭证', h('p', {}, '为“' + values.username + '”签发凭证，授权范围：' + (values.scopes || '无') + '。Token只展示一次。'), async () => {
     const result = await createCaller(ctx.api, ctx.role, values); ctx.issued = {...result, username: values.username};
     ctx.callers.push({id: result.id, username: values.username}); create.controls.username.value = ''; create.controls.scopes.value = ''; ctx.render();
   }, {submitLabel: '确认签发'}); });
   const revokeForm = h('form', {}, revoke.node, h('button', {type: 'submit', class: 'danger', disabled: !allowed}, '吊销当前凭证'));
+  // 3. 吊销必须二次确认；成功后清除相同编号的一次性Token。
   revokeForm.addEventListener('submit', event => { event.preventDefault(); const id = revoke.values().id; openDialog('确认吊销凭证', notice('编号' + id + '的当前调用方凭证将立即失效，不需要发布，不能恢复旧Token。', 'error'), async () => {
     await revokeCaller(ctx.api, ctx.role, id); if (ctx.issued?.id === Number(id)) ctx.issued = null; await ctx.saved('调用方凭证已吊销。');
   }, {submitLabel: '确认吊销', danger: true}); });

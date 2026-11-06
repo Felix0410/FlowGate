@@ -43,6 +43,7 @@ function optionsFor(ctx, scope) {
   return rows.map(row => ({value: row.id, label: scope === 'SERVICE' ? row.name : scope === 'API' ? apiName(row) : scope === 'ROUTE' ? row.routeId : row.username}));
 }
 export function editPolicy(ctx, type, original = null, bindings = []) {
+  // 1. 完整回填真实参数；既有绑定只读，未取得事实的规则不会进入编辑。
   if (!canWrite(ctx.role)) return;
   let saved = original;
   const definition = policyTypes[type]; let parameters = {};
@@ -75,6 +76,7 @@ export function editPolicy(ctx, type, original = null, bindings = []) {
     }
     try { await savePolicy(ctx.api, ctx.role, values, saved, bindings); }
     catch (error) { if (error.savedPolicy) { saved = error.savedPolicy; base.controls.scope.disabled = true; } throw error; }
+    // 3. 全部保存成功才显示草稿成功；部分失败保留表单和已创建ID供修正。
     await ctx.saved('规则及绑定草稿已保存，尚未发布。请前往发布中心。');
   });
 }

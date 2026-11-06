@@ -1,10 +1,10 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **当前：负责人已要求把原开发测试台重建为真正产品后台。Block4 分支已提交正式 /console/ 的产品化设计与 Codex 任务，产品页面源码尚未实施；先完成产品UI与实际体验，再开展已准备的完整回归和三组性能对照。PR仍为Draft，main未合并。**
+> **当前：Block4新增产品后台 `/console/` 已实现登录、目录编辑、四类治理、发布回滚、调用方和监控审计，定向Java/Node及隔离真实HTTP验证通过。先由负责人体验产品页并复审，再决定新版Block4统一验收；不以旧基线性能替代新产品验收，main未合并。**
 >
 > 更新：2026-11-06。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
-> 阅读顺序：本 README → [产品后台重设计](docs/design/product-console-v1.md) → [产品Codex任务](CODEX_PRODUCT_CONSOLE_PROMPT.md) → [Block4验收任务书](docs/progress/block-4-acceptance.md) → [最终验收计划](docs/acceptance/final-acceptance-plan.md)。
+> 使用入口：**http://127.0.0.1:8081/console/** · [产品操作指南](docs/guides/product-console-guide.md)（页面自带离线帮助）。开发合同：[产品设计与实施记录](docs/design/product-console-v1.md)、[Block4进度](docs/progress/block-4-acceptance.md)。旧 `/test-console/` 保留为开发工具。
 
 ## 1. 核心定位：复用技术，重构业务
 
@@ -203,7 +203,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **后端及五区测试台已实现，本地定向验证通过，待人工验收与代码审核** |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | **功能代码及 Codex 定向验证记录已交付；PR #3 Draft，遗留 R1/R2 与真人浏览器 UX 待收口** |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | **代码与 Codex 定向测试证据已交付；PR #4 Draft，ChatGPT 静态复审完成，真人浏览器/最终综合验收待执行** |
-| [最终验收 / 功能块 4](docs/progress/block-4-acceptance.md) | 跨模块全量回归、安全/故障/多实例、DIRECT/PROXY/GOVERNED三组对照与交付 | **已授权；实施任务、性能脚本/统计单测/验收页面已提交，真实全量验收待本地执行** |
+| [最终验收 / 功能块 4](docs/progress/block-4-acceptance.md) | 产品后台P0、跨模块回归、安全/故障/多实例、三组对照与交付 | **新产品编码和定向验证完成，待负责人浏览器/复审；旧基线实验保留，尚未完成新版最终验收** |
 
 **权威顺序**：README 负责目标与进度索引；`docs/stage-0-audit.md` 负责源码证据、业务设计、历史技术决策；**当前阶段的 `docs/progress/...` 文件优先于旧任务书**，是 Codex 应直接执行的唯一功能块实施契约。
 
