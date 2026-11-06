@@ -154,3 +154,45 @@ Python 写入本地 `.local/acceptance/`，不会覆盖旧证据，JVM 和容器
 | 综合验收结果与main合并 | 未完成/未授权 |
 
 **每轮完成后，Codex在本节后面追加真实SHA、命令与通过/失败数；不得覆盖本文件里写明的未执行事实。**
+
+### 5.1 2026-11-06 Codex本机真实执行（准备阶段表保留历史）
+
+实际报告：[final-results.md](../acceptance/final-results.md)，证据：`docs/progress/evidence/block4-functional.json`、`block4-boundaries.json`、`block4-performance-summary.json`。本阶段功能分支`test/block4-final-acceptance`，任务基线`df00937a8403be4912101d2b0344707e2ce5e290`，脚本提交`d59acf94674e0fe5017e552568e3a4de5dee3986`；后续提交同步本节/报告/页面与最终Demo RSS采样。仅新增验收脚本、资源统计及文档，没有改Java业务代码、运行依赖或schema。
+
+| 项目 | 本轮实际结果 |
+|---|---|
+| 全工程verify | Java17.0.18/Maven3.9.13，Contract7+Control1+Gateway22+Demo4=34通过，0失败/错误/跳过 |
+| 首次verify失败 | 沙箱阻止Mockito self-attach导致Control1 error；正常本机权限复跑退出0，没有跳测试冒充通过 |
+| Node/Python/指南 | 两套Node模拟DOM、JS语法、HTML本地链接/50字段/无脚本验收页、14章指南一致性、Python4项统计/CPU差值、py_compile均通过 |
+| Block2/3统一HTTP | 块2四组断言含真实自然TTL通过；块3本轮191条passed=true，保留旧192条历史证据，不覆盖旧结果 |
+| 补充Block0/1/2/容量 | 最终361条passed=true，身份/代理/TTL/撤销/并发CAS/五维顺序/真实取消与网络失败/20次revision/节点STALE→ONLINE；旧块1固定socket脚本未直接运行 |
+| 补充脚本失败修正 | 测试夹具1500ms全局超时与合法2000ms请求冲突；50%阈值已OPEN却误期望再次500；均修正实验配置/断言，失败本机记录保留 |
+| 默认性能短冒烟 | 5秒8+16/s，DIRECT/PROXY各20个CLIENT_SHED，脚本退出0但passed=false，不用于公平性能结论 |
+| 校准与正式性能 | 三组统一8+8/s；5秒校准passed=true；正式30秒+3秒预热×三组×两轮=2880条，CLIENT_SHED/NETWORK_ERROR均0，passed=true |
+| 性能实际 | 每组fast240/240成功；PROXY fast P95约299–317ms，GOVERNED约10.8–11.6ms；治理拒绝slow，全部业务成功RPS由16降至约9.4（发送窗口口径），并非总体吞吐提高 |
+| 资源与容量 | CPU累计秒差与RSS/Redis内存前后值已采集；完整GC后CB实例1→21，旧revision未清理；适用于低频本机配置演示，不能承诺无界长期稳定 |
+| 前端与文档 | 原业务操作保留；验收说明仅说明，不读私有报告/执行压测；同步校准命令及指南。Control静态资源打包退出0（明确skipTests），Jar五项资源与源文件一致 |
+| 人工/正式交付 | 真人浏览器、ChatGPT复审、CI、生产SLA/部署、main合并/tag未执行/未授权；当前不能宣称V1最终通过 |
+
+实际命令（除首次verify和两次补充实验失败外，下面各项退出0；完整说明及负载数字见报告）：
+
+```bash
+source .env
+mvn -B -ntp verify
+node --check flowgate-control/src/main/resources/static/test-console/app.js
+node scripts/block2-console-test.js
+node scripts/block3-console-test.js
+python3 scripts/build-console-guide.py --check
+python3 scripts/test-block4-performance.py
+PYTHONPYCACHEPREFIX=/tmp/flowgate-block4-pycache python3 -m py_compile scripts/block4-performance.py scripts/block4-boundaries.py
+python3 scripts/block2-smoke.py
+python3 scripts/block3-smoke.py
+python3 scripts/block4-boundaries.py
+python3 scripts/block4-performance.py --seconds 5 --warmup 0 --repeats 1 --output .local/acceptance/block4-dryrun.json
+python3 scripts/block4-performance.py --seconds 5 --warmup 0 --repeats 1 --fast-rps 8 --slow-rps 8 --output .local/acceptance/block4-dryrun-balanced.json
+python3 scripts/block4-performance.py --seconds 30 --warmup 3 --repeats 2 --fast-rps 8 --slow-rps 8 --output .local/acceptance/block4-performance-run1.json
+mvn -B -ntp -pl flowgate-control -am package -DskipTests
+git diff --check
+```
+
+原始JSON/日志保留本机`.local/acceptance/`，脱敏小摘要才入库。新增Python关键流程中文编号注释已检查，无新增Plus复制；既有Lua来源与许可保留。不修改.env、不停止负责人IDE进程/持久化容器、不使用电脑界面。Git最终结果以本节随后记录为准。

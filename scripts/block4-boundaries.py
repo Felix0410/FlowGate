@@ -27,6 +27,7 @@ class Lab(b3.Lab):
         if module == 'flowgate-demo': overrides['FLOWGATE_DEMO_FAULT_ENABLED'] = 'true'
         if module == 'flowgate-gateway': overrides['SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_HTTPCLIENT_RESPONSE_TIMEOUT'] = '3000ms'
         process = b3.b2.Lab.app(self, module, overrides)
+        if module == 'flowgate-demo': self.demo_process = process
         if module == 'flowgate-control': self.control_process = process
         if module == 'flowgate-gateway' and overrides.get('FLOWGATE_NODE_ID') == 'block2-0': self.gateway_process = process
         return process
@@ -51,9 +52,10 @@ class Lab(b3.Lab):
         raw = b3.b2.command([str(Path(os.environ['JAVA_HOME']) / 'bin/jcmd'), str(pid), 'GC.class_histogram'])
         match = re.search(r'^\s*\d+:\s+(\d+)\s+(\d+)\s+io\.github\.resilience4j\.circuitbreaker\.internal\.CircuitBreakerStateMachine\s', raw, re.M)
         rss = int(b3.b2.command(['ps', '-p', str(pid), '-o', 'rss=']))
+        demo_rss = int(b3.b2.command(['ps', '-p', str(self.demo_process.pid), '-o', 'rss=']))
         total = re.search(r'^Total\s+(\d+)\s+(\d+)', raw, re.M)
         return {'breakerInstances': int(match[1]) if match else 0,
-                'breakerShallowBytes': int(match[2]) if match else 0, 'gatewayRssKiB': rss,
+                'breakerShallowBytes': int(match[2]) if match else 0, 'gatewayRssKiB': rss, 'demoRssKiB': demo_rss,
                 'liveHeapBytesAfterFullGc': int(total[2]) if total else None}
 
 

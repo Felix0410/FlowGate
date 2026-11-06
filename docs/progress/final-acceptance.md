@@ -1,10 +1,12 @@
 # 最终验收块｜完整回归、故障与性能验证
 
-> 状态（2026-11-06）：**负责人已授权进入功能块4，验收方案/脚本/页面说明已在 `test/block4-final-acceptance` 实施；真实全量Java/HTTP/三组性能实验和负责人浏览器体验仍未运行。**  
+> 状态（2026-11-06）：**功能块4本机自动化已完成：Java17全工程34项JUnit通过，隔离HTTP/故障/有界容量及正式三组两轮性能已实跑。负责人浏览器体验与ChatGPT复审尚待完成，不宣称V1最终验收。**  
 > 实际分支：`test/block4-final-acceptance`（从Block3真实代码创建），不合并main。  
 > 目的：只在这个阶段进行整个 FlowGate 项目的统一大测试；以前各块只有定向测试，不在此之前反复全量回归。
 
-> **当前唯一详细任务书**：[功能块4实施与进度](block-4-acceptance.md)；[Codex执行提示](../../CODEX_BLOCK4_PROMPT.md)；[三组固定到达脚本](../../scripts/block4-performance.py)；[最终验收计划](../acceptance/final-acceptance-plan.md)。本文件保留历史验收大纲，实际命令/状态以 Block4 文件为准。\n\n## 1. 验收范围
+> **当前唯一详细任务书**：[功能块4实施与进度](block-4-acceptance.md)；[Codex执行提示](../../CODEX_BLOCK4_PROMPT.md)；[三组固定到达脚本](../../scripts/block4-performance.py)；[最终验收计划](../acceptance/final-acceptance-plan.md)。本文件保留历史验收大纲，实际命令/状态以 Block4 文件为准。
+
+## 1. 验收范围
 
 全量 B01—B13 主线，包括网关代理、服务和 API 管理、管理员及调用方身份、配置发布/回滚、Redis 分布式速率治理、本机并发保护、热点隔离、超时/熔断/降级、监控、审计、节点恢复。E01—E03 仍非强制验收，不补造无需求的技术栈。
 
@@ -78,3 +80,9 @@
 | 负责人/ChatGPT 最终审核 | 未开始 |
 
 **完成后**：保留真实报告链接、最终 Git SHA 与遗留风险；只有所有强制验收通过，才标记 FlowGate V1 已完成。
+
+## 8. 2026-11-06 本机执行结果
+
+本轮实际结果以[最终真实报告](../acceptance/final-results.md)及[功能块4进度追加记录](block-4-acceptance.md#5-本块进度回填区)为准，上述准备阶段“未执行”表保留为当时状态。完整verify34项JUnit成功；Block2四组联调、Block3本轮191条HTTP、补充边界最终361条HTTP通过。正式DIRECT/PROXY/GOVERNED三组各30秒+3秒预热、两轮共2880条，CLIENT_SHED和网络错误均0；治理改善fast尾延迟，同时拒绝slow导致总成功吞吐下降。
+
+默认8+16/s短冒烟发生客户端丢负载，三组统一降至8+8/s后重测，原始失败证据未覆盖。20次CB修订实证旧实例1→21，属于需负责人决定是否接受的已知限制。当前仍等待负责人真实浏览器/ChatGPT复审及Git审核；不得自行合并main/tag或宣告V1验收完成。

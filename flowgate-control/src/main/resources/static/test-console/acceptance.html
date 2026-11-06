@@ -27,7 +27,8 @@
 <pre>source .env
 mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am package
 python3 scripts/test-block4-performance.py
-python3 scripts/block4-performance.py --seconds 30 --warmup 3 --repeats 2 --output .local/acceptance/block4-performance-run1.json</pre>
+python3 scripts/block4-performance.py --seconds 30 --warmup 3 --repeats 2 --fast-rps 8 --slow-rps 8 --output .local/acceptance/block4-performance-new.json</pre>
+<p>本机首次默认 fast 8/s + slow 16/s 短实验出现客户端丢负载，因此三组统一改为 fast 8/s + slow 8/s 后再做正式对照。这里给出本机校准命令；换机器需先短冒烟，不能沿用别人的性能结论。输出文件已存在时请换新名称，不覆盖原记录。</p>
 <p>上面是供本地终端执行的命令，<strong>页面本身不会执行这些命令</strong>。脚本只在本次创建的隔离MySQL/Redis及双Gateway环境中运行；原始结果保留在本机受限目录，不会自动上传。</p></section>
 <section><h2>看哪些证据才算通过？</h2>
 <p>全工程JUnit与HTTP回归的真实命令、三组的总数/业务成功RPS/fast成功P95/P99/429/503、节点版本与容错结果、未执行项、负责人浏览器检查结果、Git审核记录，缺一都不能宣称V1已经完成。</p>

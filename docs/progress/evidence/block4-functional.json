@@ -1,0 +1,3143 @@
+{
+  "recordedAt": "2026-11-06T10:53:01.185568+00:00",
+  "passed": true,
+  "notes": "isolated HTTP chain; bodies, credentials and auth headers excluded",
+  "requests": [
+    {
+      "path": "/status",
+      "status": 200,
+      "requestId": null
+    },
+    {
+      "path": "/actuator/health",
+      "status": 200,
+      "requestId": "78960333-9f8f-47d5-99d8-610c6ec5456a"
+    },
+    {
+      "path": "/actuator/health",
+      "status": 200,
+      "requestId": "4ebcc842-e101-419a-885a-70760d4bf885"
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200,
+      "requestId": "a47a72b4-53b4-4886-b406-9b19e8196dec"
+    },
+    {
+      "path": "/admin/services",
+      "status": 201,
+      "requestId": "b5a558ed-d7be-4dae-929d-848fab975e75"
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201,
+      "requestId": "5aa6a3ff-5d55-467d-8f2c-b54f82c22f10"
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201,
+      "requestId": "17fa1d0a-da80-4651-a4e6-a4d4bde65a1c"
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201,
+      "requestId": "4af371a9-925e-4e14-88a6-243d10ded858"
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201,
+      "requestId": "527cccbe-cc88-486e-903e-06195d348cbd"
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201,
+      "requestId": "173257bd-6ace-4ca7-a776-b3b1e806d5be"
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201,
+      "requestId": "f07665a4-7920-4e99-b818-4b7545437b1c"
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201,
+      "requestId": "0d78c30f-597c-4044-af5b-19590f19d451"
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201,
+      "requestId": "c8a384c9-3deb-4f3d-ba16-50acc94b094c"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "6ba05517-78c5-4949-b98a-6765d20a5e7c"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "16a771a9-3d6e-4efb-9aa4-70ebdfe52899",
+      "nodes": []
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "7b6b615a-4d93-4bef-a6a0-566aa3979d12",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 1,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "06f8c5d3-f8e7-4468-8935-7144a527b3eb",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 1,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 1,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201,
+      "requestId": "ff410a2c-effa-494c-be2b-4f32c8fcf73b"
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201,
+      "requestId": "c8c7b211-fd0c-4ed1-9e23-98e0a5682ed1"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "cd95e366-4895-44f1-9f43-344232802894"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "288a18fb-c70e-4ad8-aa7f-66ed4a8153b1",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 1,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 1,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "05ac4130-5830-4954-9118-858d857134d0",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 2,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 2,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "deacc804-1a25-4f4d-916b-daa11f6a08b8",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 2,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 2,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "bb955409-4859-405b-a5c3-94b4f76362ad",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 3,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 3,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/slow?delayMs=100",
+      "status": 200,
+      "requestId": "38d72d35-e198-49d6-94bf-ada4b2476519"
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 500,
+      "requestId": "2770995c-bb2e-48f9-9db1-096787226571",
+      "code": null
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 500,
+      "requestId": "46475c33-9ce5-4b0b-ac72-e2b43c9c59ee",
+      "code": null
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 500,
+      "requestId": "e5a76060-1351-439c-b44f-c4f51405b4b1",
+      "code": null
+    },
+    {
+      "path": "/api/demo/fault?mode=ok",
+      "status": 200,
+      "requestId": "2dd6ee83-88ab-4d69-9f49-5426ba75b6a8"
+    },
+    {
+      "path": "/api/demo/fast/1",
+      "status": 200,
+      "requestId": "d57ccfeb-7b40-4c50-8967-18774c1fe907"
+    },
+    {
+      "path": "/api/demo/echo",
+      "status": 201,
+      "requestId": "c84752b1-8822-4025-9b79-609225472ad1"
+    },
+    {
+      "path": "/api/demo/fault?mode=slow",
+      "status": 504,
+      "requestId": "a95b3482-f3c9-4fb9-b77c-844ff540ba18",
+      "code": "UPSTREAM_TIMEOUT"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "6045956c-7d90-4762-8c89-3361902ecb0a"
+    },
+    {
+      "path": "/admin/policies/1/bindings",
+      "status": 201,
+      "requestId": "9b54a1e3-4a57-4dc1-9b96-556d9205c4e2"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "46986bf3-09b2-4f21-bdb7-91fe4969607c"
+    },
+    {
+      "path": "/admin/policies/2/bindings",
+      "status": 201,
+      "requestId": "392313d0-08fe-49ae-9f36-53b97e8dd17c"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "ab81f233-c02e-42f4-85e2-8d8e50150782"
+    },
+    {
+      "path": "/admin/policies/3/bindings",
+      "status": 201,
+      "requestId": "24a6524c-fc43-4fcf-b4e7-0052aad066a6"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "919ccc8a-b35f-4209-9ab6-f0434894140f"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "777e531e-5d66-4166-b72b-70e9421c5180",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 3,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 3,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "1455d6f5-1cd9-4f01-8e0b-7cc35b404680",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 4,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 3,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "ac77ed4b-f586-4082-a175-9d669bfcbb91",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 4,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 4,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/slow?delayMs=600",
+      "status": 504,
+      "requestId": "97d71d82-4b8c-421a-89f1-bf987566ede0",
+      "code": "UPSTREAM_TIMEOUT"
+    },
+    {
+      "path": "/api/demo/slow?delayMs=0",
+      "status": 200,
+      "requestId": "5a6776af-d083-4575-9b61-787ab1983091"
+    },
+    {
+      "path": "/api/demo/fast/1",
+      "status": 200,
+      "requestId": "cbcbb6ff-00fc-426f-905f-fcb79dede1df"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 400,
+      "requestId": "432a32e0-2771-4195-8d65-4d734c02bda6",
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 400,
+      "requestId": "dfcc7c49-ac80-4e38-ba77-8d7b9c8c2295",
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "e0e995f8-b0fc-4d35-95d6-3d79c31540c3"
+    },
+    {
+      "path": "/admin/policies/4/bindings",
+      "status": 201,
+      "requestId": "40992253-26fd-4b84-ab59-459877d07159"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "d39122af-b2c4-403a-be26-26d483749b71"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "12bd6804-6d49-4c76-9a17-f95137814e16",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 4,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 4,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "ae194c0e-091a-44ed-b191-103f4dedc1d3",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.876805Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "8213ab9a-c916-421d-bd79-bfa33f95b69a",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.876805Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fault?mode=invalid",
+      "status": 400,
+      "requestId": "88f5c84f-b3e8-40da-b3bd-f74957f8b096",
+      "code": null
+    },
+    {
+      "path": "/api/demo/fault?mode=invalid",
+      "status": 400,
+      "requestId": "269620da-0e9d-4528-ae69-037cd6786cd4",
+      "code": null
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 500,
+      "requestId": "0fda7c91-3eed-413a-a79e-eba353599461",
+      "code": "UPSTREAM_ERROR"
+    },
+    {
+      "path": "/api/demo/fault?mode=503",
+      "status": 503,
+      "requestId": "4ed49338-fb31-4eab-a95f-15a4e41ddf85",
+      "code": "UPSTREAM_ERROR"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "4b2f5098-5af7-433e-afeb-155db1767735",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.876805Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "8a1effcb-978c-469e-b09f-a70de4c19ba7",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/demo/fault-count",
+      "status": 200,
+      "requestId": null
+    },
+    {
+      "path": "/api/demo/fault?mode=ok",
+      "status": 503,
+      "requestId": "79875b17-c14e-4fa0-ac72-653436358291",
+      "code": "CIRCUIT_OPEN"
+    },
+    {
+      "path": "/demo/fault-count",
+      "status": 200,
+      "requestId": null
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "953599c3-3c96-41a0-adf4-c9200c22e101",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "4808888c-1852-49d0-bb0b-135687a1ad69"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "631eb047-7f13-4e87-a4aa-13adeda3e7c1",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "6826e75c-a2b3-4510-9acf-41ae40263bfb",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 5,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "8d131573-d8bc-4144-9dfc-0d434cc54129",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "f9a91a0d-62c8-4a73-b3d0-e4af4f0c2ae9",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "9f75035f-67d3-4c75-a110-ae632aecf621",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "76c4887a-a487-466d-a097-3fe240f79c02",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "ddb1873d-9b9a-4c3d-9ade-533f1cdffc16",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "b9ad9f1b-2f4f-4201-b914-cf8f939113ef",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "52d8726d-05d5-467a-af25-33944d8f6be8",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "49ec19e7-b651-48f0-86f5-95f499ff2cb5",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "73472929-5831-4724-a7af-622b1692fdd4",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "cf03a5a8-a65b-4d95-a884-511c99c96068",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "cd3c1b36-654c-4879-a1d7-ea474b15a863",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "e7ca8e66-f088-4230-95d1-88aa745fa38a",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "816be203-b587-4195-928e-94bc6dd7cdb4",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "2270c36d-ccf6-43d8-b48f-59128f37736d",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "b6bd5e3a-2329-4024-ae9b-8ea1900c2ceb",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.998489Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "b5a35406-e735-4622-8e1e-1a22a5716876",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.002800Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "HALF_OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fault?mode=ok",
+      "status": 200,
+      "requestId": "f76fabd1-3ae4-463a-850c-f837c9f43496"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "a8340173-f283-4be8-b9b1-c5a9701f2a39",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.002800Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "HALF_OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fault?mode=ok",
+      "status": 200,
+      "requestId": "3c7b0dc8-fedc-42c7-9007-1d6cfc1597f8"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "99f95312-ba30-4256-b945-281a819da400",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.002800Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "HALF_OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "75dd5145-9a98-477e-9eee-327ca351b04b",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.244919Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 500,
+      "requestId": "5c5ce3fc-204e-4838-bd18-31c4aa41d37a",
+      "code": "UPSTREAM_ERROR"
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 500,
+      "requestId": "6adc1a96-3fbd-4c26-a6e0-e35f03753d87",
+      "code": "UPSTREAM_ERROR"
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 503,
+      "requestId": "7c320567-bb3c-4a47-8b1e-7d7c3c93aac9",
+      "code": "CIRCUIT_OPEN"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "54b999cd-a077-4789-92be-55255f3a59f1",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.244919Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "9e841c4b-653d-4396-a578-dc060f8f0645",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "d8264358-ba8c-450b-87f9-db0193b0446f",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "1740b568-82e6-4036-a417-6d2737e8c848",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "3704e714-5e90-4be2-a82d-a66d240d5407",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "376a64cf-4ca7-4d03-8976-2048d2729b3e",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "7f33a3eb-222e-477d-bb7d-884a1fb1a37c",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "c7d5ffa6-09b6-491b-8e99-d9059a25c619",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "59c14c11-f7b0-4ba3-80b7-f88ecaea3344",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "a0b95e77-e425-471b-a105-2802831e7e2d",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "33d3bd5c-4f8d-42f6-9027-9dc881bef4d0",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "77e615fd-61f7-4a7b-933f-eea7f172820b",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "46b1c2db-4308-4d7e-8b12-11b836a0df71",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "2cf90a40-da2f-40c6-9e97-f7198ca6c81e",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "07919ec9-7c4c-4ed5-aa37-499595f274b2",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:38.493703Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "d9af8f9a-accd-4c1a-b38d-0b8f41735682",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:41.496276Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "HALF_OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 500,
+      "requestId": "3decd185-8153-4f55-87f9-92d30811e17c",
+      "code": "UPSTREAM_ERROR"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "6d1653c2-e81f-42ad-9858-462d78f1035f",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:41.496276Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "HALF_OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "2d7a039e-1236-42ce-8cf9-0b0ee5d63e8b",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:41.662142Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/policies/4",
+      "status": 200,
+      "requestId": "c222fc79-6d5b-4304-a0d5-e7d491ee5c17"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "23746a9d-7e90-44fb-8d1e-597371882a1c"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "314c99ca-cc53-4fc1-a9e7-30d37d97ee77",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:41.662142Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 6,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:34.855582Z",
+              "routeId": "demo-fault",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "32d683ea-48bf-4697-ac03-e7f8f8680f74",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 7,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022664Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 7,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "157a5b72-fd37-44ca-bb8e-5f96bd5ed10a",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 7,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022664Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 7,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fault?mode=slow",
+      "status": 200,
+      "requestId": "2c6eb91b-c998-4a0e-9193-c9d107bdf0bd"
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 503,
+      "requestId": "edb7e970-8465-4112-9a9c-35f017130870",
+      "code": "DEGRADED"
+    },
+    {
+      "path": "/__flowgate/fallback",
+      "status": 404,
+      "requestId": "13b01b41-39c9-465b-a536-74a3448af0c6"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "2b248457-b884-402d-b90e-e5728fdd58ab"
+    },
+    {
+      "path": "/admin/policies/5/bindings",
+      "status": 201,
+      "requestId": "5655195d-2ac9-44ab-a8f2-d45f714ee6f3"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 400,
+      "requestId": "5bba7f09-3282-457f-8884-bc1d67071c65",
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/policies/5",
+      "status": 200,
+      "requestId": "7a33930f-8616-4b42-a425-47e4fbe8a602"
+    },
+    {
+      "path": "/admin/policies/1",
+      "status": 200,
+      "requestId": "92d9384a-8694-49f6-beed-80630a2b3222"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "9261da69-4452-43b0-9a64-9d0f492ecccb"
+    },
+    {
+      "path": "/admin/policies/6/bindings",
+      "status": 201,
+      "requestId": "774b0877-d67f-4fc5-9d64-6c371fcb4cfa"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "faa07d08-c287-4c69-8b1c-2d7407e6dee2"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "c220308c-2e5e-4904-890a-bdcd8005c359",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 7,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022664Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 7,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "86330bf3-c852-4d8f-bc7c-eb770b898688",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.269980Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/demo/observation",
+      "status": 200,
+      "requestId": null
+    },
+    {
+      "path": "/demo/observation",
+      "status": 200,
+      "requestId": null
+    },
+    {
+      "path": "/api/demo/slow?delayMs=0",
+      "status": 503,
+      "requestId": "31568f7a-f856-4341-8a3c-8e1b8a85db95",
+      "code": "CONCURRENCY_LIMITED"
+    },
+    {
+      "path": "/api/demo/slow?delayMs=0",
+      "status": 503,
+      "requestId": "7a2005b5-d7f6-4c5f-9090-08c5259ebd35",
+      "code": "CONCURRENCY_LIMITED"
+    },
+    {
+      "path": "/api/demo/slow?delayMs=0",
+      "status": 503,
+      "requestId": "902a7d66-118d-4d08-910b-f6fc58af41c9",
+      "code": "CONCURRENCY_LIMITED"
+    },
+    {
+      "path": "/api/demo/slow?delayMs=2000",
+      "status": 504,
+      "requestId": "99962811-2b15-436d-86cd-0822e605aebe",
+      "code": "UPSTREAM_TIMEOUT"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "17d14aa2-a134-4d65-80a0-4d0d994e3bf7",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.269980Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/slow?delayMs=2000",
+      "status": 504,
+      "requestId": "62c92529-2295-4ba3-8a1d-cc7910045f48",
+      "code": "UPSTREAM_TIMEOUT"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "a99150ca-b61f-4a04-ba6b-91afdad79579",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.269980Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "46370c28-5051-4b3f-b89f-9a97c6ac1ba2",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:46.488810Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/slow?delayMs=0",
+      "status": 503,
+      "requestId": "a595758f-b27f-45f2-b26c-68ed53fb8405",
+      "code": "CIRCUIT_OPEN"
+    },
+    {
+      "path": "/actuator/metrics/flowgate.protection.events",
+      "status": 200,
+      "requestId": "d2ba3ac2-add0-4cfc-bddf-5fec1ad2b155",
+      "metric": {
+        "availableTags": [
+          {
+            "tag": "routeId",
+            "values": [
+              "demo-slow",
+              "demo-fault"
+            ]
+          },
+          {
+            "tag": "kind",
+            "values": [
+              "CIRCUIT",
+              "TIMEOUT",
+              "FALLBACK"
+            ]
+          },
+          {
+            "tag": "outcome",
+            "values": [
+              "open_rejected",
+              "to_OPEN",
+              "to_HALF_OPEN",
+              "half_open_probe",
+              "degraded",
+              "upstream_5xx",
+              "to_CLOSED",
+              "timeout"
+            ]
+          }
+        ],
+        "measurements": [
+          {
+            "statistic": "COUNT",
+            "value": 25.0
+          }
+        ],
+        "name": "flowgate.protection.events"
+      }
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 401,
+      "requestId": "4ef93467-f11b-43d1-a14a-e57a8118d648",
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "path": "/actuator/gateway/routes",
+      "status": 404,
+      "requestId": "7f37d114-34ce-465e-92a2-62b9c31c51ad",
+      "code": null
+    },
+    {
+      "path": "/admin/policies/1",
+      "status": 200,
+      "requestId": "9d0798e4-18c4-4983-81e8-61e799e396b5"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "9e55470a-3989-418b-845b-e6fbdc44d902"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "74544685-6430-4839-9d2a-b73b40e37b93",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:46.488810Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 8,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "d64df4d6-ce74-4787-85d5-e4b210fc0973",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 9,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:46.488810Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 9,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "79030dbe-6944-4536-86ea-aa271740ffea"
+    },
+    {
+      "path": "/admin/policies/7/bindings",
+      "status": 201,
+      "requestId": "d61c36ec-ebea-4ca7-a133-0cea89cdc501"
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201,
+      "requestId": "ed14f344-eb16-4884-885f-e1038a16dc00"
+    },
+    {
+      "path": "/admin/policies/8/bindings",
+      "status": 201,
+      "requestId": "43530959-88a4-4c42-aecb-3c4d84ac9bd2"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "9929d740-f4d5-434b-8cfd-db030270baf1"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "0e132038-b041-40a6-86c0-647d8a4c94b5",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 9,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:46.488810Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 9,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "049259be-7016-4982-bac1-cd60e99b94a8",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 10,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.139771Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:46.488810Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 10,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.142091Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/callers",
+      "status": 201,
+      "requestId": "b5035965-9a01-4a31-9587-85e02e324b12"
+    },
+    {
+      "path": "/admin/callers",
+      "status": 201,
+      "requestId": "ad5d7417-4124-4bcd-8b57-fac0b9bb1b4a"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 401,
+      "requestId": "a42041c5-8e4b-4c2d-9c05-5257b3467afe",
+      "code": "INVALID_CALLER"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 403,
+      "requestId": "10e08300-00e2-4b2b-b69f-3e6624d4f4a4",
+      "code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 401,
+      "requestId": "6b48fcd8-7f9c-4d21-af07-199f81231706",
+      "code": "INVALID_CALLER"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 403,
+      "requestId": "26688575-66df-41c0-b53a-362914372d2a",
+      "code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 401,
+      "requestId": "4287ac2b-cc48-4efd-8922-268c44186866",
+      "code": "INVALID_CALLER"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 403,
+      "requestId": "fbd0177c-a6fd-4155-b3df-8c05a53815cb",
+      "code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 200,
+      "requestId": "9691d043-720b-4191-bbdb-3111aa3db535"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 429,
+      "requestId": "35b76eca-df09-4562-ba7f-c4f36f8d5a97",
+      "code": "RATE_LIMITED"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "0f7452ef-b797-4ba9-8cfe-ce232fa76bc8",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 10,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.151460Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.139771Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:46.488810Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 10,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.142091Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 503,
+      "requestId": "1b777806-767c-4757-9c78-f3dc4c586c1c",
+      "code": "AUTH_UNAVAILABLE"
+    },
+    {
+      "path": "/api/demo/fast/1",
+      "status": 200,
+      "requestId": "d4bfecfe-bc54-4e7b-955e-fc2f3c5b6774"
+    },
+    {
+      "path": "/api/private/fast/1",
+      "status": 200,
+      "requestId": "96918031-10bc-4e0a-a125-26722fd7bcb1"
+    },
+    {
+      "path": "/admin/policies/6",
+      "status": 200,
+      "requestId": "3301788e-983d-4a1d-920d-d2de615b0cbc"
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200,
+      "requestId": "30cfc03e-a891-400d-b6be-3e4f60fb368d"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "d97ec786-bfd0-42a9-81ae-9c76cd29ff95",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 10,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.155787Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "HALF_OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.139771Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:46.488810Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "OPEN"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 10,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.142091Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:44.275026Z",
+              "routeId": "demo-slow",
+              "revision": "fd3ec1cc208eaeccecd39c7666202c5d",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "65a5610b-6321-43bd-89b9-cc34e5e41c81",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 11,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.155787Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "HALF_OPEN"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.139771Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 11,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.142091Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fast/1",
+      "status": 200,
+      "requestId": "e75d293b-b726-4f8c-9714-216f539eaa87"
+    },
+    {
+      "path": "/api/demo/slow?delayMs=600",
+      "status": 504,
+      "requestId": "46b59789-a7a6-443b-aefd-4a395b91160f",
+      "code": "UPSTREAM_TIMEOUT"
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 503,
+      "requestId": "b91089b4-365f-450a-83e7-72e646ecead5",
+      "code": "DEGRADED"
+    },
+    {
+      "path": "/actuator/health",
+      "status": 200,
+      "requestId": "4e23360c-7419-4de3-9265-07675e979f1d"
+    },
+    {
+      "path": "/api/demo/fast/1",
+      "status": 404,
+      "requestId": "3021c46d-050a-4017-9513-26dbea0f88c7",
+      "code": null
+    },
+    {
+      "path": "/status",
+      "status": 200,
+      "requestId": null
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200,
+      "requestId": "814ebbdd-c005-46db-9e2f-ee7146beda6a"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "a27700ea-516f-4b85-8fb4-f125f3434d32",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 11,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:59.553669Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:59.565654Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 11,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.142091Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/fast/1",
+      "status": 200,
+      "requestId": "58f2f5b4-4c48-4617-abb7-352335e143d1"
+    },
+    {
+      "path": "/api/demo/fast/1",
+      "status": 200,
+      "requestId": "8309f8be-8a0b-45d2-94a7-f1f5a4668272"
+    },
+    {
+      "path": "/admin/releases/3/rollback",
+      "status": 200,
+      "requestId": "79f79231-4481-4fc5-806c-6b1027d9e859"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "98921ea4-1654-4573-ae3c-8884e03611a3",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 11,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:59.553669Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:59.565654Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 11,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.142091Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "d8e4456c-7db9-44ce-bc28-be94167d91d6",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 12,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 12,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/slow?delayMs=500",
+      "status": 200,
+      "requestId": "dfc7b320-fdd9-41c0-8aac-35e9ff639f1c"
+    },
+    {
+      "path": "/api/demo/fault?mode=ok",
+      "status": 200,
+      "requestId": "87d70e22-8fdc-462e-8dfa-42e4e6e43365"
+    },
+    {
+      "path": "/admin/releases/11/rollback",
+      "status": 200,
+      "requestId": "e593d23d-b3ca-4824-b023-7e0241be01c0"
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "84bbd54a-da5b-46d9-ad6f-f7a7c547d274",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 12,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 12,
+          "freshness": "ONLINE",
+          "circuitStates": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200,
+      "requestId": "31b9b6ac-05b6-463d-8550-b5154ac2f838",
+      "nodes": [
+        {
+          "nodeId": "block2-0",
+          "appliedVersion": 13,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:59.553669Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:59.565654Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        },
+        {
+          "nodeId": "block2-1",
+          "appliedVersion": 13,
+          "freshness": "ONLINE",
+          "circuitStates": [
+            {
+              "stateChangedAt": "2026-11-06T10:52:42.022975Z",
+              "routeId": "demo-fault",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            },
+            {
+              "stateChangedAt": "2026-11-06T10:52:47.142091Z",
+              "routeId": "demo-private",
+              "revision": "0e0f49422f1091566430e200a37224ba",
+              "state": "CLOSED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/api/demo/slow?delayMs=600",
+      "status": 504,
+      "requestId": "a679fea3-66f4-49c5-9a53-de9cef23a5c1",
+      "code": "UPSTREAM_TIMEOUT"
+    },
+    {
+      "path": "/api/demo/fault?mode=500",
+      "status": 503,
+      "requestId": "69219554-6aa2-42b8-9cb2-94c9c3b9792c",
+      "code": "DEGRADED"
+    },
+    {
+      "path": "/test-console/",
+      "status": 200,
+      "requestId": null
+    }
+  ]
+}

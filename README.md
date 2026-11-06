@@ -1,6 +1,6 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **当前：负责人已授权功能块 4——最终综合验收和 V1 交付。功能块 0–3 的代码已提交、分块测试有记录；Block4 的统一验收任务书、固定到达三组性能脚本、业务页验收说明已写入独立分支。全项目回归、真实三组负载及负责人浏览器验收尚待在本地执行，PR 仍 Draft，main 未合并。**
+> **当前：功能块4本机自动化已执行：Java17全工程verify共34个JUnit通过，隔离跨块HTTP/故障/容量与正式三组×两轮性能对照完成。结果及限制见[真实验收报告](docs/acceptance/final-results.md)。负责人浏览器体验和ChatGPT复审仍待执行；旧熔断revision实例保留已实证，V1尚未最终验收，PR仍Draft，main未合并。**
 >
 > 更新：2026-11-06。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
@@ -203,7 +203,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **后端及五区测试台已实现，本地定向验证通过，待人工验收与代码审核** |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | **功能代码及 Codex 定向验证记录已交付；PR #3 Draft，遗留 R1/R2 与真人浏览器 UX 待收口** |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | **代码与 Codex 定向测试证据已交付；PR #4 Draft，ChatGPT 静态复审完成，真人浏览器/最终综合验收待执行** |
-| [最终验收 / 功能块 4](docs/progress/block-4-acceptance.md) | 跨模块全量回归、安全/故障/多实例、DIRECT/PROXY/GOVERNED三组对照与交付 | **已授权；实施任务、性能脚本/统计单测/验收页面已提交，真实全量验收待本地执行** |
+| [最终验收 / 功能块 4](docs/progress/block-4-acceptance.md) | 跨模块全量回归、安全/故障/多实例、DIRECT/PROXY/GOVERNED三组对照与交付 | **本机自动化与正式六组性能完成；已记录容量限制，待负责人浏览器验收/复审，不合并main** |
 
 **权威顺序**：README 负责目标与进度索引；`docs/stage-0-audit.md` 负责源码证据、业务设计、历史技术决策；**当前阶段的 `docs/progress/...` 文件优先于旧任务书**，是 Codex 应直接执行的唯一功能块实施契约。
 
