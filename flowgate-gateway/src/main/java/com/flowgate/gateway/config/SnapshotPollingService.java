@@ -56,8 +56,7 @@ public class SnapshotPollingService {
             try { store.stage(next); } catch (RuntimeException error) { applying.set(false); return Mono.error(error); }
             Sinks.One<Void> completion = Sinks.one(); pending = completion;
             // 2. 使用官方缓存刷新；等待结果事件，不把发送刷新事件当成应用成功。
-            events.publishEvent(new RefreshRoutesEvent(this));
-            return completion.asMono().timeout(Duration.ofSeconds(3)).doOnSuccess(ignored -> store.confirm(next))
+            return Mono.fromRunnable(() -> events.publishEvent(new RefreshRoutesEvent(this))).then(completion.asMono()).timeout(Duration.ofSeconds(3)).doOnSuccess(ignored -> store.confirm(next))
                     .onErrorResume(error -> {
                         // 3. 恢复真实缓存再结束失败应用；仅恢复 candidate 不足以恢复路由和权限。
                         pending = null;

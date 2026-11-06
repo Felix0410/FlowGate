@@ -98,4 +98,28 @@ class SnapshotSwitchTest {
         assertTrue(((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).isPublic());
     }
 
+    @Test void lateCacheWriteCannotReplaceLastAppliedRoutes() {
+        var store=new ActiveSnapshotStore("http://127.0.0.1:8085");
+        var definitions=new SnapshotRouteDefinitionLocator(store);
+        var delayed=reactor.core.publisher.Sinks.<Route>one();
+        var captured=new java.util.concurrent.atomic.AtomicReference<Route>();
+        RouteLocator delegate=()->definitions.getRouteDefinitions().map(def->Route.async(def)
+                .asyncPredicate(e->reactor.core.publisher.Mono.just(true)).build()).flatMap(route->{
+                    var spec=(RouteSpec)route.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC);
+                    if(spec.configVersion()==2) { captured.set(route); return delayed.asMono(); }
+                    return reactor.core.publisher.Mono.just(route);
+                });
+        var cache=new CachingRouteLocator(delegate);
+        var poller=new SnapshotPollingService(store,event->cache.onApplicationEvent((RefreshRoutesEvent)event),
+                "http://127.0.0.1:8081","x".repeat(32),"late");
+        cache.setApplicationEventPublisher(event->poller.refreshed((RefreshRoutesResultEvent)event));
+        poller.apply(snapshot(1,false)).block();
+        assertThrows(RuntimeException.class,()->poller.apply(snapshot(2,true)).block());
+        // 超时恢复完成后，旧刷新异步写入V2并触发迟到成功，必须补偿回V1。
+        assertNotNull(captured.get()); delayed.tryEmitValue(captured.get());
+        var active=(RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC);
+        assertEquals(1,active.configVersion()); assertFalse(active.isPublic()); assertEquals(1,store.version());
+        poller.apply(snapshot(3,true)).block(); assertEquals(3,store.version());
+    }
+
 }

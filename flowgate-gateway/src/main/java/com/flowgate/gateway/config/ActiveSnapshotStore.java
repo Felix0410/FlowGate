@@ -20,6 +20,7 @@ public class ActiveSnapshotStore {
     public long version() { return applied.get() == null ? 0 : applied.get().version(); }
     public void stage(Snapshot next) {
         SnapshotCodec.verify(next);
+        PolicyRules.validate(next);
         Rules.routes(next.routes(), next.version(), allowed);
         for (var service : next.services()) Rules.upstream((String)service.get("upstreamUri"), allowed);
         Rules.require(next.version() > version(), "拒绝非递增版本");

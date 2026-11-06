@@ -16,6 +16,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 /** 只验证当前匹配 Route 的 Caller 权限；Redis 故障 503，凭证无效 401，Scope 不足 403。 */
 @Component
 public class CallerAuthFilter implements GlobalFilter, Ordered {
+    public static final String PRINCIPAL_ID="flowgateCallerPrincipalId";
     private final ReactiveStringRedisTemplate redis;
     public CallerAuthFilter(ReactiveStringRedisTemplate redis) { this.redis = redis; }
     @Override public int getOrder() { return -100; }
@@ -41,7 +42,9 @@ public class CallerAuthFilter implements GlobalFilter, Ordered {
                     try {
                         Session session = SnapshotCodec.JSON.readValue(value, Session.class);
                         if (!"CALLER".equals(session.principalType()) || !"CALLER".equals(session.role())) return 401;
-                        return session.scopes().contains(spec.requiredScope()) ? 200 : 403;
+                        if (!session.scopes().contains(spec.requiredScope())) return 403;
+                        exchange.getAttributes().put(PRINCIPAL_ID,session.principalId());
+                        return 200;
                     } catch (RuntimeException invalid) { return 401; }
                 }).defaultIfEmpty(401).onErrorReturn(503)
                 // 3. 准入结论与下游执行分开，避免把下游异常误归为 Redis 错误。

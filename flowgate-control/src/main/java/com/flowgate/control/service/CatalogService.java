@@ -94,7 +94,7 @@ public class CatalogService {
             Rules.require(value.routeId.matches("[A-Za-z0-9_-]+"), "routeId 只支持字母数字下划线和横线");
             Rules.require(value.priority != null && value.enabled != null, "priority/enabled 必填");
         } else if (entity instanceof PolicyEntry value) {
-            // 3. 策略当前只做结构/数值校验，不能据此宣称治理逻辑已执行。
+            // 3. 草稿仅校验结构/数值；治理执行以新发布快照及节点应用为准。
             Rules.text(value.code, "code");
             Rules.require(value.enabled != null && value.scope != null && Set.of("GLOBAL", "SERVICE", "API", "ROUTE", "CALLER").contains(value.scope), "策略作用域非法");
             Rules.require(value.type != null, "策略类型必填");
@@ -140,4 +140,20 @@ public class CatalogService {
         };
         Rules.require(exists, "策略绑定目标不存在");
     }
+    /** 发布边界重验启用目标与并发作用域，草稿保存仍允许未绑定的其他作用域。 */
+    public void validatePublishedBinding(BindingEntry binding) {
+        PolicyEntry policy=policies.selectById(binding.policyId);
+        if (!Boolean.TRUE.equals(policy.enabled)) return;
+        if ("CONCURRENCY".equals(policy.type)) Rules.require(Set.of("SERVICE","ROUTE").contains(policy.scope), "并发只支持服务/路由");
+        boolean enabled=switch(binding.targetType) {
+            case "GLOBAL" -> true;
+            case "SERVICE" -> Boolean.TRUE.equals(services.selectById(binding.targetId).enabled);
+            case "API" -> Boolean.TRUE.equals(apis.selectById(binding.targetId).enabled);
+            case "ROUTE" -> Boolean.TRUE.equals(routes.selectById(binding.targetId).enabled);
+            case "CALLER" -> Boolean.TRUE.equals(principals.selectById(binding.targetId).enabled);
+            default -> false;
+        };
+        Rules.require(enabled,"启用策略绑定了停用目标");
+    }
+
 }

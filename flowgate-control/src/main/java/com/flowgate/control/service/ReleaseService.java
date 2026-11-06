@@ -26,7 +26,13 @@ public class ReleaseService {
     }
     public Object current() {
         long version = state.selectById(1).currentVersion;
-        return version == 0 ? Map.of("version", 0, "status", "EMPTY") : summary(find(version));
+        if (version == 0) return Map.of("version",0,"status","EMPTY","policyStates",List.of());
+        ConfigRelease release=find(version);
+        var result=new LinkedHashMap<String,Object>(summary(release));
+        Snapshot snapshot=SnapshotCodec.JSON.readValue(release.snapshotJson,Snapshot.class);
+        result.put("policyStates",snapshot.policies().stream().map(p -> Map.of("code",p.get("code"),
+                "type",p.get("type"),"enabled",p.get("enabled"),"executionStatus",p.get("executionStatus"))).toList());
+        return result;
     }
     public Snapshot snapshot() {
         long version = state.selectById(1).currentVersion;
@@ -52,6 +58,7 @@ public class ReleaseService {
         long next = Math.addExact(current.currentVersion, 1);
         Snapshot candidate = rollback == null ? build(next) : rollback(rollback, next);
         Rules.routes(candidate.routes(), next, catalog.allowed());
+        PolicyRules.validate(candidate);
         // 2. CAS 防止两个发布者丢更新；失败会回滚全部写入，没有孤立版本。
         if (state.advance(expected, current.optimisticVersion, next) != 1) throw new ApiFailure(409, "VERSION_CONFLICT", "其他发布已先提交");
         ConfigRelease release = new ConfigRelease(); release.version = next; release.sha256 = candidate.checksum();
@@ -78,6 +85,7 @@ public class ReleaseService {
         List<BindingEntry> bindings = catalog.bindings().selectList(new QueryWrapper<BindingEntry>().orderByAsc("id"));
         services.forEach(catalog::validate); apis.forEach(catalog::validate); routes.forEach(catalog::validate);
         policies.forEach(catalog::validate); bindings.forEach(catalog::validateBinding);
+        bindings.forEach(catalog::validatePublishedBinding);
         // 目录内的启用 API 即使还未绑定路由，也不能留下方法/路径歧义。
         var apiChecks = apis.stream().filter(a -> a.enabled).map(a -> {
             ServiceEntry service = services.stream().filter(s -> s.id.equals(a.serviceId)).findFirst().orElseThrow();
@@ -94,13 +102,18 @@ public class ReleaseService {
             specs.add(new RouteSpec(route.routeId, api.method, api.publicPath, api.upstreamPath, service.upstreamUri,
                     api.isPublic, api.requiredScope, route.priority, version));
         }
-        // 3. 只选白名单字段；策略显式标注未执行；规范化载荷后计算 SHA-256。
+        // 3. 只选白名单字段；策略分别标注块2执行/块3待办；规范化载荷后计算 SHA-256。
         return SnapshotCodec.seal(new Snapshot(1, version, "",
                 services.stream().map(s -> Map.<String,Object>of("id", s.id, "code", s.code, "name", s.name, "upstreamUri", s.upstreamUri, "enabled", s.enabled)).toList(),
                 apis.stream().map(a -> Map.<String,Object>of("id", a.id, "serviceId", a.serviceId, "method", a.method, "publicPath", a.publicPath,
                         "upstreamPath", a.upstreamPath, "isPublic", a.isPublic, "requiredScope", a.requiredScope, "enabled", a.enabled)).toList(), specs,
                 policies.stream().map(p -> Map.<String,Object>of("id", p.id, "code", p.code, "type", p.type, "scope", p.scope,
-                        "parametersJson", p.parametersJson, "enabled", p.enabled, "executionStatus", "PENDING_BLOCK_2_3")).toList(),
-                bindings.stream().map(b -> Map.<String,Object>of("id", b.id, "policyId", b.policyId, "targetType", b.targetType, "targetId", b.targetId)).toList()));
+                        "parametersJson", p.parametersJson, "enabled", p.enabled, "executionStatus", Set.of("RATE_LIMIT","CONCURRENCY").contains(p.type) ? PolicyRules.ENFORCED : "PENDING_BLOCK3")).toList(),
+                bindings.stream().map(b -> {
+                    var entry = new LinkedHashMap<String,Object>();
+                    entry.put("id",b.id); entry.put("policyId",b.policyId); entry.put("targetType",b.targetType); entry.put("targetId",b.targetId);
+                    if ("ROUTE".equals(b.targetType)) entry.put("targetRouteId", routes.stream().filter(r -> r.id.equals(b.targetId)).findFirst().orElseThrow().routeId);
+                    return (Map<String,Object>)entry;
+                }).toList()));
     }
 }
