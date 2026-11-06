@@ -20,7 +20,7 @@
 ## 1. V11-A 开发要求（只做本块，避免提前进入 B/C）
 
 1. 在原有 Control 模块增量建表/实体/Mapper/Service/Controller；业务对象 Developer、Application、ApiPlan、Subscription、App-Caller 映射；不得改 V1 的既有表数据。
-2. 权限清楚：ADMIN 写、OPERATOR/VIEWER 首版只读；Caller 不能访问管理 API；所有错误返回明确 400/401/403/404/409；Token 仅一次展示，不保存或打印。
+2. 权限清楚：ADMIN 写、OPERATOR/VIEWER 首版只读；Caller 不能访问管理 API；所有错误返回明确 400/401/403/404/409。**A 阶段不实际签发新的应用活跃 Token**：/admin/apps/{id}/credentials 暂返回 409 FEATURE_NOT_READY，直到 B 同时实现 app-only 路由限制与持久状态核验；不能让 app Token 沿用旧 CALLER Scope 绕过订阅限制。
 3. 新增接口按总设计第 6 节，必须遵守字段验证、唯一约束和订阅互斥事务；新增真实列表分页、可读名称、空数据状态。
 4. 每个新增管理功能同步更新 /console/ 导航与表单、/console/guide.html 和 docs/guides/product-console-guide.md。正式前端应像产品而不是“JSON 接口调试器”；375px 移动端和 1280px PC 验证。
 5. 中文注释：较长关键逻辑使用 // 1.、// 2.、// 3.；遵从现有 Java17、Boot4、MyBatis-Plus、HTML/CSS/JS ES Modules，不新增 Vue/React/npm、新微服务或不必要库。
@@ -28,7 +28,7 @@
 
 ## 2. B/C/D 提前锁定的架构原则（本次不编码）
 
-- B：Redis Lua 的 RATE_LIMIT 是速率；MySQL QuotaBalance/Ledger 是月度额度，后者不由 Redis 缓存决定。显式 USAGE_QUOTA 策略要求 protected route；Gateway 用 WebClient 非阻塞访问可信内部 Quota 接口，Control 用单 MySQL 事务原子扣减+Outbox，chargeId 幂等；失败 fail-closed，不污染旧路由。
+- B：首次真正签发/轮换 app Caller Token 时必须同步上线 app-only 计量路由访问限制、App 停用验证和吊销；Redis Lua 的 RATE_LIMIT 是速率；MySQL QuotaBalance/Ledger 是月度额度，后者不由 Redis 缓存决定。显式 USAGE_QUOTA 策略要求 protected route；Gateway 用 WebClient 非阻塞访问可信内部 Quota 接口，Control 用单 MySQL 事务原子扣减+Outbox，chargeId 幂等；失败 fail-closed，不污染旧路由。
 - **B 的重要实现细节**：对配额请求中 Gateway 报告的 appliedVersion，要核对对应 ConfigRelease 的已发布历史快照和 route/policy 绑定；不能只拿 Control 当前最新版验证，否则网关落后一个合法版本时出现错扣/误拒。这个接口由可信服务调用，但版本/规则仍需在 Control 侧二次校验；无法核对对应历史发布就拒绝。本条列为 B 的独立测试。
 - C：Outbox Kafka 至少一次送达、消费者幂等，异步统计不是权威余额；Kafka 挂了账本扣减仍成功，事件在 MySQL Outbox 等待恢复。可靠性证明见 C 文件。
 - D：SQL 数据规模与 EXPLAIN、四组对照、真实浏览器、双网关与故障注入证据；避免复用旧 V1 纯代理性能作为 V1.1 结论。
