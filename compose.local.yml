@@ -1,0 +1,40 @@
+# FlowGate 本地依赖，独立项目名/数据卷；不复用或覆盖其他项目的数据库。
+name: flowgate-local
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: flowgate
+      MYSQL_USER: ${FG_MYSQL_USERNAME:?请配置数据库用户名}
+      MYSQL_PASSWORD: ${FG_MYSQL_PASSWORD:?请配置数据库密码}
+      MYSQL_ROOT_PASSWORD: ${FG_MYSQL_ROOT_PASSWORD:?请配置 root 密码}
+    ports:
+      - "127.0.0.1:${FG_MYSQL_PORT:-13307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/flowgate-init.sql:/docker-entrypoint-initdb.d/001-flowgate.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql -u \"$$MYSQL_USER\" -D \"$$MYSQL_DATABASE\" -Nse 'SELECT 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${FG_REDIS_PASSWORD:?请配置 Redis 密码}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    ports:
+      - "127.0.0.1:${FG_REDIS_PORT:-16380}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+volumes:
+  mysql-data:
+  redis-data:

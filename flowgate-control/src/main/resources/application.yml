@@ -1,0 +1,31 @@
+server:
+  address: 127.0.0.1
+  port: ${CONTROL_PORT:8081}
+spring:
+  application:
+    name: flowgate-control
+  datasource:
+    url: ${FG_MYSQL_URL:jdbc:mysql://127.0.0.1:3306/flowgate?connectionTimeZone=UTC}
+    username: ${FG_MYSQL_USERNAME:flowgate}
+    password: ${FG_MYSQL_PASSWORD:}
+    hikari:
+      connection-timeout: 2000
+      validation-timeout: 1000
+  data:
+    redis:
+      host: ${FG_REDIS_HOST:127.0.0.1}
+      port: ${FG_REDIS_PORT:6379}
+      password: ${FG_REDIS_PASSWORD:}
+      database: ${FG_REDIS_DATABASE:0}
+      timeout: 2s
+      connect-timeout: 2s
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+flowgate:
+  allowed-upstreams: ${FLOWGATE_ALLOWED_UPSTREAMS:http://127.0.0.1:8085}
+  internal-key: ${FLOWGATE_INTERNAL_KEY}
+  admin-ttl-seconds: 1800
+  caller-ttl-seconds: 3600

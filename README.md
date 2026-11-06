@@ -1,10 +1,10 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **状态：功能块 0 已提交并经 ChatGPT 源码静态审查通过；本地定向测试由 Codex 报告，待负责人确认验收。后续功能块未开始。**
+> **状态：功能块 0 已实现并通过静态审查及 Codex 报告的本地定向测试；负责人手动验收统一推迟到功能块 1 最小 Demo。功能块 1 后端与简易测试台已实现，并通过本地定向验证，等待负责人及 ChatGPT 审查。**
 >
-> 更新：2026-11-04。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
+> 更新：2026-11-05。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
-> 阅读顺序：**本 README（定位、架构、业务目录与 4+1 开发计划） → [阶段 0 审计与完整业务设计](docs/stage-0-audit.md)（Plus 复用证据、B01–B13/E01–E03 细则、决策及测试边界）**。
+> 阅读顺序：**本 README → [功能块 1 开发任务书](docs/progress/block-1-control.md) → [前端同步规范](docs/standards/frontend-sync-rule.md) → [Codex 执行说明](CODEX_BLOCK1_PROMPT.md)**。历史源码证据与业务设计见 [阶段 0 审计](docs/stage-0-audit.md)。
 
 ## 1. 核心定位：复用技术，重构业务
 
@@ -191,16 +191,16 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 5. 完成后整理文件清单、Git 提交、实际运行命令及通过/失败结果、未覆盖风险；可推送**独立功能分支**供复核，但不得直接修改/合并 main 或自行开启下个功能块。需要用户权限的远端操作按本地权限和用户授权处理。
 6. ChatGPT 和负责人审核后的问题在**同一功能块**修复、做相关定向复测；审核通过才开启下一功能块。
 
-**当前入口**：只执行 [第十二节任务书](docs/stage-0-audit.md)（功能块 0）。其余 B01—B13 的后续功能在当前回合均未授权实现。
+**当前入口**：Codex 执行 [功能块 1 任务书](docs/progress/block-1-control.md)；从远端已有的 `feat/block1-control-publish` 分支开始，依照根目录 [CODEX_BLOCK1_PROMPT.md](CODEX_BLOCK1_PROMPT.md) 和 [前端同步规范](docs/standards/frontend-sync-rule.md) 编码。功能块 0 的人工验收延至功能块 1 最小可执行 Demo；功能块 2 尚未授权。
 
 ### 6.3 按功能块管理任务与开发进度（2026-11-04 新约定）
 
-**文件组织已由“长期只维护两份文档”调整为“2 份长期总览/审计文档 + 每个功能块 1 份任务兼进度文件”。** 这是负责人新授权的开发进度记录方式，不应再按旧“两份文档上限”阻止新增阶段文件。
+**文件组织已由“长期只维护两份文档”调整为“总览/审计文档 + 每个功能块 1 份任务兼进度文件 + 1 份长期前端同步规范 + 当前块 Codex 提示词”。** 这是负责人新授权的开发进度记录方式，不应再按旧“两份文档上限”阻止新增阶段文件。
 
 | 阶段文件 | 包含的开发内容 | 当前实际进度 |
 |---|---|---|
 | [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 双进程、静态路由、三类 Demo API、Trace/指标与定向测试 | **源码静态审查通过，待负责人验收；提交已在 main、无 PR** |
-| [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | 控制面表结构、管理 API、Token、发布事务、网关版本热更新 | 未开始，待 Block0 审核 |
+| [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **后端及五区测试台已实现，本地定向验证通过，待人工验收与代码审核** |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | 未开始，待 Block1 审核 |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | 未开始，待 Block2 审核 |
 | [最终验收：统一大测试](docs/progress/final-acceptance.md) | 全量回归、跨模块安全、多实例与故障注入、三组性能对照 | 未开始，待全部功能块完成 |
@@ -211,45 +211,85 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 
 **本地 Codex 不承担开放式系统设计**：若当前功能块文件已有明确实现方案，不自行换技术栈、改架构、扩展需求；若实际编译、框架版本或安全问题与任务书冲突，只做最小可验证修正并在进度文件中记录。无论如何不能虚报测试成功。长方法/代码块中文注释遵循 1、2、3 分点原则。
 
-### 6.4 功能块 0 本地启动与验证
+### 6.4 功能块 0 接口的动态路由迁移
 
-需要 JDK 17、Maven 3.9+；冒烟脚本另外使用 Python 3 标准库。macOS 可先选择 JDK：
+fast GET、echo POST、slow GET 的路径与返回语义保持不变；Gateway 已移除原 `/api/demo/**` 通配静态路由。当前分支必须先在 Control 注册并发布三个公共 API，首次无可信快照时业务路径返回 404。块 0 的 `scripts/block0-smoke.py` 是静态路由历史脚本，**不用于当前动态路由分支**；由下面的 Block 1 冒烟包含对应最小回归。
+
+### 6.5 功能块 1 本地运行与首次手动验收
+
+需要 JDK 17、Maven 3.9+、MySQL 8 和 Redis；前端是 Control 自带的原生 HTML/CSS/JS，无 npm。先构建：
 
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-mvn -pl flowgate-demo,flowgate-gateway -am package
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am package
+cp -n .env.example .env
+chmod 600 .env
 ```
 
-在两个终端分别启动（也支持 `mvn -pl flowgate-demo spring-boot:run` 和 `mvn -pl flowgate-gateway spring-boot:run`）：
+编辑未跟踪的 `.env`，填写实际 JDK 路径、数据库密码、Redis 密码、管理员哈希和内部密钥。推荐使用 `compose.local.yml`：独立的 MySQL 8.4 / Redis 7 容器、持久化数据卷，默认仅绑定 `127.0.0.1:13307` / `127.0.0.1:16380`，不占用其他项目的 3306/6379。MySQL 的 root 密码由 `FG_MYSQL_ROOT_PASSWORD` 配置，应用使用 `flowgate` 用户；容器首次创建数据卷时自动执行 `sql/flowgate-init.sql`。
+
+配置完成后，可一条命令启动 Docker 依赖及三个 JVM：
+
+```bash
+python3 scripts/run-local.py start
+python3 scripts/run-local.py status
+# 重启/停止本脚本管理的 JVM，均不删除数据库数据卷。
+python3 scripts/run-local.py restart
+python3 scripts/run-local.py stop
+# 单独停止 Docker 依赖（数据卷保留）。
+docker compose -f compose.local.yml stop
+```
+
+脚本自动读取根目录 `.env`，只管理经过 PID/Jar 路径核对的本项目进程；日志在 `.local/run/`（已忽略）。修改 Java 代码后先重新 Maven package，再 restart。Docker Desktop 需保持运行；数据库卷已存在时，修改 `.env` 不会自动重置 MySQL 账号密码，不要通过删除数据卷处理配置变更。
+
+如果不用 Compose 而是自行维护 MySQL，需要创建专用数据库及有权限的应用账号，并执行 DDL（端口使用 `.env` 的实际值）：
+
+```bash
+source .env
+mysql -h 127.0.0.1 -P "${FG_MYSQL_PORT:-3306}" -u root -p -e 'CREATE DATABASE IF NOT EXISTS flowgate CHARACTER SET utf8mb4'
+mysql -h 127.0.0.1 -P "${FG_MYSQL_PORT:-3306}" -u "$FG_MYSQL_USERNAME" -p flowgate < sql/flowgate-init.sql
+```
+
+`sh scripts/hash-password.sh` 隐藏读取管理员密码并输出 BCrypt 哈希，将结果填写到 `.env` 的 `FG_BOOTSTRAP_ADMIN_BCRYPT`（使用单引号保留 `$`）；同时设置用户名。内部密钥可本机运行 `openssl rand -hex 32` 生成，填写 `FLOWGATE_INTERNAL_KEY`；Control/Gateway 必须使用相同的至少 32 字符密钥。不要提交 `.env`、密码或生成结果。初始化只在 ADMIN 不存在时运行，绝不覆盖已有账号；不提供默认密码。
+
+若不使用上述一键脚本，也可在三个终端分别 `source .env` 后启动（两种方式选一种，避免端口冲突）：
 
 ```bash
 "$JAVA_HOME/bin/java" -jar flowgate-demo/target/flowgate-demo-0.0.1-SNAPSHOT.jar
 ```
 
 ```bash
+"$JAVA_HOME/bin/java" -jar flowgate-control/target/flowgate-control-0.0.1-SNAPSHOT.jar
+```
+
+```bash
 "$JAVA_HOME/bin/java" -jar flowgate-gateway/target/flowgate-gateway-0.0.1-SNAPSHOT.jar
 ```
 
-默认只监听 `127.0.0.1:8085`（Demo）和 `127.0.0.1:8080`（Gateway）。可用 `DEMO_PORT`、`GATEWAY_PORT` 覆盖端口；Demo 改端口时，给 Gateway 设置 `DEMO_UPSTREAM_URI=http://127.0.0.1:<新端口>`。该变量仅供部署方指定可信本地 Demo，本块不提供任意请求 URL 转发功能，不适合直接开放到公网。
+默认三个应用仅监听回环地址。端口分别由 `DEMO_PORT`、`CONTROL_PORT`、`GATEWAY_PORT` 覆盖；修改端口后同步调整 `FLOWGATE_CONTROL_URI`、`FLOWGATE_ALLOWED_UPSTREAMS`、`FLOWGATE_DEMO_STATUS_URI`、`FLOWGATE_CONSOLE_ORIGIN` 和测试台 Gateway 地址。默认只允许 `http://127.0.0.1:8085`；管理地址不得注册成上游。
+
+打开 **http://127.0.0.1:8081/test-console/**，依次：
+
+1. 探测三服务/依赖 → 管理员登录 → “初始化公共 Demo 草稿”。
+2. 发布 expectedVersion=0 得 V1；点击节点查看实际 `appliedVersion=1`。`PERSISTED` 只表示事务提交成功，应用通常在下一次 5 秒轮询完成。
+3. 测试 GET fast 200、POST echo 201、slow 200/400、Trace ID 和框架指标。
+4. “添加私有 Demo 草稿”，expectedVersion=1 发布 V2。无 Token 请求私有 API 为 401；创建 `other:read` Caller 得 403，创建 `demo:read` Caller 得 200；吊销后不再放行。
+5. expectedVersion=2，来源版本=1 回滚得 V3；私有路径恢复 404，公共三个 API 仍可用；查看节点、历史和审计。
+
+若已有版本，从“当前持久化版本”读取实际数字，不重复使用示例 expectedVersion。回滚只替换已发布配置，不覆盖草稿。页面凭证仅保存在内存，刷新/退出清空；浏览器没有内部密钥。策略只校验、存储、发布，**待功能块 2/3 执行**。
+
+本块测试命令：
 
 ```bash
-curl -i 'http://127.0.0.1:8080/api/demo/fast/123?tag=abc'
-curl -i 'http://127.0.0.1:8080/api/demo/echo' -H 'Content-Type: application/json' -H 'X-Demo-Header: hello' -d '{"name":"flowgate"}'
-curl -i 'http://127.0.0.1:8080/api/demo/slow?delayMs=100'
-curl 'http://127.0.0.1:8080/actuator/metrics/spring.cloud.gateway.requests'
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package
+mvn -B -ntp -pl flowgate-gateway -am dependency:tree
+node --check flowgate-control/src/main/resources/static/test-console/app.js
+# 自动联调使用专用测试 MySQL（TCP 13306 + 对应 socket），不要指向正式库。
+# 脚本新建随机临时库、自行启动隔离 Redis 和三 JVM；默认结束时清理自身进程/库。
+FG_SMOKE_MYSQL_SOCKET=/path/to/test-mysql.sock python3 scripts/block1-smoke.py
 ```
 
-Echo 返回 201，JSON 对象包含 `body`、`demoHeader`、`requestId`；快速查询和慢请求返回 200。Gateway 每次生成并覆盖 `X-Request-Id`，下游回显的 ID 与响应头相同。慢请求范围为 0～2000ms，非法参数返回 400。下游不可用目前采用框架默认 500，未匹配路径返回 404。Actuator 仅暴露 health、metrics，网关指标不带动态路径标签。
-
-定向测试及双进程自动验证：
-
-```bash
-mvn -pl flowgate-demo,flowgate-gateway -am test
-# 先停止手动启动的应用，确保两个端口空闲；先 package 生成当前 Jar。
-python3 scripts/block0-smoke.py
-```
-
-脚本检查空闲端口、自行启动两个 Jar，验证业务与断联，最后只清理自己启动的进程，并打印临时应用日志目录。实际结果见[功能块 0 进度记录](docs/progress/block-0-gateway.md#7-进度记录codex-完工后原地更新本节)。
+Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序；固定使用回环 MySQL 13306，socket 用户由 `FG_SMOKE_MYSQL_USER` 指定（默认仅适用于无密码的隔离测试 MySQL root，不是应用默认凭证）。`FG_SMOKE_KEEP=1` 可保留成功的三服务 Demo，脚本会打印权限 0600 的临时登录文件位置。真实结果、技术差异和人工检查入口见[功能块 1 进度记录](docs/progress/block-1-control.md#12-codex-原地回填请仅填真实情况)。尚未执行统一压测/最终验收。
 
 ## 7. 风险与未决定事项
 
