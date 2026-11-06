@@ -202,7 +202,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 | [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 双进程、静态路由、三类 Demo API、Trace/指标与定向测试 | **源码静态审查通过，待负责人验收；提交已在 main、无 PR** |
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **后端及五区测试台已实现，本地定向验证通过，待人工验收与代码审核** |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | **功能代码及 Codex 定向验证记录已交付；PR #3 Draft，遗留 R1/R2 与真人浏览器 UX 待收口** |
-| [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | **负责人已授权；任务文档/提示词/指南已提交，业务代码尚未开始** |
+| [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | **代码与 Codex 定向测试证据已交付；PR #4 Draft，ChatGPT 静态复审完成，真人浏览器/最终综合验收待执行** |
 | [最终验收：统一大测试](docs/progress/final-acceptance.md) | 全量回归、跨模块安全、多实例与故障注入、三组性能对照 | 未开始，待全部功能块完成 |
 
 **权威顺序**：README 负责目标与进度索引；`docs/stage-0-audit.md` 负责源码证据、业务设计、历史技术决策；**当前阶段的 `docs/progress/...` 文件优先于旧任务书**，是 Codex 应直接执行的唯一功能块实施契约。
@@ -276,7 +276,7 @@ mysql -h 127.0.0.1 -P "${FG_MYSQL_PORT:-3306}" -u "$FG_MYSQL_USERNAME" -p flowga
 4. “添加私有 Demo 草稿”，expectedVersion=1 发布 V2。无 Token 请求私有 API 为 401；创建 `other:read` Caller 得 403，创建 `demo:read` Caller 得 200；吊销后不再放行。
 5. expectedVersion=2，来源版本=1 回滚得 V3；私有路径恢复 404，公共三个 API 仍可用；查看节点、历史和审计。
 
-若已有版本，从“当前持久化版本”读取实际数字，不重复使用示例 expectedVersion。回滚只替换已发布配置，不覆盖草稿。页面凭证仅保存在内存，刷新/退出清空；浏览器没有内部密钥。历史块1策略标记为待执行；块2新发布RATE_LIMIT/CONCURRENCY实际执行，TIMEOUT/熔断仍待块3。
+若已有版本，从“当前持久化版本”读取实际数字，不重复使用示例 expectedVersion。回滚只替换已发布配置，不覆盖草稿。页面凭证仅保存在内存，刷新/退出清空；浏览器没有内部密钥。历史块1/2 PENDING 保护策略不因升级自动激活；新发布 Block2 速率/并发及 Block3 TIMEOUT/熔断按对应 ENFORCED 标记、网关节点实际应用后执行。
 
 本块测试命令：
 
@@ -302,16 +302,22 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 
 从 Block2 开始，前端可用性不是附属外观，而是每次功能块的**强制验收项**：普通使用者应能在中文帮助下独立完成 Demo，并能分辨“草稿”“PERSISTED”“节点已应用”“策略真正执行”。
 
-### 6.7 功能块 3 开发入口（2026-11-06，已授权但尚未实现）
+### 6.7 功能块 3 交付与审核入口（2026-11-06，已实现待最终验收）
 
 开发分支：`feat/block3-resilience-observability`，基于远端 Block2 代码创建。**这不是独立空工程**，请 Codex 优先读取根目录 `AGENTS.md` 和 `CODEX_BLOCK3_PROMPT.md`，而不是照旧的 Block2 提示重新开发已完成的限速/并发。
 
 - [功能块 3 V2.0 全量任务书](docs/progress/block-3-resilience.md)：先修 Block2 两项遗留，再在既有路由快照上落地 TIMEOUT、CIRCUIT_BREAKER、GET-only 静态降级、恢复和监控。明确 504、503、GET fallback 的区分、版本/回滚安全和小范围定向验证。
 - [本地 Codex 执行提示词](CODEX_BLOCK3_PROMPT.md)：按 B3-00 至 B3-06 顺序编码，复杂流程中文编号注释，仅运行直接受影响的测试；代码和前端随阶段同步提交到 Block3 feature 分支。
-- [功能块 3 中文故障演示操作指南](docs/guides/block3-fault-testing.md)：从配置/发布到超时、开路、半开恢复、降级、Redis/Control 故障的步骤与预期结果。**目前属于待实现演示说明，不是已完成的实测记录**。
+- [功能块 3 中文故障演示操作指南](docs/guides/block3-fault-testing.md)：从配置/发布到超时、开路、半开恢复、降级、Redis/Control 故障的步骤与真实联调说明。Codex 有自动化实测记录，但**真人浏览器操作待负责人执行**。
 - [测试台现有完整使用指南](docs/guides/test-console-guide.md)：继续保留 Block0/1/2 的 fast/echo/slow、身份/路由、限流/并发测试；新增故障保护页签及清晰的状态/错误说明。
 
-**硬性边界**：Block2 PR #3 仍 Draft，用户的浏览器可用性反馈以及静态审查 R1/R2 要在本块第一步解决；若路由缓存版本一致性无法证明，暂停接入熔断并报告。当前状态不是最终验收通过，禁止直接合并 main，也不进行项目最终统一性能压测。
+**审核现状**：Block2 静态审查 R1/R2 已在本分支实现修复并有定向测试；用户浏览器可用性仍需真实体验。Block1/2/3 各 PR 仍 Draft；不合并 main、不把 Codex 定向测试当成最终统一性能压测。
+
+### 6.8 Block3 远端静态复审与最终验收计划（2026-11-06）
+
+- [Block3 源码复核报告](docs/reviews/block-3-static-review-2026-11-06.md)：确认功能块 3 真实源码和 192 条 HTTP 证据存在，主要业务闭环已交付；ChatGPT 未独立执行本地 Maven/浏览器，真实页面体验及跨阶段统一回归待执行。
+- [最终综合验收计划](docs/acceptance/final-acceptance-plan.md)：全工程回归、两 Gateway/故障恢复、直连/仅代理/启用治理三组对照、真人业务页面验收、历史版本兼容及 Git stacked PR 顺序交付。**这是待执行的验收设计，不是测试已通过报告。**
+- 代码审核入口 [PR #4](https://github.com/Felix0410/FlowGate/pull/4)，仍为 Draft；不要跳过 PR #1–#3 的依赖关系直接合并到 main。
 
 ## 7. 风险与未决定事项
 
@@ -326,7 +332,7 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 ### 功能块 2 本地实现（2026-11-06，待审核）
 
 - 实现分支：`feat/block2-traffic-governance`；块1缓存超时/迟到事件恢复前置修复基线为`6a3e038`。
-- 新发布 RATE_LIMIT/CONCURRENCY 通过 Route 同版元数据实际执行；历史待办策略不自动激活。限速是 Reactive Redis 单Key原子令牌桶，并发上限仅单个Gateway；熔断仍待块3。
+- 新发布 RATE_LIMIT/CONCURRENCY 通过 Route 同版元数据实际执行；新发布 TIMEOUT/CIRCUIT_BREAKER 已在 Block3 代码中接入官方 Gateway/Resilience4j，历史 PENDING 策略仍不自动激活。限速是 Reactive Redis 单 Key 原子令牌桶，并发上限仅单个 Gateway；源码和联调记录已提交，最终统一验收待执行。
 - 测试台默认五步引导，支持分区结果、策略向导、有界请求、真实版本与节点对照；[操作指南](docs/guides/test-console-guide.md)。浏览器人工可用性验收尚未执行。
 - 定向命令与真实结果见[块2进度第12节](docs/progress/block-2-traffic.md)。`scripts/block2-smoke.py`、`scripts/block2-hotspot.py`使用独立临时容器和随机端口，退出清理自己的资源。
 
