@@ -1,9 +1,15 @@
 # FlowGate 功能块 4｜交给本地 Codex 的实际执行提示词
 
-> 负责人已授权“设计并完成功能4”。**当前任务是：统一回归 + 隔离三组性能对照 + 故障边界复测 + 业务页面体验支持 + V1 交付证据。不要再设计新网关功能。**
+> 负责人已授权功能块4，并新增了**V1必须先完成真正产品级前端**的P0要求。目前唯一优先任务是 `CODEX_PRODUCT_CONSOLE_PROMPT.md` + `docs/design/product-console-v1.md` 的产品后台完整编码与可用性收口；完成后才执行本文统一回归与三组性能对照。不要新增网关业务。
 > GitHub 已创建 `test/block4-final-acceptance`，其基础是 `feat/block3-resilience-observability` 实现分支。详尽契约为 `docs/progress/block-4-acceptance.md`，此文件只是执行顺序，遇冲突以前者为准。
 
-## 0. 立即处理仓库与环境安全
+## 0. 产品UI前置门槛（新增最高优先级）
+
+- **先停止执行正式三组性能负载**，直接阅读 `CODEX_PRODUCT_CONSOLE_PROMPT.md` 和 `docs/design/product-console-v1.md`，完成 `/console/` 产品级登录、工作台、真实服务/API/路由 CRUD、治理策略、发布、Caller、监控及响应式；保留 `/test-console/` 作为开发工具。
+- 产品UI不是修旧 CSS 或补说明，必须做到非开发者可独立完成正常业务操作；无假指标/假在线/假发布，不要求填写 JSON 或数据库内部 ID。
+- 新产品后台的定向测试、真实 Control/Gateway 小联调与用户浏览器可用性反馈收口后，才继续下面 B4-00..06 的全量回归与长性能实验。
+
+## 1. 立即处理仓库与环境安全
 
 1. 在本地 FlowGate 执行 `pwd`、`git status -sb`、`git remote -v`、`git log -1 --oneline`，保护所有未提交修改；禁止 `reset --hard`、`clean -fd`、强推、清空Docker数据卷或覆盖 `.env`。
 2. `git fetch origin`，先判断是否已存在本地同名分支；没有时安全执行：
@@ -12,7 +18,7 @@
 3. 阅读 `AGENTS.md` → `docs/progress/block-4-acceptance.md` → `docs/acceptance/final-acceptance-plan.md` → `docs/progress/final-acceptance.md` → `docs/guides/test-console-guide.md` → `docs/guides/block3-fault-testing.md`。
 4. 明确当前环境的 JDK17 路径、Maven/Docker 可用性、已有 IDE/容器/端口占用和隔离计划。本项目三个 JVM 的 Java17 不得混用 shell 默认 Java21；安全验证前不要运行可能影响个人数据库的老脚本。
 
-## 1. 执行顺序：逐步记录，不要自行改需求
+## 2. 执行顺序：逐步记录，不要自行改需求
 
 **B4-00** 固定基线和环境：Git SHA、实际 JDK、CPU/内存、MySQL/Redis隔离容器、两Gateway、Demo线程上限；记录 `main` 和 PR 当前状态。
 
@@ -36,7 +42,7 @@
 
 **B4-06** 写 `docs/acceptance/final-results.md` 的真实验收结果，带命令、退出码、JDK、总数、原始脱敏文件路径、样本/公平性、已知故障与修复SHA；同步 `docs/progress/block-4-acceptance.md` 最末进度区、`docs/progress/final-acceptance.md`、README、前端状态说明。未执行的项目写“未执行”。
 
-## 2. 绝对禁止
+## 3. 绝对禁止
 
 - 不删除个人 Docker/数据库卷，不运行全局 `docker prune`，不更改凭据，不覆盖用户本地未提交修改，不强推。
 - 不为最终性能测试引入 Kafka、Nacos、JMeter集群、Grafana、React/Vue/npm、新数据库表或服务进程；已有 Python 标准库就够。
@@ -44,7 +50,7 @@
 - 不让 Gateway 使用 Servlet/JDBC/同步Redis；关键Java/Python/JS按业务阶段写准确中文注释，长逻辑按1/2/3编号。
 - 不修改/合并 main，不切换未授权功能阶段。**本次用户授权的是功能4实施与测试，不是批准最终把所有 PR 合并。**
 
-## 3. 提交与收口格式
+## 4. 提交与收口格式
 
 按实做提交，例如：
 - `test(block4): verify cross-block regression and three-mode performance`
