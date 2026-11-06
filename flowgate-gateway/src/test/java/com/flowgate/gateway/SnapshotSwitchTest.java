@@ -153,4 +153,28 @@ class SnapshotSwitchTest {
         assertEquals(3,((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion());
     }
 
+    @Test void refusesAppliedWhenProtectionMetadataDoesNotMatchRouteVersion() {
+        var store=new ActiveSnapshotStore("http://127.0.0.1:8085");
+        var definitions=new SnapshotRouteDefinitionLocator(store);
+        RouteLocator delegate=()->definitions.getRouteDefinitions().map(def->{
+            var builder=Route.async(def).asyncPredicate(e->reactor.core.publisher.Mono.just(true));
+            if(((RouteSpec)def.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion()==2)
+                builder.metadata(com.flowgate.gateway.protection.ProtectionPolicyResolver.METADATA,
+                        new com.flowgate.gateway.protection.ProtectionPolicyResolver.Plan(999,"","","NONE",""));
+            return builder.build();
+        });
+        var cache=new CachingRouteLocator(delegate);
+        var poller=new SnapshotPollingService(store,event->cache.onApplicationEvent((RefreshRoutesEvent)event),
+                "http://127.0.0.1:8081","x".repeat(32),"metadata");
+        cache.setApplicationEventPublisher(event->poller.refreshed((RefreshRoutesResultEvent)event));
+        poller.apply(snapshot(1,false)).block();
+        var error=new java.util.concurrent.atomic.AtomicReference<Throwable>();
+        var pending=poller.apply(snapshot(2,true)).subscribe(ignored->{},error::set);
+        assertEquals(1,store.version());assertNull(error.get());
+        poller.refreshed(new RefreshRoutesResultEvent(cache,new IllegalStateException("元数据不一致")));
+        assertNotNull(error.get());assertEquals(1,store.version());
+        assertEquals(1,((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion());
+        pending.dispose();poller.apply(snapshot(3,true)).block();assertEquals(3,store.version());
+    }
+
 }

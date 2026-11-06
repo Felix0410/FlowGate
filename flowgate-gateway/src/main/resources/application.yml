@@ -46,3 +46,8 @@ management:
         allowed-origins: ${FLOWGATE_CONSOLE_ORIGIN:http://127.0.0.1:8081}
         allowed-methods: GET
         exposed-headers: X-Request-Id
+
+# 只有官方Netty路由超时计时；不叠加默认1秒TimeLimiter或隐式Bulkhead。
+spring.cloud.circuitbreaker.resilience4j.disable-time-limiter: true
+spring.cloud.circuitbreaker.bulkhead.resilience4j.enabled: false
+flowgate.connect-timeout-ms: ${FLOWGATE_CONNECT_TIMEOUT_MS:1000}

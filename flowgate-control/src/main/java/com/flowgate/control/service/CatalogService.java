@@ -98,25 +98,8 @@ public class CatalogService {
             Rules.text(value.code, "code");
             Rules.require(value.enabled != null && value.scope != null && Set.of("GLOBAL", "SERVICE", "API", "ROUTE", "CALLER").contains(value.scope), "策略作用域非法");
             Rules.require(value.type != null, "策略类型必填");
-            Set<String> fields = switch (value.type) {
-                case "RATE_LIMIT" -> Set.of("capacity", "refillPerSecond");
-                case "CONCURRENCY" -> Set.of("maxConcurrent");
-                case "TIMEOUT" -> Set.of("timeoutMs");
-                case "CIRCUIT_BREAKER" -> Set.of("failureRateThreshold", "slidingWindowSize", "minimumNumberOfCalls", "waitDurationMs");
-                default -> throw new IllegalArgumentException("策略类型非法");
-            };
             Rules.require(value.parametersJson != null, "策略参数必填");
-            var parameters = SnapshotCodec.JSON.readTree(value.parametersJson);
-            Rules.require(parameters.isObject() && parameters.size() == fields.size(), "策略参数结构错误");
-            for (String field : fields) {
-                var parameter = parameters.get(field);
-                Rules.require(parameter != null && parameter.isIntegralNumber() && parameter.canConvertToLong()
-                        && parameter.longValue() > 0 && parameter.longValue() <= 1_000_000, "策略参数必须为受控正整数");
-            }
-            if (value.type.equals("CIRCUIT_BREAKER")) {
-                Rules.require(parameters.get("failureRateThreshold").intValue() <= 100 && parameters.get("minimumNumberOfCalls").longValue()
-                        <= parameters.get("slidingWindowSize").longValue(), "熔断参数范围错误");
-            }
+            PolicyRules.parameters(value.type,value.parametersJson);
         }
     }
 

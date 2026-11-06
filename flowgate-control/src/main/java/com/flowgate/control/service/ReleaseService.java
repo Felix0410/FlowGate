@@ -108,7 +108,7 @@ public class ReleaseService {
                 apis.stream().map(a -> Map.<String,Object>of("id", a.id, "serviceId", a.serviceId, "method", a.method, "publicPath", a.publicPath,
                         "upstreamPath", a.upstreamPath, "isPublic", a.isPublic, "requiredScope", a.requiredScope, "enabled", a.enabled)).toList(), specs,
                 policies.stream().map(p -> Map.<String,Object>of("id", p.id, "code", p.code, "type", p.type, "scope", p.scope,
-                        "parametersJson", p.parametersJson, "enabled", p.enabled, "executionStatus", Set.of("RATE_LIMIT","CONCURRENCY").contains(p.type) ? PolicyRules.ENFORCED : "PENDING_BLOCK3")).toList(),
+                        "parametersJson", p.parametersJson, "enabled", p.enabled, "executionStatus", Set.of("RATE_LIMIT","CONCURRENCY").contains(p.type) ? PolicyRules.ENFORCED : PolicyRules.PROTECTED)).toList(),
                 bindings.stream().map(b -> {
                     var entry = new LinkedHashMap<String,Object>();
                     entry.put("id",b.id); entry.put("policyId",b.policyId); entry.put("targetType",b.targetType); entry.put("targetId",b.targetId);

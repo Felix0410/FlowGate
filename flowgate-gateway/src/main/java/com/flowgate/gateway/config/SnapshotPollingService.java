@@ -28,6 +28,9 @@ public class SnapshotPollingService {
     private final AtomicBoolean busy = new AtomicBoolean();
     private volatile Sinks.One<Void> pending;
     private Disposable running;
+    private com.flowgate.gateway.protection.CircuitBreakerConfigRegistry protection;
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setProtection(com.flowgate.gateway.protection.CircuitBreakerConfigRegistry protection) { this.protection=protection; }
     private final AtomicBoolean applying = new AtomicBoolean();
     private volatile CachingRouteLocator routeCache;
     public SnapshotPollingService(ActiveSnapshotStore store, ApplicationEventPublisher events,
@@ -98,7 +101,12 @@ public class SnapshotPollingService {
         cache.getRoutes().collectList().subscribe(routes -> {
             // 3. 缓存必须恰为候选的所有路由及版本权限；首次无规则也不会凭空开启公共代理。
             var actual = routes.stream().map(route -> route.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).toList();
-            if (actual.size() == candidate.routes().size() && new HashSet<>(actual).equals(new HashSet<>(candidate.routes()))) {
+            boolean protectionMatches=routes.stream().allMatch(route->{
+                Object spec=route.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC);
+                return spec instanceof RouteSpec trusted && com.flowgate.gateway.protection.ProtectionPolicyResolver.freeze(candidate,trusted)
+                        .equals(route.getMetadata().get(com.flowgate.gateway.protection.ProtectionPolicyResolver.METADATA));
+            });
+            if (protectionMatches && actual.size() == candidate.routes().size() && new HashSet<>(actual).equals(new HashSet<>(candidate.routes()))) {
                 if (pending == completion && store.candidate() == candidate) completion.tryEmitEmpty();
             }
         }, completion::tryEmitError);
@@ -116,7 +124,8 @@ public class SnapshotPollingService {
     private Mono<Void> report() {
         Snapshot current = store.applied();
         if (current == null) return Mono.empty();
-        return client.post().uri("/internal/nodes/applied").bodyValue(Map.of("nodeId", nodeId, "version", current.version(), "checksum", current.checksum()))
+        return client.post().uri("/internal/nodes/applied").bodyValue(Map.of("nodeId", nodeId, "version", current.version(), "checksum", current.checksum(),
+                "circuitStates",protection==null?List.of():protection.states(current)))
                 .retrieve().toBodilessEntity().timeout(Duration.ofSeconds(3)).then();
     }
     @PreDestroy public void close() { if (running != null) running.dispose(); }

@@ -7,6 +7,10 @@ import tools.jackson.databind.JsonNode;
 public final class PolicyRules {
     private PolicyRules() {}
     public static final String ENFORCED = "ENFORCED_BLOCK2";
+    public static final String PROTECTED = "ENFORCED_BLOCK3";
+    public static boolean active(Map<String,Object> policy) {
+        return Boolean.TRUE.equals(policy.get("enabled")) && Set.of(ENFORCED,PROTECTED).contains(String.valueOf(policy.get("executionStatus")));
+    }
     public static long id(Map<String,Object> entry, String field) {
         Object value = entry.get(field);
         Rules.require(value instanceof Number, "缺失数字字段 " + field);
@@ -17,17 +21,31 @@ public final class PolicyRules {
     }
     /** 完整参数必须在发布和应用前校验，热路径不补默认值。 */
     public static JsonNode parameters(String type, String json) {
+        // 1. 固定业务字段；只有CB允许可选的受控fallbackMode。
         Set<String> fields = switch(type) {
             case "RATE_LIMIT" -> Set.of("capacity", "refillPerSecond");
             case "CONCURRENCY" -> Set.of("maxConcurrent");
+            case "TIMEOUT" -> Set.of("timeoutMs");
+            case "CIRCUIT_BREAKER" -> Set.of("failureRateThreshold","slidingWindowSize","minimumNumberOfCalls","waitDurationMs");
             default -> throw new IllegalArgumentException("不支持的执行策略");
         };
         JsonNode node = SnapshotCodec.JSON.readTree(json);
-        Rules.require(node.isObject() && node.size() == fields.size(), "治理参数结构错误");
+        boolean fallback=type.equals("CIRCUIT_BREAKER") && node.has("fallbackMode");
+        Rules.require(node.isObject() && node.size() == fields.size()+(fallback?1:0), "治理参数结构错误");
+        // 2. 数字必须完整、为整数且有统一精度上限，不在热路径补默认值。
         for (String field : fields) {
             JsonNode value = node.get(field);
             Rules.require(value != null && value.isIntegralNumber() && value.canConvertToLong()
                     && value.longValue() >= 1 && value.longValue() <= 1_000_000, "治理参数必须为1..1000000整数");
+        }
+        // 3. 保护类型再收紧业务范围，保留旧四字段CB参数契约。
+        if(type.equals("TIMEOUT")) Rules.require(node.get("timeoutMs").intValue()>=50 && node.get("timeoutMs").intValue()<=10000,"timeoutMs必须50..10000");
+        if(type.equals("CIRCUIT_BREAKER")) {
+            Rules.require(node.get("failureRateThreshold").intValue()<=100,"失败率必须1..100");
+            int window=node.get("slidingWindowSize").intValue();
+            Rules.require(window>=2 && window<=100 && node.get("minimumNumberOfCalls").intValue()<=window,"窗口必须2..100且不小于最小样本量");
+            int wait=node.get("waitDurationMs").intValue(); Rules.require(wait>=500 && wait<=60000,"等待时间必须500..60000ms");
+            if(fallback) Rules.require(node.get("fallbackMode").isString() && Set.of("NONE","STATIC_JSON").contains(node.get("fallbackMode").stringValue()),"fallbackMode非法");
         }
         return node;
     }
@@ -37,8 +55,9 @@ public final class PolicyRules {
         var policies = new HashMap<Long,Map<String,Object>>();
         for (var policy : snapshot.policies()) {
             Rules.require(policies.put(id(policy,"id"), policy) == null, "重复策略 ID");
-            if (enforced(policy)) {
+            if (active(policy)) {
                 String type = (String)policy.get("type"), scope = (String)policy.get("scope");
+                Rules.require((Set.of("RATE_LIMIT","CONCURRENCY").contains(type)?ENFORCED:PROTECTED).equals(policy.get("executionStatus")),"执行标记与策略类型不一致");
                 parameters(type, (String)policy.get("parametersJson"));
                 Rules.require(Set.of("GLOBAL","SERVICE","API","ROUTE","CALLER").contains(scope), "非法治理作用域");
             }
@@ -48,10 +67,18 @@ public final class PolicyRules {
         for (var binding : snapshot.bindings()) {
             var policy = policies.get(id(binding,"policyId"));
             Rules.require(policy != null, "悬空策略绑定");
-            if (!enforced(policy)) continue;
+            if (!active(policy)) continue;
             String scope=(String)binding.get("targetType"); long target=id(binding,"targetId");
             Rules.require(scope.equals(policy.get("scope")), "绑定作用域不一致");
             if ("CONCURRENCY".equals(policy.get("type"))) Rules.require(Set.of("SERVICE","ROUTE").contains(scope), "并发仅支持SERVICE/ROUTE");
+            if ("TIMEOUT".equals(policy.get("type"))) Rules.require(Set.of("SERVICE","API","ROUTE").contains(scope),"超时仅支持SERVICE/API/ROUTE");
+            if ("CIRCUIT_BREAKER".equals(policy.get("type"))) {
+                Rules.require("ROUTE".equals(scope),"熔断仅支持ROUTE");
+                var params=parameters("CIRCUIT_BREAKER",(String)policy.get("parametersJson"));
+                if(params.has("fallbackMode") && "STATIC_JSON".equals(params.get("fallbackMode").stringValue())) {
+                    Rules.require(snapshot.routes().stream().anyMatch(r -> r.routeId().equals(binding.get("targetRouteId")) && r.method().equals("GET")),"静态降级仅允许只读GET路由");
+                }
+            }
             Rules.require(unique.add(policy.get("type")+":"+scope+":"+target), "同一目标存在重复启用策略");
             // 3. 引用必须有效且启用；Caller 的启用状态在 Control 数据库侧再次校验。
             boolean valid = switch(scope) {
