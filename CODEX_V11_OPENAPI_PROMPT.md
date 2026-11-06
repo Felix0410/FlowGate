@@ -1,5 +1,7 @@
 # Codex 工作指令｜FlowGate V1.1 OpenAPI 平台业务化改造
 
+> **2026-11-06 已完成V11设计复审**：严格先读 `docs/reviews/v11-design-review-2026-11-06.md`、`docs/design/openapi-platform-v1.1.md`第12节，再执行 **`CODEX_V11_A_EXEC_PROMPT.md`**。后者是当前唯一详细的本地编码交接；新应用Token、USAGE_QUOTA、Kafka和四组性能均尚未实现。V1人工浏览器验收与最终收口仍待负责人进行，V11-A可在隔离新分支先做不激活Token的管理域，B之前须完成前置门槛。
+
 > 当前默认工作仅为**阅读规划并开始 V11-A（前提：负责人确认旧 V1 收口与工作树安全）**。不得把设计文档标记为已编码。具体业务约束权威源：docs/design/openapi-platform-v1.1.md。
 >
 > 远端文档设计分支：docs/v1.1-openapi-platform，起点是 V1 最完整的 test/block4-final-acceptance SHA ec16efe0bb1a5a07824c82f2352789a6c95391b1；main 仍停留在 Block0。旧 PR#1–#5 是逐级依赖的 Draft，不得改 PR base、强推或自行 merge main。开发分支须以负责人确认的最新完整功能分支起步，先 fetch 核对 SHA。
