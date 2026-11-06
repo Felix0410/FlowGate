@@ -33,3 +33,14 @@ A DIRECT：直接请求 Demo；B PROXY：经 Gateway 且无 RATE/CONCURRENCY/USA
 ## D-04 最终通过标准
 
 真实双网关并发扣减不超额，Kafka 停机/重复后的账本-用量收敛，SQL 改善有真实数据，四组压测包含计量额外开销，核心非计量路由全部回归，负责人浏览器体验认可，并列出所有已知限制。缺少任一项一律标注“未完成/待验收”，不可把单测通过误写为项目已交付。
+
+
+## D-05 审核后逐项验收任务（A/B/C真实完成才开始）
+
+1. **D0** 锁定最终源码SHA、JDK17、独立MySQL/Redis/Kafka容器与当前用户资产安全，运行`mvn -B -ntp verify`和全部新增/旧Node JS合同；旧V1两Gateway所有安全行为不得退化。
+2. **D1** 在独立数据库生成≥10万脱敏模拟Ledger/审计，实际执行既有查询与增加索引后的`EXPLAIN ANALYZE`；比较稳定`(time,id)`游标与offset深翻页、写入索引成本，提交真实SQL/资源/扫描行/延迟，不编造提高。
+3. **D2** 四组 DIRECT/PROXY/GOVERNED/METERED，按相同负载/路由/请求方法/大小与固定到达节奏对照；不能等价的身份认证/直连业务条件分别说明。METERED应提供充足但可信月额度，**故意耗额场景另测，不混入性能P95**。至少两轮，每组记录scheduled/completed/clientShed、fast业务成功RPS/P50/P95/P99、429/503、Gateway→Control quotaHop P95、MySQL锁等待、Kafka lag和CPU/RSS；业务成功样本与所有HTTP分布分离。
+4. **D3** 双网关额度竞争/同chargeId跨月重试、旧Gateway拒app Token、旧快照回滚、Redis/Control/DB/Kafka分别断连、Outbox追平/幂等、节点/CB累积及敏感信息审计统一实证。不能将旧V1性能当V11结果。
+5. **D4** 负责人真人1280px/375px，ADMIN/OPERATOR/VIEWER执行新客户→应用→订阅→B真正发证→计量路由→5授权+1拒绝→ledger→Kafka用量→对账；失败/空态/撤销/409/权限。写`docs/acceptance/v11-final-results.md`包含实际SHA、命令、原始脱敏证据、未执行及缺陷；所有PR保持Draft，只有负责人另行授权才可以合并main/tag。
+
+**最终通过门槛**：MySQL账本不超额、混合版本无绕过、Kafka重复统计可收敛、SQL与性能可复现、旧非计量路由不受影响、真人产品可用性合格。任一项尚缺写`未完成`，不得以A/B/C定向测试替代D。
