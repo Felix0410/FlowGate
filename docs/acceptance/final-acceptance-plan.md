@@ -1,6 +1,6 @@
 # FlowGate｜最终综合验收计划 V1.0（准备稿）
 
-> 2026-11-06。状态：**仅计划已准备；尚未启动最终统一回归/长测试/正式性能对照**。需要负责人认可此计划、Block3 源码审核及真实浏览器体验问题收口后执行。不得借“已提交”自动合并 main。
+> 2026-11-06。状态：**负责人已授权功能块4执行，具体合同见 `docs/progress/block-4-acceptance.md`；已提交三组性能脚本和统计单测，但全量 Maven、真实三组 HTTP 性能、故障/长期容量与负责人真实浏览器体验尚未执行。** 发现问题需收口并留证，不得借“已提交”自动合并 main。
 > 基线：`feat/block3-resilience-observability`；四个功能块 Block0–Block3、现有三 JVM（Demo/Control/Gateway）+ MySQL/Redis + 原生业务页面。
 > 审核参照：[功能块 3 源码复审](../reviews/block-3-static-review-2026-11-06.md)、[现有使用指南](../guides/test-console-guide.md)、[故障演示](../guides/block3-fault-testing.md)。
 
@@ -82,7 +82,7 @@ python3 scripts/build-console-guide.py --check
 
 ## 7. 最终交付和 Git 合并检查
 
-统一汇总 `docs/acceptance/final-results.md`（**尚未创建，执行者完成测试后再建**）：构建命令/总数、浏览器验收记录、三组负载原始数据路径、故障实验、异常处理、风险剩余、Commit SHA/依赖清单。
+统一汇总 `docs/acceptance/final-results.md`（**真正执行测试后按结果创建，不得预填通过**）：构建命令/总数、浏览器验收记录、三组负载原始数据路径、故障实验、异常处理、风险剩余、Commit SHA/依赖清单。
 
 分支现为 stacked PR：Block1→main，Block2 设计→Block1，Block2 实现→设计，Block3→Block2 实现。负责人审核全部通过后**按依赖顺序**处理，必要时审慎重设后续 PR base；合并时保留原始 Conventional Commits 与文档证据，不强推、不直接 squash 造成版本/证据难以对应。合并前检查 GitHub PR diff、CI（若可用）、main 实际 SHA，合并后再从 main 再次完整验证并打可追溯 tag。
 
