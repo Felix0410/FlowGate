@@ -46,3 +46,17 @@
 ## C-06 不做
 
 不新增 Kafka 到 Gateway 依赖，不在 HTTP 热路径同步等待 Kafka ack，不建设通用订单业务，不把异步用量称为实时权威账单，不用 Redis 的 key TTL 代替 Outbox 幂等/持久化。
+
+
+## C-07 审核后执行分配（A/B未通过时不得运行）
+
+| 阶段 | 工作内容 | 验收门槛 |
+|---|---|---|
+| C0 | 从B权威Ledger/Outbox实测中冻结事件Schema V1：eventId/chargeId/appId/apiId/period/units/time/version，脱敏；核对B已预留leaseOwner/leaseUntil | Outbox/ledger同事务事实成立 |
+| C1 | Control可选Spring Kafka依赖、单机可选compose profile、环境开关；旧本地MySQL/Redis无Kafka仍能启动 | 默认关闭Kafka时V1路由和B授权仍正常 |
+| C2 | Mapper + Worker：`SKIP LOCKED`小事务领取有限批次、写leaseOwner/Until、commit后才send；ack成功/失败按租约owner状态转换，超时重新领取 | 双Worker无长期持锁；send成功DB更新失败可重复投递 |
+| C3 | `fg_consumed_event`唯一eventId + `fg_usage_daily`UPSERT同事务；DB提交后ack offset | 消费/ack中间崩溃重放不双计数 |
+| C4 | 管理端`/admin/usage`、`/admin/async-events`、`/admin/reconciliation`，固定watermark/已关闭UTC日期对账、失败安全重放/审计；前端真实表格和中文指南 | Kafka停机时显示“统计延迟”，余额从DB权威读；不以lag=0代表未失败 |
+| C5 | Java/Node/隔离Kafka+MySQL/Redis真实故障脚本，脱敏证据和阶段SHA | 停Kafka→授权仍成功/outbox堆积→恢复→对账；重复事件只计1；最终FAILED可诊断 |
+
+**C阶段不做新Gateway Kafka客户端**，不等待Kafka ack才放行、不重新扣余额、不将`SKIP LOCKED`当权威额度查询、不无界提交失败事件。Outbox状态及lease owner更新必须有条件where，不被迟到worker覆盖。全量性能留D。
