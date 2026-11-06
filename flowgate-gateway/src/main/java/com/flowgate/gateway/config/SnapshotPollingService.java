@@ -60,19 +60,14 @@ public class SnapshotPollingService {
                     .onErrorResume(error -> {
                         // 3. 恢复真实缓存再结束失败应用；仅恢复 candidate 不足以恢复路由和权限。
                         pending = null;
-                        store.restore();
-                        CachingRouteLocator cache = routeCache;
-                        return (cache == null ? Mono.<Void>empty() : cache.refresh().then().timeout(Duration.ofSeconds(3)))
-                                .then(Mono.<Void>error(error));
+                        return recoverCache().then(Mono.<Void>error(error));
                     }).doFinally(signal -> {
                         pending = null;
                         if (signal == SignalType.CANCEL) {
-                            store.restore();
-                            CachingRouteLocator cache = routeCache;
-                            if (cache != null) cache.refresh().then().subscribe(ignored -> {}, error ->
+                            // 取消已结束订阅，但恢复未结束：互斥权必须保留到实际恢复终止。
+                            recoverCache().doFinally(ignored -> applying.set(false)).subscribe(ignored -> {}, error ->
                                     org.slf4j.LoggerFactory.getLogger(getClass()).warn("取消应用后的缓存恢复未完成"));
-                        }
-                        applying.set(false);
+                        } else applying.set(false);
                     });
         });
     }
@@ -86,14 +81,15 @@ public class SnapshotPollingService {
         routeCache = cache;
         if (completion == null) {
             // 迟到刷新可能在恢复后覆盖缓存；再次以最后确认快照修复，不确认迟到版本。
-            if (!applying.get() && event.isSuccess()) {
+            if (event.isSuccess() && applying.compareAndSet(false,true)) {
                 cache.getRoutes().collectList().flatMap(routes -> {
                     Snapshot active = store.applied();
                     var expected = active == null ? List.of() : active.routes();
                     var actual = routes.stream().map(r -> r.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).toList();
                     return actual.size() == expected.size() && new HashSet<>(actual).equals(new HashSet<>(expected))
-                            ? Mono.<Void>empty() : cache.refresh().then();
-                }).subscribe(ignored -> {}, error -> org.slf4j.LoggerFactory.getLogger(getClass()).warn("迟到缓存恢复失败，等待下次同步"));
+                            ? Mono.<Void>empty() : recoverCache();
+                }).doFinally(signal -> applying.set(false)).subscribe(ignored -> {}, error ->
+                        org.slf4j.LoggerFactory.getLogger(getClass()).warn("迟到缓存恢复失败，等待下次同步"));
             }
             return;
         }
@@ -106,6 +102,15 @@ public class SnapshotPollingService {
                 if (pending == completion && store.candidate() == candidate) completion.tryEmitEmpty();
             }
         }, completion::tryEmitError);
+    }
+
+    /** 恢复与下一次应用共享所有权；不能在恢复 Flux 悬挂时先释放互斥标记。 */
+    private Mono<Void> recoverCache() {
+        return Mono.defer(() -> {
+            store.restore();
+            CachingRouteLocator cache=routeCache;
+            return cache==null ? Mono.empty() : cache.refresh().then().timeout(Duration.ofSeconds(3));
+        });
     }
 
     private Mono<Void> report() {

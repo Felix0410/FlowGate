@@ -146,9 +146,11 @@ function targets() {
 el('policy-scope').onchange=targets;
 el('policy-existing').onchange=()=>{
  const policy=policyCatalog.find(p=>p.id===Number(el('policy-existing').value)); el('policy-type').disabled=Boolean(policy); el('policy-scope').disabled=Boolean(policy);
- if(!policy) return;
+ el('policy-target').disabled=Boolean(policy);
+ if(policy) el('policy-status').textContent='编辑只修改参数/启停；绑定关系保持不变。如需新增绑定，请使用下方单独绑定入口。';
+ if(!policy) { targets(); return; }
  el('policy-code').value=policy.code; el('policy-type').value=policy.type; el('policy-scope').value=policy.scope; el('policy-enabled').value=String(policy.enabled);
- const params=JSON.parse(policy.parametersJson); el('capacity').value=params.capacity || 5; el('refill').value=params.refillPerSecond || 2; el('max-concurrent').value=params.maxConcurrent || 2; targets();
+ const params=JSON.parse(policy.parametersJson); el('capacity').value=params.capacity || 5; el('refill').value=params.refillPerSecond || 2; el('max-concurrent').value=params.maxConcurrent || 2; targets(); el('policy-target').replaceChildren(new Option('已有绑定保持不变（此处不修改目标）','unchanged'));
 };
 action('policy-load',async()=>{
  policyCatalog=await call('/admin/policies',{admin:true});
@@ -160,7 +162,7 @@ action('policy-save',async()=>{
  const type=el('policy-type').value,scope=el('policy-scope').value;
  if(type==='CONCURRENCY' && !['SERVICE','ROUTE'].includes(scope)) throw new Error('本机并发只支持SERVICE/ROUTE');
  let target=el('policy-target').value;
- if(scope==='CALLER') target=prompt('输入已启用 Caller 的内部数字 ID（不是Token）');
+ if(!el('policy-existing').value && scope==='CALLER') target=prompt('输入已启用 Caller 的内部数字 ID（不是Token）');
  if(target===null || target==='') throw new Error('请读取并选择绑定目标');
  const params=type==='RATE_LIMIT'?{capacity:Number(el('capacity').value),refillPerSecond:Number(el('refill').value)}:{maxConcurrent:Number(el('max-concurrent').value)};
  const id=el('policy-existing').value;
