@@ -31,7 +31,7 @@ const context={console,performance,Map,Set,Date,Option:class extends Element {co
  return {status,ok:status>=200&&status<300,headers:{get:()=> 'test-request-id'},text:async()=>JSON.stringify(result)};}};
 vm.createContext(context);vm.runInContext(fs.readFileSync(root+'app.js','utf8'),context);
 async function click(id) {await nodes.get(id).listeners.click();}
-(async()=>{
+async function run(){
  assert.equal(sections.filter(s=>!s.hidden).length,1); assert.equal(sections[0].id,'quick');
  assert.equal(nodes.get('publish').disabled,true);
  nodes.get('username').value='test';nodes.get('password').value='private-test-password';data={token:'private-test-token',role:'ADMIN'};
@@ -53,4 +53,6 @@ async function click(id) {await nodes.get(id).listeners.click();}
  const before=requests.length; status=200;data={id:99};await click('policy-save');
  assert.equal(requests.slice(before).some(r=>r.path.endsWith('/bindings')),false);
  console.log('PASS 控制台导航/登录与清密/角色按钮/当前版本/真实目标路径/429与400渲染/409不重试/摘要脱敏');
-})().catch(error=>{console.error(error);process.exitCode=1;});
+}
+module.exports={context,nodes,requests,click,run,reply:(s,d)=>{status=s;data=d;}};
+if(require.main===module) run().catch(error=>{console.error(error);process.exitCode=1;});
