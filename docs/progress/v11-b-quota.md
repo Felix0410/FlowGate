@@ -43,3 +43,27 @@ B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/
 ## B-05 完成标准
 
 数据库守恒与唯一性实测通过 + Gateway 真实跨节点测试 + 异常与身份边界通过 + 前端显示额度与拒绝原因 + 负责人确认后才进入 C。
+
+
+## B-06 设计审核后的强制门槛与实施拆分（不可提前编码）
+
+> 审查依据：`docs/reviews/v11-design-review-2026-11-06.md` R01～R05，`docs/design/openapi-platform-v1.1.md` 第12节。**本块未开始**；只有A代码和真实定向验收通过、负责人确认后才派给Codex。
+
+| 子任务 | 必须实际改动 | 拦截/验收 |
+|---|---|---|
+| **B0** | 复核A的DDL/订阅/角色和V1最新基线；冻结route/API/身份/版本与错误码合同 | 旧Caller不能因appToken设计失效 |
+| **B1** | `sql/flowgate-v11.sql`只新增余额/ledger/outbox表，Outbox预留`lease_owner,lease_until,last_error_code`；Entity/Mapper/事务Service | 隔离MySQL重复DDL；冻结`subscription_id/plan_version`，余额不负、Ledger/Outbox同事务 |
+| **B2** | `PolicyRules`、`ReleaseService`、`SnapshotRouteDefinitionLocator`、`EffectivePolicyResolver`接入独立`USAGE_QUOTA`策略、同版metadata与可信节点`supportedFeatures`检查 | **混合旧/新Gateway不允许激活计量**；历史checksum/rollback完全兼容 |
+| **B3** | 应用Token独立`fg:auth:app:{digest}`和`APP_CALLER`类型；`IdentityService`与`CallerAuthFilter`新增受限用途且不污染旧Caller；`POST /admin/apps/{id}/credentials`签发/轮换/吊销 | 旧Gateway读不到APP Token；新Gateway非计量私有路由403；状态停用DB拒绝；A占位409变真正接口必须与隔离同提交 |
+| **B4** | `POST /internal/quota/charge` + MySQL原子授权、业务校验、chargeId幂等、DB UTC、旧发布版本校验、限时WebClient；在认证/速率/并发与熔断边界中放置单次计量授权 | 100并发Free5仅5grant/5Ledger/5Outbox；重复100次仅扣1；跨月同chargeId不扣第二月；409不同payload；丢回包有限重试fail-closed |
+| **B5** | `/console/`额度/账本真实列表、错误提示和用户指南；旧页面保留 | 用户看得到授权消耗vs成功处理、下月套餐状态；非管理员不能修改 |
+| **B6** | JUnit、Node、隔离双Gateway+Control+MySQL/Redis真HTTP与故障注入、脱敏证据 | Control/DB故障被计量503而原非计量路线仍旧行为；Redis/401/403/429短路不扣额；实际filter顺序证据 |
+
+**特别注意**：
+1. **不是只给新Gateway的`CallerAuthFilter`增加一个检查就完成App隔离**。旧Gateway只识别`fg:auth:caller:`，应用新Token必须存入**不同命名空间**；新用途`APP_CALLER`不作为普通CALLER Session返回。混合版本测试是P0。
+2. 不能仅用`/admin/nodes`的`appliedVersion`作为能力检查。节点须有经过受信上报的`supportedFeatures`，由受控接流清单判断，所有可以接计量流量的Gateway尚未升级时**拒绝发布或激活USAGE_QUOTA**。
+3. 配额内部接口以历史`ConfigRelease(appliedVersion)`核验同版策略绑定、API隐私/Scope和units；旧版合法滞后网关不能被误拒，伪造不存在/不匹配版本不扣账。
+4. **同chargeId跨UTC月重试**查询先前Ledger原始月份和参数，比对后返回先前grant，不创建新月Ledger。若停用应用应拒绝新的代理授权，不通过“历史重复成功”绕过状态；旧grant账本保留。测试用固定可注入UTC Clock、同一chargeId两种月份、当前停用三种可控场景。
+5. 首个授权Grant之后，下游失败/取消/超时仍保留单位扣减。若框架过滤器实际无法保证熔断OPEN在quota前拒绝，必须通过集成测试证明并在业务合同与UI明确限制，或收窄首版计量API范围，**不可偷偷将语义写成“真正到达Demo才扣”**。
+6. 新计量路由只对App专用身份生效；旧普通Caller仍按V1授权。Public route无鉴权承诺不能被误描述为App token被禁止访问，真正需要保护的端点必须是private metered。
+7. A/B/C都是定向测试和每块独立提交；直到D才进行全量长压测。B不提前集成Kafka broker；Outbox写MySQL即可。
