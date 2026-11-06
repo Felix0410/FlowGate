@@ -1,6 +1,6 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **当前：负责人已授权功能块 3（超时、熔断、降级、故障恢复、指标）。Block2 主要功能代码及本地定向测试记录已交付，但旧版控制台/路由缓存两项审核事项与负责人浏览器验收尚需收口；Block3 的任务书与 Codex 提示词已写入 `feat/block3-resilience-observability`，Block3 业务代码尚未实现。所有 PR 仍保持 Draft，未合并 main。**
+> **当前：功能块3超时、熔断、受控GET降级、故障恢复和简单业务前端已实现并定向验证，等待ChatGPT/负责人审核。真实浏览器由负责人操作；没有合并main，不启动最终全量/性能验收。**
 >
 > 更新：2026-11-06。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
@@ -191,7 +191,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 5. 完成后整理文件清单、Git 提交、实际运行命令及通过/失败结果、未覆盖风险；可推送**独立功能分支**供复核，但不得直接修改/合并 main 或自行开启下个功能块。需要用户权限的远端操作按本地权限和用户授权处理。
 6. ChatGPT 和负责人审核后的问题在**同一功能块**修复、做相关定向复测；审核通过才开启下一功能块。
 
-**当前入口**：执行 [功能块 3 任务契约](docs/progress/block-3-resilience.md) 与根目录 [CODEX_BLOCK3_PROMPT.md](CODEX_BLOCK3_PROMPT.md)，从**远端已有**的 `feat/block3-resilience-observability` 检出。先处理 Block2 R1 编辑目标误导、R2 取消/缓存恢复竞态，再接入超时熔断；不要从旧 main 创建功能分支。
+**当前入口**：按[功能块3契约](docs/progress/block-3-resilience.md)及[CODEX_BLOCK3_PROMPT.md](CODEX_BLOCK3_PROMPT.md)在`feat/block3-resilience-observability`工作；当前实现等待复审，不开始最终全量验收。
 
 ### 6.3 按功能块管理任务与开发进度（2026-11-04 新约定）
 
@@ -329,3 +329,12 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - 新发布 RATE_LIMIT/CONCURRENCY 通过 Route 同版元数据实际执行；历史待办策略不自动激活。限速是 Reactive Redis 单Key原子令牌桶，并发上限仅单个Gateway；熔断仍待块3。
 - 测试台默认五步引导，支持分区结果、策略向导、有界请求、真实版本与节点对照；[操作指南](docs/guides/test-console-guide.md)。浏览器人工可用性验收尚未执行。
 - 定向命令与真实结果见[块2进度第12节](docs/progress/block-2-traffic.md)。`scripts/block2-smoke.py`、`scripts/block2-hotspot.py`使用独立临时容器和随机端口，退出清理自己的资源。
+
+
+### 功能块3业务入口与定向交付
+
+- 当前分支`feat/block3-resilience-observability`，基于远端块2实现；先独立提交`fe0f391`关闭已有策略目标误导和取消恢复竞态。
+- 复用官方Gateway路由超时及Reactor Resilience4j CircuitBreaker；新发布ENFORCED_BLOCK3执行，旧PENDING快照不自动执行。OPEN拒绝与GET静态不可用提示均明确503，主动超时504。
+- 页面仍为`http://127.0.0.1:8081/test-console/`，默认业务概览；服务/API关联下拉、保存草稿、发布、流量策略和故障保护均使用真实API，原始响应折叠，便于抽查，不建设复杂验收平台。
+- 正常启动不增加必填配置。仅演示`/demo/fault`时，在Demo的IDEA环境或本机`.env`显式设`FLOWGATE_DEMO_FAULT_ENABLED=true`；默认关闭。不覆盖现有`.env`、密码或Docker数据。
+- 实际命令/结果/差异见[块3进度第11节](docs/progress/block-3-resilience.md)，[业务前端指南](docs/guides/test-console-guide.md)、[故障保护指南](docs/guides/block3-fault-testing.md)。自动HTTP证据为`docs/progress/evidence/block3-smoke.json`，不含认证头、密码、Token或请求Body。

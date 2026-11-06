@@ -1,6 +1,6 @@
 # FlowGate 本地测试台｜第一次使用指南
 
-> 更新：2026-11-06。对应功能块2新版分区测试台；浏览器布局和负责人可用性验收尚未执行。
+> 更新：2026-11-06。对应功能块3简单业务前端；浏览器布局和负责人可用性验收尚未执行。
 > 使用范围：本机开发演示，不是公网部署方案；密码、Token、内部密钥不可提交 Git 或发到聊天中。
 
 ## 1. 先启动服务（macOS + JDK17 + Docker Desktop）
@@ -43,32 +43,32 @@ docker compose -f compose.local.yml stop  # 另外停止容器，数据卷仍保
 
 浏览器打开：**http://127.0.0.1:8081/test-console/**
 
-新版默认打开“快速开始”，顶部导航可进入环境检查、业务测试、身份与登录、配置与版本、策略与流控、帮助和最近十条摘要。所有原有操作保留，每项操作在所在分区显示独立结果卡，最近十条仅保留无敏感摘要。顶部状态始终显示依赖、PERSISTED版本和节点appliedVersion；首次检查前不会显示UP。
+新版默认打开“业务概览”，顶部导航为环境状态、接口调用、账号与调用方、服务/API与发布、流量策略、故障保护、帮助和最近操作。首次使用五步说明折叠保留，原始HTTP详情也默认折叠；业务页面不承担复杂验收或压测。所有原有操作保留，每项操作在所在分区显示独立结果卡，最近十条仅保留无敏感摘要。顶部状态始终显示依赖、PERSISTED版本和节点appliedVersion；首次检查前不会显示UP。
 
 **IDEA启动**：分别运行 Demo、Control、Gateway 的主类，JRE均选择17。Control/Gateway运行配置的环境文件必须是 **FlowGate** 根目录 `.env`，不要误选 AIGateRe 项目的同名文件。不要同时用脚本和IDEA重复启动；需要切换时先 `python3 scripts/run-local.py stop`。该命令只停止脚本自身的JVM，Docker保留运行。
 
 ## 3. 第一次演示：公共 Demo（从空库 V0 开始）
 
-1. 在“环境检查” 点击“探测服务”，必须先看到相关依赖 UP；若探测失败先查 `.local/run/` 日志。
-2. 在“身份与登录” 输入管理员用户名和原始密码，点击“登录”，应显示 ADMIN。页面刷新会丢失临时 Token，需要重新登录，这是当前设计。
-3. 在“配置与版本” 点击“初始化公共 Demo 草稿”。这是**只补齐缺失的** Demo 服务、三个公共 API 和路由，不会自动发布。
+1. 在“环境状态” 点击“探测服务”，必须先看到相关依赖 UP；若探测失败先查 `.local/run/` 日志。
+2. 在“账号与调用方” 输入管理员用户名和原始密码，点击“登录”，应显示 ADMIN。页面刷新会丢失临时 Token，需要重新登录，这是当前设计。
+3. 在“服务/API与发布” 点击“初始化公共 Demo 草稿”。这是**只补齐缺失的** Demo 服务、三个公共 API 和路由，不会自动发布。
 4. 点击“当前持久化版本”。**不要假设一定是 0**：如果返回 version=0，确认自动读取的 expectedVersion=0；如果已有版本 Vn，自动读取后应显示 Vn。
 5. 点击“发布完整配置”，返回应为 HTTP 200 且 `status=PERSISTED`、`version=n+1`，注意这**还不代表 Gateway 已应用**。
 6. 等待/重复点“节点实际应用版本”，看到某个节点 `appliedVersion=n+1` 且 checksum 对得上，才能确认已应用。若没有，检查 Gateway/Control 状态和日志。
-7. 在“业务测试” 点击 GET fast（id=123、tag=abc），预期 200；POST echo（合法 JSON 对象，例如 `{"name":"flowgate"}`）预期 201；GET slow（delayMs=100）预期 200，越界 2001 预期 400。
+7. 在“接口调用” 点击 GET fast（id=123、tag=abc），预期 200；POST echo（合法 JSON 对象，例如 `{"name":"flowgate"}`）预期 201；GET slow（delayMs=100）预期 200，越界 2001 预期 400。
 8. 每次查看就地结果中的 HTTP 状态、JSON 和 X-Request-Id。私有认证不影响已明确发布为公开的三个 Demo 接口。
 
 如果原本已有草稿/版本，建议先查看 `services`、`apis`、`routes` 的实际列表，而不是反复创建重复对象。
 
 ## 4. 进阶演示：私有路由与版本回滚
 
-1. 在“配置与版本” 点“添加私有 Demo 草稿”；该按钮只添加 `GET /api/private/fast/{id}`，要求 Scope `demo:read`，仍需显式发布。
+1. 在“服务/API与发布” 点“添加私有 Demo 草稿”；该按钮只添加 `GET /api/private/fast/{id}`，要求 Scope `demo:read`，仍需显式发布。
 2. 先点“当前持久化版本”，把真实 `version` 写入 expectedVersion，点击发布；等待节点 appliedVersion 同步到新版本。
-3. “业务测试” 的“私有路径”使用 `/api/private/fast/123`，**不带 Caller Token** 点击“请求私有 API”，预期 HTTP 401。
-4. “身份与登录” 中输入 Caller 名称、Scopes=`demo:read`，点击“创建 Caller”。一次性 Token 会暂存在当前页面的密码输入框，默认隐藏；页面会自动填写 Caller Token 和吊销 ID。现在私有请求预期 HTTP 200。
+3. “接口调用” 的“私有路径”使用 `/api/private/fast/123`，**不带 Caller Token** 点击“请求私有 API”，预期 HTTP 401。
+4. “账号与调用方” 中输入 Caller 名称、Scopes=`demo:read`，点击“创建 Caller”。一次性 Token 会暂存在当前页面的密码输入框，默认隐藏；页面会自动填写 Caller Token 和吊销 ID。现在私有请求预期 HTTP 200。
 5. 如要测试 Scope 不足，创建一个只有 `other:read` 的不同名称 Caller，私有请求应返回 HTTP 403。不要把真实 Token 粘贴到聊天或仓库。
-6. “身份与登录” 点击“吊销”，再次请求私有 API 应返回 HTTP 401。
-7. 在“配置与版本” 的“发布历史”选择**最初仅含公共 Demo 的版本**（不一定是 V1，取实际值），填写“回滚来源版本”和**当前持久化版本** expectedVersion，点击“回滚为更大新版本”。成功后新版本号必须大于旧版本；等待节点同步。
+6. “账号与调用方” 点击“吊销”，再次请求私有 API 应返回 HTTP 401。
+7. 在“服务/API与发布” 的“发布历史”选择**最初仅含公共 Demo 的版本**（不一定是 V1，取实际值），填写“回滚来源版本”和**当前持久化版本** expectedVersion，点击“回滚为更大新版本”。成功后新版本号必须大于旧版本；等待节点同步。
 8. 再请求 `/api/private/fast/123` 应为 HTTP 404；原三个公开 Demo API 应仍可用。回滚不会擦掉草稿；下一次发布草稿仍可能重新开放私有路由。
 
 ## 5. 常见错误和处理
@@ -97,9 +97,9 @@ docker compose -f compose.local.yml stop  # 另外停止容器，数据卷仍保
 
 ## 7. 限速和并发演示
 
-1. 在“策略与流控”点击“读取策略与目标”，选ROUTE和demo-slow。
+1. 在“流量策略”点击“读取策略与目标”，选ROUTE和demo-slow。
 2. 新建RATE_LIMIT，代码填唯一值，例如slow-route-rate；capacity=2、refillPerSecond=1，点击“保存并绑定草稿”。
-3. 转到“配置与版本”，读取当前版本，点击发布并确认；查询节点，等待appliedVersion匹配。
+3. 转到“服务/API与发布”，读取当前版本，点击发布并确认；查询节点，等待appliedVersion匹配。
 4. 回到策略页，路径`/api/demo/slow?delayMs=0`，请求数6，执行有界请求；独立结果卡呈现真实429。不是所有请求都必定429，取决于容量、补充和发送时刻。
 5. 选择已有策略，停用并保存；新建CONCURRENCY，ROUTE=demo-slow、maxConcurrent=1，发布并确认节点。
 6. 路径改为`/api/demo/slow?delayMs=500`，请求数6。可观察200和503 CONCURRENCY_LIMITED；请求结束后再次发送应恢复准入。
@@ -117,3 +117,10 @@ python3 scripts/block2-hotspot.py
 ```
 
 最后一条运行同环境15秒+15秒的小对照，结果写入`docs/progress/evidence/block2-hotspot.json`。Demo观测仅在显式`FLOWGATE_DEMO_OBSERVATION=true`时注册；脚本设置8个共享Tomcat线程，不改变日常启动默认值。普通API尾延迟的改善仅代表此次开发机短实验，不代表正式性能验收。
+
+
+## 8. 服务/API和故障保护业务页面
+
+“业务概览”刷新即可查看服务/API目录，不用读Java源码。“服务/API与发布”可读取关联服务/API的下拉选项，选择服务、API或路由模板，填入名称、方法与路径后直接保存业务草稿；高级JSON仅在需要时展开，保留原有更新/绑定能力。
+
+“故障保护”提供响应超时、熔断与GET不可用提示表单、发布和节点状态，具体抽查步骤见[故障保护指南](block3-fault-testing.md)。只有演示故障接口时需要在Demo环境开启`FLOWGATE_DEMO_FAULT_ENABLED=true`，正常业务没有新增必填配置。控制台URL暂沿用`/test-console/`，页面定位已调整为简单业务前端。

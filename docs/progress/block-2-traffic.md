@@ -221,3 +221,5 @@ git diff --check
 在`feat/block3-resilience-observability`补修R1/R2：已有策略编辑锁定目标且说明只改参数/启停；取消及迟到恢复与新版本应用共享互斥权，恢复Flux未结束前拒绝下一次apply。新增Sinks可控交错测试（V2取消→V1恢复悬挂→V3被拒绝→恢复完成→V3成功），真实缓存与applied最终同版，没有使用sleep遮盖时序。
 
 `source .env; mvn -B -ntp -pl flowgate-gateway -am test`通过（Contract5、Gateway17）；`node scripts/block2-console-test.js`通过，包含编辑不重复绑定断言。Maven实际使用Java17.0.18；shell默认java21不作为构建JDK。修复独立提交为`fix(block2)`，SHA见该提交记录；不是负责人浏览器验收通过。
+
+块3前置补修的实际提交SHA为`fe0f391`（位于feat/block3-resilience-observability）；对应R1/R2定向复测已通过，负责人浏览器验收仍未冒充完成。

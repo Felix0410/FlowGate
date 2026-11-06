@@ -1,6 +1,6 @@
 # FlowGate 功能块 3｜超时、熔断、受控降级、故障恢复与可观测性（实施任务 V2.0）
 
-> 日期：2026-11-06。状态：**负责人已授权进入本块；任务书已交付，Block3 业务代码/测试尚未执行**。
+> 日期：2026-11-06。状态：**实现与定向验证已完成，等待复审；负责人真实浏览器/最终全量验收未执行**。
 > 工作分支：`feat/block3-resilience-observability`，基于 `feat/block2-traffic-governance` 的远端实现建立，不从旧 `main` 开始。
 > 目标：完成 B09、B10、B12 的可靠性闭环，并保留 B01–B08 已交付的全部业务/前端功能。
 > 停止边界：本块定向测试后等待审核；**最终完整回归、正式性能压测、生产部署审查在末阶段**，不可提前宣称全部完成。
@@ -173,23 +173,73 @@
 - 这不是可公网部署的生产管理后台；所有 Demo 故障接口/Actuator 控制均在 loopback 或显式测试配置，不可成为任意公网地址代理或绕过登录。
 - 遇具体 Spring Cloud Gateway 5.x API 与设计不一致，以**真实依赖源码/编译结果**选最小官方支持实现并回填理由，禁止做看似成功但未生效的 mock 路由或前端固定响应。
 
-## 11. Codex 进度回填（目前尚未编码）
+## 11. Codex 进度回填（2026-11-06 实际执行）
 
 | 子项 | 当前真实状态 |
 |---|---|
-| 分支 | 远端 `feat/block3-resilience-observability` 已创建；基于 Block2 实现 |
-| Block2 R1/R2 补修 | 待本地 Codex 实现、复测 |
-| Contract/Control 策略兼容 | 未编码 |
-| 超时与 504 | 未编码 |
-| Resilience4j 熔断、半开、受控降级 | 未编码 |
-| Control/Redis/Gateway 故障恢复 | 未执行 Block3 增量验证 |
-| 低基数指标和节点状态 | 未编码 |
-| Demo 故障接口及短实验 | 未编码 |
-| 前端新页签及中文使用指南 | 任务已定义，前端代码未修改 |
-| 定向 JUnit/真实链路/前端 JS | 未执行 |
-| 负责人浏览器验收与 ChatGPT 审核 | 未开始 |
-| Git 提交 SHA、已知缺陷 | Codex 实施后追加真实值 |
+| 分支与代码提交 | feat/block3-resilience-observability；前置fe0f391，保护实现4fc7562，业务前端519cb46、表单重读修正c79a198；脚本证据和文档另作交付提交 |
+| Block2 R1/R2 | 已修复并定向验证：已有目标锁定，取消/迟到恢复持有互斥权直到真实缓存恢复结束；Sinks控制交错，不用sleep遮盖 |
+| Contract/Control | TIMEOUT/CB边界与作用域、GET-only可选fallback、新ENFORCED_BLOCK3、旧PENDING兼容、CAS/历史checksum保持 |
+| 官方超时 | Netty路由response-timeout与connect-timeout；504 JSON、可信Request ID、原许可释放；实测路由覆盖已有全局超时 |
+| 官方熔断 | BOM Starter+Gateway CircuitBreaker Filter；精确版本注册、稳定revision、真实CLOSED/OPEN/HALF_OPEN、2次成功恢复及任一次半开失败回OPEN |
+| 受控降级 | 固定内部forward，仅GET返回503 DEGRADED；直接访问404、POST配置发布400，认证/准入失败不降级 |
+| 故障恢复 | Control离线保留保护、Gateway无快照首启fail-closed、Redis暂停/恢复、重新追平版本均通过实链路 |
+| 指标与节点 | flowgate.protection.events仅routeId/kind/outcome；真实CB状态经受限节点上报，ONLINE/STALE由服务端派生，未取得运行状态标未知 |
+| Demo故障接口 | 显式开关，默认404；固定ok/500/503/slow<=2000ms，真实到达计数，普通接口不变 |
+| 业务前端 | 默认业务概览；服务/API关联下拉与直接保存草稿、流量策略、保护表单和发布/节点操作；JSON/首次使用/故障抽查折叠，原按钮保留 |
+| 自动化 | 全部受影响模块34个JUnit通过；后续Gateway/Contract29个定向复测通过；Node交互和最终隔离HTTP链路通过 |
+| 人工与最终验收 | 浏览器操作由负责人进行，未执行；未做最终全量回归/正式压测/公网部署审查，不进入后续阶段 |
 
-**完成定义**：经过本块实际复测，504/503 与下游故障严格区分，真实 CB CLOSED→OPEN→HALF_OPEN→CLOSED，OPEN 拒绝不进下游；受控 GET 降级明确标识、非 GET 不伪造成功；配置和鉴权故障不静默放行；路由缓存与策略同版且旧版回滚安全；低基数指标可信、前端帮助与真实测试一致，所有新增定向测试留下可追溯结果。
+### 11.1 实际文件与必要依赖
 
-**项目最后一轮的全量回归/正式性能验收不是本块任务**。
+- Contract `PolicyRules`、Control `CatalogService/ReleaseService`：共用范围校验、已有表/API和schemaVersion=1，无新增管理表或业务模块。
+- Gateway `ProtectionPolicyResolver`与`CircuitBreakerConfigRegistry`：同版冻结、注册先于Filter构建、稳定policyId+revision+routeId名称。`SnapshotPollingService`实际缓存与保护metadata核对后才确认；节点仅报告applied快照所引用实例。
+- `ProtectionResponses`：官方异常JSON边界及固定内部fallback；原生5xx状态、主动504与断路器503严格区分，不重写已提交响应。`RequestIdWebFilter`保存可信exchange属性，避免异常处理拿到原请求时丢失Trace ID。
+- `ReleaseController`：受限运行摘要仅内存保存、最多100节点/每报告100条状态，摘要字段/路由/状态/revision严验；缺少上报/Control重启后显示未知。节点时间写入前截断秒，避免TIMESTAMP舍入产生短暂未来时间。
+- Demo `DemoFaultController`：本机显式实验开关，不增加业务进程/任意延迟或目标URL。`.env.example`只增加可选false开关，**没有修改用户.env**。
+- 唯一新增直接运行依赖：`spring-cloud-starter-circuitbreaker-reactor-resilience4j`，由现有Cloud BOM解析；实测Spring Cloud CircuitBreaker Resilience4j5.0.3、Resilience4j2.3.0、Gateway5.0.4、Java17.0.18/Boot4.0.9。该依赖是官方CB Filter所需，没有自行实现状态机或新增Kafka/Redisson/重型前端框架。
+- Plus代码本块没有新复制；只继续使用块2已有Lua。熔断/超时均复用官方能力，既有第三方归属文件保持。
+
+### 11.2 精确版本适配与业务边界
+
+1. Resilience4j2.3.0把半开最小样本量与CLOSED的minimumNumberOfCalls耦合。为严格实现“半开两次成功才关闭、任一次失败回OPEN”，固定半开许可2，框架最小样本至少2；通过官方onError事件/transitionToOpenState补齐半开首失败，以及用户min=1首样本失败的等价行为。不维护自定义运行状态或计数器；真实注册表单测与HTTP状态转换均已执行。
+2. 关闭Starter默认TimeLimiter和隐式Bulkhead，避免默认1秒计时改变官方Netty超时语义。隔离测试显式设置全局1500ms：未绑定fault slow在1500ms超时；route slow200ms更早超时；route fault2500ms+CB可等待2000ms并200，证明两方向覆盖且CB没有额外1秒计时。
+3. 无fallback时，官方statusCodes Filter先把上游500/502/503/504计入CB再抛异常；网关保留原HTTP状态并返回`UPSTREAM_ERROR/source=DOWNSTREAM`，**不原样保留该错误Body**。正常业务响应仍透传；OPEN由CIRCUIT_OPEN区分。此处采用任务书允许的“原状态/可辨来源”，不伪装成功。
+4. 前端按负责人新澄清调整为简单业务页面，而非继续扩展复杂验收平台；五步帮助和原始协议细节折叠保留。普通表单使用原管理API；SERVICE/API范围TIMEOUT仍可用原高级入口，不虚构GUI覆盖全部复杂配置。
+5. 旧PENDING历史保持不可变；脚本仅在**自有临时库**追加旧协议夹具，以Python规范JSON/SHA生成受校验载荷，未改写已有历史。实测旧TIMEOUT50ms不执行、旧CB连续500不熔断，再发布B3、回滚旧PENDING并恢复B3历史参数。checksum原值保持。
+
+### 11.3 实际命令与结果
+
+```bash
+source .env
+mvn -B -ntp -pl flowgate-gateway -am test                        # 前置：Contract5/Gateway17通过
+mvn -B -ntp -pl flowgate-gateway -am package -DskipTests         # 首次解析唯一新增Starter，不计作测试通过
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package
+mvn -B -ntp -pl flowgate-gateway -am test package                # 追加守卫后Contract7/Gateway22通过
+mvn -B -ntp -pl flowgate-control -am package -DskipTests         # 更新业务静态资源，不重复宣称测试已运行
+node --check flowgate-control/src/main/resources/static/test-console/app.js
+node scripts/block2-console-test.js
+node scripts/block3-console-test.js
+PYTHONPYCACHEPREFIX=/tmp/flowgate-block3-pycache python3 -m py_compile scripts/block3-smoke.py
+python3 scripts/block3-smoke.py
+git diff --check
+```
+
+- 全部直接受影响模块JUnit：**34通过、0失败/跳过**（Contract7、Control1、Gateway22、Demo4）。包含范围/GET降级/旧PENDING、官方注册表min=1及半开、原始exchange错误Trace、默认禁用故障API、缓存取消/迟到/元数据不一致与恢复、新旧许可等；之后Gateway/Contract29个定向复测通过。没有宣布全项目最终回归通过。
+- Node：原有导航、登录清密、角色按钮、草稿/版本、409不重试、429/400与摘要脱敏，及新保护表单/实际目标路径/504与降级渲染/节点真实状态/目标锁定/业务关联下拉及直接保存均通过。这是模拟DOM契约，不是浏览器人工验收。
+- 最终独立实链路：MySQL/Redis临时容器、Demo/Control/两个Gateway、随机端口；**192条无凭证HTTP记录**见`docs/progress/evidence/block3-smoke.json`，`passed=true`。状态统计：200×122、201×30、500×7、504×6、400×5、503×11、404×3、401×4、403×3、429×1；错误码均为有意测试结果，不是把所有非200当失败。
+- 实测包括OPEN时Demo到达计数不增、两次半开成功/一次失败恢复、并发503不计CB失败、401/403/429/Redis503不降级、可写Gateway Actuator未开放、节点状态受管理员权限保护、保护指标只有受控低基数标签、Control/Gateway/Redis故障恢复与历史双向回滚。
+- JVM与容器由脚本finally清理自己的资源，未停止用户IDEA应用或本地持久化容器。没有执行电脑界面控制、全局Docker prune或改写用户数据库。
+
+### 11.4 失败记录、注释与已知限制
+
+- 初次真实超时504的Body requestId为空：外层异常处理得到原始exchange请求，已改用入口生成的可信exchange属性，并加单测及HTTP Header/Body一致性断言，复测通过。
+- 节点刚上报却短暂STALE：MySQL TIMESTAMP秒精度舍入可能大于当前瞬间；写入前withNano(0)修正，节点单测/实链路通过。
+- 并发拒绝增量测试初次用200ms窗口，观测轮询时首请求已超时，后续200其实符合正确行为。改为受控1000ms/2000ms，明确断言首Future未结束再发送拒绝请求；没有修改生产限流逻辑掩盖结果，最终通过。
+- Shell默认java21；所有Maven使用.env指定的JAVA_HOME17.0.18，脚本使用该JAVA_HOME/bin/java，不把shell默认版本写成实际测试JDK。
+- 中文注释已检查：关键Java/Reactor/JS路径有中文说明，长逻辑编号；Gateway源码无JDBC/Servlet/同步StringRedisTemplate/ThreadLocal/阻塞sleep。秘密值检查未发现本机密码、内部Key或BCrypt进入变更；git diff --check通过。
+- 运行状态由最近上报提供，Control内存摘要不持久化；Gateway重启会重建CB，页面说明可能重置，不能承诺状态热迁移。稳定revision进程内复用，无关发布不重置窗口。
+- 官方注册表为复用历史revision保留实例，频繁参数发布可能增加进程内实例数量；本机演示尚未做长期容量/清理验证。Gateway取消/超时释放本机许可不代表Servlet下游已停止睡眠工作，不宣称强制中断下游。
+- 负责人浏览器/窄屏/键盘体验、正式长时间故障演练、生产部署、最终完整回归和正式性能测试**未执行**。Block1/2/3不因本轮自动合并或宣称全部验收完成。
+
+**交付结论：功能块3编码与上述定向验证已完成，业务前端和指南已同步，等待ChatGPT与项目负责人审核；不合并main、不开始最终验收。**

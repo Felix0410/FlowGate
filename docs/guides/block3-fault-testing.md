@@ -1,113 +1,86 @@
-# FlowGate 功能块 3｜超时、熔断、降级与恢复演示操作指南
+# FlowGate｜故障保护业务页面使用说明
 
-> 创建于 2026-11-06；**这是功能块 3 的测试手册草稿，不表示下述 Block3 接口或按钮已经实现**。Codex 开发完成后，应根据真实页面与测试返回修订本文件并填写“实测结果”；负责人自行进行真实浏览器体验，不由 AI 操作电脑。
-> 当前既有测试台使用说明：[test-console-guide.md](test-console-guide.md)。功能块 3 技术契约：[`block-3-resilience.md`](../progress/block-3-resilience.md)。
+> 2026-11-06：对应块3已实现功能。自动JUnit/HTTP/Node测试已运行；本文点击步骤由负责人自行抽查，Codex没有操作电脑或冒充浏览器人工验收。
 
-## 1. 本地环境与启动（现有步骤，可直接使用）
+## 1. 启动与可选配置
 
-先在仓库根目录检查 Java 17、Docker Desktop、Maven 与本项目独立的 `.env`。不要使用其他项目的同名环境文件，也不要提交真实密码。
+正常业务启动不新增必填配置。Java17构建后，使用现有Docker依赖，分别在IDEA运行Demo、Control、Gateway；Control/Gateway加载**FlowGate**根目录`.env`。不要同时使用脚本和IDEA重复启动同一个应用。
 
 ```bash
-# 首次环境仍需先按 docs/guides/test-console-guide.md 创建 .env。
-# 修改 Block3 代码后先打包（只构建相关模块及依赖）
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am package
-
-# 下面脚本只管理本项目启动的三个 Java 进程，Docker 数据卷保留
+# 如果用脚本启动，而不是IDEA：
 python3 scripts/run-local.py start
-python3 scripts/run-local.py status
 ```
 
-浏览器打开 `http://127.0.0.1:8081/test-console/`。Control 8081、Gateway 8080、Demo 8085，MySQL/Redis 使用现有本地 Compose；如果你使用 IDE 启动三个主类，不要再启动脚本的三个 JVM 造成端口冲突。当前五步引导：环境检查、管理员登录、初始化公共 Demo 草稿、发布并确认节点、HTTP 测试。具体初始账号和密码来自**你本地首次设置的** `.env`，不是仓库默认密码。
+仅当需要抽查故障API时，在**Demo的运行环境**设置`FLOWGATE_DEMO_FAULT_ENABLED=true`并重启Demo。用脚本时可在本机`.env`添加此变量；用IDEA时让Demo加载该文件或单独填写环境变量。默认关闭，普通fast/echo/slow不受影响。不修改密码、数据库卷或用户已有容器。
 
-## 2. 新功能的安全初始化（待 Codex 实现后按 UI 更新）
+打开 **http://127.0.0.1:8081/test-console/**，使用本机已初始化账号登录。
 
-1. 在“配置与版本”查看已有 Demo 服务/路由；**从现有版本继续，勿假定 expectedVersion=0**。
-2. Block3 会新增只在本地开发实验模式下使用的 GET `/api/demo/fault` 路由，映射到 `/demo/fault`，上游仍为 `http://127.0.0.1:8085`。以实际页面的“初始化故障演示”功能或原目录 API 添加，**仅补缺失的记录，不重复创建或覆盖**。
-3. 打开“故障保护”页签，选择已存在的路由（推荐 slow / fault）后依次保存策略草稿。**保存不生效**；需确认新版本发布后，等待节点 `appliedVersion` 与最新持久化版本匹配。
-4. 准备查询 Gateway Actuator `/actuator/metrics`（只从本机读）和演示下游实际到达计数。不要在浏览器或日志中暴露 `Authorization`、`.env`、`FLOWGATE_INTERNAL_KEY`。
+## 2. 业务页面如何操作
 
-## 3. 场景 A：TIMEOUT（预期 504）
+- **业务概览**：读取真实服务/API目录，看公开/需授权和草稿状态；顶部区分已发布版本与节点已应用版本。
+- **服务/API与发布**：读取可选服务/API，从下拉选择关联对象，保存业务草稿，无需手写JSON。高级JSON编辑保留在折叠区；已有公共Demo初始化入口继续保留。
+- **流量策略**：原限速、并发功能保留；已有策略只改参数/启停，不能把未保存的目标切换伪称绑定已更新。
+- **故障保护**：读取路由与保护策略，选择已有策略编辑，或选择目标路由新建；已有绑定被锁定。基本表单只做ROUTE范围，SERVICE/API范围的超时仍可使用原高级策略接口。
 
-推荐策略：ROUTE 作用域，绑定 slow 路由；`{"timeoutMs":200}`，保存后发布。
+保存草稿后，点击“发布配置”，确认后持久化；再点“查看节点与熔断状态”。只有节点应用版本等于当前发布版本时，才按该版本规则执行。页面的OPEN/HALF_OPEN/CLOSED来自节点最近真实上报，不能当作没有延迟的实时状态；STALE表示最近心跳已过期。
 
-| 操作 | 预期 | 判断依据 |
-|---|---|---|
-| `GET /api/demo/slow?delayMs=100` | 200 | 下游响应早于 200ms |
-| `GET /api/demo/slow?delayMs=500` | 504 `UPSTREAM_TIMEOUT` | Gateway 自己计时超时；不是浏览器超时 |
-| 同一个未设 TIMEOUT 的 fast 路由 | 200 | 不被其他路由超时策略误影响 |
-| 超时后执行新慢请求 | 有可判定的 200/504，无永久 503 | 原 Block2 在途许可不泄漏 |
+## 3. 抽查超时
 
-如果新版本仍处于 PERSISTED 且节点尚未应用，则不能把任何旧 HTTP 响应当作新超时生效的证据。
+1. “故障保护”读取路由，选择`demo-slow`，类型“响应超时”，名称用唯一值，例如`slow-timeout`，等待时间`200`毫秒。
+2. 保存、发布、查看节点，确认应用对应版本。
+3. 展开“抽查演示”，点击“请求slow 500ms”，应为**504 UPSTREAM_TIMEOUT**；响应详情中的requestId应与响应Header一致。
+4. 回到“接口调用”，slow设`0`或`100`，应为200。若配置了并发保护，超时后仍应可再次准入。
 
-## 4. 场景 B：熔断 CLOSE → OPEN → HALF_OPEN → CLOSED
+未绑定路由保持框架原全局超时行为。TIMEOUT允许50..10000ms；SERVICE/API/ROUTE多层配置取最小值。后端超时不是浏览器fetch自行计时。
 
-策略例子（ROUTE：fault）：
+## 4. 抽查熔断和恢复
 
-```json
-{
-  "failureRateThreshold": 50,
-  "slidingWindowSize": 10,
-  "minimumNumberOfCalls": 5,
-  "waitDurationMs": 3000
-}
-```
+1. 点击“添加故障演示API草稿”，只补缺失，不覆盖已有API；发布并确认节点。Demo须先开启本机故障演示。
+2. 读取路由，在`demo-fault`上新建故障熔断：失败比例50%、窗口10、最少5次、等待3000ms，不可用响应选择“保留故障状态”。保存、发布、确认应用。
+3. 点击“上游故障500”若干次。最初为下游500；达到阈值后继续调用应为**503 CIRCUIT_OPEN**，此时不访问Demo。
+4. 等待至少3000ms，刷新实际状态。自动转HALF_OPEN后，点击“正常请求”两次，再刷新状态，应恢复CLOSED；半开任一次失败会回OPEN。
+5. 超时和上游500/502/503/504会计入失败；认证401/403、限速429、本机并发拒绝503在CB之前返回，不计其失败样本。
 
-| 步骤 | 操作 | 预期 |
-|---|---|---|
-| 1 | 发布策略并确认网关节点 applied | 当前熔断状态 CLOSED（仅由真实状态返回确认） |
-| 2 | 多次 `GET /api/demo/fault?mode=500` | 真实下游 HTTP 500；达到阈值后熔断转 OPEN |
-| 3 | OPEN 时继续请求同一路由 | HTTP 503 `CIRCUIT_OPEN`；Demo 实际到达计数**不增加** |
-| 4 | 停止注入故障，等待至少 `waitDurationMs` | 再执行由网关允许的两个有限半开试探 |
-| 5 | 连续 `GET /api/demo/fault?mode=ok` | 成功样本使状态恢复 CLOSED，后续请求正常 200 |
-| 6 | 半开阶段再次 `mode=500` | 应重新 OPEN，后续短路不进入下游 |
+无降级时，官方statusCodes Filter会把受控上游5xx转成异常；FlowGate保留原HTTP状态并返回`UPSTREAM_ERROR / source=DOWNSTREAM`的明确来源JSON，区别于OPEN短路。该分支不原样返回上游错误Body；正常业务响应仍由Gateway代理。
 
-实现时可以记录保护指标、Node 已应用版本、底层 Demo 命中数；**不能仅通过前端根据次数模拟状态**。不同客户端时序可能改变触发请求序号，应以真实断路器事件/状态为准。
+## 5. 抽查只读不可用提示
 
-## 5. 场景 C：只读 GET 的静态受控降级
+编辑已有GET熔断策略，将不可用响应改为“只读GET返回明确的不可用提示”，保存、发布、确认节点。
 
-在 fault GET 路由的 CIRCUIT_BREAKER 参数中明确设 `fallbackMode:"STATIC_JSON"` 并发布。按任务书约定：
+- 故障或OPEN时为**503 DEGRADED**，包含`degraded:true`、`source:GATEWAY_FALLBACK`。
+- 不伪造业务成功或HTTP200；正常请求仍正常代理。
+- POST echo不能启用此模式，发布会400；内部`/__flowgate/fallback`直接访问404。
+- 认证/Scope/Redis/限流拒绝不会变成降级成功。
 
-- 触发保护时 **HTTP 503**，JSON `code:"DEGRADED"`、`degraded:true`、`source:"GATEWAY_FALLBACK"`。
-- 不返回编造的 `{"id":...,"result":"success"}`，也不冒充实际业务成功；正常访问不触发 fallback 时，原响应仍保留。
-- 不可给 POST echo 打开该选项。未认证/无 scope（401/403）、限速（429）、Redis 不可用（503）不会被 GET fallback 绕过或更改成 200。
-- 内部 `/__flowgate/fallback` 地址不能被外部直接调用；若直接请求获得可用降级处理，应报告高优先级缺陷。
+## 6. 状态和常见错误
 
-## 6. 场景 D：Control 与 Redis 断联及节点恢复
-
-**先确认测试数据/容器属于 FlowGate**，不要关闭其他项目运行的 Redis/MySQL。建议使用 Block3 独立脚本创建的隔离实例做故障注入，正式用户持久化容器只用管理员可控、可恢复的方式操作。
-
-- Control 暂不可用：Gateway 对最后成功应用的路由继续按原权限/限速/熔断运行；不伪造更高 appliedVersion。Control 恢复后下一次补拉到最新版本。
-- 无可信快照时重启 Gateway：未知动态业务 API 404/拒绝，而不是使用旧块 0 公开通配代理。
-- Redis 断联：私有 API 身份校验失败为 503，配置了分布式速率预算的路由 503；公开且未绑定速率的路由依已确认快照继续服务。恢复后重新尝试，凭证失效需要重新登录/签发。
-- 回滚到 Block1/2 历史 `PENDING`：不自动开启 Block3 TIMEOUT/CIRCUIT_BREAKER；回滚生成**更大的版本号**，不是降低 `currentVersion`；再次发布新策略后才按 Block3 执行。
-
-## 7. 用户遇到错误时应该看到什么
-
-| HTTP/错误 | 业务解释 | 检查方式 |
-|---|---|---|
-| 400 `VALIDATION_ERROR` | 参数或作用域不合法 | 改合法超时时间/熔断窗口/绑定对象 |
-| 401/403 | Caller 凭证或 Scope 不足 | 回到“身份与登录”，不要错误认作断路器 |
-| 409 | expectedVersion 落后 | 重新读取当前版本，检查草稿后决定发布 |
-| 429 `RATE_LIMITED` | Redis 速率额度用尽 | 查 Block2 策略，与熔断无关 |
-| 503 `CONCURRENCY_LIMITED` | 本实例的在途许可耗尽 | 查看 slow/fast 并发实验 |
-| 503 `CIRCUIT_OPEN` | 当前断路器短路，未访问下游 | 查看真实状态与下游到达计数 |
-| 503 `DEGRADED` | 只读路由启用静态降级 | 检查 `degraded:true`、`source` |
-| 503 `ADMISSION_UNAVAILABLE` | Redis 限速依赖失败 | 检查 Redis，不会自动降级为业务成功 |
-| 504 `UPSTREAM_TIMEOUT` | Gateway 主动等待超时 | 核查 timeoutMs、Demo delayMs、版本应用 |
-
-**状态码最终以运行的真实结果为准**；Codex 完成后需要在此文件增加实际版控 SHA、成功命令及一组可复核示例。不把本表当成已经执行的验收证据。
-
-## 8. 完成时由本地 Codex 真实回填
-
-| 验收项目 | 状态 |
+| 返回 | 含义 |
 |---|---|
-| 超时 slow 504 | 待实现/未执行 |
-| 真实 500 触发 OPEN，OPEN 不访问 Demo | 待实现/未执行 |
-| 半开恢复 CLOSED | 待实现/未执行 |
-| GET 静态降级明确 503 degraded | 待实现/未执行 |
-| Redis/Control 故障按预期恢复 | 待实现/未执行 |
-| 节点/指标真实显示 | 待实现/未执行 |
-| 测试台保留旧按钮并有中文引导 | 待实现/未执行 |
-| 负责人真实浏览器体验 | 未执行 |
+| 400 | 参数、作用域或只读降级限制不符合要求 |
+| 401/403 | 凭证/Scope问题，优先于流控和熔断 |
+| 409 | 草稿发布版本已变化，刷新后由用户决定，不自动重试覆盖 |
+| 429 RATE_LIMITED | Redis速率预算耗尽 |
+| 503 CONCURRENCY_LIMITED | 当前Gateway本机在途容量已满 |
+| 503 ADMISSION_UNAVAILABLE / AUTH_UNAVAILABLE | Redis依赖失败，继续拒绝受保护请求 |
+| 503 CIRCUIT_OPEN | 官方断路器拒绝，本次不访问下游 |
+| 503 DEGRADED | 只读接口的明确静态不可用提示 |
+| 504 UPSTREAM_TIMEOUT | Gateway等待下游响应超过受控时间 |
 
-**完成后同步更新** `docs/guides/test-console-guide.md`、`docs/progress/block-3-resilience.md` 与 README。
+原始HTTP/JSON、耗时和Request ID在操作结果详情中折叠保留；页面以业务表单/列表为主，不作为复杂验收或压测平台。
+
+## 7. 自动化实测证据
+
+```bash
+source .env
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package
+node scripts/block3-console-test.js
+python3 scripts/block3-smoke.py
+```
+
+脚本使用独立临时MySQL/Redis、随机端口与Demo/Control/两个Gateway，不控制浏览器或使用用户业务数据。退出清理自建JVM/容器/匿名卷。末次无凭证HTTP证据在[block3-smoke.json](../progress/evidence/block3-smoke.json)，阶段命令、数字和已知差异在[块3进度第11节](../progress/block-3-resilience.md)。
+
+已实测：旧PENDING历史不执行保护；全局1500ms与路由200/2500ms覆盖；CB不叠加默认1秒TimeLimiter；真实状态转换及短路计数；认证/限速/并发不进入CB；Redis暂停恢复；Control停机与Gateway无快照重启；回滚旧PENDING和恢复已生效历史。原始历史checksum不改写。
+
+负责人浏览器、窄屏/键盘可用性、最终完整回归和正式性能测试**未执行**，不能据本脚本宣布全部项目验收完成。
