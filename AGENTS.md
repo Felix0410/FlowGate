@@ -1,35 +1,20 @@
-# FlowGate｜当前本地 Codex 唯一入口
+# FlowGate｜当前本地Codex统一入口（V1.1-A）
 
-> **2026-11-06 最新负责人要求：V1 正式交付之前，把目前仅开发者能看懂的测试台，改造成真正可用的产品管理后台。**
-> 因此 **当前首要工作是PC-00..PC-06产品后台开发**，不是先跑正式三组性能实验，也不是继续堆调试按钮。Block0–3 业务代码已有；Block4 综合验收已授权但须在产品页交付后执行。
-> 本文是统一仓库入口，技术/交互的唯一权威详细合同为 `docs/design/product-console-v1.md`，实施提示为 `CODEX_PRODUCT_CONSOLE_PROMPT.md`。
+> 2026-11-06。负责人要求审查V1.1设计并分配开发任务。设计审查已完成，**仅V11-A管理业务代码获安排，尚未开发/实测**；V11-B配额、C Kafka/Outbox、D性能均不得提前编码。
+> 实施分支：`feat/v11-a-business`，基于`docs/v1.1-openapi-platform`最新设计审查。旧PR #1–#6仍逐级Draft，`main`仍是旧基线；当前新PR为V11-A Draft，不允许自动合并或变更旧PR base。
 
-> **远端源码静态复审状态**：`test/block4-final-acceptance` 已包含产品Java/JS/CSS实装，PR #5继续Draft；详见 `docs/reviews/product-console-static-review-2026-11-06.md`。待确认的产品体验问题是旧Caller不能通过列表查找/吊销、移动端/键盘真实操作未验收，最终全量回归需以产品化后源码重新确认。\n\n> **当前实施状态**：PC-00..06编码及定向验证已经完成，主实现`0758787`，实际记录见产品合同第8节与Block4进度5.3。下一步处理ChatGPT复审/负责人真实浏览器反馈；不要重新开发已有后台或启动正式长对照。原df00937基线测试已保留，与新产品验收分开记录。
+## 立即执行顺序
 
-## 1. 先做的产品改造
+1. 阅读 `docs/reviews/v11-design-review-2026-11-06.md` 的R01～R06安全边界和`docs/design/openapi-platform-v1.1.md`第12节。
+2. 阅读 `docs/progress/v11-a-business.md` 第A-06/A-07节（**A0～A6唯一代码实施合同**）。
+3. 阅读 `CODEX_V11_A_EXEC_PROMPT.md`（可直接执行的详细指令）。`CODEX_V11_OPENAPI_PROMPT.md`作为总体背景，不能覆盖A专属门禁。
+4. 安全核对本地`git status -sb`、`git fetch origin`、未提交数据、JDK17/IDE/Docker与当前用户的MySQL/Redis卷，不`reset --hard`、`git clean -fd`、`docker prune`、强推或改`.env`。若无可隔离的DB环境先停止真实迁移。
+5. **只编码A**：增量`sql/flowgate-v11.sql`/Entities/Mapper、ADMIN-only客户/应用/套餐/订阅API、行锁串行订阅、`/console/`真实业务页面/中文指南、受影响Java/Node/隔离SQL+HTTP验证，实际命令/退出码/失败情况/提交SHA回填阶段文件。
+6. A阶段`POST /admin/apps/{id}/credentials`只返回`409 FEATURE_NOT_READY`，绝不签发有效APP Token或写`fg:auth:caller:`/`fg:auth:app:`。**B启用真实APP Token时必须采用独立namespace+APP_CALLER用途，与旧V1 Gateway隔离；没有V1最后人工验收/A复审之前不进入B。**
+7. A完成后按Conventional Commits推送`feat/v11-a-business`，保留Draft PR，提交Codex本地真实结果等待ChatGPT和负责人复审；不得自行开始B/C/D或合并main。
 
-- 远端分支：`test/block4-final-acceptance`（保留 Block0–3 实现和 Block4 现有脚本）。`git status -sb`、`git fetch origin`，核对差异后安全检出；**不要从main重新创建，不覆盖用户修改**。
-- **优先阅读**：
-  1. `docs/design/product-console-v1.md`（真实产品后台的导航、业务流程、CRUD、状态、安全、UI、测试与完成标准）。
-  2. `CODEX_PRODUCT_CONSOLE_PROMPT.md`（PC-00..06本地可执行任务）。
-  3. `docs/progress/block-4-acceptance.md` 第0节（先产品化、后正式验收）。
-  4. `docs/standards/frontend-sync-rule.md`、`docs/guides/test-console-guide.md` 与实际后端Controller/实体模型。
-- 新产品主入口 `/console/`：独立登录页、左侧导航与工作台、服务/API/路由列表与完整表单、四类规则、发布回滚、Caller、节点/指标/审计，真实版本/权限/空状态/报错。
-- 旧 `/test-console/` 原样保留所有功能，明确定位为开发/验收工具；不把HTTP调试堆在新产品首页。若只读绑定查询确实缺少，可按合同最小扩展现有Control GET API并定向测试，无新数据库/新后端服务。
-- 没有产品前端完整可操作、定向测试、使用指南和负责人浏览器反馈前，**不启动Block4正式三组长对照**，不把“用户体验已通过”写进进度。
-- 正常代码提交到该分支：`feat(console): ...`、`test(console): ...`、`docs(console): ...`，更新阶段文件与README，交由ChatGPT/负责人审核。
+## 永久代码和产品约束
 
-## 2. 完成产品化后才继续Block4
+Java17、Spring Boot4、Control MVC+MyBatis-Plus、Gateway WebFlux+Redis/Resilience4j和原生`/console/` ES Modules；**A不新增Kafka/新服务/Gateway计量链路/新前端框架**。关键业务中文注释，长流程`// 1.` `// 2.` `// 3.`分点。新业务管理角色ADMIN才能修改，OPERATOR/VIEWER只读，旧V1权限不能改变。数据库迁移不得删改旧表或用户数据；凭证不落日志/请求Body公开证据；静态/DOM合同测试不等于真人浏览器体验。
 
-1. 读取 `CODEX_BLOCK4_PROMPT.md`、`docs/progress/block-4-acceptance.md`（B4-00..06），隔离环境运行 Maven 全工程回归、旧HTTP实测与真正DIRECT/PROXY/GOVERNED三组性能对照；
-2. 保留 `scripts/block4-performance.py` 和统计单测的真实运行数据，不能把HTTP429/503作为成功吞吐或用旧Block2短实验替代正式三组；
-3. 真人浏览器 1280px/375px、键盘、权限/草稿/发布/回滚由负责人操作，Codex只做自动/真实HTTP测试并记录人工“待执行”，收到反馈后修复；
-4. 最终真实结果 `docs/acceptance/final-results.md`，PR仍Draft，不合并main或标记V1完成，必须由负责人明确审批。
-
-## 3. 永久约束
-
-只复用 Java17、Spring Boot4、Gateway WebFlux、Control MVC/MyBatis、Redis/Lua、Micrometer/Resilience4j。前端继续原生 HTML/CSS/JS ES modules，**不引入Vue/React/npm/Vite/复杂UI框架**；设计质量来自信息架构和交互正确性，不是框架数量。Token只存在JS内存；不把控制面 `/internal/**` 或内部密钥暴露网页，不伪造任何在线/已应用/策略已生效。
-
-重要 Java/JS 业务逻辑有准确中文注释，长流程 `// 1.`、`// 2.`、`// 3.`；只执行变更范围自动化测试，完整大回归留到产品化完成后。保护用户IDE进程、个人Docker/数据库卷、`.env` 与本地未提交修改；禁止 `reset --hard`、`clean -fd`、`docker prune`、强推和自行合并main。
-
-**当前执行入口改为复审反馈和人工验收收口**：产品后台PC-00..06代码已提交远端，先读 `docs/reviews/product-console-static-review-2026-11-06.md` 和 `docs/progress/block-4-acceptance.md` 第5.5节；若负责人确认需要修Caller旧记录管理，用既有PrincipalMapper增加最小ADMIN-only安全只读列表及前端行操作，按变更范围定向测试。负责人需亲自验证新 `/console/` 的1280px/375px、键盘/权限/真实业务操作。修复后再做最新版最终全量回归与性能确认，不重新开发已有功能，不合并main。**
+**当前真实状态：A任务已分配，业务代码与A实测还未执行；V1.1全部处于开发前准备。**
