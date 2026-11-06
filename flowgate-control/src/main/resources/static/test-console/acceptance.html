@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowGate V1 统一验收说明</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><span>FLOWGATE / LOCAL</span><h1>V1 综合验收说明</h1>
+<p>这里提供功能验证顺序和三组性能模式说明。**不运行压测、不收集凭证、不显示伪造的测试通过状态。**</p>
+<a class="manual-link" href="index.html">返回业务管理</a>
+<a class="manual-link" href="guide.html" target="_blank" rel="noopener">完整中文业务手册</a></header>
+<main>
+<section><h2>当前验证状态</h2><p>本页不会主动读取本机测试结果，因此状态为<strong>尚未由此页面核验</strong>。
+真正的 Java/HTTP/负载测试须由本地 Codex 使用隔离环境运行，实际结论以仓库最新进度和脱敏证据为准。负责人浏览器体验需单独确认。</p>
+<p>不要把“完成一次配置发布”理解为“Gateway节点已经应用”。前往业务页面先看当前持久化版本和节点appliedVersion。</p></section>
+<section><h2>先做人工业务验收</h2>
+<ol>
+<li>从 <a href="guide.html#first-run" target="_blank" rel="noopener">首次成功调用指南</a> 进入，完成环境检查、管理员登录、Demo初始化、版本发布和节点确认。</li>
+<li>按说明调用 fast（200）、echo（201）、slow（200），再验证Caller的401/403/200和回滚。</li>
+<li>设置速率/并发规则，观察真实429或503；查看成功请求、Demo实际到达与策略版本。</li>
+<li>按 <a href="guide.html" target="_blank" rel="noopener">业务手册</a> 测试 TIMEOUT 504、熔断短路503、GET降级503 DEGRADED及恢复。</li>
+<li>在桌面与窄屏下检查输入、帮助、按钮权限和键盘Tab；把失败项发回Block4分支修复。</li>
+</ol></section>
+<section><h2>三组真实性能对照</h2>
+<table><thead><tr><th>模式</th><th>链路</th><th>看什么</th></tr></thead><tbody>
+<tr><td>A · DIRECT</td><td>客户端 → Demo</td><td>直接访问时真实业务成功数和尾延迟</td></tr>
+<tr><td>B · PROXY</td><td>客户端 → Gateway → Demo</td><td>纯代理的附加成本</td></tr>
+<tr><td>C · GOVERNED</td><td>客户端 → Gateway（限速/并发）→ Demo</td><td>slow被限速后，fast成功吞吐和尾延迟是否改善</td></tr></tbody></table>
+<p>所有组使用相同的发送节奏、共享资源和受控数据。HTTP 429/503不是成功请求，客户端自身未发出的请求也不能算Gateway拒绝。单机本地结论不等同生产能力。</p>
+<pre>source .env
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am package
+python3 scripts/test-block4-performance.py
+python3 scripts/block4-performance.py --seconds 30 --warmup 3 --repeats 2 --output .local/acceptance/block4-performance-run1.json</pre>
+<p>上面是供本地终端执行的命令，**页面本身不会执行这些命令**。脚本只在本次创建的隔离MySQL/Redis及双Gateway环境中运行；原始结果保留在本机受限目录，不会自动上传。</p></section>
+<section><h2>看哪些证据才算通过？</h2>
+<p>全工程JUnit与HTTP回归的真实命令、三组的总数/业务成功RPS/fast成功P95/P99/429/503、节点版本与容错结果、未执行项、负责人浏览器检查结果、Git审核记录，缺一都不能宣称V1已经完成。</p>
+<p>仓库权威阶段文件：<a href="https://github.com/Felix0410/FlowGate/blob/test/block4-final-acceptance/docs/progress/block-4-acceptance.md" target="_blank" rel="noopener">Block4 验收任务与进度</a>（联网时可查看）；详细报告只有在真实执行后才填写。</p>
+</section></main><footer>FlowGate 本机 V1 验收入口 · 不是压测工具或生产管理后台</footer></body></html>
