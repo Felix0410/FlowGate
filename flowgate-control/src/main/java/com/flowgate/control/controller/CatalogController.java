@@ -23,6 +23,9 @@ public class CatalogController {
         return catalog.save(kind, id, input, ((Session)req.getAttribute("session")).principalId());
     }
     public record Binding(String targetType, Long targetId) {}
+    /** 只读绑定摘要沿用管理GET权限，不返回调用方凭证或内部配置。 */
+    @GetMapping("/policies/{id}/bindings")
+    public Object bindings(@PathVariable long id) { return catalog.bindingViews(id); }
     @PostMapping("/policies/{id}/bindings") @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     public Object bind(@PathVariable long id, @RequestBody Binding input, HttpServletRequest req) {
         return catalog.bind(id, input.targetType(), input.targetId(), ((Session)req.getAttribute("session")).principalId());

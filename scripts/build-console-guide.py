@@ -79,15 +79,18 @@ def main():
     # 3. --check用于定向交付检查，防止只改仓库文档而漏更新网页手册。
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
+    parser.add_argument('--product', action='store_true', help='同步独立产品后台的任务式使用指南')
     args = parser.parse_args()
-    rendered = render(SOURCE.read_text())
+    source = ROOT / 'docs/guides/product-console-guide.md' if args.product else SOURCE
+    target = ROOT / 'flowgate-control/src/main/resources/static/console/guide.html' if args.product else TARGET
+    rendered = render(source.read_text())
     if args.check:
-        if not TARGET.exists() or TARGET.read_text() != rendered:
-            raise SystemExit('网页手册未同步，请运行 python3 scripts/build-console-guide.py')
+        if not target.exists() or target.read_text() != rendered:
+            raise SystemExit('网页手册未同步，请运行 python3 scripts/build-console-guide.py' + (' --product' if args.product else ''))
         print('PASS Markdown与同源HTML手册一致')
     else:
-        TARGET.write_text(rendered)
-        print('已生成 /test-console/guide.html')
+        target.write_text(rendered)
+        print('已生成 ' + ('/console/' if args.product else '/test-console/') + 'guide.html')
 
 
 if __name__ == '__main__':

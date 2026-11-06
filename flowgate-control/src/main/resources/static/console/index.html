@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>FlowGate · API治理平台</title><link rel="stylesheet" href="style.css"></head>
+<body><a href="#main" class="skip-link">跳到主要内容</a>
+<section id="login-view" class="login-layout" aria-label="登录FlowGate">
+  <div class="brand-panel"><a class="brand" href="./"><span class="logo">F</span> FlowGate</a><div><span class="eyebrow">API GOVERNANCE / LOCAL</span><h1>让每一次接入<br>都有清晰的秩序。</h1><p>集中管理接口，按版本发布规则，<br>看清网关真正应用的配置。</p><ul><li>服务与API，一处管理</li><li>流量与故障保护，按需配置</li><li>发布与运行状态，有据可查</li></ul></div><small>本机内部管理平台 · Java 17 / FlowGate V1</small></div>
+  <main class="login-main"><div class="login-card"><span class="eyebrow">欢迎回来</span><h2>登录管理工作台</h2><p class="muted">使用已配置的管理员或操作员账号。刷新页面后需重新登录。</p>
+    <form id="login-form"><label class="field" for="username">账号<input id="username" name="username" autocomplete="username" required maxlength="200"></label><label class="field" for="password">密码<input id="password" name="password" type="password" autocomplete="current-password" required></label><div id="login-error" role="alert" tabindex="-1"></div><button id="login-submit" class="primary full" type="submit">登录 FlowGate</button></form>
+    <p><a href="guide.html" target="_blank" rel="noopener">第一次使用？查看操作指南 ↗</a></p><button id="login-health" type="button">检查本机依赖</button><div id="login-dependencies" aria-live="polite"></div>
+  </div></main>
+</section>
+<div id="app-view" hidden><aside id="sidebar"><a class="brand" href="#dashboard"><span class="logo">F</span> FlowGate</a><p class="sidebar-caption">API治理平台</p><nav id="navigation" aria-label="管理导航"></nav><div class="sidebar-bottom"><a href="guide.html" target="_blank" rel="noopener">使用帮助 ↗</a><a href="/test-console/" target="_blank" rel="noopener">开发与功能验证 ↗</a><span id="session-role"></span><button id="logout" type="button">安全退出</button></div></aside><button id="menu-backdrop" class="menu-backdrop" hidden aria-label="关闭导航"></button>
+  <div class="workspace"><header class="topbar"><button id="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false">☰ <span class="sr-only">切换导航</span></button><span id="top-title">工作台</span><div class="top-right"><span class="badge">本机环境</span><span id="version-state">版本未读取</span><button id="refresh" type="button">重新读取</button></div></header><main id="main" tabindex="-1"><div id="page-head"></div><div id="page-notice" aria-live="polite"></div><div id="page-content"></div><footer>FlowGate V1 · 草稿保存、版本发布与节点应用是三个不同阶段</footer></main></div>
+</div><dialog id="entity-dialog" aria-labelledby="dialog-title"></dialog><script type="module" src="app.js"></script></body></html>
