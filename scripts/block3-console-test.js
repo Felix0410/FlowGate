@@ -24,5 +24,7 @@ const test=require('./block2-console-test.js');
  assert.equal(nodes.get('template-parent').value,'10');
  nodes.get('template-method').value='GET';reply(201,{id:456});await click('template');
  assert.equal(requests.at(-1).path,'/admin/apis');assert.equal(JSON.parse(requests.at(-1).options.body).serviceId,10);
+ reply(200,[{id:99,code:'old',type:'RATE_LIMIT',scope:'ROUTE',enabled:true,parametersJson:'{\"capacity\":2,\"refillPerSecond\":1}'}]);
+ await click('policy-load');assert.equal(nodes.get('policy-target').disabled,false);assert.equal(nodes.get('policy-type').disabled,false);
  console.log('PASS 业务保护表单/原API绑定/草稿提示/实际504与降级渲染/真实节点状态/已有绑定锁定');
 })().catch(error=>{console.error(error);process.exitCode=1;});

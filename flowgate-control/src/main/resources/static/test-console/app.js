@@ -159,6 +159,7 @@ action('policy-load',async()=>{
  policyCatalog=await call('/admin/policies',{admin:true});
  for(const [scope,path] of Object.entries({SERVICE:'services',API:'apis',ROUTE:'routes'})) targetCatalog[scope]=await call('/admin/'+path,{admin:true});
  el('policy-existing').replaceChildren(new Option('新建',''),...policyCatalog.filter(p=>['RATE_LIMIT','CONCURRENCY'].includes(p.type)).map(p=>new Option(p.code,String(p.id))));
+ el('policy-type').disabled=false;el('policy-scope').disabled=false;el('policy-target').disabled=false;
  targets(); await loadVersion();
 });
 action('policy-save',async()=>{
