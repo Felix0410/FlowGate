@@ -21,7 +21,7 @@
 
 **A4**：在正式`/console/`新增“客户与应用”“套餐与订阅”两个任务式导航/真实列表、中文新建/编辑、名称下拉、分页、空/错/加载状态；旧服务/策略/发布/监控及旧`/test-console/`全部保留。应用详情显示`凭证功能待B阶段启用`，不可展示假的Token/余额。UI和`docs/guides/product-console-guide.md`、离线`/console/guide.html`同步。原生ES modules、无React/Vue/npm/新中间件。
 
-**A5**：Java17受影响Maven test/package、Node旧`scripts/product-console-test.mjs`+新`scripts/v11-a-console-test.mjs`，隔离MySQL/Redis真实`scripts/v11-a-smoke.py`，包括ADMIN/OPERATOR/VIEWER/Caller角色、2客户2应用Free/Pro、订阅冲突、UTC边界、旧Caller签发撤销、409未激活App Token。检查SQL迁移两次、PHP? **不要引入额外语言工具**。生成脱敏JSON，敏感凭证只在本次内存，公开证据不保存Header/Token/密码/请求body。
+**A5**：Java17受影响Maven test/package、Node旧`scripts/product-console-test.mjs`+新`scripts/v11-a-console-test.mjs`，隔离MySQL/Redis真实`scripts/v11-a-smoke.py`，包括ADMIN/OPERATOR/VIEWER/Caller角色、2客户2应用Free/Pro、订阅冲突、UTC边界、旧Caller签发撤销、409未激活App Token。检查SQL增量迁移重复执行两次，生成脱敏JSON，敏感凭证只在本次内存，公开证据不保存Header/Token/密码/请求body。
 
 **A6**：在`docs/progress/v11-a-business.md`最后追加实际代码SHA、命令/退出码/JUnit数/HTTP数/失败修复与剩余问题；README和新产品指南同步。每个小块独立Conventional Commit，示例`feat(v11-a): add management schema`、`feat(v11-a): validate subscription scheduling`、`feat(console): support openapi business catalog`、`test(v11-a): verify role isolation and utc intervals`。只提交`feat/v11-a-business`，PR保持Draft，不修改main。
 
