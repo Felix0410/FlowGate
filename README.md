@@ -291,6 +291,17 @@ FG_SMOKE_MYSQL_SOCKET=/path/to/test-mysql.sock python3 scripts/block1-smoke.py
 
 Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序；固定使用回环 MySQL 13306，socket 用户由 `FG_SMOKE_MYSQL_USER` 指定（默认仅适用于无密码的隔离测试 MySQL root，不是应用默认凭证）。`FG_SMOKE_KEEP=1` 可保留成功的三服务 Demo，脚本会打印权限 0600 的临时登录文件位置。真实结果、技术差异和人工检查入口见[功能块 1 进度记录](docs/progress/block-1-control.md#12-codex-原地回填请仅填真实情况)。尚未执行统一压测/最终验收。
 
+### 6.6 功能块 2 设计预备与前端易用性整改（2026-11-06）
+
+**当前仍在 Block1 审核期；下述内容均为下一阶段方案，尚未实现。** Block1 已在 PR #1 远端交付主要代码，本轮静态核查记录见 [Block1 复审](docs/reviews/block-1-static-review-2026-11-06.md)。需先复测路由缓存刷新失败后的实际匹配行为并完成负责人手动验收；PR #1 尚未合并 main。
+
+- [功能块 2 可执行设计](docs/progress/block-2-traffic.md)：直接对齐现有 Control 的 `capacity/refillPerSecond`、`maxConcurrent` 策略及 `Snapshot` 实际协议，不新造数据表与中间件。
+- [测试台易用性改造规范](docs/standards/test-console-ux-v2.md)：首屏五步引导、独立结果卡、版本状态、错误码帮助、可读配置表单和原生 JS 保留全部旧功能。
+- [当前测试台中文使用指南](docs/guides/test-console-guide.md)：针对现有 A/B/C/D/E 页面，从 Docker 启动到发布、私有鉴权与回滚，附预期状态码及排错指引；V2 UI 改造仍待编码。
+- [Block2 Codex 预备提示词](CODEX_BLOCK2_PROMPT.md)：负责人批准 Block2 且 Block1 审查完成后才可交给本地 Codex 实施，不自动跨阶段。
+
+从 Block2 开始，前端可用性不是附属外观，而是每次功能块的**强制验收项**：普通使用者应能在中文帮助下独立完成 Demo，并能分辨“草稿”“PERSISTED”“节点已应用”“策略真正执行”。
+
 ## 7. 风险与未决定事项
 
 阶段 0 确认的是静态源码事实，**没有实际编译、运行、测试或压测**。主要风险：Plus 原限流器使用同步 Redis 和 Servlet，不能直接放在 Gateway；原认证依赖 MVC `ThreadLocal`；原业务错误使用 HTTP 200 包装失败；一些原日志包含演示性质的验证码/令牌；原上游 ShardingSphere 有多数据源与配置敏感项，不可直接复制到公开仓库。
