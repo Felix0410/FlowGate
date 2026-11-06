@@ -274,3 +274,5 @@ git diff --check
 以上全部通过。Maven只验证打包，明确跳过Java测试；Node是模拟DOM契约，保留原导航/登录清密/角色/版本/请求渲染/保护表单/目标锁定检查。HTMLParser额外确认50个字段说明引用、章节链接及页面ID有效；临时随机回环端口HTTP服务读取Control的target/classes静态资源，index/guide/style/app四项返回200并校验新内容，退出已关闭。首次绑定本机端口受沙箱限制，获准后上述检查通过；此项不是Spring进程启动验证。
 
 没有控制浏览器、重启用户应用、修改.env或数据；没有重跑Java后端/全量回归/故障联调。实际浏览器阅读、布局和操作体验仍由负责人抽查，不能以本次自动化代替。使用新版需重新构建并重启Control、刷新业务页面；Gateway/Demo无本次代码变更。Git提交与远端结果见本节后续记录。
+
+本次说明与页面改进提交：`7db9f88`（`docs(console): add complete offline business usage guide`）。随后仅执行`git push origin feat/block3-resilience-observability`，仍返回`Permission to Felix0410/FlowGate.git denied to Felix0410`及HTTP403，未上传成功；保留本地提交，不修改凭据、不推main、不强推。远端仍不能用于查看本次新版手册。
