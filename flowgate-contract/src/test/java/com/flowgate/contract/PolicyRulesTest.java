@@ -33,4 +33,27 @@ class PolicyRulesTest {
         PolicyRules.validate(snapshot(concurrency,List.of()));
         assertThrows(IllegalArgumentException.class,()->PolicyRules.validate(snapshot(concurrency,List.of(Map.of("policyId",1,"targetType","CALLER","targetId",1)))));
     }
+    @Test void validatesBlock3RangesAndGetOnlyFallback() {
+        for(String json:List.of("{\"timeoutMs\":49}","{\"timeoutMs\":10001}")) assertThrows(IllegalArgumentException.class,()->PolicyRules.parameters("TIMEOUT",json));
+        String base="{\"failureRateThreshold\":50,\"slidingWindowSize\":4,\"minimumNumberOfCalls\":2,\"waitDurationMs\":1000";
+        PolicyRules.parameters("CIRCUIT_BREAKER",base+"}");
+        PolicyRules.parameters("CIRCUIT_BREAKER",base+",\"fallbackMode\":\"STATIC_JSON\"}");
+        assertThrows(IllegalArgumentException.class,()->PolicyRules.parameters("CIRCUIT_BREAKER",base+",\"fallbackMode\":\"SCRIPT\"}"));
+        var route=new RouteSpec("echo","POST","/api/echo","/demo/echo","http://127.0.0.1:8085",true,"",0,1);
+        var p=policy("CIRCUIT_BREAKER","ROUTE",PolicyRules.PROTECTED,base+",\"fallbackMode\":\"STATIC_JSON\"}");
+        var snap=SnapshotCodec.seal(new Snapshot(1,1,"",List.of(),List.of(),List.of(route),List.of(p),List.of(Map.of("policyId",1,"targetType","ROUTE","targetId",2,"targetRouteId","echo"))));
+        assertThrows(IllegalArgumentException.class,()->PolicyRules.validate(snap));
+    }
+
+    @Test void rejectsCircuitBoundsAndUnsupportedProtectionScope() {
+        var valid=Map.of("failureRateThreshold",50,"slidingWindowSize",4,"minimumNumberOfCalls",2,"waitDurationMs",1000);
+        for(var invalid:List.of(Map.of("failureRateThreshold",0),Map.of("failureRateThreshold",101),Map.of("slidingWindowSize",1),
+                Map.of("slidingWindowSize",101),Map.of("minimumNumberOfCalls",0),Map.of("minimumNumberOfCalls",5),Map.of("waitDurationMs",499),Map.of("waitDurationMs",60001))) {
+            var params=new HashMap<>(valid);params.putAll(invalid);
+            assertThrows(IllegalArgumentException.class,()->PolicyRules.parameters("CIRCUIT_BREAKER",SnapshotCodec.JSON.writeValueAsString(params)));
+        }
+        var p=policy("TIMEOUT","GLOBAL",PolicyRules.PROTECTED,"{\"timeoutMs\":200}");
+        assertThrows(IllegalArgumentException.class,()->PolicyRules.validate(snapshot(p,List.of(Map.of("policyId",1,"targetType","GLOBAL","targetId",0)))));
+    }
+
 }

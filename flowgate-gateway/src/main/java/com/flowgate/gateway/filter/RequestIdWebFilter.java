@@ -14,12 +14,14 @@ import reactor.core.publisher.Mono;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestIdWebFilter implements WebFilter {
     public static final String HEADER = "X-Request-Id";
+    public static final String REQUEST_ID = "flowgateRequestId";
 
     /** 覆盖客户端标识，并在响应提交前再次保证返回同一标识；全程不阻塞。 */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         // 1. 每次入口生成独立标识，不信任客户端提供的一个或多个同名头。
         String requestId = UUID.randomUUID().toString();
+        exchange.getAttributes().put(REQUEST_ID,requestId);
         ServerWebExchange traced = exchange.mutate().request(request ->
                 request.headers(headers -> {
                     headers.set(HEADER, requestId);

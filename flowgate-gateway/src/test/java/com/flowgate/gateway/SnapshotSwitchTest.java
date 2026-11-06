@@ -122,4 +122,59 @@ class SnapshotSwitchTest {
         poller.apply(snapshot(3,true)).block(); assertEquals(3,store.version());
     }
 
+    @Test void cancellationRecoveryOwnsRefreshUntilCacheIsRestored() {
+        // 1. V2已写缓存但确认悬挂；取消后把V1恢复的真实Flux也悬挂。
+        var store=new ActiveSnapshotStore("http://127.0.0.1:8085");
+        var definitions=new SnapshotRouteDefinitionLocator(store);
+        var hold=new java.util.concurrent.atomic.AtomicBoolean();
+        var recovery=reactor.core.publisher.Sinks.<Route>one();
+        var captured=new java.util.concurrent.atomic.AtomicReference<Route>();
+        RouteLocator delegate=()->definitions.getRouteDefinitions().map(def->Route.async(def)
+                .asyncPredicate(e->reactor.core.publisher.Mono.just(true)).build()).flatMap(route->{
+            if(hold.get()) { captured.set(route); return recovery.asMono(); }
+            return reactor.core.publisher.Mono.just(route);
+        });
+        var cache=new CachingRouteLocator(delegate);
+        var deliver=new java.util.concurrent.atomic.AtomicBoolean(true);
+        var poller=new SnapshotPollingService(store,event->cache.onApplicationEvent((RefreshRoutesEvent)event),
+                "http://127.0.0.1:8081","x".repeat(32),"cancel");
+        cache.setApplicationEventPublisher(event->{if(deliver.get()) poller.refreshed((RefreshRoutesResultEvent)event);});
+        poller.apply(snapshot(1,false)).block(); deliver.set(false);
+        var applying=poller.apply(snapshot(2,true)).subscribe();
+        hold.set(true); applying.dispose(); assertNotNull(captured.get());
+        // 2. 恢复尚未完成时V3必须拒绝，不能抢先成功再被旧恢复覆盖。
+        assertThrows(IllegalStateException.class,()->poller.apply(snapshot(3,true)).block());
+        assertEquals(1,store.version());
+        hold.set(false); recovery.tryEmitValue(captured.get());
+        assertEquals(1,((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion());
+        // 3. 恢复完成才允许V3，最终缓存/applied同版，无需sleep猜测时序。
+        deliver.set(true); poller.apply(snapshot(3,true)).block();
+        assertEquals(3,store.version());
+        assertEquals(3,((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion());
+    }
+
+    @Test void refusesAppliedWhenProtectionMetadataDoesNotMatchRouteVersion() {
+        var store=new ActiveSnapshotStore("http://127.0.0.1:8085");
+        var definitions=new SnapshotRouteDefinitionLocator(store);
+        RouteLocator delegate=()->definitions.getRouteDefinitions().map(def->{
+            var builder=Route.async(def).asyncPredicate(e->reactor.core.publisher.Mono.just(true));
+            if(((RouteSpec)def.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion()==2)
+                builder.metadata(com.flowgate.gateway.protection.ProtectionPolicyResolver.METADATA,
+                        new com.flowgate.gateway.protection.ProtectionPolicyResolver.Plan(999,"","","NONE",""));
+            return builder.build();
+        });
+        var cache=new CachingRouteLocator(delegate);
+        var poller=new SnapshotPollingService(store,event->cache.onApplicationEvent((RefreshRoutesEvent)event),
+                "http://127.0.0.1:8081","x".repeat(32),"metadata");
+        cache.setApplicationEventPublisher(event->poller.refreshed((RefreshRoutesResultEvent)event));
+        poller.apply(snapshot(1,false)).block();
+        var error=new java.util.concurrent.atomic.AtomicReference<Throwable>();
+        var pending=poller.apply(snapshot(2,true)).subscribe(ignored->{},error::set);
+        assertEquals(1,store.version());assertNull(error.get());
+        poller.refreshed(new RefreshRoutesResultEvent(cache,new IllegalStateException("元数据不一致")));
+        assertNotNull(error.get());assertEquals(1,store.version());
+        assertEquals(1,((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion());
+        pending.dispose();poller.apply(snapshot(3,true)).block();assertEquals(3,store.version());
+    }
+
 }

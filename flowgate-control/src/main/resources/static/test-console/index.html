@@ -1,68 +1,100 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FlowGate 本地测试台</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head>
-<body><header><span>FLOWGATE / LOCAL</span><h1>网关功能实验台</h1><p>配置依赖 → 登录 → 初始化三个 Demo API → 发布 → 核对节点 → 测试公开与私有请求 → 变更及回滚。</p></header>
+<title>FlowGate 业务管理</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head>
+<body><header><span>FLOWGATE / LOCAL</span><h1>FlowGate 业务管理</h1><p>管理服务和 API、调用方、流量与故障保护策略；发布后可直接调用接口抽查结果。</p><a class="manual-link" href="guide.html#first-run" target="_blank" rel="noopener">第一次使用：跟着完成一次成功调用</a> <a class="manual-link" href="guide.html" target="_blank" rel="noopener">完整使用说明（全部功能）</a></header>
 <nav id="tabs" aria-label="功能导航"></nav><aside id="global-status" aria-live="polite">依赖未检查 · 版本未读取 · 节点未读取</aside><main>
-<section id="quick"><h2>快速开始 · 五步引导</h2><p>刷新页面会清空登录凭证；保存草稿不会自动发布。</p>
+<section id="quick"><h2>业务概览</h2><aside class="page-help"><p>第一次建议先完成一条成功调用路线，不需要读完所有高级配置。 <a href="guide.html#overview" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>账号与调用方登录 → 环境状态探测 → 服务/API初始化公共Demo。</li><li>读取当前版本 → 发布 → 确认当前Gateway节点版本一致。</li><li>接口调用中编号123、文字abc，快速查询应为200。</li></ol></details></aside><p>登录后查看已配置的服务与API。保存配置后需发布，节点确认应用后才生效。</p>
+<button id="business-load" data-admin disabled>刷新服务与 API</button><div id="business-list">尚未读取，请先在“账号与调用方”登录。</div>
+<details><summary>首次使用：初始化与发布步骤</summary><p>刷新页面会清空登录凭证；保存草稿不会自动发布。</p>
 <ol><li><button data-open="panel-0">环境检查</button>分别确认 MySQL、Redis、Demo、Gateway。</li>
 <li><button data-open="panel-2">管理员登录</button>使用本机初始化的账号密码。</li>
 <li><button data-open="panel-3">初始化公共 Demo</button>只补缺失，不覆盖，不自动发布。</li>
 <li><button data-open="panel-3">发布并确认节点</button>先读取版本，再发布，核对 appliedVersion。</li>
 <li><button data-open="panel-1">接口测试</button>fast 200、echo 201、slow 200。</li></ol>
-<pre id="version-status">持久化版本：未读取；节点应用版本：未读取</pre></section>
-<section><h2>A · 服务状态</h2><p>只展示实际探测结果；发布持久化 PERSISTED 与节点 appliedVersion 分开核对。</p>
-<label>Gateway 地址 <input id="gateway" value="http://127.0.0.1:8080"></label><button id="probe">探测服务</button><pre id="health">尚未探测</pre>
-<table><tr><th>能力</th><th>实现状态</th></tr><tr><td>块 0 fast / echo / slow / Trace / metrics</td><td>已实现，须先发布动态路由</td></tr><tr><td>身份、目录、CAS 发布、回滚、节点与审计</td><td>已实现，依赖 MySQL / Redis</td></tr><tr><td>限速 / 本机并发 / 熔断</td><td>限速/并发按新发布规则执行，熔断待块3</td></tr></table></section>
-<section><h2>B · 基础 HTTP 与 Caller 测试</h2>
-<div class="row"><label>ID <input id="fast-id" value="123"></label><label>tag <input id="tag" value="abc"></label><button id="fast">GET fast</button></div>
-<label>Echo JSON <textarea id="echo-body">{"name":"flowgate"}</textarea></label><label>X-Demo-Header <input id="demo-header" value="hello"></label><button id="echo">POST echo</button>
-<div class="row"><label>delayMs <input id="delay" value="100"></label><button id="slow">GET slow</button><button id="metrics">读取网关指标</button></div>
-<label>Caller Token（仅页面内存）<input id="caller-token" type="password" autocomplete="off"></label>
-<label>私有路径 <input id="private-path" value="/api/private/fast/123"></label><button id="private">请求私有 API</button><button id="clear-caller">清空 Caller 凭证</button>
-<p>不带 Token 为 401；错误 Scope 为 403；有效 Scope 为 200。回滚 V1 后私有路由应为 404。</p></section>
-<section><h2>C · 管理员与身份</h2><form id="login-form"><label>用户名 <input id="username" autocomplete="username" required></label><label>密码 <input id="password" type="password" autocomplete="current-password" required></label><button>登录</button></form>
+</details><pre id="version-status">持久化版本：未读取；节点应用版本：未读取</pre></section>
+<section><h2>环境状态</h2><aside class="page-help"><p>这里检查服务是否可用，不会创建草稿或修改配置。 <a href="guide.html#environment" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>Gateway地址通常保持127.0.0.1:8080。</li><li>点探测服务，分别查看Control、mysql、redis、demo和Gateway。</li><li>依赖失败先恢复对应服务，再点一次探测；不要删卷或盲改密码。</li></ol></details></aside><p>只展示实际探测结果；发布持久化 PERSISTED 与节点 appliedVersion 分开核对。</p>
+<label>Gateway 地址 <input id="gateway" aria-describedby="hint-gateway" value="http://127.0.0.1:8080"><small class="field-help" id="hint-gateway">通常保持 http://127.0.0.1:8080；这是Gateway地址，不是网页或Demo地址。</small></label><button id="probe">探测服务</button><pre id="health">尚未探测</pre>
+<table><tr><th>能力</th><th>实现状态</th></tr><tr><td>请求代理与接口调用</td><td>已实现，须先发布动态路由</td></tr><tr><td>服务、调用方、配置发布与审计</td><td>已实现，依赖 MySQL / Redis</td></tr><tr><td>流量与故障保护</td><td>限速、并发、超时、熔断按新发布且节点已应用规则执行</td></tr></table></section>
+<section><h2>接口调用</h2><aside class="page-help"><p>先发布对应路由；输入是示例业务参数，不是管理配置。 <a href="guide.html#requests" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>快速查询：编号123、附加文字abc → 200。</li><li>回显：合法JSON对象与hello标记 → 201；慢请求100表示100毫秒。</li><li>公开接口不需要Caller；私有接口需先创建、发布并签发有demo:read的Caller。</li></ol></details></aside>
+<div class="row"><label>快速查询编号 <input id="fast-id" aria-describedby="hint-fast-id" value="123"><small class="field-help" id="hint-fast-id">示例123；会替换路径中的{id}，返回相同编号。</small></label><label>附加文字 <input id="tag" aria-describedby="hint-tag" value="abc"><small class="field-help" id="hint-tag">示例abc或中文；作为Query参数返回相同tag。</small></label><button id="fast">快速查询（GET fast）</button></div>
+<label>要回显的 JSON 对象 <textarea id="echo-body" aria-describedby="hint-echo-body">{"name":"flowgate"}</textarea><small class="field-help" id="hint-echo-body">示例 {&quot;name&quot;:&quot;flowgate&quot;}；必须是JSON对象，双引号，无尾逗号。</small></label><label>自定义演示标记（X-Demo-Header）<input id="demo-header" aria-describedby="hint-demo-header" value="hello"><small class="field-help" id="hint-demo-header">示例hello；作为X-Demo-Header传到下游并回显。</small></label><button id="echo">发送并回显（POST echo）</button>
+<div class="row"><label>模拟耗时（毫秒）<input id="delay" aria-describedby="hint-delay" value="100"><small class="field-help" id="hint-delay">100=0.1秒，1000=1秒；只允许0..2000毫秒。</small></label><button id="slow">模拟慢请求（GET slow）</button><button id="metrics">读取网关指标</button></div>
+<label>Caller Token（仅页面内存）<input id="caller-token" aria-describedby="hint-caller-token" type="password" autocomplete="off"><small class="field-help" id="hint-caller-token">仅私有接口需要；创建Caller后自动填入。不是管理员Token，公开接口可留空。</small></label>
+<label>自定义/私有 GET 路径 <input id="private-path" aria-describedby="hint-private-path" value="/api/private/fast/123"><small class="field-help" id="hint-private-path">默认/api/private/fast/123；先添加私有Demo草稿并发布。也可调用其他已发布的/api/GET路径。</small></label><button id="private">发送自定义/私有 GET 请求</button><button id="clear-caller">清空 Caller 凭证</button>
+<p>不带 Token 为 401；错误 Scope 为 403；有效 Scope 为 200。只有回滚来源历史不含该私有路由时，回滚后才为404。</p></section>
+<section><h2>账号与调用方</h2><aside class="page-help"><p>管理员负责管理配置；Caller负责使用私有API，二者凭证不能混用。 <a href="guide.html#identity" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>用本机用户名和原始密码登录；刷新业务页面会清空登录。</li><li>要调用私有Demo：先在服务/API页添加私有草稿并发布，再创建唯一名称Caller，Scopes填demo:read。</li><li>Token自动填入接口调用；吊销前核对数字ID，吊销后应为401。</li></ol></details></aside><form id="login-form"><label>用户名 <input id="username" aria-describedby="hint-username" autocomplete="username" required><small class="field-help" id="hint-username">使用本机已初始化的管理账号；这里不创建新管理员。</small></label><label>密码 <input id="password" aria-describedby="hint-password" type="password" autocomplete="current-password" required><small class="field-help" id="hint-password">填你设置的原始登录密码，不是.env中的BCrypt哈希。</small></label><button>登录</button></form>
 <p id="role">尚未登录；刷新页面后所有凭证清空。</p><button id="logout" data-admin disabled>退出并清空凭证</button>
-<div class="row"><label>Caller 名称 <input id="caller-name"></label><label>Scopes（逗号分隔）<input id="scopes" value="demo:read"></label><button id="create-caller" data-admin data-role="ADMIN" disabled>创建 Caller</button></div>
-<label>最近一次 Caller Token（仅本次可见，可复制）<input id="issued-token" type="password" readonly></label><button id="show-token">显示 / 隐藏</button>
-<label>吊销 Caller ID <input id="revoke-id" type="number" min="1"></label><button id="revoke" data-admin data-role="ADMIN" disabled>吊销</button></section>
-<section><h2>D · 目录草稿与发布</h2><p>JSON 编辑只保存草稿，发布后才影响网关。初始化只补齐缺失的 Demo 服务与三条公共规则。</p>
+<div class="row"><label>Caller 名称 <input id="caller-name" aria-describedby="hint-caller-name"><small class="field-help" id="hint-caller-name">唯一名称，例如guide-reader-01；重做时不要重复创建同名记录。</small></label><label>Scopes（逗号分隔）<input id="scopes" aria-describedby="hint-scopes" value="demo:read"><small class="field-help" id="hint-scopes">私有Demo填demo:read；多个权限用英文逗号分隔。</small></label><button id="create-caller" data-admin data-role="ADMIN" disabled>创建 Caller</button></div>
+<label>最近一次 Caller Token（仅本次可见，可复制）<input id="issued-token" aria-describedby="hint-issued-token" type="password" readonly><small class="field-help" id="hint-issued-token">只在当前页面可见；显示/隐藏不能找回刷新前的旧凭证。</small></label><button id="show-token">显示 / 隐藏</button>
+<label>吊销 Caller ID <input id="revoke-id" aria-describedby="hint-revoke-id" type="number" min="1"><small class="field-help" id="hint-revoke-id">创建后自动填入的数字ID；确认是要吊销的Caller，再操作。</small></label><button id="revoke" data-admin data-role="ADMIN" disabled>吊销</button></section>
+<section><h2>服务、API 与配置发布</h2><aside class="page-help"><p>服务是下游程序，API是方法/路径，路由把API注册给Gateway。三者不是同一条记录。 <a href="guide.html#catalog" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>首次只点初始化公共Demo，无需重复创建服务或手写JSON。</li><li>自定义入口按服务 → API → 路由顺序保存；创建API后重新读取选项，再创建关联路由。</li><li>保存只改草稿；点当前持久化版本 → 发布完整配置 → 查询当前节点应用版本。回滚详见手册第9节。</li></ol></details></aside><p>JSON 编辑只保存草稿，发布后才影响网关。初始化只补齐缺失的 Demo 服务与三条公共规则。</p>
 <button id="seed" data-admin data-write disabled>初始化公共 Demo 草稿</button><button id="seed-private" data-admin data-write disabled>添加私有 Demo 草稿</button>
-<div class="row"><label>目录 <select id="kind"><option>services</option><option>apis</option><option>routes</option><option>policies</option></select></label><label>更新 ID（创建时留空）<input id="entity-id" type="number" min="1"></label></div>
-<label>目录模板<select id="template-kind"><option value="services">服务</option><option value="apis">API</option><option value="routes">路由</option></select></label>
-<label>代码/路由标识<input id="template-code" value="demo"></label>
-<label>服务/API 父级 ID<input id="template-parent" type="number" min="1"></label>
-<label>请求方法<select id="template-method"><option>GET</option><option>POST</option></select></label>
-<label>公开路径<input id="template-public" value="/api/demo/fast/{id}"></label>
-<label>上游路径<input id="template-upstream" value="/demo/fast/{id}"></label>
-<button id="template" data-admin disabled>填充高级编辑器并检查后保存</button>
-<details><summary>高级 JSON 编辑（保存草稿，未发布）</summary><label>完整 JSON <textarea id="entity-body" rows="6">{"code":"demo","name":"本地 Demo","upstreamUri":"http://127.0.0.1:8085","enabled":true}</textarea></label>
+
+<label>目录模板<select id="template-kind" aria-describedby="hint-template-kind"><option value="services">服务</option><option value="apis">API</option><option value="routes">路由</option></select><small class="field-help" id="hint-template-kind">普通表单只负责创建；更新/停用已有记录用高级编辑。</small></label>
+<p id="template-guidance" class="field-help">按目录模板填写，下面仅显示当前需要的字段。</p><label>代码/路由标识<input id="template-code" aria-describedby="hint-template-code" value="demo"><small class="field-help" id="hint-template-code">服务填写唯一代码；路由填写唯一routeId，例如guide-fast；API不使用此字段。</small></label>
+<button id="catalog-load" data-admin disabled>读取可选服务与 API</button><label>关联服务 / API<select id="template-parent-select" aria-describedby="hint-template-parent-select"></select><small class="field-help" id="hint-template-parent-select">先读取可选服务与API；API选择服务，路由选择已创建的API。</small></label><input id="template-parent" type="hidden">
+<label>请求方法<select id="template-method" aria-describedby="hint-template-method"><option>GET</option><option>POST</option></select><small class="field-help" id="hint-template-method">API的HTTP方法：快速查询选GET，回显选POST。</small></label>
+<label>公开路径<input id="template-public" aria-describedby="hint-template-public" value="/api/demo/fast/{id}"><small class="field-help" id="hint-template-public">用户访问的入口，如/api/guide/fast/{id}；不含http地址或?Query。</small></label>
+<label>上游路径<input id="template-upstream" aria-describedby="hint-template-upstream" value="/demo/fast/{id}"><small class="field-help" id="hint-template-upstream">下游真实路径，如/demo/fast/{id}；变量名必须来自公开路径。</small></label>
+<button id="template" data-admin data-write disabled>保存业务草稿</button>
+<details><summary>高级 JSON 编辑（修改已有记录 / 自定义字段）</summary><div class="row"><label>目录 <select id="kind" aria-describedby="hint-kind"><option value="services">服务（services）</option><option value="apis">API（apis）</option><option value="routes">路由（routes）</option><option value="policies">策略（policies）</option></select><small class="field-help" id="hint-kind">高级目录：先查询真实记录，修改时去掉JSON中的id并单独填更新ID。</small></label><label>更新 ID（创建时留空）<input id="entity-id" aria-describedby="hint-entity-id" type="number" min="1"><small class="field-help" id="hint-entity-id">新建留空；更新填当前目录记录的数据库数字id，不是routeId。</small></label></div><label>完整 JSON <textarea id="entity-body" aria-describedby="hint-entity-body" rows="6">{"code":"demo","name":"本地 Demo","upstreamUri":"http://127.0.0.1:8085","enabled":true}</textarea><small class="field-help" id="hint-entity-body">完整业务字段，不含id；不是只改一个字段的PATCH。请先查询再复制并修改。</small></label>
 <button id="list" data-admin disabled>查询目录</button><button id="save" data-admin data-write disabled>创建 / 更新草稿</button>
-</details><div class="row"><label>expectedVersion <input id="expected" type="number" min="0" placeholder="先读取当前版本"></label><button id="publish" data-admin data-write disabled>发布完整配置</button></div>
+</details><div class="row"><label>当前发布版本（自动读取）<input id="expected" aria-describedby="hint-expected" type="number" min="0" placeholder="先读取当前版本"><small class="field-help" id="hint-expected">点当前持久化版本自动填写；例如当前5就提交5，发布成功后为6。不要直接猜0。</small></label><button id="publish" data-admin data-write disabled>发布完整配置</button></div>
 <div class="row"><button id="current" data-admin disabled>当前持久化版本</button><button id="history" data-admin disabled>发布历史</button><button id="nodes" data-admin disabled>节点实际应用版本</button></div>
-<label>回滚来源版本 <input id="rollback-version" type="number" min="1" value="1"></label><button id="rollback" data-admin data-write disabled>回滚为更大新版本</button></section>
-<section><h2>E · 策略与流控</h2>
-<p>① 选择范围及目标 → ② 保存并绑定草稿 → ③ 去配置页发布并确认节点 → ④ 小批请求观察真实拒绝。历史待办规则不自动激活；TIMEOUT/熔断待块3。</p>
+<label>回滚来源版本 <input id="rollback-version" aria-describedby="hint-rollback-version" type="number" min="1" value="1"><small class="field-help" id="hint-rollback-version">从发布历史的结果中读取真实version；回滚会生成更大新版本，不撤销草稿。</small></label><button id="rollback" data-admin data-write disabled>回滚为更大新版本</button></section>
+<section><h2>流量策略</h2><aside class="page-help"><p>每秒速率与同时处理数量是两种规则。首次抽查只选ROUTE/demo-slow，避免影响其他API。 <a href="guide.html#traffic" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>读取策略与目标 → 新建或选已有策略；已有策略只改参数/启停，不改绑定目标。</li><li>速率例子：容量2、每秒补1；并发例子：本机在途1。保存后必须另行发布并确认节点。</li><li>小批请求前检查是否有其他策略干扰；试完停用自己的演示策略并发布，不会随关闭网页自动消失。</li></ol></details></aside>
+<p>① 选择范围及目标 → ② 保存并绑定草稿 → ③ 去配置页发布并确认节点 → ④ 小批请求观察真实拒绝。历史待办规则不自动激活；TIMEOUT/熔断见故障保护。</p>
 <button id="policy-load" data-admin disabled>读取策略与目标</button>
-<label>已有策略（新建留空）<select id="policy-existing"><option value="">新建</option></select></label>
-<label>策略代码<input id="policy-code" value="slow-route-rate"></label>
-<label>类型<select id="policy-type"><option>RATE_LIMIT</option><option>CONCURRENCY</option></select></label>
-<label>范围<select id="policy-scope"><option>ROUTE</option><option>SERVICE</option><option>API</option><option>GLOBAL</option><option>CALLER</option></select></label>
-<label>绑定目标<select id="policy-target"></select></label>
-<label>桶容量 capacity<input id="capacity" type="number" min="1" max="1000000" value="5"></label>
-<label>每秒补充 refillPerSecond<input id="refill" type="number" min="1" max="1000000" value="2"></label>
-<label>本机在途 maxConcurrent<input id="max-concurrent" type="number" min="1" max="1000000" value="2"></label>
-<label>启用<select id="policy-enabled"><option value="true">启用</option><option value="false">停用</option></select></label>
+<label>已有策略（新建留空）<select id="policy-existing" aria-describedby="hint-policy-existing"><option value="">新建</option></select><small class="field-help" id="hint-policy-existing">选新建会创建记录；选已有只修改参数/启停，目标不变。</small></label>
+<label>策略代码<input id="policy-code" aria-describedby="hint-policy-code" value="slow-route-rate"><small class="field-help" id="hint-policy-code">唯一标识，如guide-slow-rate；同名已有时选择编辑，不重复新建。</small></label>
+<label>类型<select id="policy-type" aria-describedby="hint-policy-type"><option value="RATE_LIMIT">每秒速率限制（RATE_LIMIT）</option><option value="CONCURRENCY">同时处理数量（CONCURRENCY）</option></select><small class="field-help" id="hint-policy-type">RATE_LIMIT限制每秒速率；CONCURRENCY限制本实例同时在途数。</small></label>
+<label>范围<select id="policy-scope" aria-describedby="hint-policy-scope"><option value="ROUTE">单条路由（ROUTE，推荐）</option><option value="SERVICE">整个服务（SERVICE）</option><option value="API">一个API（API，仅速率）</option><option value="GLOBAL">全局（GLOBAL，仅速率）</option><option value="CALLER">一个调用方（CALLER，仅速率）</option></select><small class="field-help" id="hint-policy-scope">首次选ROUTE；并发只支持ROUTE/SERVICE，其余范围只支持速率。</small></label>
+<label>绑定目标<select id="policy-target" aria-describedby="hint-policy-target"></select><small class="field-help" id="hint-policy-target">选择真实目标；示例demo-slow。GLOBAL共享预算，CALLER需其数字ID。</small></label>
+<p id="traffic-guidance" class="field-help">先选策略类型，数值只对当前类型生效。</p><label>桶容量 capacity<input id="capacity" aria-describedby="hint-capacity" type="number" min="1" max="1000000" value="5"><small class="field-help" id="hint-capacity">速率专用：桶最多存多少额度；例2表示满桶可短时通过约2次。</small></label>
+<label>每秒补充 refillPerSecond<input id="refill" aria-describedby="hint-refill" type="number" min="1" max="1000000" value="2"><small class="field-help" id="hint-refill">速率专用：每秒补多少额度；例1表示每秒补约1次。</small></label>
+<label>本机在途 maxConcurrent<input id="max-concurrent" aria-describedby="hint-max-concurrent" type="number" min="1" max="1000000" value="2"><small class="field-help" id="hint-max-concurrent">并发专用：例1表示当前Gateway对该目标最多1个在途请求，不是每秒1次。</small></label>
+<label>启用<select id="policy-enabled" aria-describedby="hint-policy-enabled"><option value="true">启用</option><option value="false">停用</option></select><small class="field-help" id="hint-policy-enabled">选停用后仍须保存、发布、确认节点；只改下拉不会生效。</small></label>
 <button id="policy-save" data-admin data-write disabled>保存并绑定草稿（未发布）</button>
 <p id="policy-status">尚未读取；以发布内容及节点应用版本确认执行状态。</p>
-<label>小测试路径<input id="batch-path" value="/api/demo/slow?delayMs=300"></label>
-<label>请求数（最多20）<input id="batch-size" type="number" min="1" max="20" value="6"></label>
+<label>小测试路径<input id="batch-path" aria-describedby="hint-batch-path" value="/api/demo/slow?delayMs=300"><small class="field-help" id="hint-batch-path">速率例/api/demo/slow?delayMs=0；并发例/api/demo/slow?delayMs=1000。</small></label>
+<label>请求数（最多20）<input id="batch-size" aria-describedby="hint-batch-size" type="number" min="1" max="20" value="6"><small class="field-help" id="hint-batch-size">同时发1..20个请求；先看实际code，非成功汇总不等于全部限速。</small></label>
 <button id="batch">执行有界并发请求</button><button id="admission-metrics">读取准入计数</button>
-<p>小测试不等于热点对照；热点实验用 scripts/block2-hotspot.py 记录同环境 A/B 原始数据。</p><p>策略使用上方 policies JSON 编辑器。配置先入草稿，新发布 RATE_LIMIT/CONCURRENCY 才执行；旧待办版本不执行。</p>
-<p>参数示例：RATE_LIMIT {"capacity":100,"refillPerSecond":10}；CONCURRENCY {"maxConcurrent":10}；TIMEOUT {"timeoutMs":1000}。scope 为 GLOBAL / SERVICE / API / ROUTE / CALLER。</p>
-<label>Policy ID <input id="policy-id" type="number" min="1"></label><label>绑定 JSON <textarea id="binding">{"targetType":"GLOBAL","targetId":0}</textarea></label><button id="bind" data-admin data-write disabled>绑定策略草稿</button><button id="audits" data-admin disabled>查看最近审计</button><button disabled title="等待块3">熔断：待功能块3</button></section>
-<section id="help"><h2>帮助与使用指南</h2><p>启动依赖：<code>docker compose -f compose.local.yml up -d</code>。IDEA 三个主类均用 JDK17；Control/Gateway 加载 FlowGate 根目录 .env。8085/8081/8080 端口占用时先停止旧进程。</p>
-<p>使用路径：环境检查 → 登录 → 初始化公共 Demo → 读取当前版本 → 发布新版本 → 查询节点，确认 appliedVersion 等于发布版本 → 业务测试。回滚会生成更大新版本，不撤销草稿。</p>
-<p>400 输入错误；401 凭证缺失/过期；403 权限不足；404 路由未发布；409 版本变化，请刷新版本并检查草稿；429 限速；503 并发满或依赖不可用。异常时查看响应 code 区分原因。</p>
-<p>限速跨网关共享；在途并发仅限制单个网关。前层令牌扣减后，后层拒绝或并发拒绝不会退还。历史待执行策略不会自动激活。</p><a href="https://github.com/Felix0410/FlowGate/blob/feat/block2-traffic-governance/docs/guides/test-console-guide.md" target="_blank" rel="noopener">完整中文操作手册</a></section>
-<section class="result"><h2>实际 HTTP 结果</h2><p id="result-meta">尚无请求。凭证会从响应原文中遮罩，不写入浏览器持久化存储。</p><pre id="result" aria-live="polite"></pre></section>
-</main><footer>仅本机实验环境 · 未进行生产验收或性能压测</footer></body></html>
+<p>小批请求只方便抽查；非成功汇总不等于全部是限速。先看实际429/503及错误code。</p><details><summary>高级：为已知策略增加绑定（不是移动或替换）</summary><label>Policy ID <input id="policy-id" aria-describedby="hint-policy-id" type="number" min="1"><small class="field-help" id="hint-policy-id">高级新增绑定用真实Policy数字ID；不要填策略代码。</small></label><label>绑定 JSON <textarea id="binding" aria-describedby="hint-binding">{"targetType":"GLOBAL","targetId":0}</textarea><small class="field-help" id="hint-binding">只增加关系，不会替换/删除旧绑定；ROUTE targetId是路由数字id，不是routeId字符串。</small></label><button id="bind" data-admin data-write disabled>绑定策略草稿</button></details><button id="audits" data-admin disabled>查看最近审计</button><p>响应超时与熔断请在“故障保护”配置。</p></section>
+<section id="protection"><h2>故障保护</h2><aside class="page-help"><p>先决定是等待多久（超时），还是连续故障时暂时停止访问（熔断）。 <a href="guide.html#protection" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>超时：demo-slow、200毫秒 → 保存、发布、确认节点 → 请求500ms应504。</li><li>熔断演示先给Demo开启故障开关，再添加故障API草稿并发布；选择demo-fault配置规则。</li><li>500等失败达到阈值后OPEN；停止故障、等半开、发两次正常请求并查询状态。GET静态不可用提示仍为503。</li></ol></details></aside>
+<p>为 API 设置响应超时与故障熔断。保存只修改草稿；发布并确认节点应用后生效。</p>
+<button id="protection-load" data-admin disabled>读取路由与保护策略</button>
+<button id="fault-init" data-admin data-write disabled>添加故障演示 API 草稿</button>
+<p>故障演示需本机 Demo 显式配置 <code>FLOWGATE_DEMO_FAULT_ENABLED=true</code> 并重启；默认关闭，原业务接口不受影响。</p>
+<label>已有保护策略<select id="protection-existing" aria-describedby="hint-protection-existing"><option value="">新建</option></select><small class="field-help" id="hint-protection-existing">已有策略只能改参数/启停；目标保持原绑定，不能在这里迁移。</small></label>
+<label>目标 API 路由<select id="protection-route" aria-describedby="hint-protection-route"></select><small class="field-help" id="hint-protection-route">先读取路由；超时示例demo-slow，熔断示例demo-fault。</small></label>
+<label>策略名称<input id="protection-code" aria-describedby="hint-protection-code" value="slow-timeout"><small class="field-help" id="hint-protection-code">唯一名称，例如guide-slow-timeout或guide-fault-cb。</small></label>
+<label>保护类型<select id="protection-type" aria-describedby="hint-protection-type"><option value="TIMEOUT">响应超时</option><option value="CIRCUIT_BREAKER">故障熔断</option></select><small class="field-help" id="hint-protection-type">响应超时控制最长等待；熔断根据近期故障比例暂时停止访问。</small></label>
+<div id="timeout-fields"><label>最长等待时间（50～10000 毫秒）<input id="timeout-ms" aria-describedby="hint-timeout-ms" type="number" min="50" max="10000" value="200"><small class="field-help" id="hint-timeout-ms">50..10000毫秒；例200，请求slow 500ms应504，slow 100ms应200（无其他规则干扰时）。</small></label></div>
+<div id="circuit-fields" hidden>
+<label>失败比例阈值（1～100%）<input id="failure-rate" aria-describedby="hint-failure-rate" type="number" min="1" max="100" value="50"><small class="field-help" id="hint-failure-rate">1..100%；例50，达到最少样本量后失败比例达50%可打开。</small></label>
+<label>最近请求窗口（2～100 次）<input id="window-size" aria-describedby="hint-window-size" type="number" min="2" max="100" value="10"><small class="field-help" id="hint-window-size">2..100次；例10，统计最近10次结果，不是10秒。</small></label>
+<label>最少统计请求（不超过窗口）<input id="minimum-calls" aria-describedby="hint-minimum-calls" type="number" min="1" max="100" value="5"><small class="field-help" id="hint-minimum-calls">1..窗口大小；例5，未达到5个样本时不按比例打开。</small></label>
+<label>熔断后等待（500～60000 毫秒）<input id="wait-ms" aria-describedby="hint-wait-ms" type="number" min="500" max="60000" value="3000"><small class="field-help" id="hint-wait-ms">500..60000毫秒；例3000，打开后约3秒转半开，并需两次正常试探恢复。</small></label>
+<label>不可用时响应<select id="fallback-mode" aria-describedby="hint-fallback-mode"><option value="NONE">保留故障状态</option><option value="STATIC_JSON">只读 GET 返回明确的不可用提示（503）</option></select><small class="field-help" id="hint-fallback-mode">STATIC_JSON仅GET；返回503 DEGRADED明确不可用，不返回假200业务成功。</small></label>
+</div>
+<label>策略状态<select id="protection-enabled" aria-describedby="hint-protection-enabled"><option value="true">启用</option><option value="false">停用</option></select><small class="field-help" id="hint-protection-enabled">启用/停用都需保存并发布；节点应用对应版本才执行。</small></label>
+<button id="protection-save" data-admin data-write disabled>保存保护草稿</button>
+<button id="protection-publish" data-admin data-write disabled>发布配置</button>
+<button id="protection-status" data-admin disabled>查看节点与熔断状态</button><p>熔断状态来自节点最近上报；节点重启后运行状态可能已重置，STALE表示上报已过期。</p><p id="protection-state">尚未取得实际状态；不会根据请求次数推测熔断状态。</p>
+<details><summary>抽查演示：响应与恢复</summary>
+<label>接口路径<input id="fault-path" aria-describedby="hint-fault-path" value="/api/demo/fault"><small class="field-help" id="hint-fault-path">默认/api/demo/fault；不带?mode=，按钮自动附加。需Demo故障开关和已发布路由。</small></label>
+<button id="fault-ok">正常请求</button><button id="fault-500">上游故障 500</button><button id="fault-503">上游不可用 503</button><button id="fault-slow">上游延迟 2 秒</button>
+<button id="timeout-check">请求 slow 500ms（需配置更小超时）</button><button id="protection-metrics">查看保护计数</button>
+<p>504：等待超时；CIRCUIT_OPEN 503：当前禁止访问下游；DEGRADED 503：明确的不可用提示。恢复后发起两次正常请求，并刷新实际状态。认证、限流拒绝不会变为降级成功。</p></details>
+</section><section id="help"><h2>帮助与使用指南</h2><aside class="page-help"><p>完整手册覆盖每个页面、字段、按钮、预期结果及恢复方法。 <a href="guide.html#first-run" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>先完成第2节的最小路线。</li><li>不知道字段含义时看输入框下方说明，或打开对应页面的详细章节。</li><li>高级JSON、绑定和故障实验按需使用，不要求第一次全部完成。</li></ol></details></aside>
+<p>完整说明已经随网页提供，不需要访问GitHub。首次使用先完成公开接口调用，再选择你想抽查的功能。</p>
+<p><a href="guide.html#first-run" target="_blank" rel="noopener">第一次使用：一步一步完成最小闭环</a> · <a href="guide.html" target="_blank" rel="noopener">打开全部功能详细手册</a></p>
+<ul><li><a href="guide.html#identity" target="_blank" rel="noopener">账号、Caller、Scope、吊销怎么用</a></li>
+<li><a href="guide.html#catalog" target="_blank" rel="noopener">服务、API、路由分别填什么（完整例子）</a></li>
+<li><a href="guide.html#publish" target="_blank" rel="noopener">保存、发布、节点应用、回滚的区别</a></li>
+<li><a href="guide.html#traffic" target="_blank" rel="noopener">怎样看到429或并发503，试完怎样恢复</a></li>
+<li><a href="guide.html#protection" target="_blank" rel="noopener">超时、熔断、GET不可用提示与恢复</a></li>
+<li><a href="guide.html#errors" target="_blank" rel="noopener">按钮灰色、下拉空、404/409/503等问题处理</a></li></ul>
+</section>
+<section class="result"><h2>实际 HTTP 结果</h2><aside class="page-help"><p>这里是最近10条内存摘要；实际响应详情在对应操作所在页面。 <a href="guide.html#results" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>展开当前按钮下方结果查看HTTP、Body和requestId。</li><li>最近摘要会被后续操作挤出，刷新也会清空；管理审计另用查看最近审计。</li><li>报错时提供页面、按钮、HTTP/code和requestId，不要发送密码、Token或.env。</li></ol></details></aside><p id="result-meta">尚无请求。凭证会从响应原文中遮罩，不写入浏览器持久化存储。</p><pre id="result" aria-live="polite"></pre></section>
+</main><footer>FlowGate · 本地开发环境</footer></body></html>

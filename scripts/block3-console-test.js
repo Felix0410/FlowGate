@@ -1,0 +1,30 @@
+'use strict';
+// 原生业务页面HTTP契约；不是浏览器人工体验验收。
+const assert=require('node:assert/strict'), vm=require('node:vm');
+const test=require('./block2-console-test.js');
+(async()=>{
+ await test.run(); const {nodes,requests,click,context,reply}=test;
+ nodes.get('protection-type').value='TIMEOUT';nodes.get('protection-enabled').value='true';nodes.get('protection-route').value='12';nodes.get('protection-code').value='slow-timeout';
+ reply(201,{id:123});const start=requests.length;await click('protection-save');
+ const calls=requests.slice(start);assert.equal(calls[0].path,'/admin/policies');
+ const body=JSON.parse(calls[0].options.body);assert.equal(body.type,'TIMEOUT');assert.equal(JSON.parse(body.parametersJson).timeoutMs,200);
+ assert.equal(calls[1].path,'/admin/policies/123/bindings');assert.equal(JSON.parse(calls[1].options.body).targetId,12);
+ assert.match(nodes.get('protection-state').textContent,/尚未生效/);
+ reply(504,{code:'UPSTREAM_TIMEOUT',requestId:'test-request-id'});await click('timeout-check');
+ assert.match(requests.at(-1).path,/\/api\/demo\/slow\?delayMs=500$/);assert.match(nodes.get('response-timeout-check').textContent,/504/);
+ nodes.get('fault-path').value='/api/demo/fault';reply(503,{code:'DEGRADED',degraded:true,source:'GATEWAY_FALLBACK'});await click('fault-500');
+ assert.match(requests.at(-1).path,/mode=500$/);assert.match(nodes.get('response-fault-500').textContent,/DEGRADED/);
+ reply(200,[{nodeId:'test',appliedVersion:7,freshness:'ONLINE',lastSeenAt:'2026-11-06T12:00:00',runtimeStateKnown:true,circuitStates:[{routeId:'demo-fault',state:'OPEN'}]}]);
+ await click('protection-status');assert.match(nodes.get('protection-state').textContent,/demo-fault OPEN/);assert.match(nodes.get('protection-state').textContent,/当前版本/);
+ vm.runInContext("protectionPolicies=[{id:1,code:'fault-cb',type:'CIRCUIT_BREAKER',enabled:true,parametersJson:'{\\\"failureRateThreshold\\\":50,\\\"slidingWindowSize\\\":4,\\\"minimumNumberOfCalls\\\":2,\\\"waitDurationMs\\\":1000}'}]",context);
+ nodes.get('protection-existing').value='1';nodes.get('protection-existing').onchange();assert.equal(nodes.get('protection-route').disabled,true);
+ assert.equal(nodes.get('timeout-fields').hidden,true);assert.equal(nodes.get('circuit-fields').hidden,false);
+ vm.runInContext("catalogServices=[{id:10,name:'Demo'}]",context);
+ nodes.get('template-kind').value='apis';nodes.get('template-kind').onchange();
+ assert.equal(nodes.get('template-parent').value,'10');
+ nodes.get('template-method').value='GET';reply(201,{id:456});await click('template');
+ assert.equal(requests.at(-1).path,'/admin/apis');assert.equal(JSON.parse(requests.at(-1).options.body).serviceId,10);
+ reply(200,[{id:99,code:'old',type:'RATE_LIMIT',scope:'ROUTE',enabled:true,parametersJson:'{\"capacity\":2,\"refillPerSecond\":1}'}]);
+ await click('policy-load');assert.equal(nodes.get('policy-target').disabled,false);assert.equal(nodes.get('policy-type').disabled,false);
+ console.log('PASS 业务保护表单/原API绑定/草稿提示/实际504与降级渲染/真实节点状态/已有绑定锁定');
+})().catch(error=>{console.error(error);process.exitCode=1;});

@@ -39,4 +39,9 @@ class DemoHttpTest {
         assertEquals(200, send("/demo/slow?delayMs=2000", null).statusCode());
         assertTrue(send("/demo/slow", null).body().contains("100"));
     }
+    @Test void faultInjectionIsDisabledByDefault() throws Exception {
+        assertEquals(404,send("/demo/fault?mode=500",null).statusCode());
+        assertEquals(404,send("/demo/fault-count",null).statusCode());
+    }
+
 }

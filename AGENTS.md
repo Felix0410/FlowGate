@@ -1,22 +1,25 @@
-# FlowGate 本地 Codex 协作入口
+# FlowGate｜本地 Codex 协作入口
 
-> 本文件供本地编码助手自动发现任务使用；只约束 FlowGate 仓库当前已授权的功能块，不代表对应功能已完成。
+> **最新状态（2026-11-06）**：功能块 0–3 的主要业务代码已交付，功能块 3 源码静态复审已完成；PR #1–#4 仍为 Draft，`main` 尚未合并这些功能块。**现在停在审核/人工体验及最终综合验收准备阶段，不要自行开始新的功能块或长时间压测。**
 
-## 当前唯一可执行任务
+## 当前工作基线
 
-- 当前阶段：**功能块 2：分布式限速、本机并发保护与热点隔离**。
-- 任务分支：`feat/block2-traffic-governance`，从块 1 的 R1 修复提交 `6a3e038` 创建，并合入设计文档。负责人于 2026-11-06 明确授权开始；先检查工作区，禁止改 main 或重写共享历史。
-- **先完整阅读**：[本块实施契约](docs/progress/block-2-traffic.md)、[前端同步规范](docs/standards/frontend-sync-rule.md)、[测试台体验规范](docs/standards/test-console-ux-v2.md)、[可执行任务提示词](CODEX_BLOCK2_PROMPT.md)；必要时参照 README、[块 0 进度记录](docs/progress/block-0-gateway.md) 和历史审计。
-- 优先级：本块任务书 > 前端同步规范（有关前端同步时两者须同时满足） > 本交接入口 > README 的旧历史说明。实际代码/API 与文档不符时进行**最小安全修正**并记录理由。
+- 实现分支：`feat/block3-resilience-observability`，已包含 Block1/2/3 的业务代码；相应 PR 为 [#4](https://github.com/Felix0410/FlowGate/pull/4)（叠加于功能块 2 的实现分支）。
+- Block3 实际实现与 Codex 定向测试见 [阶段进度第11节](docs/progress/block-3-resilience.md)，含源码、测试命令与 192 条隔离 HTTP 证据。**报告不是最终验收**；浏览器人工操作由负责人执行。
+- 已完成源码静态核查见 [Block3 审核报告](docs/reviews/block-3-static-review-2026-11-06.md)；下一阶段应先阅读 [最终综合验收计划](docs/acceptance/final-acceptance-plan.md)。
+- 业务页面使用指南：[完整中文说明](docs/guides/test-console-guide.md)、[故障演示](docs/guides/block3-fault-testing.md)；页面内另有同源 `/test-console/guide.html`。页面操作体验仍需负责人实际浏览器体验。
 
-## 编码与交付硬性约束
+## 等待负责人下一步指令
 
-1. **只实施本块**，不要启动块 3 的熔断、降级或自适应控制；不擅自引入 Kafka、Redisson、Nacos、复杂前端框架等。
-2. Gateway 保持 WebFlux/Netty 非阻塞：禁止 JDBC、Servlet、同步 Redis/Redisson 进入热路径；Control 可以使用 MVC、MyBatis-Plus、同步 Redis。
-3. 核心类、方法与关键异常流程使用准确中文注释；较长代码块采用 `// 1. ...`、`// 2. ...`、`// 3. ...` 的业务阶段说明。
-4. 必须实现并持续维护同源 `/test-console/` 测试页面：原生 HTML/CSS/JS，保留块 0 的 fast/echo/slow 测试，保留认证、路由管理和发布回滚，新增当前块的策略向导与真实429/503测试，不伪造功能完成。
-5. 每次修改只执行新增、修改、直接受影响代码的定向测试及最小联调；完整回归和性能压测留到最终验收。负责人手动测试延后到本块最小可执行 Demo 完成。
-6. 在 `docs/progress/block-2-traffic.md` 第 12 节回填真实进度、测试命令、结果、SHA、已知风险；同步 README 与测试前端功能状态。
-7. 遵循 Conventional Commits，不提交密码/Token、`.env`、构建产物；只在本块分支提交，不合并/强推 main。若 Git 或依赖环境阻断，记录实际错误并停在本块，绝不虚报完成。
+1. 如果负责人反馈网页难用/按钮异常：**仅修明确问题**，保留 Block0/1/2/3 功能；更新前端代码及中文指南，同一功能分支提交，执行变更范围定向测试。
+2. 如果负责人明确授权“开始最终综合验收”：以 `docs/acceptance/final-acceptance-plan.md` 为契约，先确认测试隔离环境和已存在用户数据，执行全工程功能回归、两 Gateway/故障场景、三组对照性能，逐步记录实际结果。**在得到明确授权之前，不要运行最后的完整压测。**
+3. 各 PR 仅在负责人同意且证据完备后按依赖顺序审核/合并。禁止强推、`reset --hard`、`clean -fd`、直接改 main、覆盖 `.env`、删除非本项目 Docker/数据库资源。
 
-**开始编码**：阅读 `CODEX_BLOCK2_PROMPT.md`，按块2契约执行；用户禁止电脑界面控制，浏览器手动验收不得冒充已执行。
+## 永久编码/测试约束
+
+- Java17 + Spring Boot4 / Gateway WebFlux、MVC Control、MyBatis-Plus、Reactive Redis、Micrometer，熔断只使用官方 Gateway CircuitBreaker/Resilience4j，不为修复小问题引入新中间件/前端框架。
+- 网关热路径无 JDBC/Servlet/同步 Redis/阻塞调用；已发布快照 PENDING/ENFORCED 状态安全明确；认证与流控不可被降级绕过。
+- 中文注释清晰准确，长段业务代码按 `// 1.` `// 2.` `// 3.` 分点；源码和 `/test-console/` 与指南每次同步。
+- 变更要有真实测试命令和结果、Conventional Commits、可追溯 SHA，不提交密码/Token/内部 Key/日志或构建产物。测试过的才写“已通过”，模拟 DOM 不能写成真实浏览器验收。
+
+**当前结论：功能块 3 代码已远端提交并完成静态审核，等待真人体验和最终统一验收。**

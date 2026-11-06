@@ -215,3 +215,11 @@ git diff --check
 - ChatGPT 阅读了主要源码、关键 JUnit 与 Node 模拟 DOM 测试、实验脚本和报告：实现方向与本块设计基本一致，报告中的 24 个 JUnit 与两组短热点数据仍属**Codex 本机测试记录**，没有在本次会话环境独立运行验证。
 - 本轮静态审核明列三个待处理项：① 编辑已有策略时前端目标选择可能误导（代码仅在新建时真正绑定）；② 新快照和异步失败恢复同时发生时的缓存一致性竞态需补可控测试；③ 真实浏览器界面、桌面/窄屏及多角色操作仍待负责人体验。详见 `docs/reviews/block-2-static-review-2026-11-06.md`。
 - 功能代码已远端提交但**仍待审核和人工验收**，不能直接标记最终通过、合并 `main` 或开始 Block3 编码。
+
+### 2026-11-06 Block3前置收口
+
+在`feat/block3-resilience-observability`补修R1/R2：已有策略编辑锁定目标且说明只改参数/启停；取消及迟到恢复与新版本应用共享互斥权，恢复Flux未结束前拒绝下一次apply。新增Sinks可控交错测试（V2取消→V1恢复悬挂→V3被拒绝→恢复完成→V3成功），真实缓存与applied最终同版，没有使用sleep遮盖时序。
+
+`source .env; mvn -B -ntp -pl flowgate-gateway -am test`通过（Contract5、Gateway17）；`node scripts/block2-console-test.js`通过，包含编辑不重复绑定断言。Maven实际使用Java17.0.18；shell默认java21不作为构建JDK。修复独立提交为`fix(block2)`，SHA见该提交记录；不是负责人浏览器验收通过。
+
+块3前置补修的实际提交SHA为`fe0f391`（位于feat/block3-resilience-observability）；对应R1/R2定向复测已通过，负责人浏览器验收仍未冒充完成。
