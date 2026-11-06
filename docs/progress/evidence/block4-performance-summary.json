@@ -1,0 +1,937 @@
+{
+  "schemaVersion": 1,
+  "passed": true,
+  "startedAt": "2026-11-06T11:00:52.549960+00:00",
+  "finishedAt": "2026-11-06T11:04:43.997926+00:00",
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "sourceGitSha": "d59acf94674e0fe5017e552568e3a4de5dee3986",
+    "scriptSha256": "85e3a82903ddbe10f91cdd545744e98a2c23528502fd2071badaa7e10953fbe6",
+    "javaVersion": "openjdk version \"17.0.18\" 2026-01-20 LTS\nOpenJDK Runtime Environment Microsoft-13106359 (build 17.0.18+8-LTS)\nOpenJDK 64-Bit Server VM Microsoft-13106359 (build 17.0.18+8-LTS, mixed mode, sharing)",
+    "demoTomcatThreads": 8,
+    "gatewayInstances": 2,
+    "requestedConfig": {
+      "seconds": 30,
+      "warmup": 3,
+      "repeats": 2,
+      "fast_rps": 8,
+      "slow_rps": 8,
+      "max_inflight": 48
+    },
+    "loadModel": "fixed-arrival open-loop; bounded client in-flight"
+  },
+  "limitations": [
+    "直连无Gateway，代理组为公开路由；协议栈开销需独立解释",
+    "CLIENT_SHED是客户端未送达，绝不能视为网关429/503",
+    "Demo观测请求也占用共享Tomcat线程；此处仅为开发机对照",
+    "businessSuccessRps按发送窗口归一，包含窗口后的收尾；同时报告含收尾耗时的RPS",
+    "CPU取累计CPU秒差/采样墙钟；RSS仅前后采样，不等同峰值；预热不计正式样本",
+    "P99样本少时不稳；总HTTP与业务成功P95分别计算",
+    "本机并发限制不是两个Gateway共享的总上限"
+  ],
+  "rawLocalPath": ".local/acceptance/block4-performance-run1.json",
+  "runs": [
+    {
+      "summary": {
+        "scheduled": 480,
+        "httpCompleted": 480,
+        "businessSuccess": 480,
+        "businessSuccessRps": 16.0,
+        "businessSuccessRateScheduled": 1.0,
+        "clientShed": 0,
+        "networkErrors": 0,
+        "statusCounts": {
+          "fast:200": 240,
+          "slow:200": 240
+        },
+        "fastSuccess": {
+          "samples": 240,
+          "meanMs": 180.434,
+          "p50Ms": 180.409,
+          "p95Ms": 356.507,
+          "p99Ms": 406.752
+        },
+        "allSuccess": {
+          "samples": 480,
+          "meanMs": 651.67,
+          "p50Ms": 462.368,
+          "p95Ms": 1222.956,
+          "p99Ms": 1308.085
+        },
+        "allHttp": {
+          "samples": 480,
+          "meanMs": 651.67,
+          "p50Ms": 462.368,
+          "p95Ms": 1222.956,
+          "p99Ms": 1308.085
+        },
+        "group": "DIRECT",
+        "repetition": 0,
+        "elapsedIncludingDrainSeconds": 31.092,
+        "businessSuccessRpsIncludingDrain": 15.438,
+        "phase": "measurement",
+        "durationSeconds": 30,
+        "demoPeakInFlightObserved": 7
+      },
+      "resources": {
+        "before": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 6.43,
+              "rssKiB": 252640
+            },
+            "control": {
+              "cpuSeconds": 14.91,
+              "rssKiB": 412640
+            },
+            "gateway0": {
+              "cpuSeconds": 14.24,
+              "rssKiB": 439824
+            },
+            "gateway1": {
+              "cpuSeconds": 14.2,
+              "rssKiB": 418400
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.03195,
+            "used_cpu_user": 0.139299,
+            "used_memory": 1177848.0,
+            "used_memory_rss": 14376960.0
+          }
+        },
+        "after": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 7.94,
+              "rssKiB": 256272
+            },
+            "control": {
+              "cpuSeconds": 19.81,
+              "rssKiB": 426336
+            },
+            "gateway0": {
+              "cpuSeconds": 15.68,
+              "rssKiB": 444112
+            },
+            "gateway1": {
+              "cpuSeconds": 15.55,
+              "rssKiB": 423280
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.060721,
+            "used_cpu_user": 0.411121,
+            "used_memory": 1177848.0,
+            "used_memory_rss": 14376960.0
+          }
+        },
+        "cpuWindowSeconds": 31.364,
+        "jvmMeanCpuOneCorePercent": {
+          "demo": 4.814,
+          "control": 15.623,
+          "gateway0": 4.591,
+          "gateway1": 4.304
+        },
+        "redisMeanCpuOneCorePercent": 0.958
+      }
+    },
+    {
+      "summary": {
+        "scheduled": 480,
+        "httpCompleted": 480,
+        "businessSuccess": 480,
+        "businessSuccessRps": 16.0,
+        "businessSuccessRateScheduled": 1.0,
+        "clientShed": 0,
+        "networkErrors": 0,
+        "statusCounts": {
+          "fast:200": 240,
+          "slow:200": 240
+        },
+        "fastSuccess": {
+          "samples": 240,
+          "meanMs": 158.151,
+          "p50Ms": 157.735,
+          "p95Ms": 299.013,
+          "p99Ms": 323.635
+        },
+        "allSuccess": {
+          "samples": 480,
+          "meanMs": 628.837,
+          "p50Ms": 332.422,
+          "p95Ms": 1171.784,
+          "p99Ms": 1201.634
+        },
+        "allHttp": {
+          "samples": 480,
+          "meanMs": 628.837,
+          "p50Ms": 332.422,
+          "p95Ms": 1171.784,
+          "p99Ms": 1201.634
+        },
+        "group": "PROXY",
+        "repetition": 0,
+        "elapsedIncludingDrainSeconds": 31.038,
+        "businessSuccessRpsIncludingDrain": 15.465,
+        "phase": "measurement",
+        "durationSeconds": 30,
+        "demoPeakInFlightObserved": 7
+      },
+      "resources": {
+        "before": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 8.02,
+              "rssKiB": 256448
+            },
+            "control": {
+              "cpuSeconds": 20.24,
+              "rssKiB": 427248
+            },
+            "gateway0": {
+              "cpuSeconds": 16.7,
+              "rssKiB": 447632
+            },
+            "gateway1": {
+              "cpuSeconds": 15.73,
+              "rssKiB": 424128
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.068815,
+            "used_cpu_user": 0.443738,
+            "used_memory": 1177848.0,
+            "used_memory_rss": 14376960.0
+          }
+        },
+        "after": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 8.84,
+              "rssKiB": 261936
+            },
+            "control": {
+              "cpuSeconds": 22.77,
+              "rssKiB": 428240
+            },
+            "gateway0": {
+              "cpuSeconds": 20.85,
+              "rssKiB": 464144
+            },
+            "gateway1": {
+              "cpuSeconds": 16.61,
+              "rssKiB": 426080
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.09676,
+            "used_cpu_user": 0.660044,
+            "used_memory": 1177848.0,
+            "used_memory_rss": 14376960.0
+          }
+        },
+        "cpuWindowSeconds": 31.166,
+        "jvmMeanCpuOneCorePercent": {
+          "demo": 2.631,
+          "control": 8.118,
+          "gateway0": 13.316,
+          "gateway1": 2.824
+        },
+        "redisMeanCpuOneCorePercent": 0.784
+      }
+    },
+    {
+      "summary": {
+        "scheduled": 480,
+        "httpCompleted": 480,
+        "businessSuccess": 282,
+        "businessSuccessRps": 9.4,
+        "businessSuccessRateScheduled": 0.5875,
+        "clientShed": 0,
+        "networkErrors": 0,
+        "statusCounts": {
+          "fast:200": 240,
+          "slow:200": 42,
+          "slow:429": 179,
+          "slow:503": 19
+        },
+        "fastSuccess": {
+          "samples": 240,
+          "meanMs": 5.658,
+          "p50Ms": 4.896,
+          "p95Ms": 10.796,
+          "p99Ms": 21.581
+        },
+        "allSuccess": {
+          "samples": 282,
+          "meanMs": 155.36,
+          "p50Ms": 5.644,
+          "p95Ms": 1011.724,
+          "p99Ms": 1018.853
+        },
+        "allHttp": {
+          "samples": 480,
+          "meanMs": 94.03,
+          "p50Ms": 5.68,
+          "p95Ms": 1009.886,
+          "p99Ms": 1016.638
+        },
+        "group": "GOVERNED",
+        "repetition": 0,
+        "elapsedIncludingDrainSeconds": 30.507,
+        "businessSuccessRpsIncludingDrain": 9.244,
+        "phase": "measurement",
+        "durationSeconds": 30,
+        "demoPeakInFlightObserved": 3
+      },
+      "resources": {
+        "before": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 8.9,
+              "rssKiB": 261936
+            },
+            "control": {
+              "cpuSeconds": 23.29,
+              "rssKiB": 428528
+            },
+            "gateway0": {
+              "cpuSeconds": 21.44,
+              "rssKiB": 470848
+            },
+            "gateway1": {
+              "cpuSeconds": 16.77,
+              "rssKiB": 426608
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.107324,
+            "used_cpu_user": 0.694402,
+            "used_memory": 1361424.0,
+            "used_memory_rss": 14508032.0
+          }
+        },
+        "after": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 9.34,
+              "rssKiB": 262192
+            },
+            "control": {
+              "cpuSeconds": 25.96,
+              "rssKiB": 429536
+            },
+            "gateway0": {
+              "cpuSeconds": 24.31,
+              "rssKiB": 475824
+            },
+            "gateway1": {
+              "cpuSeconds": 17.7,
+              "rssKiB": 429568
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.162652,
+            "used_cpu_user": 0.986811,
+            "used_memory": 1359696.0,
+            "used_memory_rss": 14508032.0
+          }
+        },
+        "cpuWindowSeconds": 30.681,
+        "jvmMeanCpuOneCorePercent": {
+          "demo": 1.434,
+          "control": 8.702,
+          "gateway0": 9.354,
+          "gateway1": 3.031
+        },
+        "redisMeanCpuOneCorePercent": 1.133
+      }
+    },
+    {
+      "summary": {
+        "scheduled": 480,
+        "httpCompleted": 480,
+        "businessSuccess": 480,
+        "businessSuccessRps": 16.0,
+        "businessSuccessRateScheduled": 1.0,
+        "clientShed": 0,
+        "networkErrors": 0,
+        "statusCounts": {
+          "fast:200": 240,
+          "slow:200": 240
+        },
+        "fastSuccess": {
+          "samples": 240,
+          "meanMs": 163.666,
+          "p50Ms": 163.157,
+          "p95Ms": 305.333,
+          "p99Ms": 323.278
+        },
+        "allSuccess": {
+          "samples": 480,
+          "meanMs": 636.254,
+          "p50Ms": 331.036,
+          "p95Ms": 1187.039,
+          "p99Ms": 1208.617
+        },
+        "allHttp": {
+          "samples": 480,
+          "meanMs": 636.254,
+          "p50Ms": 331.036,
+          "p95Ms": 1187.039,
+          "p99Ms": 1208.617
+        },
+        "group": "DIRECT",
+        "repetition": 1,
+        "elapsedIncludingDrainSeconds": 31.091,
+        "businessSuccessRpsIncludingDrain": 15.439,
+        "phase": "measurement",
+        "durationSeconds": 30,
+        "demoPeakInFlightObserved": 7
+      },
+      "resources": {
+        "before": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 9.42,
+              "rssKiB": 262272
+            },
+            "control": {
+              "cpuSeconds": 26.91,
+              "rssKiB": 430112
+            },
+            "gateway0": {
+              "cpuSeconds": 24.42,
+              "rssKiB": 475936
+            },
+            "gateway1": {
+              "cpuSeconds": 17.92,
+              "rssKiB": 429856
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.165405,
+            "used_cpu_user": 1.025407,
+            "used_memory": 1339224.0,
+            "used_memory_rss": 14508032.0
+          }
+        },
+        "after": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 10.33,
+              "rssKiB": 262400
+            },
+            "control": {
+              "cpuSeconds": 29.71,
+              "rssKiB": 431408
+            },
+            "gateway0": {
+              "cpuSeconds": 25.3,
+              "rssKiB": 475440
+            },
+            "gateway1": {
+              "cpuSeconds": 18.82,
+              "rssKiB": 435776
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.21441,
+            "used_cpu_user": 1.292322,
+            "used_memory": 1339224.0,
+            "used_memory_rss": 14049280.0
+          }
+        },
+        "cpuWindowSeconds": 31.216,
+        "jvmMeanCpuOneCorePercent": {
+          "demo": 2.915,
+          "control": 8.97,
+          "gateway0": 2.819,
+          "gateway1": 2.883
+        },
+        "redisMeanCpuOneCorePercent": 1.012
+      }
+    },
+    {
+      "summary": {
+        "scheduled": 480,
+        "httpCompleted": 480,
+        "businessSuccess": 480,
+        "businessSuccessRps": 16.0,
+        "businessSuccessRateScheduled": 1.0,
+        "clientShed": 0,
+        "networkErrors": 0,
+        "statusCounts": {
+          "fast:200": 240,
+          "slow:200": 240
+        },
+        "fastSuccess": {
+          "samples": 240,
+          "meanMs": 161.946,
+          "p50Ms": 159.112,
+          "p95Ms": 317.345,
+          "p99Ms": 341.058
+        },
+        "allSuccess": {
+          "samples": 480,
+          "meanMs": 636.204,
+          "p50Ms": 347.264,
+          "p95Ms": 1195.978,
+          "p99Ms": 1221.854
+        },
+        "allHttp": {
+          "samples": 480,
+          "meanMs": 636.204,
+          "p50Ms": 347.264,
+          "p95Ms": 1195.978,
+          "p99Ms": 1221.854
+        },
+        "group": "PROXY",
+        "repetition": 1,
+        "elapsedIncludingDrainSeconds": 31.086,
+        "businessSuccessRpsIncludingDrain": 15.441,
+        "phase": "measurement",
+        "durationSeconds": 30,
+        "demoPeakInFlightObserved": 7
+      },
+      "resources": {
+        "before": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 10.41,
+              "rssKiB": 262432
+            },
+            "control": {
+              "cpuSeconds": 30.07,
+              "rssKiB": 431584
+            },
+            "gateway0": {
+              "cpuSeconds": 25.55,
+              "rssKiB": 475504
+            },
+            "gateway1": {
+              "cpuSeconds": 18.91,
+              "rssKiB": 437328
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.219093,
+            "used_cpu_user": 1.330792,
+            "used_memory": 1339224.0,
+            "used_memory_rss": 14049280.0
+          }
+        },
+        "after": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 11.26,
+              "rssKiB": 264800
+            },
+            "control": {
+              "cpuSeconds": 31.41,
+              "rssKiB": 431776
+            },
+            "gateway0": {
+              "cpuSeconds": 28.81,
+              "rssKiB": 452096
+            },
+            "gateway1": {
+              "cpuSeconds": 19.67,
+              "rssKiB": 441264
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.264804,
+            "used_cpu_user": 1.587342,
+            "used_memory": 1339048.0,
+            "used_memory_rss": 14049280.0
+          }
+        },
+        "cpuWindowSeconds": 31.239,
+        "jvmMeanCpuOneCorePercent": {
+          "demo": 2.721,
+          "control": 4.29,
+          "gateway0": 10.436,
+          "gateway1": 2.433
+        },
+        "redisMeanCpuOneCorePercent": 0.968
+      }
+    },
+    {
+      "summary": {
+        "scheduled": 480,
+        "httpCompleted": 480,
+        "businessSuccess": 281,
+        "businessSuccessRps": 9.367,
+        "businessSuccessRateScheduled": 0.58542,
+        "clientShed": 0,
+        "networkErrors": 0,
+        "statusCounts": {
+          "fast:200": 240,
+          "slow:200": 41,
+          "slow:429": 179,
+          "slow:503": 20
+        },
+        "fastSuccess": {
+          "samples": 240,
+          "meanMs": 5.999,
+          "p50Ms": 5.187,
+          "p95Ms": 11.568,
+          "p99Ms": 18.669
+        },
+        "allSuccess": {
+          "samples": 281,
+          "meanMs": 153.239,
+          "p50Ms": 5.528,
+          "p95Ms": 1016.263,
+          "p99Ms": 1033.482
+        },
+        "allHttp": {
+          "samples": 480,
+          "meanMs": 92.515,
+          "p50Ms": 5.763,
+          "p95Ms": 1012.589,
+          "p99Ms": 1023.012
+        },
+        "group": "GOVERNED",
+        "repetition": 1,
+        "elapsedIncludingDrainSeconds": 30.422,
+        "businessSuccessRpsIncludingDrain": 9.237,
+        "phase": "measurement",
+        "durationSeconds": 30,
+        "demoPeakInFlightObserved": 2
+      },
+      "resources": {
+        "before": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 11.31,
+              "rssKiB": 264800
+            },
+            "control": {
+              "cpuSeconds": 31.64,
+              "rssKiB": 431856
+            },
+            "gateway0": {
+              "cpuSeconds": 29.34,
+              "rssKiB": 452352
+            },
+            "gateway1": {
+              "cpuSeconds": 19.94,
+              "rssKiB": 441616
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.265765,
+            "used_cpu_user": 1.614594,
+            "used_memory": 1375392.0,
+            "used_memory_rss": 14049280.0
+          }
+        },
+        "after": {
+          "jvms": {
+            "demo": {
+              "cpuSeconds": 11.92,
+              "rssKiB": 265072
+            },
+            "control": {
+              "cpuSeconds": 32.98,
+              "rssKiB": 432048
+            },
+            "gateway0": {
+              "cpuSeconds": 31.96,
+              "rssKiB": 453520
+            },
+            "gateway1": {
+              "cpuSeconds": 20.72,
+              "rssKiB": 442224
+            }
+          },
+          "redis": {
+            "used_cpu_sys": 0.327101,
+            "used_cpu_user": 1.910224,
+            "used_memory": 1368968.0,
+            "used_memory_rss": 14049280.0
+          }
+        },
+        "cpuWindowSeconds": 30.62,
+        "jvmMeanCpuOneCorePercent": {
+          "demo": 1.992,
+          "control": 4.376,
+          "gateway0": 8.557,
+          "gateway1": 2.547
+        },
+        "redisMeanCpuOneCorePercent": 1.166
+      }
+    }
+  ],
+  "calibration": [
+    {
+      "localPath": ".local/acceptance/block4-dryrun.json",
+      "passed": false,
+      "runs": [
+        {
+          "scheduled": 120,
+          "httpCompleted": 100,
+          "businessSuccess": 100,
+          "businessSuccessRps": 20.0,
+          "businessSuccessRateScheduled": 0.83333,
+          "clientShed": 20,
+          "networkErrors": 0,
+          "statusCounts": {
+            "slow:CLIENT_SHED": 14,
+            "fast:CLIENT_SHED": 6,
+            "fast:200": 34,
+            "slow:200": 66
+          },
+          "fastSuccess": {
+            "samples": 34,
+            "meanMs": 1880.074,
+            "p50Ms": 2030.012,
+            "p95Ms": 3566.935,
+            "p99Ms": 3691.807
+          },
+          "allSuccess": {
+            "samples": 100,
+            "meanMs": 2487.724,
+            "p50Ms": 2531.111,
+            "p95Ms": 4129.178,
+            "p99Ms": 4628.401
+          },
+          "allHttp": {
+            "samples": 100,
+            "meanMs": 2487.724,
+            "p50Ms": 2531.111,
+            "p95Ms": 4129.178,
+            "p99Ms": 4628.401
+          },
+          "group": "DIRECT",
+          "repetition": 0,
+          "elapsedIncludingDrainSeconds": 9.136,
+          "businessSuccessRpsIncludingDrain": 10.945,
+          "phase": "measurement",
+          "durationSeconds": 5,
+          "demoPeakInFlightObserved": 7
+        },
+        {
+          "scheduled": 120,
+          "httpCompleted": 100,
+          "businessSuccess": 100,
+          "businessSuccessRps": 20.0,
+          "businessSuccessRateScheduled": 0.83333,
+          "clientShed": 20,
+          "networkErrors": 0,
+          "statusCounts": {
+            "slow:CLIENT_SHED": 14,
+            "fast:CLIENT_SHED": 6,
+            "fast:200": 34,
+            "slow:200": 66
+          },
+          "fastSuccess": {
+            "samples": 34,
+            "meanMs": 1875.119,
+            "p50Ms": 2025.67,
+            "p95Ms": 3616.302,
+            "p99Ms": 3701.503
+          },
+          "allSuccess": {
+            "samples": 100,
+            "meanMs": 2486.643,
+            "p50Ms": 2528.626,
+            "p95Ms": 4129.711,
+            "p99Ms": 4631.373
+          },
+          "allHttp": {
+            "samples": 100,
+            "meanMs": 2486.643,
+            "p50Ms": 2528.626,
+            "p95Ms": 4129.711,
+            "p99Ms": 4631.373
+          },
+          "group": "PROXY",
+          "repetition": 0,
+          "elapsedIncludingDrainSeconds": 9.134,
+          "businessSuccessRpsIncludingDrain": 10.948,
+          "phase": "measurement",
+          "durationSeconds": 5,
+          "demoPeakInFlightObserved": 7
+        },
+        {
+          "scheduled": 120,
+          "httpCompleted": 120,
+          "businessSuccess": 48,
+          "businessSuccessRps": 9.6,
+          "businessSuccessRateScheduled": 0.4,
+          "clientShed": 0,
+          "networkErrors": 0,
+          "statusCounts": {
+            "fast:200": 40,
+            "slow:200": 8,
+            "slow:429": 69,
+            "slow:503": 3
+          },
+          "fastSuccess": {
+            "samples": 40,
+            "meanMs": 5.35,
+            "p50Ms": 4.337,
+            "p95Ms": 9.156,
+            "p99Ms": 11.683
+          },
+          "allSuccess": {
+            "samples": 48,
+            "meanMs": 173.823,
+            "p50Ms": 4.963,
+            "p95Ms": 1016.862,
+            "p99Ms": 1036.377
+          },
+          "allHttp": {
+            "samples": 120,
+            "meanMs": 73.381,
+            "p50Ms": 5.41,
+            "p95Ms": 1011.342,
+            "p99Ms": 1021.573
+          },
+          "group": "GOVERNED",
+          "repetition": 0,
+          "elapsedIncludingDrainSeconds": 5.075,
+          "businessSuccessRpsIncludingDrain": 9.457,
+          "phase": "measurement",
+          "durationSeconds": 5,
+          "demoPeakInFlightObserved": 2
+        }
+      ]
+    },
+    {
+      "localPath": ".local/acceptance/block4-dryrun-balanced.json",
+      "passed": true,
+      "runs": [
+        {
+          "scheduled": 80,
+          "httpCompleted": 80,
+          "businessSuccess": 80,
+          "businessSuccessRps": 16.0,
+          "businessSuccessRateScheduled": 1.0,
+          "clientShed": 0,
+          "networkErrors": 0,
+          "statusCounts": {
+            "fast:200": 40,
+            "slow:200": 40
+          },
+          "fastSuccess": {
+            "samples": 40,
+            "meanMs": 76.013,
+            "p50Ms": 38.216,
+            "p95Ms": 167.866,
+            "p99Ms": 171.845
+          },
+          "allSuccess": {
+            "samples": 80,
+            "meanMs": 552.15,
+            "p50Ms": 171.845,
+            "p95Ms": 1045.472,
+            "p99Ms": 1054.877
+          },
+          "allHttp": {
+            "samples": 80,
+            "meanMs": 552.15,
+            "p50Ms": 171.845,
+            "p95Ms": 1045.472,
+            "p99Ms": 1054.877
+          },
+          "group": "DIRECT",
+          "repetition": 0,
+          "elapsedIncludingDrainSeconds": 5.925,
+          "businessSuccessRpsIncludingDrain": 13.501,
+          "phase": "measurement",
+          "durationSeconds": 5,
+          "demoPeakInFlightObserved": 7
+        },
+        {
+          "scheduled": 80,
+          "httpCompleted": 80,
+          "businessSuccess": 80,
+          "businessSuccessRps": 16.0,
+          "businessSuccessRateScheduled": 1.0,
+          "clientShed": 0,
+          "networkErrors": 0,
+          "statusCounts": {
+            "fast:200": 40,
+            "slow:200": 40
+          },
+          "fastSuccess": {
+            "samples": 40,
+            "meanMs": 77.927,
+            "p50Ms": 31.967,
+            "p95Ms": 164.02,
+            "p99Ms": 206.48
+          },
+          "allSuccess": {
+            "samples": 80,
+            "meanMs": 555.157,
+            "p50Ms": 206.48,
+            "p95Ms": 1050.557,
+            "p99Ms": 1111.968
+          },
+          "allHttp": {
+            "samples": 80,
+            "meanMs": 555.157,
+            "p50Ms": 206.48,
+            "p95Ms": 1050.557,
+            "p99Ms": 1111.968
+          },
+          "group": "PROXY",
+          "repetition": 0,
+          "elapsedIncludingDrainSeconds": 5.925,
+          "businessSuccessRpsIncludingDrain": 13.502,
+          "phase": "measurement",
+          "durationSeconds": 5,
+          "demoPeakInFlightObserved": 7
+        },
+        {
+          "scheduled": 80,
+          "httpCompleted": 80,
+          "businessSuccess": 48,
+          "businessSuccessRps": 9.6,
+          "businessSuccessRateScheduled": 0.6,
+          "clientShed": 0,
+          "networkErrors": 0,
+          "statusCounts": {
+            "fast:200": 40,
+            "slow:200": 8,
+            "slow:429": 29,
+            "slow:503": 3
+          },
+          "fastSuccess": {
+            "samples": 40,
+            "meanMs": 6.447,
+            "p50Ms": 5.863,
+            "p95Ms": 11.399,
+            "p99Ms": 14.358
+          },
+          "allSuccess": {
+            "samples": 48,
+            "meanMs": 174.456,
+            "p50Ms": 6.23,
+            "p95Ms": 1018.085,
+            "p99Ms": 1021.293
+          },
+          "allHttp": {
+            "samples": 80,
+            "meanMs": 107.481,
+            "p50Ms": 6.623,
+            "p95Ms": 1013.366,
+            "p99Ms": 1021.293
+          },
+          "group": "GOVERNED",
+          "repetition": 0,
+          "elapsedIncludingDrainSeconds": 5.649,
+          "businessSuccessRpsIncludingDrain": 8.498,
+          "phase": "measurement",
+          "durationSeconds": 5,
+          "demoPeakInFlightObserved": 2
+        }
+      ]
+    }
+  ]
+}

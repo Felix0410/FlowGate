@@ -36,6 +36,26 @@ public class CatalogService {
     public PolicyEntryMapper policies() { return policies; }
     public BindingEntryMapper bindings() { return bindings; }
     public Set<String> allowed() { return allowed; }
+    public record BindingView(Long bindingId, Long policyId, String targetType, Long targetId,
+                              String targetLabel, String targetRouteId) {}
+    /** 产品页只读绑定事实；缺失引用明确显示未知，绝不把principal实体或密钥序列化。 */
+    public List<BindingView> bindingViews(long policyId) {
+        if (policies.selectById(policyId) == null) throw new ApiFailure(404, "NOT_FOUND", "策略不存在");
+        return bindings.selectList(new QueryWrapper<BindingEntry>().eq("policy_id", policyId).orderByAsc("id")).stream().map(binding -> {
+            // 1. 标签只从同一个真实引用取得；没有查询到不猜测目标名称。
+            String label = "目标不存在或未取得", routeId = null;
+            switch (binding.targetType) {
+                case "GLOBAL" -> label = "全局共享预算";
+                case "SERVICE" -> { var value = services.selectById(binding.targetId); if (value != null) label = value.name; }
+                case "API" -> { var value = apis.selectById(binding.targetId); if (value != null) label = value.method + " " + value.publicPath; }
+                case "ROUTE" -> { var value = routes.selectById(binding.targetId); if (value != null) { label = value.routeId; routeId = value.routeId; } }
+                case "CALLER" -> { var value = principals.selectById(binding.targetId); if (value != null && "CALLER".equals(value.principalType)) label = value.username; }
+                default -> { }
+            }
+            // 2. 使用固定只读DTO，不返回完整实体/会话，也不允许通过此接口修改绑定。
+            return new BindingView(binding.id, binding.policyId, binding.targetType, binding.targetId, label, routeId);
+        }).toList();
+    }
     private record Catalog(BaseMapper mapper, Class<?> type) {}
     private Catalog catalog(String kind) {
         return switch (kind) {

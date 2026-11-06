@@ -1,10 +1,10 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **当前：功能块3超时、熔断、受控GET降级、故障恢复和简单业务前端已实现并定向验证，等待ChatGPT/负责人审核。真实浏览器由负责人操作；没有合并main，不启动最终全量/性能验收。**
+> **当前：Block4正式产品后台 `/console/` 的Java/JS/CSS已远端提交，定向Java10项和产品真实HTTP64条有Codex证据，ChatGPT源码静态复审已完成；Caller旧记录缺少安全列表、负责人1280px/375px与键盘实际浏览器体验、产品后全量回归仍待收口。Block4/V1没有最终验收，PR均Draft，main未合并。**
 >
 > 更新：2026-11-06。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
-> 阅读顺序：**本 README → [功能块 3 任务书](docs/progress/block-3-resilience.md) → [Codex 执行提示](CODEX_BLOCK3_PROMPT.md) → [故障演示指南](docs/guides/block3-fault-testing.md) → [现有测试台使用指南](docs/guides/test-console-guide.md)**。历史证据与设计见 [阶段 0 审计](docs/stage-0-audit.md)。
+> 使用入口：**http://127.0.0.1:8081/console/** · [产品操作指南](docs/guides/product-console-guide.md)（页面自带离线帮助）。开发合同：[产品设计与实施记录](docs/design/product-console-v1.md)、[Block4进度](docs/progress/block-4-acceptance.md)。旧 `/test-console/` 保留为开发工具。
 
 ## 1. 核心定位：复用技术，重构业务
 
@@ -191,7 +191,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 5. 完成后整理文件清单、Git 提交、实际运行命令及通过/失败结果、未覆盖风险；可推送**独立功能分支**供复核，但不得直接修改/合并 main 或自行开启下个功能块。需要用户权限的远端操作按本地权限和用户授权处理。
 6. ChatGPT 和负责人审核后的问题在**同一功能块**修复、做相关定向复测；审核通过才开启下一功能块。
 
-**当前入口**：按[功能块3契约](docs/progress/block-3-resilience.md)及[CODEX_BLOCK3_PROMPT.md](CODEX_BLOCK3_PROMPT.md)在`feat/block3-resilience-observability`工作；当前实现等待复审，不开始最终全量验收。
+**当前入口**：Codex首先执行 [CODEX_PRODUCT_CONSOLE_PROMPT.md](CODEX_PRODUCT_CONSOLE_PROMPT.md) 和 [产品设计合同](docs/design/product-console-v1.md)，在已建 test/block4-final-acceptance 分支完成 /console/，保留 /test-console/ 仅供开发验收。UI完成后再执行 [Block4完整验收](CODEX_BLOCK4_PROMPT.md)，不自动合并main。
 
 ### 6.3 按功能块管理任务与开发进度（2026-11-04 新约定）
 
@@ -203,7 +203,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **后端及五区测试台已实现，本地定向验证通过，待人工验收与代码审核** |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | **功能代码及 Codex 定向验证记录已交付；PR #3 Draft，遗留 R1/R2 与真人浏览器 UX 待收口** |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | **代码与 Codex 定向测试证据已交付；PR #4 Draft，ChatGPT 静态复审完成，真人浏览器/最终综合验收待执行** |
-| [最终验收：统一大测试](docs/progress/final-acceptance.md) | 全量回归、跨模块安全、多实例与故障注入、三组性能对照 | 未开始，待全部功能块完成 |
+| [最终验收 / 功能块 4](docs/progress/block-4-acceptance.md) | 产品后台P0、跨模块回归、安全/故障/多实例、三组对照与交付 | **新产品编码和定向验证完成，待负责人浏览器/复审；旧基线实验保留，尚未完成新版最终验收** |
 
 **权威顺序**：README 负责目标与进度索引；`docs/stage-0-audit.md` 负责源码证据、业务设计、历史技术决策；**当前阶段的 `docs/progress/...` 文件优先于旧任务书**，是 Codex 应直接执行的唯一功能块实施契约。
 
@@ -319,6 +319,25 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - [最终综合验收计划](docs/acceptance/final-acceptance-plan.md)：全工程回归、两 Gateway/故障恢复、直连/仅代理/启用治理三组对照、真人业务页面验收、历史版本兼容及 Git stacked PR 顺序交付。**这是待执行的验收设计，不是测试已通过报告。**
 - 代码审核入口 [PR #4](https://github.com/Felix0410/FlowGate/pull/4)，仍为 Draft；不要跳过 PR #1–#3 的依赖关系直接合并到 main。
 
+### 6.9 功能块 4：统一验收与 V1 交付（2026-11-06）
+
+- [Block4 详细实施契约](docs/progress/block-4-acceptance.md)：完整 Java17/Maven 回归、隔离双Gateway故障、安全/历史版本、三组真实性能对照及验收判定，严格区分“工具交付”与“实际通过”。
+- [本地 Codex 执行提示](CODEX_BLOCK4_PROMPT.md)：按 B4-00..06 运行真实命令、记录证据、修复回归问题；不自行选型或合并 main。
+- [统一验收原有大纲](docs/acceptance/final-acceptance-plan.md)：保留完整矩阵；真实结果写 `docs/acceptance/final-results.md`（执行后创建）。
+- [三组对照 Python 脚本](scripts/block4-performance.py) 与 [统计单测](scripts/test-block4-performance.py)：仅使用隔离 Docker、随机端口和现有 Demo/Gateway；DIRECT 直连、PROXY 纯代理、GOVERNED 治理慢请求，报告业务成功 RPS、fast 成功 P95/P99、拒绝和客户端发送失败。原始样本先存本地 `.local/acceptance/`，**不预先填写任何性能收益**。
+- 本地业务页面新增 `http://127.0.0.1:8081/test-console/acceptance.html` 说明入口；不在浏览器触发压测或显示假成绩。原有全部业务操作及离线手册继续保留。
+- 所有 PR 保持 Draft；`test/block4-final-acceptance` 只作为审核分支。项目 V1 必须等真实回归、三组对照、人工 UX 和负责人 Git 审批完毕才能宣布最终完成。
+
+### 6.10 V1 产品管理后台重建设计（2026-11-06，P0）
+
+负责人明确反馈旧测试台“乱七八糟、只有开发者看得懂”，要求V1必须拥有真正可操作的管理后台。该要求覆盖了之前简易测试前端作为最终交付面的最低标准。
+
+- **正式入口（Codex待实现）**：http://127.0.0.1:8081/console/，产品级登录、工作台、服务/API/路由真实列表与新建编辑、四类治理、发布中心、Caller、监控审计。普通操作员不必填写JSON/内部数字ID或理解HTTP调试。
+- **旧开发入口（继续保留）**：http://127.0.0.1:8081/test-console/，继续包含原有HTTP测试、故障演示与离线指南，但不再作为用户日常工作台。
+- [V1产品UI详细设计与后端契约](docs/design/product-console-v1.md)：信息架构、视觉规范、完整业务流程、RBAC、绑定查询接口缺口、响应式和真实验收。
+- [本地Codex产品化编码任务](CODEX_PRODUCT_CONSOLE_PROMPT.md)：PC-00至PC-06，按序实现并定向测试，负责人负责真实浏览器体验。
+- 前端长期规范已更新：[前端同步规范](docs/standards/frontend-sync-rule.md)。**目前只完成产品化设计和交接，新产品UI源码尚未实现**；必须先完成这个P0目标，再继续正式Block4全工程回归与长对照。
+
 ## 7. 风险与未决定事项
 
 阶段 0 确认的是静态源码事实，**没有实际编译、运行、测试或压测**。主要风险：Plus 原限流器使用同步 Redis 和 Servlet，不能直接放在 Gateway；原认证依赖 MVC `ThreadLocal`；原业务错误使用 HTTP 200 包装失败；一些原日志包含演示性质的验证码/令牌；原上游 ShardingSphere 有多数据源与配置敏感项，不可直接复制到公开仓库。
@@ -345,3 +364,11 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - 页面顶部“完整使用手册”打开同源离线说明：`http://127.0.0.1:8081/test-console/guide.html`。14章覆盖启动、首次调用、全部字段/按钮、身份、目录、发布回滚、限速并发、超时熔断、结果解释、常见错误及恢复；每个业务页也有就地说明。修改[权威Markdown手册](docs/guides/test-console-guide.md)后运行`python3 scripts/build-console-guide.py`同步网页，`--check`检查一致性。更新资源后重新构建并重启Control，再刷新页面。
 - 正常启动不增加必填配置。仅演示`/demo/fault`时，在Demo的IDEA环境或本机`.env`显式设`FLOWGATE_DEMO_FAULT_ENABLED=true`；默认关闭。不覆盖现有`.env`、密码或Docker数据。
 - 实际命令/结果/差异见[块3进度第11节](docs/progress/block-3-resilience.md)，[业务前端指南](docs/guides/test-console-guide.md)、[故障保护指南](docs/guides/block3-fault-testing.md)。自动HTTP证据为`docs/progress/evidence/block3-smoke.json`，不含认证头、密码、Token或请求Body。
+
+### 产品后台源码静态复审（2026-11-06）
+
+[产品后台审核报告](docs/reviews/product-console-static-review-2026-11-06.md)：确认实际独立产品入口/业务列表/策略/发布/Caller/监控源码和64条HTTP证据；建议补全历史Caller安全只读列表与按行吊销，待负责人真实浏览器体验；最终全工程回归、性能确认及PR合并均未完成。
+
+### 原验收基线的本机记录
+
+获知产品化新门槛前，Codex按df00937任务书运行了Java34项、隔离HTTP/容量与三组两轮对照，见[历史基线报告](docs/acceptance/final-results.md)。这些结果不含新产品后台，不能作为新版Block4完成的依据。当前先执行产品化合同。

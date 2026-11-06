@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FlowGate 业务管理</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head>
-<body><header><span>FLOWGATE / LOCAL</span><h1>FlowGate 业务管理</h1><p>管理服务和 API、调用方、流量与故障保护策略；发布后可直接调用接口抽查结果。</p><a class="manual-link" href="guide.html#first-run" target="_blank" rel="noopener">第一次使用：跟着完成一次成功调用</a> <a class="manual-link" href="guide.html" target="_blank" rel="noopener">完整使用说明（全部功能）</a></header>
+<body><header><span>FLOWGATE / LOCAL</span><h1>FlowGate 业务管理</h1><p>管理服务和 API、调用方、流量与故障保护策略；发布后可直接调用接口抽查结果。</p><a class="manual-link" href="guide.html#first-run" target="_blank" rel="noopener">第一次使用：跟着完成一次成功调用</a> <a class="manual-link" href="guide.html" target="_blank" rel="noopener">完整使用说明（全部功能）</a> <a class="manual-link" href="acceptance.html" target="_blank" rel="noopener">V1验收与三组性能说明</a></header>
 <nav id="tabs" aria-label="功能导航"></nav><aside id="global-status" aria-live="polite">依赖未检查 · 版本未读取 · 节点未读取</aside><main>
 <section id="quick"><h2>业务概览</h2><aside class="page-help"><p>第一次建议先完成一条成功调用路线，不需要读完所有高级配置。 <a href="guide.html#overview" target="_blank" rel="noopener">本页详细说明与填写示例</a></p><details><summary>本页怎么用：先做什么、再点哪里</summary><ol><li>账号与调用方登录 → 环境状态探测 → 服务/API初始化公共Demo。</li><li>读取当前版本 → 发布 → 确认当前Gateway节点版本一致。</li><li>接口调用中编号123、文字abc，快速查询应为200。</li></ol></details></aside><p>登录后查看已配置的服务与API。保存配置后需发布，节点确认应用后才生效。</p>
 <button id="business-load" data-admin disabled>刷新服务与 API</button><div id="business-list">尚未读取，请先在“账号与调用方”登录。</div>
