@@ -276,3 +276,11 @@ git diff --check
 没有控制浏览器、重启用户应用、修改.env或数据；没有重跑Java后端/全量回归/故障联调。实际浏览器阅读、布局和操作体验仍由负责人抽查，不能以本次自动化代替。使用新版需重新构建并重启Control、刷新业务页面；Gateway/Demo无本次代码变更。Git提交与远端结果见本节后续记录。
 
 本次说明与页面改进提交：`7db9f88`（`docs(console): add complete offline business usage guide`）。随后仅执行`git push origin feat/block3-resilience-observability`，仍返回`Permission to Felix0410/FlowGate.git denied to Felix0410`及HTTP403，未上传成功；保留本地提交，不修改凭据、不推main、不强推。远端仍不能用于查看本次新版手册。
+
+
+### 11.7 2026-11-06 远端源码复审补记（不改写 Codex 本地 403 原始日志）
+
+- GitHub 远端 `feat/block3-resilience-observability` **现已包含实际 Block3 Java/前端/脚本实现**。本轮源码复审起始 SHA=`a460efc2feb7b83116fab20afd0bd2c9739df663`，已存在 PR #4：`https://github.com/Felix0410/FlowGate/pull/4`（Draft，目标是 Block2 实现分支）。上文 11.5/11.6 的 “push HTTP403、远端仍为设计基线”记录的是本地 Codex **当时实际失败的历史事件**，不再代表当前远端状态，不应删除以免丢失运行证据。
+- 已核对主要超时/CircuitBreaker/GET-only 降级、Gateway 缓存恢复、节点上报、原生业务控制台及对应 JUnit/Node 测试源码；`docs/progress/evidence/block3-smoke.json` 确实有 192 条请求、`passed=true`，状态码与 11.3 一致，未见凭证字段。**本次 ChatGPT 未独立在本地执行 Maven、Docker 或浏览器**。
+- 静态审核结论：主要实现闭环已交付，未见需要推翻架构的阻断项；但 **Block3 不等于最终验收通过**。必须由负责人检查真实浏览器、响应/发布体验、桌面/窄屏/权限；项目最后阶段再统一跑全模块、两 Gateway、完整故障与三组真实性能对照。频繁变更 CB revision 对 Resilience4j 注册表实例数/内存的长期影响仍需最小观察。
+- 详细审查见 `docs/reviews/block-3-static-review-2026-11-06.md`；最终综合验收**计划（尚未执行）**见 `docs/acceptance/final-acceptance-plan.md`。保持 PR Draft、不擅自合并 main。下一步由负责人决定何时启动最终执行，任何未运行项不得填写“已通过”。
