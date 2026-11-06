@@ -79,7 +79,7 @@
 - Gateway→Control 内部 quota 接口必须独立于 /admin 对外管理 API，绑定受限内部网段/端口或至少验证环境变量服务身份密钥、TLS/隔离网络；不得经公开可配置路由代理该内部接口，也不得直接相信 Caller 传的 X-App-Id。服务密钥仅从环境注入，日志不记录凭证。
 - Gateway 把**已验证**的 principalId、可信 route/API 标识、chargeId 与 appliedVersion 传给内部配额服务。Control 从数据库确认 principal→app 绑定、应用/客户/订阅状态、具体计量 API 和单位数；不能仅凭报文字段扣另一个应用余额。
 - 控制面中的计量策略只允许在已发布快照上启用；Gateway 解析同版本规则；Rule/Route 构造需要显式支持新策略，不能套用现有 RateLimit 的 capacity/refill 字段。
-- 下线应用的计量访问立即在数据库授权步骤被拒绝；同时尽最大可能原子撤销已有 Redis Caller Token。历史非计量路由需要明确处理应用凭证：首版**应用专用 Token 只允许对带 USAGE_QUOTA 的受保护路由使用**；旧 CALLER 的既有路由调用规则不变，防止应用被停用后通过旧非计量路由绕开账本。
+- 下线应用的计量访问立即在数据库授权步骤被拒绝；同时尽最大可能撤销已有 Redis Caller Token（DB+Redis 不可宣称跨系统原子）。历史非计量路由需要明确处理应用凭证：首版**应用专用 Token 只允许对带 USAGE_QUOTA 的受保护路由使用**；旧 CALLER 的既有路由调用规则不变，防止应用被停用后通过旧非计量路由绕开账本。**分阶段安全门槛：A 阶段只实现应用/主体映射及凭证入口但不签发可用 app Token（返回 FEATURE_NOT_READY），B 阶段 app-only 策略与配额授权同时上线后才允许首次签发。**
 - 配额授权建议 403 APP_DISABLED/NO_ACTIVE_SUBSCRIPTION；额度不足 429 QUOTA_EXHAUSTED；内部依赖故障 503 QUOTA_UNAVAILABLE；未知业务条件不要吞成 200。错误体沿用现有 requestId 语义。
 - UTC 期间边界按数据库 UTC 时钟/明确统一 clock 决定（不得信任客户端日期）；允许测试时注入时钟，跨时区和月末并发均有断言；不能用 TTL 当作唯一的余额重置机制。
 - 管理端严禁普通 VIEWER 改配额；所有变更与关键操作应入审计，Caller Token 明文仅创建/轮换时一次展示且不进入 Kafka 或 Git 日志。
