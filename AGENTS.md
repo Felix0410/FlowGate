@@ -1,27 +1,33 @@
-# FlowGate｜本地 Codex 唯一当前执行入口
+# FlowGate｜当前本地 Codex 唯一入口
 
-> **2026-11-06：负责人已授权功能块 4——最终综合验收与 FlowGate V1 交付收口**。Block0–3 实现代码与分块定向测试已有记录，Block4 的脚本/任务文档在独立功能分支上；**全项目统一测试、正式三组性能对照和负责人浏览器体验尚未运行，绝不能写成已验收通过**。
+> **2026-11-06 最新负责人要求：V1 正式交付之前，把目前仅开发者能看懂的测试台，改造成真正可用的产品管理后台。**
+> 因此 **当前首要工作是PC-00..PC-06产品后台开发**，不是先跑正式三组性能实验，也不是继续堆调试按钮。Block0–3 业务代码已有；Block4 综合验收已授权但须在产品页交付后执行。
+> 本文是统一仓库入口，技术/交互的唯一权威详细合同为 `docs/design/product-console-v1.md`，实施提示为 `CODEX_PRODUCT_CONSOLE_PROMPT.md`。
 
-## 1. 唯一当前任务
+## 1. 先做的产品改造
 
-- 远端分支已建：`test/block4-final-acceptance`，从 `feat/block3-resilience-observability` 的已提交实现创建，当前 PR #1–#4 全是 Draft。先核对本地/远端 SHA 与未提交改动，再安全检出远端分支，不从旧 main 新建。
-- 唯一详细任务契约：[Block4 最终综合验收](docs/progress/block-4-acceptance.md)。
-- 唯一交接提示：[CODEX_BLOCK4_PROMPT.md](CODEX_BLOCK4_PROMPT.md)。
-- 原有验收大纲：[最终验收计划](docs/acceptance/final-acceptance-plan.md)、[旧阶段摘要](docs/progress/final-acceptance.md)。
-- 操作说明：[业务前端指南](docs/guides/test-console-guide.md) 与 [故障演示指南](docs/guides/block3-fault-testing.md)；业务页 `/test-console/` 已有 `acceptance.html` 验收说明入口，不运行压测、不存Token。
+- 远端分支：`test/block4-final-acceptance`（保留 Block0–3 实现和 Block4 现有脚本）。`git status -sb`、`git fetch origin`，核对差异后安全检出；**不要从main重新创建，不覆盖用户修改**。
+- **优先阅读**：
+  1. `docs/design/product-console-v1.md`（真实产品后台的导航、业务流程、CRUD、状态、安全、UI、测试与完成标准）。
+  2. `CODEX_PRODUCT_CONSOLE_PROMPT.md`（PC-00..06本地可执行任务）。
+  3. `docs/progress/block-4-acceptance.md` 第0节（先产品化、后正式验收）。
+  4. `docs/standards/frontend-sync-rule.md`、`docs/guides/test-console-guide.md` 与实际后端Controller/实体模型。
+- 新产品主入口 `/console/`：独立登录页、左侧导航与工作台、服务/API/路由列表与完整表单、四类规则、发布回滚、Caller、节点/指标/审计，真实版本/权限/空状态/报错。
+- 旧 `/test-console/` 原样保留所有功能，明确定位为开发/验收工具；不把HTTP调试堆在新产品首页。若只读绑定查询确实缺少，可按合同最小扩展现有Control GET API并定向测试，无新数据库/新后端服务。
+- 没有产品前端完整可操作、定向测试、使用指南和负责人浏览器反馈前，**不启动Block4正式三组长对照**，不把“用户体验已通过”写进进度。
+- 正常代码提交到该分支：`feat(console): ...`、`test(console): ...`、`docs(console): ...`，更新阶段文件与README，交由ChatGPT/负责人审核。
 
-## 2. 现在按顺序完成
+## 2. 完成产品化后才继续Block4
 
-1. 保护本地 `.env`、未提交源码、IDE JVM、用户Docker数据库/卷，固定Java17与Git SHA；禁止 `reset --hard`、`clean -fd`、`docker prune`、强推。
-2. 全工程 Maven `verify`，Node 模拟DOM、离线HTML指南检查、Python 统计单测；保留真实成功/失败/未执行数字。
-3. 使用现有隔离Lab复测 Block1/2/3 业务 HTTP/身份/版本/限流/熔断/故障；不能让老脚本固定端口连接用户持久化MySQL。
-4. 执行已提交的 `scripts/block4-performance.py`：先短冒烟，再**真实DIRECT/PROXY/GOVERNED三组 × 两轮**，区分成功RPS、拒绝和客户端丢弃；原始结果写本地 `.local/acceptance/`，脱敏后才允许摘要入库。
-5. 有界检查CB不同revision累积、缓存刷新、断联恢复和并发许可；如发现缺陷仅最小修对应Block代码，定向复测再补必要整体回归。
-6. 前端维持已实现全部业务按钮、真实状态和14章离线指南；新验收说明只负责用户看步骤/模式，不用JS发起压测。真人浏览器/窄屏/角色体验由负责人完成，Codex只记录待执行与反馈。
-7. `docs/acceptance/final-results.md` 填写真正运行的命令/退出码/指标和未执行项，同步本阶段进度、README、Git提交SHA。功能分支 Conventional Commits，先交复审，**不得自行把任何PR合并main或宣布V1验收完成**。
+1. 读取 `CODEX_BLOCK4_PROMPT.md`、`docs/progress/block-4-acceptance.md`（B4-00..06），隔离环境运行 Maven 全工程回归、旧HTTP实测与真正DIRECT/PROXY/GOVERNED三组性能对照；
+2. 保留 `scripts/block4-performance.py` 和统计单测的真实运行数据，不能把HTTP429/503作为成功吞吐或用旧Block2短实验替代正式三组；
+3. 真人浏览器 1280px/375px、键盘、权限/草稿/发布/回滚由负责人操作，Codex只做自动/真实HTTP测试并记录人工“待执行”，收到反馈后修复；
+4. 最终真实结果 `docs/acceptance/final-results.md`，PR仍Draft，不合并main或标记V1完成，必须由负责人明确审批。
 
-## 3. 长期代码与验证原则
+## 3. 永久约束
 
-Java17+Boot4+Gateway WebFlux/Control MVC/MyBatis+Redis/Lua+Micrometer+Resilience4j；不引入Kafka/Nacos/Sentinel/新前端工程；Gateway热路径不阻塞。重要代码中文注释，长流程按 `// 1.`、`// 2.`、`// 3.` 分点。敏感信息/测试日志不提交；测试结果必须以真实运行和证据为准。
+只复用 Java17、Spring Boot4、Gateway WebFlux、Control MVC/MyBatis、Redis/Lua、Micrometer/Resilience4j。前端继续原生 HTML/CSS/JS ES modules，**不引入Vue/React/npm/Vite/复杂UI框架**；设计质量来自信息架构和交互正确性，不是框架数量。Token只存在JS内存；不把控制面 `/internal/**` 或内部密钥暴露网页，不伪造任何在线/已应用/策略已生效。
 
-**启动：直接阅读 `CODEX_BLOCK4_PROMPT.md` 并按 `docs/progress/block-4-acceptance.md` 执行。**
+重要 Java/JS 业务逻辑有准确中文注释，长流程 `// 1.`、`// 2.`、`// 3.`；只执行变更范围自动化测试，完整大回归留到产品化完成后。保护用户IDE进程、个人Docker/数据库卷、`.env` 与本地未提交修改；禁止 `reset --hard`、`clean -fd`、`docker prune`、强推和自行合并main。
+
+**现在开始执行：`CODEX_PRODUCT_CONSOLE_PROMPT.md`，先完成真正的业务产品界面。**
