@@ -1,10 +1,10 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **当前：功能块3超时、熔断、受控GET降级、故障恢复和简单业务前端已实现并定向验证，等待ChatGPT/负责人审核。真实浏览器由负责人操作；没有合并main，不启动最终全量/性能验收。**
+> **当前：负责人已授权功能块 4——最终综合验收和 V1 交付。功能块 0–3 的代码已提交、分块测试有记录；Block4 的统一验收任务书、固定到达三组性能脚本、业务页验收说明已写入独立分支。全项目回归、真实三组负载及负责人浏览器验收尚待在本地执行，PR 仍 Draft，main 未合并。**
 >
 > 更新：2026-11-06。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
-> 阅读顺序：**本 README → [功能块 3 任务书](docs/progress/block-3-resilience.md) → [Codex 执行提示](CODEX_BLOCK3_PROMPT.md) → [故障演示指南](docs/guides/block3-fault-testing.md) → [现有测试台使用指南](docs/guides/test-console-guide.md)**。历史证据与设计见 [阶段 0 审计](docs/stage-0-audit.md)。
+> 阅读顺序：**本 README → [功能块 4 任务书](docs/progress/block-4-acceptance.md) → [Block4 Codex 提示词](CODEX_BLOCK4_PROMPT.md) → [最终验收计划](docs/acceptance/final-acceptance-plan.md) → [业务页面说明](docs/guides/test-console-guide.md)**。历史依据见 [阶段 0 审计](docs/stage-0-audit.md)。
 
 ## 1. 核心定位：复用技术，重构业务
 
@@ -191,7 +191,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 5. 完成后整理文件清单、Git 提交、实际运行命令及通过/失败结果、未覆盖风险；可推送**独立功能分支**供复核，但不得直接修改/合并 main 或自行开启下个功能块。需要用户权限的远端操作按本地权限和用户授权处理。
 6. ChatGPT 和负责人审核后的问题在**同一功能块**修复、做相关定向复测；审核通过才开启下一功能块。
 
-**当前入口**：按[功能块3契约](docs/progress/block-3-resilience.md)及[CODEX_BLOCK3_PROMPT.md](CODEX_BLOCK3_PROMPT.md)在`feat/block3-resilience-observability`工作；当前实现等待复审，不开始最终全量验收。
+**当前入口**：本地 Codex 阅读 [功能块 4 任务契约](docs/progress/block-4-acceptance.md) 与 [CODEX_BLOCK4_PROMPT.md](CODEX_BLOCK4_PROMPT.md)，从远端已有 `test/block4-final-acceptance` 安全检出。已授权执行最终大测试与三组对照，但真人浏览器验收须负责人操作，任何 PR 合并 main 仍需单独授权。
 
 ### 6.3 按功能块管理任务与开发进度（2026-11-04 新约定）
 
@@ -203,7 +203,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **后端及五区测试台已实现，本地定向验证通过，待人工验收与代码审核** |
 | [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | **功能代码及 Codex 定向验证记录已交付；PR #3 Draft，遗留 R1/R2 与真人浏览器 UX 待收口** |
 | [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | **代码与 Codex 定向测试证据已交付；PR #4 Draft，ChatGPT 静态复审完成，真人浏览器/最终综合验收待执行** |
-| [最终验收：统一大测试](docs/progress/final-acceptance.md) | 全量回归、跨模块安全、多实例与故障注入、三组性能对照 | 未开始，待全部功能块完成 |
+| [最终验收 / 功能块 4](docs/progress/block-4-acceptance.md) | 跨模块全量回归、安全/故障/多实例、DIRECT/PROXY/GOVERNED三组对照与交付 | **已授权；实施任务、性能脚本/统计单测/验收页面已提交，真实全量验收待本地执行** |
 
 **权威顺序**：README 负责目标与进度索引；`docs/stage-0-audit.md` 负责源码证据、业务设计、历史技术决策；**当前阶段的 `docs/progress/...` 文件优先于旧任务书**，是 Codex 应直接执行的唯一功能块实施契约。
 
@@ -318,6 +318,15 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - [Block3 源码复核报告](docs/reviews/block-3-static-review-2026-11-06.md)：确认功能块 3 真实源码和 192 条 HTTP 证据存在，主要业务闭环已交付；ChatGPT 未独立执行本地 Maven/浏览器，真实页面体验及跨阶段统一回归待执行。
 - [最终综合验收计划](docs/acceptance/final-acceptance-plan.md)：全工程回归、两 Gateway/故障恢复、直连/仅代理/启用治理三组对照、真人业务页面验收、历史版本兼容及 Git stacked PR 顺序交付。**这是待执行的验收设计，不是测试已通过报告。**
 - 代码审核入口 [PR #4](https://github.com/Felix0410/FlowGate/pull/4)，仍为 Draft；不要跳过 PR #1–#3 的依赖关系直接合并到 main。
+
+### 6.9 功能块 4：统一验收与 V1 交付（2026-11-06）
+
+- [Block4 详细实施契约](docs/progress/block-4-acceptance.md)：完整 Java17/Maven 回归、隔离双Gateway故障、安全/历史版本、三组真实性能对照及验收判定，严格区分“工具交付”与“实际通过”。
+- [本地 Codex 执行提示](CODEX_BLOCK4_PROMPT.md)：按 B4-00..06 运行真实命令、记录证据、修复回归问题；不自行选型或合并 main。
+- [统一验收原有大纲](docs/acceptance/final-acceptance-plan.md)：保留完整矩阵；真实结果写 `docs/acceptance/final-results.md`（执行后创建）。
+- [三组对照 Python 脚本](scripts/block4-performance.py) 与 [统计单测](scripts/test-block4-performance.py)：仅使用隔离 Docker、随机端口和现有 Demo/Gateway；DIRECT 直连、PROXY 纯代理、GOVERNED 治理慢请求，报告业务成功 RPS、fast 成功 P95/P99、拒绝和客户端发送失败。原始样本先存本地 `.local/acceptance/`，**不预先填写任何性能收益**。
+- 本地业务页面新增 `http://127.0.0.1:8081/test-console/acceptance.html` 说明入口；不在浏览器触发压测或显示假成绩。原有全部业务操作及离线手册继续保留。
+- 所有 PR 保持 Draft；`test/block4-final-acceptance` 只作为审核分支。项目 V1 必须等真实回归、三组对照、人工 UX 和负责人 Git 审批完毕才能宣布最终完成。
 
 ## 7. 风险与未决定事项
 
