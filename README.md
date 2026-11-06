@@ -1,10 +1,10 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **当前：负责人已授权功能块2；限速、本机并发、热点小对照及测试台改造已在独立功能分支实现并定向验证，浏览器人工可用性及ChatGPT/负责人最终审核待完成。未合并main，不进入块3。**
+> **当前：负责人已授权功能块 3（超时、熔断、降级、故障恢复、指标）。Block2 主要功能代码及本地定向测试记录已交付，但旧版控制台/路由缓存两项审核事项与负责人浏览器验收尚需收口；Block3 的任务书与 Codex 提示词已写入 `feat/block3-resilience-observability`，Block3 业务代码尚未实现。所有 PR 仍保持 Draft，未合并 main。**
 >
-> 更新：2026-11-05。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
+> 更新：2026-11-06。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
-> 阅读顺序：**本 README → [功能块2任务书](docs/progress/block-2-traffic.md) → [测试台指南](docs/guides/test-console-guide.md) → [Codex 执行说明](CODEX_BLOCK2_PROMPT.md)**。历史源码证据与业务设计见 [阶段 0 审计](docs/stage-0-audit.md)。
+> 阅读顺序：**本 README → [功能块 3 任务书](docs/progress/block-3-resilience.md) → [Codex 执行提示](CODEX_BLOCK3_PROMPT.md) → [故障演示指南](docs/guides/block3-fault-testing.md) → [现有测试台使用指南](docs/guides/test-console-guide.md)**。历史证据与设计见 [阶段 0 审计](docs/stage-0-audit.md)。
 
 ## 1. 核心定位：复用技术，重构业务
 
@@ -191,7 +191,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 5. 完成后整理文件清单、Git 提交、实际运行命令及通过/失败结果、未覆盖风险；可推送**独立功能分支**供复核，但不得直接修改/合并 main 或自行开启下个功能块。需要用户权限的远端操作按本地权限和用户授权处理。
 6. ChatGPT 和负责人审核后的问题在**同一功能块**修复、做相关定向复测；审核通过才开启下一功能块。
 
-**当前入口**：执行[功能块2契约](docs/progress/block-2-traffic.md)与根目录[CODEX_BLOCK2_PROMPT.md](CODEX_BLOCK2_PROMPT.md)；实现分支`feat/block2-traffic-governance`基于块1缓存恢复修复。不要从旧main另起功能实现。
+**当前入口**：执行 [功能块 3 任务契约](docs/progress/block-3-resilience.md) 与根目录 [CODEX_BLOCK3_PROMPT.md](CODEX_BLOCK3_PROMPT.md)，从**远端已有**的 `feat/block3-resilience-observability` 检出。先处理 Block2 R1 编辑目标误导、R2 取消/缓存恢复竞态，再接入超时熔断；不要从旧 main 创建功能分支。
 
 ### 6.3 按功能块管理任务与开发进度（2026-11-04 新约定）
 
@@ -201,8 +201,8 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 |---|---|---|
 | [功能块 0：基础网关与代理](docs/progress/block-0-gateway.md) | 双进程、静态路由、三类 Demo API、Trace/指标与定向测试 | **源码静态审查通过，待负责人验收；提交已在 main、无 PR** |
 | [功能块 1：管理、身份、动态发布](docs/progress/block-1-control.md) | Control、身份、API/路由、CAS 版本发布与回滚、动态鉴权、简易测试前端 | **后端及五区测试台已实现，本地定向验证通过，待人工验收与代码审核** |
-| [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | 未开始，待 Block1 审核 |
-| [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | 未开始，待 Block2 审核 |
+| [功能块 2：限流、并发与热点隔离](docs/progress/block-2-traffic.md) | Lua 单 Key 限速、分级配额语义、本机许可、热点小实验 | **功能代码及 Codex 定向验证记录已交付；PR #3 Draft，遗留 R1/R2 与真人浏览器 UX 待收口** |
+| [功能块 3：可靠性与监控](docs/progress/block-3-resilience.md) | 超时/熔断/降级、配置与 Redis 故障模式、指标 | **负责人已授权；任务文档/提示词/指南已提交，业务代码尚未开始** |
 | [最终验收：统一大测试](docs/progress/final-acceptance.md) | 全量回归、跨模块安全、多实例与故障注入、三组性能对照 | 未开始，待全部功能块完成 |
 
 **权威顺序**：README 负责目标与进度索引；`docs/stage-0-audit.md` 负责源码证据、业务设计、历史技术决策；**当前阶段的 `docs/progress/...` 文件优先于旧任务书**，是 Codex 应直接执行的唯一功能块实施契约。
@@ -301,6 +301,17 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - [Block2 Codex 预备提示词](CODEX_BLOCK2_PROMPT.md)：记录授权门槛与固定实施顺序，不自动进入块3。
 
 从 Block2 开始，前端可用性不是附属外观，而是每次功能块的**强制验收项**：普通使用者应能在中文帮助下独立完成 Demo，并能分辨“草稿”“PERSISTED”“节点已应用”“策略真正执行”。
+
+### 6.7 功能块 3 开发入口（2026-11-06，已授权但尚未实现）
+
+开发分支：`feat/block3-resilience-observability`，基于远端 Block2 代码创建。**这不是独立空工程**，请 Codex 优先读取根目录 `AGENTS.md` 和 `CODEX_BLOCK3_PROMPT.md`，而不是照旧的 Block2 提示重新开发已完成的限速/并发。
+
+- [功能块 3 V2.0 全量任务书](docs/progress/block-3-resilience.md)：先修 Block2 两项遗留，再在既有路由快照上落地 TIMEOUT、CIRCUIT_BREAKER、GET-only 静态降级、恢复和监控。明确 504、503、GET fallback 的区分、版本/回滚安全和小范围定向验证。
+- [本地 Codex 执行提示词](CODEX_BLOCK3_PROMPT.md)：按 B3-00 至 B3-06 顺序编码，复杂流程中文编号注释，仅运行直接受影响的测试；代码和前端随阶段同步提交到 Block3 feature 分支。
+- [功能块 3 中文故障演示操作指南](docs/guides/block3-fault-testing.md)：从配置/发布到超时、开路、半开恢复、降级、Redis/Control 故障的步骤与预期结果。**目前属于待实现演示说明，不是已完成的实测记录**。
+- [测试台现有完整使用指南](docs/guides/test-console-guide.md)：继续保留 Block0/1/2 的 fast/echo/slow、身份/路由、限流/并发测试；新增故障保护页签及清晰的状态/错误说明。
+
+**硬性边界**：Block2 PR #3 仍 Draft，用户的浏览器可用性反馈以及静态审查 R1/R2 要在本块第一步解决；若路由缓存版本一致性无法证明，暂停接入熔断并报告。当前状态不是最终验收通过，禁止直接合并 main，也不进行项目最终统一性能压测。
 
 ## 7. 风险与未决定事项
 
