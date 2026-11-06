@@ -27,6 +27,8 @@
 
 ## B-03 内部接口和安全
 
+B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/apps/{id}/credentials 的正式签发/轮换与吊销；不得让新应用的活跃 Caller Token 访问无 USAGE_QUOTA 的旧受保护路由。检查 app status/订阅为 DB 权威条件，暂停后拒绝所有计量授权，现有旧 Caller 使用规则不变。
+
 新增 POST /internal/quota/charge：仅 Gateway 可信内部调用，可由环境配置的服务身份 + 网络隔离校验；在 Control 与 Gateway 同网段内对抗伪造/重放，密钥不得打印或直接写入脚本；公网 /admin、API Route 和 Caller 均不能调用它。对于同一 chargeId，校验身份与业务字段的一致性。业务码区分 403 无订阅/停用、429 配额耗尽、409 幂等冲突、503 内部依赖不可用。
 
 ## B-04 最低验收
