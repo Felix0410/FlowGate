@@ -11,6 +11,17 @@ spec.loader.exec_module(benchmark)
 
 
 class BenchmarkStatsTest(unittest.TestCase):
+    def test_cpu_delta_uses_elapsed_time_and_preserves_rss(self):
+        self.assertEqual(benchmark.cpu_seconds('1-02:03:04.50'), 93784.5)
+        before = {'jvms': {'demo': {'cpuSeconds': 10, 'rssKiB': 100}},
+                  'redis': {'used_cpu_sys': 1, 'used_cpu_user': 2}}
+        after = {'jvms': {'demo': {'cpuSeconds': 11, 'rssKiB': 120}},
+                 'redis': {'used_cpu_sys': 1.1, 'used_cpu_user': 2.1}}
+        delta = benchmark.resource_delta(before, after, 2)
+        self.assertEqual(delta['jvmMeanCpuOneCorePercent']['demo'], 50)
+        self.assertEqual(delta['redisMeanCpuOneCorePercent'], 10)
+        self.assertEqual(delta['after']['jvms']['demo']['rssKiB'], 120)
+
     def test_rejections_and_client_shed_do_not_raise_business_success(self):
         rows = [{"kind": "fast", "status": 200, "latencyMs": 10},
                 {"kind": "fast", "status": 200, "latencyMs": 30},

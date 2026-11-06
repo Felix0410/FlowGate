@@ -4,11 +4,13 @@ import argparse
 import concurrent.futures
 from datetime import datetime, timezone
 import importlib.util
+import hashlib
 import json
 import math
 import os
 from pathlib import Path
 import platform
+import subprocess
 import threading
 import time
 
@@ -30,6 +32,43 @@ def percentile(numbers, fraction):
     return round(values[max(0, math.ceil(len(values) * fraction) - 1)], 3)
 
 
+def cpu_seconds(value):
+    """解析macOS/Linux ps累计CPU时间；只用前后差值，不把累计百分比当稳态负载。"""
+    days, clock = value.split('-') if '-' in value else ('0', value)
+    parts = [float(part) for part in clock.split(':')]
+    return int(days) * 86400 + sum(part * 60 ** index for index, part in enumerate(reversed(parts)))
+
+
+def resources(lab):
+    # 1. 仅采样本Lab自己的PID与Redis；失败明确记录未采集，不影响请求统计。
+    result = {'jvms': {}, 'redis': {}}
+    for role, process in zip(('demo', 'control', 'gateway0', 'gateway1'), lab.processes):
+        try:
+            fields = subprocess.check_output(['ps', '-p', str(process.pid), '-o', 'time=,rss='], text=True).split()
+            result['jvms'][role] = {'cpuSeconds': cpu_seconds(fields[0]), 'rssKiB': int(fields[1])}
+        except (OSError, ValueError, subprocess.CalledProcessError, IndexError):
+            result['jvms'][role] = {'unavailable': True}
+    try:
+        info = dict(line.split(':', 1) for line in lab.redis('INFO').splitlines() if ':' in line)
+        result['redis'] = {key: float(info[key]) for key in
+                           ('used_cpu_sys', 'used_cpu_user', 'used_memory', 'used_memory_rss')}
+    except (OSError, ValueError, KeyError, subprocess.CalledProcessError):
+        result['redis'] = {'unavailable': True}
+    return result
+
+
+def resource_delta(before, after, elapsed):
+    result = {'before': before, 'after': after, 'cpuWindowSeconds': round(elapsed, 3), 'jvmMeanCpuOneCorePercent': {}}
+    for role, end in after['jvms'].items():
+        start = before['jvms'].get(role, {})
+        if 'cpuSeconds' in start and 'cpuSeconds' in end:
+            result['jvmMeanCpuOneCorePercent'][role] = round(100 * (end['cpuSeconds'] - start['cpuSeconds']) / elapsed, 3)
+    if 'used_cpu_sys' in before['redis'] and 'used_cpu_sys' in after['redis']:
+        result['redisMeanCpuOneCorePercent'] = round(100 * sum(after['redis'][key] - before['redis'][key]
+            for key in ('used_cpu_sys', 'used_cpu_user')) / elapsed, 3)
+    return result
+
+
 def summarize(records, seconds):
     # 2. 成功RPS与HTTP总完成数、429/503以及客户端未发送的负载明确分开。
     completed = [r for r in records if isinstance(r.get("status"), int)]
@@ -40,13 +79,14 @@ def summarize(records, seconds):
         counts[key] = counts.get(key, 0) + 1
     result = {"scheduled": len(records), "httpCompleted": len(completed),
               "businessSuccess": len(success), "businessSuccessRps": round(len(success) / seconds, 3),
+              "businessSuccessRateScheduled": round(len(success) / len(records), 5) if records else None,
               "clientShed": sum(r.get("status") == "CLIENT_SHED" for r in records),
               "networkErrors": sum(r.get("status") == "NETWORK_ERROR" for r in records),
               "statusCounts": counts}
     for key, sample in (("fastSuccess", [r for r in success if r["kind"] == "fast"]),
                         ("allSuccess", success), ("allHttp", completed)):
         latencies = [r["latencyMs"] for r in sample]
-        result[key] = {"samples": len(latencies), "p50Ms": percentile(latencies, .50),
+        result[key] = {"samples": len(latencies), "meanMs": round(sum(latencies) / len(latencies), 3) if latencies else None, "p50Ms": percentile(latencies, .50),
                        "p95Ms": percentile(latencies, .95), "p99Ms": percentile(latencies, .99)}
     return result
 
@@ -67,6 +107,8 @@ def run_group(lab, group, args, repetition, warmup=False):
     base = direct if group == "DIRECT" else lab.gateways[0]
     slots = threading.BoundedSemaphore(args.max_inflight)
     records, observations = [], []
+    resource_started = time.monotonic()
+    before = resources(lab)
     started = time.monotonic()
     deadline = started + seconds
 
@@ -111,13 +153,18 @@ def run_group(lab, group, args, repetition, warmup=False):
             records.append(future.result())
         watcher.result()
 
+    elapsed = time.monotonic() - started
+    after = resources(lab)
+    resource_elapsed = time.monotonic() - resource_started
     summary = summarize(records, seconds)
     summary.update({"group": group, "repetition": repetition,
+                    "elapsedIncludingDrainSeconds": round(elapsed, 3),
+                    "businessSuccessRpsIncludingDrain": round(summary['businessSuccess'] / elapsed, 3),
                     "phase": "warmup" if warmup else "measurement", "durationSeconds": seconds,
                     "demoPeakInFlightObserved": max((o["inFlight"] for o in observations), default=None)})
     return {"summary": summary,
             "requests": sorted(records, key=lambda r: (r["plannedAtSeconds"], r["kind"])),
-            "observations": observations}
+            "observations": observations, 'resources': resource_delta(before, after, resource_elapsed)}
 
 
 def set_governance(lab, policies, enabled):
@@ -176,7 +223,8 @@ def main():
             result = run_group(lab, "GOVERNED", args, rep)
             results.append(result)
             print(json.dumps(result["summary"], ensure_ascii=False), flush=True)
-        passed = True
+        # 3. 完整执行仍可能被客户端丢负载/网络错误破坏公平性；不能只因脚本没抛异常标通过。
+        passed = all(result['summary']['clientShed'] == 0 and result['summary']['networkErrors'] == 0 for result in results)
     finally:
         lab.close()
         # 3. 中途失败仍保留已取得的样本、标记passed=false；不将局部样本冒充完整结果。
@@ -184,6 +232,9 @@ def main():
         payload = {"schemaVersion": 1, "passed": passed, "startedAt": started_at,
                    "finishedAt": datetime.now(timezone.utc).isoformat(),
                    "environment": {"platform": platform.platform(),
+                                   "sourceGitSha": subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                                   "scriptSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                                   "javaVersion": subprocess.run([str(Path(os.environ['JAVA_HOME']) / 'bin/java'), '-version'], capture_output=True, text=True, check=True).stderr.strip(),
                                    "demoTomcatThreads": 8, "gatewayInstances": 2,
                                    "requestedConfig": {name: getattr(args, name) for name in bounds},
                                    "loadModel": "fixed-arrival open-loop; bounded client in-flight"},
@@ -191,6 +242,8 @@ def main():
                        "直连无Gateway，代理组为公开路由；协议栈开销需独立解释",
                        "CLIENT_SHED是客户端未送达，绝不能视为网关429/503",
                        "Demo观测请求也占用共享Tomcat线程；此处仅为开发机对照",
+                       "businessSuccessRps按发送窗口归一，包含窗口后的收尾；同时报告含收尾耗时的RPS",
+                       "CPU取累计CPU秒差/采样墙钟；RSS仅前后采样，不等同峰值；预热不计正式样本",
                        "P99样本少时不稳；总HTTP与业务成功P95分别计算",
                        "本机并发限制不是两个Gateway共享的总上限"], "runs": results}
         with output.open("x", encoding="utf-8") as stream:
