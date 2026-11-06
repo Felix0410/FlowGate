@@ -263,3 +263,13 @@ git diff --check
 执行且仅执行`git push origin test/block4-final-acceptance`，GitHub返回：`Permission to Felix0410/FlowGate.git denied to Felix0410`，HTTP403，**本轮新提交未推送成功**。最近fetch远端仍`823556f8ce744707bb02ace4ddf813053d25a1fe`，不含本轮/console/实现。没有改推main、强推、变更Git凭据或用不同历史覆盖远端。保留本地全部提交，远端产品代码交付受写权限阻塞；不声称已有包含本次产品实现的新PR/CI。
 
 代码已在本地打包。使用时在当前分支重新启动Control，再打开`http://127.0.0.1:8081/console/`；Demo/Gateway/数据库仍按原配置。没有为展示新版页面自动启动或重启负责人应用。当前只等待复审/负责人体验，功能块4整体验收尚未完成。
+
+
+### 5.5 2026-11-06 ChatGPT远端代码复审（更新旧push403的现时状态）
+
+- **远端当前事实已改变**：GitHub的 `test/block4-final-acceptance` 现在包含产品主实现 `075878747ea45590cefda41f6fcd185cc163afa2`、产品后续证据与源码、独立 `/console/`、只读绑定GET、Node/Java/Python脚本。此轮复审开始时远端SHA=`2ac5998c2aa55b1a66efbbd012035474c6ac652b`，PR #5为Draft、base仍为Block3分支。第5.4节的Git push HTTP403是Codex**当时的真实失败记录**，不能删除或当作目前代码尚未推远端的结论。
+- 静态审核已覆盖 `console/{index,style,api,app,ui,catalog,governance,operations}.js/html/css`、Control绑定只读API及RBAC、JUnit和Node脚本、`product-console-smoke.json`。实际证据为主Lab 31+产品JS HTTP 33 = **64条**且passed=true。Codex的产品模块10项JUnit、Node/HTTP通过与第5.3节吻合，ChatGPT本轮没有自行运行本地Maven/Docker或实际浏览器。
+- 用户关心的“是不是产品”：已实现独立登录、业务导航、列表/创建/编辑、四类策略、发布中心、Caller凭证、监控审计和中文任务指南，不是旧测试台改配色。仍需负责人**真实浏览器**检查桌面1280px/手机375px、键盘/弹窗、第一次接入流程和中文易读性，不能仅凭JS源/CSS/模拟DOM宣告体验通过。
+- **P1产品使用缺口**：当前 `AdminAuthController` 没有Caller列表GET，`operations.js`只能显示本次内存签发记录；刷新后无法方便管理历史Caller，旧凭证吊销需人工编号，CALLER规则也无法方便选择已存在调用方。建议最小新增ADMIN-only安全摘要列表（绝不泄露Token/Hash）与真实列表/按行吊销；负责人在体验阶段决定是否列为V1必须修复的阻断。
+- **P2边界**：运行指标只读取默认本机 `127.0.0.1:8080`（非集群聚合），已有Resilience4j历史revision实例无界积累需保留容量限制说明；产品改造后的**最终全工程verify和正式整体验收**未重新执行，旧第5.1节34JUnit与六组性能是前产品基线。
+- **审核报告**：`docs/reviews/product-console-static-review-2026-11-06.md`。当前结论为**源码实现与定向验证可交真人体验；Block4/V1最终验收未完成，全部PR保持Draft，不合并main**。
