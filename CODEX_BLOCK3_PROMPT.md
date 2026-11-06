@@ -28,7 +28,7 @@
 **B3-03：CircuitBreaker + fallback**
 - 只为 Gateway 引入 Spring Cloud BOM 管理的 `spring-cloud-starter-circuitbreaker-reactor-resilience4j`。使用官方 `CircuitBreaker` GatewayFilter Factory 与动态配置的 Resilience4j 实例，不自写 Closed/Open/HalfOpen 状态机。
 - 稳定 `policyId+revision+routeId` breaker 名与已匹配 Route 同版规则，配置变化换实例，无关发布不重置；测试 500/503 触发、OPEN 503 短路不达 Demo、HALF_OPEN 两次试探、恢复 CLOSED。
-- 静态降级只允许 GET/HEAD，固定内部 `forward:` fallback，响应 503 + `degraded:true`（不是假成功），不能绕开原鉴权/限流，也不能公开一个可被直接访问的内部 fallback 管理路由。
+- 静态降级只允许 GET，固定内部 `forward:` fallback，响应 503 + `degraded:true`（不是假成功），不能绕开原鉴权/限流，也不能公开一个可被直接访问的内部 fallback 管理路由。
 - 指标低基数，节点应用与在线/迟滞真实可辨。禁止每请求到 Control/MySQL 查询。
 
 **B3-04：演示+恢复**
