@@ -203,3 +203,7 @@ git diff --check
 6. 部分早期失败实验使用Docker默认匿名卷；后续清理已修正为只对自建容器执行`docker rm -f -v`。不为清理实验残留执行全局volume prune，避免影响用户数据。
 
 **交付结论：** 功能块2编码与上述定向/真实链路验证已完成；真实浏览器人工验收及ChatGPT/负责人最终审核待完成，尚不宣称满足全部最终通过标准。只推送当前功能分支，不合并main、不进入Block3。
+
+### 12.4 远端交付实际结果
+
+2026-11-06：实现提交`618aef4`、`d89f152`，脚本与证据交付提交`59c7b59`已保存在本地。执行`git push -u origin feat/block2-traffic-governance`失败：`Permission to Felix0410/FlowGate.git denied to Felix0410`，HTTP403。**未推送成功，未建立块2PR，不把本地提交写成已在GitHub交付。** 没有改推main、强推、修改凭据或重写共享历史。具备仓库写权限后可重试同一功能分支。
