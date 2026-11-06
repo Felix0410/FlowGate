@@ -192,3 +192,39 @@ RBAC：ADMIN 管理客户/应用/套餐/订阅/凭证；OPERATOR 查看并执行
 - MySQL 8.4 SELECT ... FOR UPDATE SKIP LOCKED 的队列领取适用性与局限：https://dev.mysql.com/doc/refman/8.4/en/select.html
 - Apache Kafka 官方投递语义：https://kafka.apache.org/40/design/design/
 - 项目现有源码：flowgate-control/service/IdentityService、ReleaseService；flowgate-gateway/security/CallerAuthFilter、admission/AdmissionGlobalFilter、policy/EffectivePolicyResolver；sql/flowgate-init.sql。
+
+
+## 12. 设计审核后强制修订（2026-11-06，优先于前文含糊描述）
+
+> 对应源码审查：`docs/reviews/v11-design-review-2026-11-06.md`。审查只确认技术/业务方案，**没有实现V11代码**。此节锁定原提案没有详细定义的安全和账本规则，后续任务A/B/C/D以本节为硬约束。
+
+### 12.1 新应用凭证与V1 Caller彻底隔离（安全P0）
+
+1. 原V1普通调用方凭证继续写`fg:auth:caller:{digest}`，Session用途`CALLER`，旧路由与撤销原样保持。
+2. V11 **应用专用凭证**只能写新独立`fg:auth:app:{digest}`和`fg:auth:app-index:{principalId}`，Session用途明确`APP_CALLER`，不写`fg:auth:caller:`。底层可复用fg_principal中的CALLER实体及fg_app_principal单一关系，但身份凭证用途不混用。
+3. 新Gateway只有在同版快照的**私有且显式USAGE_QUOTA**路由上识别APP_CALLER Token；非计量受保护API返回403，旧V1 Gateway没有app命名空间只能401。公开API原有无凭证访问行为不改变，**不得宣称APP Token能限制既有公开API**。
+4. 无论Redis Token暂时有效还是撤销失败，Quota Control事务均查应用、开发者、订阅、principal数据库状态；DB停用后计量拒绝，不因缓存旧值放行。A仅建立实体/凭证占位并409 FEATURE_NOT_READY，B同时完成身份隔离和DB授权后才启用签发。
+5. **混合版本演练**：旧Gateway + 新Gateway同时运行，app token在旧网关不能以普通Caller身份访问任何私有路由；新网关不能放过非计量私有路由。V11-B缺这个实测不准启用产品发证。
+
+### 12.2 计量策略的节点能力门槛（安全P0）
+
+1. 新发布USAGE_QUOTA前，Control用**明确配置的活跃接流节点集合**及可信心跳的`supportedFeatures`/兼容schema版本确认所有可接流Gateway支持Quota。历史STALE节点不当作活跃节点；但配置为接流、心跳缺失/过期的节点必须**拒绝激活计量**，不能假定它不接流。节点身份需有受信来源，不能由公网任意上报冒充。
+2. 旧Gateway对未知USAGE_QUOTA可能忽略策略。必须有测试证明无法在旧可接流节点未升级时激活计量；旧快照/回滚之后保持旧策略生效，不改写历史checksum。
+3. 未配置/无法确认实际接流节点清单时，**计量发布失败关闭**；不能只比较配置revision、`appliedVersion`或“有一个Gateway已支持”就放行。B实际实现可以使用等效的受控本机演示能力门禁，但要明确哪些节点可接流、哪些API会拒绝发布。
+4. 对同一客户端请求，Route+Policy+能力信息须来自**同版不可变快照**；Control内部Quota按Gateway传入的appliedVersion二次查找历史ConfigRelease，不信任Control当前最新版替代旧版本。
+
+### 12.3 订阅、套餐和权威期间（业务P0）
+
+1. 日期统一UTC `Instant`；订阅生效区间左闭右开`[effectiveAt,expiresAt)`；当前有效只能1条，允许最多1条下一UTC自然月生效的排队变更。A明确采用应用行行锁序列化创建/修改；数据库唯一键只兜底，不能用不存在的部分唯一索引。
+2. 首版**套餐额度创建后不可原地改写**；调整额度必须新建套餐/不可变修订，再安排次月订阅。名称/停用可改，既有已冻结的月份额度不受影响。B余额行需冻结`subscription_id`与`plan_version`（或稳定不可变套餐修订号）、`total_units`。
+3. B首次请求在数据库当前UTC月下初始化`(application_id,period_yyyymm)`唯一余额；即使请求跨两月/多Gateway竞争也不可双建/超扣。Plan停用不自动删除历史订阅/余额；明确API错误、状态可见。
+4. **同chargeId历史结果先查**：第一次成功grant的`period_yyyymm`由当时数据库UTC clock写在Ledger；重试跨月仍返回历史归属，不重新扣新月。若应用期间被禁用，旧grant只可作为历史查询事实，不应因此绕过当前应用停用、继续执行新代理流量。业务内部重试与客户端新请求语义必须测试。
+5. Ledger金额不涉及；管理后台必须写“额度授权已消耗”，不能写“成功扣费/成功业务请求次数”。
+
+### 12.4 RBAC、发布顺序和异步统计边界
+
+1. V11首版新增`/admin/developers`、`/admin/apps`、`/admin/plans`、`/admin/subscriptions`下**全部写动作仅ADMIN**（含凭证签发/轮换/暂停/变更），OPERATOR/VIEWER均只读安全字段。现有`AdminAuthInterceptor`对多数旧/admin写默认放OPERATOR，必须新增新业务路径的显式后端ACL，不可靠前端置灰兜底。既有V1旧接口OPERATOR写规则保持。
+2. B快照发布采用USAGE_QUOTA独立执行标记/能力版本，不把它当RATE_LIMIT或CB参数；禁止旧网关未知策略“忽略后正常通过”。
+3. B的`fg_outbox_event`DDL预留`lease_owner`、`lease_until`、`last_error_code`，C阶段才启用Kafka并逐条提交真正结果。C的`SKIP LOCKED`只可用于队列任务领取，不用于权威额度一致性判断。
+4. D的四组负载必须区分身份/鉴权/路由路径的不可比部分；明确D计量的额外Control+DB hop，测成功业务请求P95/P99及拒绝率，不把快速429视为性能提升。
+5. 以上任务实际实施时遵守分块门禁：A完成与负责人评审后才实施B；B完成再C；D做最终全量回归与真实浏览器验收。V1历史测试不算V11测试，`main`不自动合并。
