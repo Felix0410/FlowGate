@@ -24,7 +24,8 @@ public class SnapshotRouteDefinitionLocator implements RouteDefinitionLocator {
                 route.setId(spec.routeId()); route.setUri(URI.create(spec.upstreamUri())); route.setOrder(spec.priority());
                 route.setPredicates(List.of(new PredicateDefinition("Path=" + spec.publicPath()), new PredicateDefinition("Method=" + spec.method())));
                 route.setFilters(List.of(new FilterDefinition("SetPath=" + spec.upstreamPath())));
-                route.setMetadata(Map.of(SPEC, spec, "configVersion", spec.configVersion()));
+                route.setMetadata(Map.of(SPEC, spec, "configVersion", spec.configVersion(),
+                        com.flowgate.gateway.policy.EffectivePolicyResolver.METADATA, com.flowgate.gateway.policy.EffectivePolicyResolver.freeze(snapshot,spec)));
                 return route;
             });
         });

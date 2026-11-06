@@ -67,4 +67,59 @@ class SnapshotSwitchTest {
         assertEquals(good, store.applied()); assertEquals(good, store.candidate());
         pending.dispose();
     }
+    @Test void restoresRealCacheAfterTimeoutAndLateResultAndAllowsNextVersion() {
+        // 1. 官方缓存已经装入 V2，但故意延迟反馈，让应用确认超时。
+        var store = new ActiveSnapshotStore("http://127.0.0.1:8085");
+        var definitions = new SnapshotRouteDefinitionLocator(store);
+        RouteLocator delegate = () -> definitions.getRouteDefinitions().map(def -> Route.async(def)
+                .asyncPredicate(exchange -> reactor.core.publisher.Mono.just(true)).build());
+        var cache = new CachingRouteLocator(delegate);
+        var deliver = new java.util.concurrent.atomic.AtomicBoolean(true);
+        var last = new java.util.concurrent.atomic.AtomicReference<RefreshRoutesResultEvent>();
+        var poller = new SnapshotPollingService(store, event -> cache.onApplicationEvent((RefreshRoutesEvent)event),
+                "http://127.0.0.1:8081", "x".repeat(32), "test");
+        cache.setApplicationEventPublisher(event -> {
+            last.set((RefreshRoutesResultEvent)event);
+            if (deliver.get()) poller.refreshed(last.get());
+        });
+        poller.apply(snapshot(1, false)).block();
+        deliver.set(false);
+        // 预先告知缓存实例；随后只有确认结果迟到，并非缓存从未更新。
+        assertThrows(RuntimeException.class, () -> poller.apply(snapshot(2, true)).block());
+        assertEquals(1, store.version());
+        assertEquals(1, ((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).configVersion());
+        // 2. 迟到成功不能确认失败版本，实际缓存与鉴权仍保持私有 V1。
+        poller.refreshed(last.get());
+        var restored = (RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC);
+        assertFalse(restored.isPublic()); assertEquals(1, restored.configVersion());
+        // 3. 下一次正常 V3 必须可应用，失败不能卡住刷新状态。
+        deliver.set(true); poller.apply(snapshot(3, true)).block();
+        assertEquals(3, store.version());
+        assertTrue(((RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).isPublic());
+    }
+
+    @Test void lateCacheWriteCannotReplaceLastAppliedRoutes() {
+        var store=new ActiveSnapshotStore("http://127.0.0.1:8085");
+        var definitions=new SnapshotRouteDefinitionLocator(store);
+        var delayed=reactor.core.publisher.Sinks.<Route>one();
+        var captured=new java.util.concurrent.atomic.AtomicReference<Route>();
+        RouteLocator delegate=()->definitions.getRouteDefinitions().map(def->Route.async(def)
+                .asyncPredicate(e->reactor.core.publisher.Mono.just(true)).build()).flatMap(route->{
+                    var spec=(RouteSpec)route.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC);
+                    if(spec.configVersion()==2) { captured.set(route); return delayed.asMono(); }
+                    return reactor.core.publisher.Mono.just(route);
+                });
+        var cache=new CachingRouteLocator(delegate);
+        var poller=new SnapshotPollingService(store,event->cache.onApplicationEvent((RefreshRoutesEvent)event),
+                "http://127.0.0.1:8081","x".repeat(32),"late");
+        cache.setApplicationEventPublisher(event->poller.refreshed((RefreshRoutesResultEvent)event));
+        poller.apply(snapshot(1,false)).block();
+        assertThrows(RuntimeException.class,()->poller.apply(snapshot(2,true)).block());
+        // 超时恢复完成后，旧刷新异步写入V2并触发迟到成功，必须补偿回V1。
+        assertNotNull(captured.get()); delayed.tryEmitValue(captured.get());
+        var active=(RouteSpec)cache.getRoutes().blockFirst().getMetadata().get(SnapshotRouteDefinitionLocator.SPEC);
+        assertEquals(1,active.configVersion()); assertFalse(active.isPublic()); assertEquals(1,store.version());
+        poller.apply(snapshot(3,true)).block(); assertEquals(3,store.version());
+    }
+
 }

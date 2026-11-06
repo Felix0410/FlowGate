@@ -368,3 +368,18 @@ git push origin HEAD:refs/heads/feat/block1-control-publish
 - 实测 `python3 scripts/run-local.py start`、`restart`、`status`：三个 JVM 就绪，Control/MySQL/Redis/Demo 为 UP、Gateway health 为 UP；管理员登录 200；新独立库中通过正式 API 初始化三条公共 Demo 规则并发布 V1，节点已应用；GET 200、Echo 201、Trace ID 一致、慢请求越界 400。
 - 此部署使用新独立 FlowGate 数据库；之前冒烟的 V7 临时库和数据文件保留，旧原生临时 MySQL/Redis 已停止。此时人工入口改用本地 `.env` 配置的管理员，当前新库版本 V1，不再使用前述临时凭证文件。
 - Docker 本地开发配置按负责人本次新授权加入，不表示原本的功能块 1 任务要求生产 Docker 部署；无需修改 Java 业务代码，也没有进入块 2。之后通过 README 6.5 的一键脚本启动即可。
+
+
+### 12.7 2026-11-06 远端代码静态复核补记（不改写 Codex 当日原始结果）
+
+- GitHub 远端 `feat/block1-control-publish` 已包含功能块 1 的实际源代码；静态审查时 PR #1 HEAD 为 `ad4e5bc8754933ca3a84076dae13f60de91a0f97`，共 71 个变更文件、9 个提交。PR 地址：`https://github.com/Felix0410/FlowGate/pull/1`，仍为 Draft、未合并 main。
+- 上文“推送 HTTP 403 / 远端只有文档 / 未创建 PR”为**当时本地 Codex 提交时的历史记录**，不再代表 2026-11-06 远端现状；不能因为旧记录判断代码未交付。
+- ChatGPT 核对了 Gateway/Control/Contract、SQL、单测、测试台与本地启动脚本的**远端源码**。基本业务实现已存在；但未独立运行 Java、Docker 或浏览器联调，10 个 JUnit 用例及 6 组冒烟是 Codex 报告，并非 ChatGPT 实测结论。
+- 本轮发现需要补定向验证：`SnapshotPollingService` 在缓存候选已进入 Gateway 但刷新确认迟到/超时/失败时，`store.restore()` 是否同步恢复**实际路由缓存**。应补“失败后旧路由仍被匹配”的测试，发现不一致时以最小改动修复，方可承载 Block2 限流版本切换。
+- 负责人明确指出当前前端操作体验不佳、缺少使用指南；已进入 Block2 的优先整改范围，现有五区页面的临时使用步骤会在新文档提供。**功能块 1 仍待负责人手动验收，未标记已完全验收**。
+
+### 2026-11-06 R1 前置修复
+
+- 配置刷新确认超时/失败时，恢复 candidate 后通过官方 `CachingRouteLocator.refresh()` 重建真实缓存；迟到事件不确认过期候选，缓存不符时再次恢复；并发 apply 立即拒绝。
+- 新增实际缓存 V2 已写入、确认超时、迟到成功、V1 私有元数据恢复及后续 V3 应用的定向用例。
+- `source .env; mvn -B -ntp -pl flowgate-gateway -am test`：沙箱内 Mockito 附加 JVM 失败；在允许测试 JVM 附加的环境重跑通过（Contract 2 + Gateway 7）。负责人本轮明确授权进入 Block2；不代表最终审核合并。
