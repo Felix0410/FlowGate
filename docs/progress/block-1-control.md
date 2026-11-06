@@ -377,3 +377,9 @@ git push origin HEAD:refs/heads/feat/block1-control-publish
 - ChatGPT 核对了 Gateway/Control/Contract、SQL、单测、测试台与本地启动脚本的**远端源码**。基本业务实现已存在；但未独立运行 Java、Docker 或浏览器联调，10 个 JUnit 用例及 6 组冒烟是 Codex 报告，并非 ChatGPT 实测结论。
 - 本轮发现需要补定向验证：`SnapshotPollingService` 在缓存候选已进入 Gateway 但刷新确认迟到/超时/失败时，`store.restore()` 是否同步恢复**实际路由缓存**。应补“失败后旧路由仍被匹配”的测试，发现不一致时以最小改动修复，方可承载 Block2 限流版本切换。
 - 负责人明确指出当前前端操作体验不佳、缺少使用指南；已进入 Block2 的优先整改范围，现有五区页面的临时使用步骤会在新文档提供。**功能块 1 仍待负责人手动验收，未标记已完全验收**。
+
+### 2026-11-06 R1 前置修复
+
+- 配置刷新确认超时/失败时，恢复 candidate 后通过官方 `CachingRouteLocator.refresh()` 重建真实缓存；迟到事件不确认过期候选，缓存不符时再次恢复；并发 apply 立即拒绝。
+- 新增实际缓存 V2 已写入、确认超时、迟到成功、V1 私有元数据恢复及后续 V3 应用的定向用例。
+- `source .env; mvn -B -ntp -pl flowgate-gateway -am test`：沙箱内 Mockito 附加 JVM 失败；在允许测试 JVM 附加的环境重跑通过（Contract 2 + Gateway 7）。负责人本轮明确授权进入 Block2；不代表最终审核合并。
