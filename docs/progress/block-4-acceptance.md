@@ -3,7 +3,20 @@
 > 2026-11-06。负责人已明确授权“设计并完成功能4”。**本阶段不是再新增一套业务，而是将已经实现的 Block0–3 作为整体，提供可重复的验证、证据、缺陷收口、前端说明和主线交付条件。**
 > 代码分支：`test/block4-final-acceptance`（从远端 `feat/block3-resilience-observability` 创建），不从旧 `main` 开始。
 > 阶段状态：**验收工具、执行规范和 Codex 交接可在仓库预先交付；本次 ChatGPT 不能访问负责人的本地 Java17/Docker 环境，完整真实验收尚未运行。负责人真实浏览器体验和 PR 合并不能被自动化或文档替代。**
-> 权威参考：`docs/acceptance/final-acceptance-plan.md`、`docs/progress/final-acceptance.md`、`docs/reviews/block-3-static-review-2026-11-06.md`。
+> 权威参考：`docs/design/product-console-v1.md`（新增P0产品化要求）、`docs/acceptance/final-acceptance-plan.md`、`docs/progress/final-acceptance.md`、`docs/reviews/block-3-static-review-2026-11-06.md`。
+
+## 0. 负责人新增的 V1 产品化前置要求（2026-11-06）
+
+**V1 必须有一个非开发者看得懂的真正管理后台。** 负责人明确反馈旧 `/test-console/` 虽有所有接口按钮和14章说明，但依然“乱七八糟”，不足以作为产品 UI。此反馈优先于此前“原生简易测试前端足够”的最低标准：
+
+- **正式产品入口** `/console/`：登录、业务工作台、服务/API/路由列表与创建编辑、流量治理、故障保护、发布中心、Caller、监控审计；中文业务表单和清晰反馈，主要管理不要求手写JSON、内部数字ID或理解HTTP测试流程。
+- **开发/验收入口** `/test-console/`：旧 HTTP 请求、故障注入和测试工具保留，不删除、不重写成产品首页；仅在产品左下“开发工具”提供次级链接。
+- 原生 HTML/CSS/JavaScript ES modules，跟随 Control 静态托管；无须新框架或中间件，UI 要真正达到产品可用性标准，不能只是原页面换颜色/侧边栏。
+- 权威详细契约：`docs/design/product-console-v1.md`；**当前唯一应先交给本地 Codex 的任务**：`CODEX_PRODUCT_CONSOLE_PROMPT.md`。完成产品后台源码、真实功能/定向测试和负责人真实浏览器反馈收口后，才继续下面 B4-00..06 的正式全量回归与长时间三组性能。
+- 若产品UI需要显示已有策略绑定，现有Control缺少读取绑定API，允许**最小新增只读查询**（已有 mapper/表及 RBAC）；不允许为了UI伪造业务状态、随意新增删除API或改Gateway内核。
+- 本次 ChatGPT 已交付产品UI设计及 Codex 任务合同，**尚未完成全产品前端编码和人工可用性验收**。不得把文档写成“重设计已上线”。
+
+按顺序完成：`PC-00` API核对 → `PC-01` 产品登录与工作台 → `PC-02` 目录 → `PC-03` 策略 → `PC-04` 发布/Caller/监控 → `PC-05` 响应式与可访问性 → `PC-06` 定向测试/指南/提交。**产品化是Block4的P0门槛，不另开新功能块，也不提前合并main。**
 
 ## 1. 最小交付目标
 
@@ -12,7 +25,7 @@
 1. **正确**：从空数据库真实完成认证、目录、CAS 发布/回滚、路由代理、限速、并发、超时、熔断和恢复；旧版快照及 checksum 安全。
 2. **稳定**：双网关共用 Redis 速率预算，但每网关并发许可独立；Control/Redis/Gateway 故障不造成未授权放行、错误版本报告或无限资源泄漏。
 3. **性能代价可解释**：在同样的发送节奏和共享资源配置下，对照 A 直连、B Gateway 仅代理、C Gateway 启用治理。分别说明**正常业务成功吞吐与尾延迟**、429/503 拒绝、网关成本；不预设一定改善。
-4. **操作可复核**：负责人在现有 `/test-console/` 和离线 `guide.html` 内独立操作已实现的四块功能；本阶段不新增复杂业务后台或浏览器压测。
+4. **产品可操作**：负责人能在新增 `/console/` 的正式产品管理后台中独立管理服务/API/路由、策略、发布、Caller及监控；旧 `/test-console/` 和离线 `guide.html` 只保留为开发验收工具，不在浏览器进行压测。
 5. **交付可追溯**：保留真实命令、环境/版本、测试结果、原始脱敏样本、失败和修复记录。无阻断缺陷且负责人批准后才按 stacked PR 依赖顺序处理 main。
 
 本块**不做**：新业务 B14、自适应算法、灰度、多租户、Kafka/Nacos/Sentinel/Grafana、为跑测试而改网关成 Servlet、生产级公网部署、未获批准的 Git 自动合并。
@@ -22,6 +35,8 @@
 | 文件 | 目的 | 状态 |
 |---|---|---|
 | `docs/progress/block-4-acceptance.md` | 本块唯一详细执行契约和真实进度 | 已建 |
+| `docs/design/product-console-v1.md` | 产品级左侧导航/首页/CRUD/策略/发布/监控的强制产品化合同 | 已提交，待Codex实现 |
+| `CODEX_PRODUCT_CONSOLE_PROMPT.md` | Block4正式验收前必须先执行的产品化任务 | 已提交，待Codex编码 |
 | `CODEX_BLOCK4_PROMPT.md` | 本地 Codex 一次性实现/运行任务，不给自由改架构空间 | 已建 |
 | `docs/acceptance/final-acceptance-plan.md` | 原有最终验收大纲，继续保留 | 已存在 |
 | `docs/progress/final-acceptance.md` | 原有最终阶段摘要，链接本文件，不重复维护两套不同事实 | 已存在 |
@@ -36,6 +51,8 @@
 ## 3. Codex 必须执行的顺序与阶段门槛
 
 ### B4-00：环境、分支与数据安全
+
+> **执行门槛：必须先完成本文件第0节PC-00..PC-06的产品化编码、定向测试与负责人可用性反馈收口。尚未完成时可仅核查环境，不启动后续正式三组负载。**
 
 1. `git fetch origin`，核对 `test/block4-final-acceptance` 与远端 `feat/block3-resilience-observability` 的关系；保留所有本地未提交内容，不 `reset --hard`、`clean -fd`、强推或改 `main`。
 2. 读取 `AGENTS.md`、本文件、`CODEX_BLOCK4_PROMPT.md`、`docs/acceptance/final-acceptance-plan.md`、两份测试台使用指南。固定本次 SHA、JDK17、Maven、OS、CPU/内存、Docker 版本/资源上限与运行时间；不能把 shell 默认 JDK21 误写成测试 JDK。
@@ -110,7 +127,9 @@ Python 写入本地 `.local/acceptance/`，不会覆盖旧证据，JVM 和容器
 
 ### B4-05：负责人真实浏览器测试
 
-负责人需要亲自打开 `http://127.0.0.1:8081/test-console/` 和离线 `guide.html`：
+> **主验收对象已改为产品后台 `/console/`**。旧 `/test-console/` 仅用于技术异常/HTTP 调试验证。必须按 `docs/design/product-console-v1.md` 逐页验证正常业务流程，不得将旧页使用指南通过视为新产品可用。
+
+负责人需要亲自打开 `http://127.0.0.1:8081/console/` 完成产品管理任务，并按需通过底部开发工具访问 `http://127.0.0.1:8081/test-console/` 和离线 `guide.html`：
 1. 不看源码完成首屏“登录→新建或读取目录→发布并确认节点→fast 200/echo 201”；
 2. 使用限速/并发、超时/熔断/降级表单真实看到 429/503/504，对照节点实际状态；
 3. 普通用户、VIEWER/OPERATOR/ADMIN 权限差异和 Caller 授权/吊销；409 版本冲突、回滚和原有策略绑定编辑；
@@ -134,7 +153,8 @@ Python 写入本地 `.local/acceptance/`，不会覆盖旧证据，JVM 和容器
 | 3组性能 | DIRECT/PROXY/GOVERNED各至少2轮，完整数据且没有无法解释的客户端丢负载 | 脚本已编写，未运行真实JVM |
 | 稳定性/容灾 | 双网关/Redis/Control/CB/许可边界有完整真实记录 | 未执行本块统一实验 |
 | 安全与文档 | 无敏感信息，低基数指标，README和使用指南准确 | 待最终复审 |
-| 页面可用性 | 负责人手动验收、缺陷修复 | 未执行 |
+| 产品化页面 | `/console/` 真正实现完整业务可操作流程、响应式、角色、就地反馈 | 设计已提交；未编码/未验收 |
+| 页面可用性 | 负责人在新产品后台手动验收、缺陷修复 | 未执行 |
 | Git正式发布 | PR顺序审核，负责人明确授权合并 main/tag | 未授权 |
 
 **Block4 的“设计/工具交付完成”与“项目 V1 通过最终验收”是两件不同的事。只有上述各项实际通过且负责人确认，才可标记 FlowGate V1 可交付。**
@@ -144,8 +164,9 @@ Python 写入本地 `.local/acceptance/`，不会覆盖旧证据，JVM 和容器
 | 项目 | 实际状态 |
 |---|---|
 | 分支 | `test/block4-final-acceptance`，来自远端Block3最新代码 |
-| 任务书/Codex提示 | 已开始写入GitHub |
+| 任务书/Codex提示 | Block4任务书与Codex提示已提交；新增产品化P0设计和专用Codex任务已提交 |
 | 三组性能脚本/纯统计单测 | 已在仓库新增；ChatGPT 在隔离Python环境对原型做过语法和3项纯统计测试，**GitHub提交版本仍需Codex本地复测** |
+| 新产品后台 `/console/` | 已明确P0架构与功能要求，尚未由Codex编码或真实体验；原 `/test-console/` 保留 |
 | Java全量测试 | 未执行 |
 | 既有 Block1/2/3 集成脚本统一运行 | 未执行 |
 | 三组真实HTTP性能实验 | 未执行 |
