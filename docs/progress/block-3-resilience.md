@@ -249,3 +249,28 @@ git diff --check
 本地实现：`fe0f391`前置补修、`4fc7562`保护实现、`519cb46`业务前端、`c79a198`表单重读修正、`1678d8e`脚本证据与文档。执行`git push origin feat/block3-resilience-observability`失败：`Permission to Felix0410/FlowGate.git denied to Felix0410`，HTTP403。只读`git ls-remote`确认远端该分支仍为设计基线`77d0abdc9d1150767e0f8c5ce28df54b70cfb094`，**本轮新增实现没有上传成功**。没有改推main、强推、变更凭据或重写共享历史。写权限恢复后仅重试同一块3分支。
 
 最终自建测试容器查询为空，保留用户已有服务与数据。当前仅等待代码复审/负责人浏览器抽查；远端交付受GitHub写权限阻塞，不宣称已建立包含本轮代码的新PR或运行CI。
+
+### 11.6 业务前端详细说明补充（2026-11-06）
+
+负责人反馈多数功能仍难以使用，本次仅补业务前端及对应文档，不改变后端协议或进入下一阶段：
+
+- 权威`docs/guides/test-console-guide.md`重写为14章完整手册：启动与IDEA配置、首次成功路线、名词、各页面全部字段/按钮、权限/凭证、目录创建和更新、版本发布/回滚、限速/并发、超时/熔断/降级、指标/结果、错误处理和清理恢复。明确哪些是示例、哪些操作仅存草稿、哪些能力尚无UI；不把旧版本/当前库状态写成固定事实。
+- 新增同源`/test-console/guide.html`，顶部及9个页面都有对应章节入口和就地步骤；50个非隐藏输入字段均有中文说明及aria-describedby。手册新标签打开，避免为了看说明刷新页面丢失内存凭证。
+- 流量策略按类型隐藏无关参数；服务/API/路由按类型显示真正使用的字段并提示保存行为；高级JSON和绑定入口继续保留。自定义GET入口使用明确中文名称，保留原公开/私有路由调用能力。
+- `scripts/build-console-guide.py`只在开发时以Python标准库生成静态HTML，`--check`检查与Markdown同步；没有新增Java或浏览器运行依赖，无Plus代码复制。关键新增JavaScript/Python中文注释已检查。
+
+本次实际执行：
+
+```bash
+source .env
+mvn -B -ntp -pl flowgate-control -am package -DskipTests
+node --check flowgate-control/src/main/resources/static/test-console/app.js
+node scripts/block2-console-test.js
+node scripts/block3-console-test.js
+python3 scripts/build-console-guide.py --check
+git diff --check
+```
+
+以上全部通过。Maven只验证打包，明确跳过Java测试；Node是模拟DOM契约，保留原导航/登录清密/角色/版本/请求渲染/保护表单/目标锁定检查。HTMLParser额外确认50个字段说明引用、章节链接及页面ID有效；临时随机回环端口HTTP服务读取Control的target/classes静态资源，index/guide/style/app四项返回200并校验新内容，退出已关闭。首次绑定本机端口受沙箱限制，获准后上述检查通过；此项不是Spring进程启动验证。
+
+没有控制浏览器、重启用户应用、修改.env或数据；没有重跑Java后端/全量回归/故障联调。实际浏览器阅读、布局和操作体验仍由负责人抽查，不能以本次自动化代替。使用新版需重新构建并重启Control、刷新业务页面；Gateway/Demo无本次代码变更。Git提交与远端结果见本节后续记录。

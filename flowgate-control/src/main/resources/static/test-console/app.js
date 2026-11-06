@@ -146,21 +146,29 @@ function targets() {
  const values=scope==='GLOBAL' ? [{id:0,label:'共享全局预算'}] : (targetCatalog[scope] || []);
  el('policy-target').replaceChildren(...values.map(v=>{const option=document.createElement('option'); option.value=v.id; option.textContent=v.label || v.code || v.routeId || v.publicPath || String(v.id); return option;}));
 }
+/** 页面只展示当前规则需要的参数，避免把每秒速率与在途并发混填。 */
+function trafficFields() {
+ const rate=el('policy-type').value==='RATE_LIMIT';
+ el('capacity').closest('label').hidden=!rate;el('refill').closest('label').hidden=!rate;
+ el('max-concurrent').closest('label').hidden=rate;
+ el('traffic-guidance').textContent=rate?'当前填写每秒速率：容量控制短时额度，每秒补充控制持续速率。推荐ROUTE / demo-slow。':'当前填写本机同时处理数量：只填maxConcurrent，只支持SERVICE或ROUTE，不是每秒次数。';
+}
+el('policy-type').onchange=trafficFields;
 el('policy-scope').onchange=targets;
 el('policy-existing').onchange=()=>{
  const policy=policyCatalog.find(p=>p.id===Number(el('policy-existing').value)); el('policy-type').disabled=Boolean(policy); el('policy-scope').disabled=Boolean(policy);
  el('policy-target').disabled=Boolean(policy);
  if(policy) el('policy-status').textContent='编辑只修改参数/启停；绑定关系保持不变。如需新增绑定，请使用下方单独绑定入口。';
- if(!policy) { targets(); return; }
+ if(!policy) { targets(); trafficFields(); return; }
  el('policy-code').value=policy.code; el('policy-type').value=policy.type; el('policy-scope').value=policy.scope; el('policy-enabled').value=String(policy.enabled);
- const params=JSON.parse(policy.parametersJson); el('capacity').value=params.capacity || 5; el('refill').value=params.refillPerSecond || 2; el('max-concurrent').value=params.maxConcurrent || 2; targets(); el('policy-target').replaceChildren(new Option('已有绑定保持不变（此处不修改目标）','unchanged'));
+ const params=JSON.parse(policy.parametersJson); el('capacity').value=params.capacity || 5; el('refill').value=params.refillPerSecond || 2; el('max-concurrent').value=params.maxConcurrent || 2; targets(); trafficFields(); el('policy-target').replaceChildren(new Option('已有绑定保持不变（此处不修改目标）','unchanged'));
 };
 action('policy-load',async()=>{
  policyCatalog=await call('/admin/policies',{admin:true});
  for(const [scope,path] of Object.entries({SERVICE:'services',API:'apis',ROUTE:'routes'})) targetCatalog[scope]=await call('/admin/'+path,{admin:true});
  el('policy-existing').replaceChildren(new Option('新建',''),...policyCatalog.filter(p=>['RATE_LIMIT','CONCURRENCY'].includes(p.type)).map(p=>new Option(p.code,String(p.id))));
  el('policy-type').disabled=false;el('policy-scope').disabled=false;el('policy-target').disabled=false;
- targets(); await loadVersion();
+ targets(); trafficFields(); await loadVersion();
 });
 action('policy-save',async()=>{
  const type=el('policy-type').value,scope=el('policy-scope').value;
@@ -253,8 +261,13 @@ protectionFields();
 
 let catalogServices=[],catalogApis=[];
 function catalogParents() {
- const kind=el('template-kind').value,rows=kind==='apis'?catalogServices:kind==='routes'?catalogApis:[];
+ const kind=el('template-kind').value||'services',rows=kind==='apis'?catalogServices:kind==='routes'?catalogApis:[];
  el('template-parent-select').replaceChildren(...rows.map(row=>new Option(row.name || row.method+' '+row.publicPath,String(row.id))));
+ // 1. 不同目录只显示会真正保存的字段，隐藏字段不能让用户误以为会生效。
+ el('template-code').closest('label').hidden=kind==='apis';
+ el('template-parent-select').closest('label').hidden=kind==='services';
+ for(const id of ['template-method','template-public','template-upstream']) el(id).closest('label').hidden=kind!=='apis';
+ el('template-guidance').textContent=kind==='services'?'创建服务：只填唯一代码；名称与代码相同，当前表单上游固定为本地Demo。已有demo时不必重复创建。':kind==='apis'?'创建公开API：先读取并选择服务，填写方法、/api/入口与/demo/下游路径；保存后还要另建关联路由。':'创建路由：先重新读取并选择API，填写唯一routeId；方法和路径直接使用关联API，保存后仍需发布。';
  el('template-parent-select').disabled=kind==='services';el('template-parent').value=el('template-parent-select').value;
 }
 el('template-kind').onchange=catalogParents;
@@ -263,3 +276,7 @@ action('catalog-load',async()=>{
  catalogServices=await call('/admin/services',{admin:true});catalogApis=await call('/admin/apis',{admin:true});catalogParents();
  showResult('catalog-load',{message:'已读取 '+catalogServices.length+' 个服务、'+catalogApis.length+' 个API，可直接选择关联对象'});
 });
+
+// 2. 初次进入即收起无关字段；后续选择模板/类型时由同一说明更新。
+catalogParents();
+trafficFields();

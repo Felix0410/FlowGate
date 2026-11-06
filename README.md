@@ -336,5 +336,6 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - 当前分支`feat/block3-resilience-observability`，基于远端块2实现；先独立提交`fe0f391`关闭已有策略目标误导和取消恢复竞态。
 - 复用官方Gateway路由超时及Reactor Resilience4j CircuitBreaker；新发布ENFORCED_BLOCK3执行，旧PENDING快照不自动执行。OPEN拒绝与GET静态不可用提示均明确503，主动超时504。
 - 页面仍为`http://127.0.0.1:8081/test-console/`，默认业务概览；服务/API关联下拉、保存草稿、发布、流量策略和故障保护均使用真实API，原始响应折叠，便于抽查，不建设复杂验收平台。
+- 页面顶部“完整使用手册”打开同源离线说明：`http://127.0.0.1:8081/test-console/guide.html`。14章覆盖启动、首次调用、全部字段/按钮、身份、目录、发布回滚、限速并发、超时熔断、结果解释、常见错误及恢复；每个业务页也有就地说明。修改[权威Markdown手册](docs/guides/test-console-guide.md)后运行`python3 scripts/build-console-guide.py`同步网页，`--check`检查一致性。更新资源后重新构建并重启Control，再刷新页面。
 - 正常启动不增加必填配置。仅演示`/demo/fault`时，在Demo的IDEA环境或本机`.env`显式设`FLOWGATE_DEMO_FAULT_ENABLED=true`；默认关闭。不覆盖现有`.env`、密码或Docker数据。
 - 实际命令/结果/差异见[块3进度第11节](docs/progress/block-3-resilience.md)，[业务前端指南](docs/guides/test-console-guide.md)、[故障保护指南](docs/guides/block3-fault-testing.md)。自动HTTP证据为`docs/progress/evidence/block3-smoke.json`，不含认证头、密码、Token或请求Body。
