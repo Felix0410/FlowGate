@@ -1,6 +1,6 @@
 # FlowGate 本地测试台｜第一次使用指南
 
-> 更新：2026-11-06。本指南**首先对应功能块 1 已有的五区测试台**，不假装 V2.0 易用性改造已经实现。功能块 2 完成时需同步更新步骤与截图/界面名称。
+> 更新：2026-11-06。对应功能块2新版分区测试台；浏览器布局和负责人可用性验收尚未执行。
 > 使用范围：本机开发演示，不是公网部署方案；密码、Token、内部密钥不可提交 Git 或发到聊天中。
 
 ## 1. 先启动服务（macOS + JDK17 + Docker Desktop）
@@ -43,37 +43,32 @@ docker compose -f compose.local.yml stop  # 另外停止容器，数据卷仍保
 
 浏览器打开：**http://127.0.0.1:8081/test-console/**
 
-当前五个区域依次是：
-- **A 服务状态**：点“探测服务”，查看 Control/MySQL/Redis/Demo/Gateway 是否真的在线。
-- **B 基础 HTTP 测试**：在发布 API 后执行 fast/echo/slow；私有 API 则需要 Caller Token。
-- **C 管理员与身份**：使用 `.env` 对应的管理员用户名及**你本人设定的原始密码**登录；密码不是 BCrypt 哈希本身。
-- **D 目录草稿与发布**：初始化 API 草稿、查看/编辑四种目录、发布、查询节点、回滚。
-- **E 策略与审计**：Block1 只能保存策略，**真实限流和熔断仍未执行**。
+新版默认打开“快速开始”，顶部导航可进入环境检查、业务测试、身份与登录、配置与版本、策略与流控、帮助和最近十条摘要。所有原有操作保留，每项操作在所在分区显示独立结果卡，最近十条仅保留无敏感摘要。顶部状态始终显示依赖、PERSISTED版本和节点appliedVersion；首次检查前不会显示UP。
 
-当前版所有操作的返回都显示在**页面底部“实际 HTTP 结果”**，你需要向下滚动查看；新操作会覆盖上一次结果。这是已确认的易用性缺陷，已列入下一阶段整改。
+**IDEA启动**：分别运行 Demo、Control、Gateway 的主类，JRE均选择17。Control/Gateway运行配置的环境文件必须是 **FlowGate** 根目录 `.env`，不要误选 AIGateRe 项目的同名文件。不要同时用脚本和IDEA重复启动；需要切换时先 `python3 scripts/run-local.py stop`。该命令只停止脚本自身的JVM，Docker保留运行。
 
 ## 3. 第一次演示：公共 Demo（从空库 V0 开始）
 
-1. 在区域 A 点击“探测服务”，必须先看到相关依赖 UP；若探测失败先查 `.local/run/` 日志。
-2. 在区域 C 输入管理员用户名和原始密码，点击“登录”，应显示 ADMIN。页面刷新会丢失临时 Token，需要重新登录，这是当前设计。
-3. 在区域 D 点击“初始化公共 Demo 草稿”。这是**只补齐缺失的** Demo 服务、三个公共 API 和路由，不会自动发布。
-4. 点击“当前持久化版本”。**不要假设一定是 0**：如果返回 version=0，填写 expectedVersion=0；如果已有版本 Vn，应填 Vn。
+1. 在“环境检查” 点击“探测服务”，必须先看到相关依赖 UP；若探测失败先查 `.local/run/` 日志。
+2. 在“身份与登录” 输入管理员用户名和原始密码，点击“登录”，应显示 ADMIN。页面刷新会丢失临时 Token，需要重新登录，这是当前设计。
+3. 在“配置与版本” 点击“初始化公共 Demo 草稿”。这是**只补齐缺失的** Demo 服务、三个公共 API 和路由，不会自动发布。
+4. 点击“当前持久化版本”。**不要假设一定是 0**：如果返回 version=0，确认自动读取的 expectedVersion=0；如果已有版本 Vn，自动读取后应显示 Vn。
 5. 点击“发布完整配置”，返回应为 HTTP 200 且 `status=PERSISTED`、`version=n+1`，注意这**还不代表 Gateway 已应用**。
 6. 等待/重复点“节点实际应用版本”，看到某个节点 `appliedVersion=n+1` 且 checksum 对得上，才能确认已应用。若没有，检查 Gateway/Control 状态和日志。
-7. 在区域 B 点击 GET fast（id=123、tag=abc），预期 200；POST echo（合法 JSON 对象，例如 `{"name":"flowgate"}`）预期 201；GET slow（delayMs=100）预期 200，越界 2001 预期 400。
-8. 每次查看底部结果中的 HTTP 状态、JSON 和 X-Request-Id。私有认证不影响已明确发布为公开的三个 Demo 接口。
+7. 在“业务测试” 点击 GET fast（id=123、tag=abc），预期 200；POST echo（合法 JSON 对象，例如 `{"name":"flowgate"}`）预期 201；GET slow（delayMs=100）预期 200，越界 2001 预期 400。
+8. 每次查看就地结果中的 HTTP 状态、JSON 和 X-Request-Id。私有认证不影响已明确发布为公开的三个 Demo 接口。
 
 如果原本已有草稿/版本，建议先查看 `services`、`apis`、`routes` 的实际列表，而不是反复创建重复对象。
 
 ## 4. 进阶演示：私有路由与版本回滚
 
-1. 在区域 D 点“添加私有 Demo 草稿”；该按钮只添加 `GET /api/private/fast/{id}`，要求 Scope `demo:read`，仍需显式发布。
+1. 在“配置与版本” 点“添加私有 Demo 草稿”；该按钮只添加 `GET /api/private/fast/{id}`，要求 Scope `demo:read`，仍需显式发布。
 2. 先点“当前持久化版本”，把真实 `version` 写入 expectedVersion，点击发布；等待节点 appliedVersion 同步到新版本。
-3. 区域 B 的“私有路径”使用 `/api/private/fast/123`，**不带 Caller Token** 点击“请求私有 API”，预期 HTTP 401。
-4. 区域 C 中输入 Caller 名称、Scopes=`demo:read`，点击“创建 Caller”。一次性 Token 会暂存在当前页面的密码输入框，默认隐藏；页面会自动填写 Caller Token 和吊销 ID。现在私有请求预期 HTTP 200。
+3. “业务测试” 的“私有路径”使用 `/api/private/fast/123`，**不带 Caller Token** 点击“请求私有 API”，预期 HTTP 401。
+4. “身份与登录” 中输入 Caller 名称、Scopes=`demo:read`，点击“创建 Caller”。一次性 Token 会暂存在当前页面的密码输入框，默认隐藏；页面会自动填写 Caller Token 和吊销 ID。现在私有请求预期 HTTP 200。
 5. 如要测试 Scope 不足，创建一个只有 `other:read` 的不同名称 Caller，私有请求应返回 HTTP 403。不要把真实 Token 粘贴到聊天或仓库。
-6. 区域 C 点击“吊销”，再次请求私有 API 应返回 HTTP 401。
-7. 在 D 的“发布历史”选择**最初仅含公共 Demo 的版本**（不一定是 V1，取实际值），填写“回滚来源版本”和**当前持久化版本** expectedVersion，点击“回滚为更大新版本”。成功后新版本号必须大于旧版本；等待节点同步。
+6. “身份与登录” 点击“吊销”，再次请求私有 API 应返回 HTTP 401。
+7. 在“配置与版本” 的“发布历史”选择**最初仅含公共 Demo 的版本**（不一定是 V1，取实际值），填写“回滚来源版本”和**当前持久化版本** expectedVersion，点击“回滚为更大新版本”。成功后新版本号必须大于旧版本；等待节点同步。
 8. 再请求 `/api/private/fast/123` 应为 HTTP 404；原三个公开 Demo API 应仍可用。回滚不会擦掉草稿；下一次发布草稿仍可能重新开放私有路由。
 
 ## 5. 常见错误和处理
@@ -89,19 +84,36 @@ docker compose -f compose.local.yml stop  # 另外停止容器，数据卷仍保
 | 发布 409 | expectedVersion 已过期或不同管理员已发布 | 重新点“当前持久化版本”，检查草稿后由你决定是否重新发布 |
 | Echo 400 | 不是合法 JSON **对象** | 例如填 `{"name":"flowgate"}`，不要直接用数组或字符串 |
 | 私有 401/403 | Caller Token 缺失/过期/吊销，或 Scope 不足 | 重新创建合法 Caller 或检查 scope |
-| 429 / 并发限制 503 | 只有功能块 2 真实治理上线后才会出现 | 在旧 Block1 不应把配置成功当成限流已执行 |
+| 429 / 并发限制 503 | 策略已真实执行或依赖故障 | 查看响应code及policyCode区分速率耗尽、并发满、Redis不可用 |
 
 ## 6. 看哪里能证明操作真正生效？
 
 - **Control 数据库发布成功**：`GET /admin/releases/current`（页面“当前持久化版本”）出现新版本和 `PERSISTED`。
 - **Gateway 已实际加载**：页面“节点实际应用版本”中的 appliedVersion 与 checksum 对齐；节点信息不是请求已经成功转发的替代品。
 - **业务返回正确**：实际请求 HTTP 200/201/400/401/403/404，Request ID 可以关联行为；别用页面点击成功代替 API 成功。
-- **策略生效**：在功能块 1 阶段尚不存在；功能块 2 将新增有界负载请求和真实 429/503 的可视演示。
+- **策略生效**：当前版本返回policyStates；ENFORCED_BLOCK2表示新版本的执行契约，仍须节点应用该版本。历史PENDING_BLOCK_2_3不执行。通过真实请求和指标确认结果。
 
 遇到问题可以把**不含密码/Token 的** HTTP 状态、requestId、接口路径和错误说明交给 Codex 排查。强制检查不要把原始认证头、`.env` 或一次性 Token 放进日志/截图。
 
-## 7. 后续新版界面会怎样变化
+## 7. 限速和并发演示
 
-功能块 2 计划把上述流程做成可视化的“环境检查→登录→初始化→发布→验证”引导，同时保留进阶目录、原始 JSON 调试和旧功能。新增策略向导、独立请求结果卡与最近 10 条无敏感历史。**这些是下一阶段设计，不代表当前页面已具备。**
+1. 在“策略与流控”点击“读取策略与目标”，选ROUTE和demo-slow。
+2. 新建RATE_LIMIT，代码填唯一值，例如slow-route-rate；capacity=2、refillPerSecond=1，点击“保存并绑定草稿”。
+3. 转到“配置与版本”，读取当前版本，点击发布并确认；查询节点，等待appliedVersion匹配。
+4. 回到策略页，路径`/api/demo/slow?delayMs=0`，请求数6，执行有界请求；独立结果卡呈现真实429。不是所有请求都必定429，取决于容量、补充和发送时刻。
+5. 选择已有策略，停用并保存；新建CONCURRENCY，ROUTE=demo-slow、maxConcurrent=1，发布并确认节点。
+6. 路径改为`/api/demo/slow?delayMs=500`，请求数6。可观察200和503 CONCURRENCY_LIMITED；请求结束后再次发送应恢复准入。
+7. 修改已有策略仅更新参数/启用状态，不改变作用域或重复绑定；原始高级绑定仍在页面保留。相同类型/范围/目标只允许一条启用策略。
+8. RATE_LIMIT跨网关共用Redis预算；CONCURRENCY仅单机。先GLOBAL→SERVICE→API→ROUTE→CALLER扣减，再获取服务→路由并发；后层拒绝不退还前层预算。Redis不可用时受限请求503，未绑定限速的公开API不依赖限流Redis。
 
-改造合同见 `docs/standards/test-console-ux-v2.md`；最小功能实现方案见 `docs/progress/block-2-traffic.md`。
+脚本验证（自动创建独立临时容器、随机端口，退出自动清理，不覆盖本机IDEA和已有数据）：
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package
+node scripts/block2-console-test.js
+python3 scripts/block2-smoke.py
+python3 scripts/block2-hotspot.py
+```
+
+最后一条运行同环境15秒+15秒的小对照，结果写入`docs/progress/evidence/block2-hotspot.json`。Demo观测仅在显式`FLOWGATE_DEMO_OBSERVATION=true`时注册；脚本设置8个共享Tomcat线程，不改变日常启动默认值。普通API尾延迟的改善仅代表此次开发机短实验，不代表正式性能验收。

@@ -1,6 +1,6 @@
 # 功能块 2｜分布式限速、在途并发保护、热点隔离（实施任务 V2.0）
 
-> 状态：**设计已准备，尚未授权编码；功能块 1 审核及必要修复完成后再开始**。
+> 状态：**2026-11-06负责人明确授权开始；实现、定向测试与短热点对照已交付，浏览器人工可用性及最终审核未完成**。
 > 预备设计分支：`docs/block2-traffic-design`（仅文档）；未来实现分支建议 `feat/block2-traffic-governance`，须从确认后的 Block1 稳定提交创建。
 > 执行范围：B06/B07/B08 + Block1 已有控制台的易用性修复与使用指南。不提前做 Block3 熔断、动态负载自适应或正式性能压测。
 > 统一阅读：`AGENTS.md` → 本文 → `docs/standards/test-console-ux-v2.md` → `docs/guides/test-console-guide.md`；背景见 `docs/progress/block-1-control.md`。
@@ -148,21 +148,58 @@ Micrometer 优先复用现有 Actuator 和 Gateway timer，只新增固定低基
 3. 关键类/方法与复杂算法全部中文注释，较长 Java/Lua 块按 `// 1. ...` / `-- 1. ...` 等编号。重点说明：早层扣减语义、为什么无跨 Key 原子性、如何安全释放许可、旧版本兼容。
 4. 每完成业务块同步维护测试台能力标识、使用指南、README 与本文件第 12 节；遵循 Conventional Commits，记录真实命令/运行结果。功能块 2 完成后停下等审核，不自动开启 Block3。
 
-## 12. Codex 进度回填（目前均未实现）
+## 12. Codex 进度回填（2026-11-06 实际执行）
 
 | 项目 | 真实状态 |
 |---|---|
-| Block1 复审与负责人授权 | 待完成 |
-| 功能块 2 实现分支 / SHA | 未创建 |
-| 前端可用性改造 + 使用指南 | 设计已备，前端代码尚未改造 |
-| 发布快照绑定字段兼容 | 未编码 / 未测 |
-| Redis Lua 令牌桶与多维规则 | 未编码 / 未测 |
-| 本机并发许可与释放 | 未编码 / 未测 |
-| 认证/治理顺序与 HTTP 错误 | 未编码 / 未测 |
-| 两网关 Redis 共享小测试 | 未执行 |
-| 热点小实验、原始结果 | 未执行 |
-| 负责人/ChatGPT 审核 | 未开始 |
+| 负责人授权与R1前置 | 负责人明确“可以开始了”；块1基线6a3e038修复真实缓存恢复，块2继续补迟到缓存写入恢复测试；最终人工验收不冒充通过 |
+| 分支/实现SHA | feat/block2-traffic-governance；前端618aef4，治理实现d89f152；本节及脚本另作交付记录提交 |
+| 测试台与指南 | 已实现分区导航、五步引导、模板/策略表单、独立响应卡、最近10条脱敏摘要、发布/回滚确认、真实版本/规则状态；自动化DOM交互契约通过，真实浏览器尚未执行 |
+| 快照兼容 | schemaVersion=1保持，ROUTE导出targetRouteId，旧PENDING不执行、旧checksum不改写，规则随同版Route冻结 |
+| 令牌桶 | Reactive Redis单Key Lua、固定点整数、Redis TIME、有界TTL、独立revision；五维有序扣减、早层不退费 |
+| 本机并发 | SERVICE→ROUTE，非阻塞CAS，部分失败释放，normal/error/timeout/cancel及旧版本许可独立释放测试通过 |
+| 认证与拒绝 | 401/403不消耗Caller预算，Caller A限额不影响B；429/503拒绝不调用Demo，Request ID一致 |
+| Redis故障 | 专用容器pause/unpause，受保护路由503，未绑定公开fast200，恢复后准入通过 |
+| 两Gateway | 相同速率Key共享预算；本机并发各自独立，真实HTTP验证通过 |
+| 热点短对照 | 同启动8个Tomcat线程、16个slow客户端/1个fast客户端、同发送节奏，A/B各15秒，原始样本见evidence/block2-hotspot.json |
+| 最终审核 | 尚未执行；没有合并main或开始Block3 |
 
-完成时必须回填本块新增文件、版本与必要依赖、Git 分支/SHA、**真实构建和测试命令/结果**、可重现 Demo 的启动与操作方法、已知问题。任何没执行过的测试明确写“未执行”。
+### 12.1 主要代码与技术复用
 
-**本块通过标准：** 正式发布的限速/本地并发策略在网关真实生效、拒绝不进下游、Redis 速率跨实例共享、请求终止许可不泄漏、旧版快照与认证不回归、短热点对照真实可解释，且前端已能让非作者按照中文使用指南独立完成一次演示。
+- `PolicyRules`：两端共享的发布/应用边界参数、关系和唯一规则验证；`ReleaseService/CatalogService`在现有表/API导出绑定与执行标识，current响应增加白名单policyStates，未新增管理表或接口。
+- `EffectivePolicyResolver`：按同版API/Route冻结五维策略、规范化参数SHA revision；不在请求中读取candidate/applied或MySQL。
+- `AdmissionGlobalFilter/ReactiveTokenBucketLimiter/LocalConcurrencyLimiter/AdmissionMetrics`：真实准入、明确429/503、单机非阻塞许可、低基数指标。无新增Maven依赖或业务模块。
+- Lua仅参考Plus令牌数学、Redis TIME和拒绝思路，重写为单Key定点数组返回；未复制Servlet、ThreadLocal、同步Redis、券/IP/User双扣。来源与Apache许可保留于`THIRD_PARTY_NOTICES.md`及`licenses/`。
+- Demo仅新增默认关闭的`FLOWGATE_DEMO_OBSERVATION=true`实验观测，用实际下游调用数证明拒绝不转发；共享资源使用已有Tomcat线程配置，没有增加下游业务。观测端点不作为网关发布路由。
+
+### 12.2 实际命令与结果
+
+```bash
+# 使用本机已有 .env 中的Java17；秘密不打印、不提交
+source .env
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package
+node --check flowgate-control/src/main/resources/static/test-console/app.js
+node scripts/block2-console-test.js
+PYTHONPYCACHEPREFIX=/tmp/flowgate-block2-pycache python3 -m py_compile scripts/block2-smoke.py scripts/block2-hotspot.py
+python3 scripts/block2-smoke.py
+python3 scripts/block2-hotspot.py
+git diff --check
+```
+
+- Maven：**24个JUnit通过**（Contract5、Gateway16、Demo3），Control无独立JUnit，本轮通过真实MySQL/Redis HTTP链路验证相关发布路径；未以无测试冒充单测覆盖。
+- Node：导航、登录清密、角色按钮、版本读取、真实目标路径、429/400渲染、409不重试及摘要脱敏通过。这是自动化DOM契约测试，**不等价真实浏览器测试**。
+- smoke：隔离MySQL/Redis容器、Demo/Control/两个Gateway JVM，真实认证/代理/发布/回滚/拒绝/Redis故障恢复/节点与指标/60秒TTL自然过期通过；在退出finally中清理自有JVM与容器、匿名卷，不停止用户已有IDEA服务和本地Docker依赖。
+- hotspot：实际执行两组15秒；A fast成功14，P95/P99=2007.691ms（仅14样本）；B fast成功146，P95=7.13ms、P99=21.729ms，slow成功25、429共1056、503共6。原始逐请求/在途观测与环境限制保留于`docs/progress/evidence/block2-hotspot.json`。同闭环客户端配置，治理后拒绝更快导致尝试总量上升，不声称相同完成吞吐的正式性能比较。
+- 初次沙箱Maven失败原因为Mockito无法附加JVM，允许测试JVM附加的环境重跑通过。首次Redis stop/start恢复测试失败：Docker随机宿主端口重启后改变；改用pause/unpause保持端口进行故障恢复，重跑通过。保留此失败事实，不归咎于已证明恢复的准入算法。
+- 中文注释检查：核心治理类、发布/版本边界、Lua与复杂方法均有中文说明及编号；Gateway源码扫描无Servlet/JDBC/同步StringRedisTemplate/RequestContextHolder/ThreadLocal。`git diff --check`通过；本机密码/内部Key/BCrypt值扫描未进入变更。
+
+### 12.3 未执行项、使用方法与风险
+
+1. **真实浏览器五步操作、1280px/窄屏布局、键盘交互、VIEWER/OPERATOR实际页面易用性及负责人人工验收未执行**：遵循负责人此前不使用电脑控制的要求；不能据自动DOM测试宣布完整Web UX验收通过。真实HTTP角色/凭证行为由既有块1和本轮联调覆盖，页面布局仍待人工。
+2. 未做全项目统一回归、长时间/正式大压测、Redis Cluster、生产安全及公网部署验证。P99样本很少，CPU仅ps生命周期平均值，开发机其他负载未隔离。
+3. 层次令牌扣减不是跨Key原子事务；并发失败不退已扣令牌；本机并发不是跨节点总容量。Redis故障对绑定限速路由fail-closed。
+4. 现有数据和历史版本保留；旧PENDING版本回滚后仍不治理，新发布才标记ENFORCED_BLOCK2。全量旧版本兼容仅针对当前schemaVersion=1受控载荷。
+5. 启动：先停止IDEA旧JVM，再用Java17构建；Docker本地依赖保持启动。分别运行Demo/Control/Gateway主类，Control与Gateway运行配置选FlowGate根目录`.env`。测试入口`http://127.0.0.1:8081/test-console/`；浏览器刷新加载新静态资源。具体点击路径见`docs/guides/test-console-guide.md`。
+6. 部分早期失败实验使用Docker默认匿名卷；后续清理已修正为只对自建容器执行`docker rm -f -v`。不为清理实验残留执行全局volume prune，避免影响用户数据。
+
+**交付结论：** 功能块2编码与上述定向/真实链路验证已完成；真实浏览器人工验收及ChatGPT/负责人最终审核待完成，尚不宣称满足全部最终通过标准。只推送当前功能分支，不合并main、不进入Block3。

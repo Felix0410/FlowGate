@@ -1,10 +1,10 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **状态：功能块 0 已实现并通过静态审查及 Codex 报告的本地定向测试；负责人手动验收统一推迟到功能块 1 最小 Demo。功能块 1 后端与简易测试台已实现，并通过本地定向验证，等待负责人及 ChatGPT 审查。**
+> **当前：负责人已授权功能块2；限速、本机并发、热点小对照及测试台改造已在独立功能分支实现并定向验证，浏览器人工可用性及ChatGPT/负责人最终审核待完成。未合并main，不进入块3。**
 >
 > 更新：2026-11-05。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
-> 阅读顺序：**本 README → [功能块 1 开发任务书](docs/progress/block-1-control.md) → [前端同步规范](docs/standards/frontend-sync-rule.md) → [Codex 执行说明](CODEX_BLOCK1_PROMPT.md)**。历史源码证据与业务设计见 [阶段 0 审计](docs/stage-0-audit.md)。
+> 阅读顺序：**本 README → [功能块2任务书](docs/progress/block-2-traffic.md) → [测试台指南](docs/guides/test-console-guide.md) → [Codex 执行说明](CODEX_BLOCK2_PROMPT.md)**。历史源码证据与业务设计见 [阶段 0 审计](docs/stage-0-audit.md)。
 
 ## 1. 核心定位：复用技术，重构业务
 
@@ -191,7 +191,7 @@ P0 先不建全套表。管理 API 的候选资源为 `/admin/apis`、`/admin/ro
 5. 完成后整理文件清单、Git 提交、实际运行命令及通过/失败结果、未覆盖风险；可推送**独立功能分支**供复核，但不得直接修改/合并 main 或自行开启下个功能块。需要用户权限的远端操作按本地权限和用户授权处理。
 6. ChatGPT 和负责人审核后的问题在**同一功能块**修复、做相关定向复测；审核通过才开启下一功能块。
 
-**当前入口**：Codex 执行 [功能块 1 任务书](docs/progress/block-1-control.md)；从远端已有的 `feat/block1-control-publish` 分支开始，依照根目录 [CODEX_BLOCK1_PROMPT.md](CODEX_BLOCK1_PROMPT.md) 和 [前端同步规范](docs/standards/frontend-sync-rule.md) 编码。功能块 0 的人工验收延至功能块 1 最小可执行 Demo；功能块 2 尚未授权。
+**当前入口**：执行[功能块2契约](docs/progress/block-2-traffic.md)与根目录[CODEX_BLOCK2_PROMPT.md](CODEX_BLOCK2_PROMPT.md)；实现分支`feat/block2-traffic-governance`基于块1缓存恢复修复。不要从旧main另起功能实现。
 
 ### 6.3 按功能块管理任务与开发进度（2026-11-04 新约定）
 
@@ -276,7 +276,7 @@ mysql -h 127.0.0.1 -P "${FG_MYSQL_PORT:-3306}" -u "$FG_MYSQL_USERNAME" -p flowga
 4. “添加私有 Demo 草稿”，expectedVersion=1 发布 V2。无 Token 请求私有 API 为 401；创建 `other:read` Caller 得 403，创建 `demo:read` Caller 得 200；吊销后不再放行。
 5. expectedVersion=2，来源版本=1 回滚得 V3；私有路径恢复 404，公共三个 API 仍可用；查看节点、历史和审计。
 
-若已有版本，从“当前持久化版本”读取实际数字，不重复使用示例 expectedVersion。回滚只替换已发布配置，不覆盖草稿。页面凭证仅保存在内存，刷新/退出清空；浏览器没有内部密钥。策略只校验、存储、发布，**待功能块 2/3 执行**。
+若已有版本，从“当前持久化版本”读取实际数字，不重复使用示例 expectedVersion。回滚只替换已发布配置，不覆盖草稿。页面凭证仅保存在内存，刷新/退出清空；浏览器没有内部密钥。历史块1策略标记为待执行；块2新发布RATE_LIMIT/CONCURRENCY实际执行，TIMEOUT/熔断仍待块3。
 
 本块测试命令：
 
@@ -291,14 +291,14 @@ FG_SMOKE_MYSQL_SOCKET=/path/to/test-mysql.sock python3 scripts/block1-smoke.py
 
 Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序；固定使用回环 MySQL 13306，socket 用户由 `FG_SMOKE_MYSQL_USER` 指定（默认仅适用于无密码的隔离测试 MySQL root，不是应用默认凭证）。`FG_SMOKE_KEEP=1` 可保留成功的三服务 Demo，脚本会打印权限 0600 的临时登录文件位置。真实结果、技术差异和人工检查入口见[功能块 1 进度记录](docs/progress/block-1-control.md#12-codex-原地回填请仅填真实情况)。尚未执行统一压测/最终验收。
 
-### 6.6 功能块 2 设计预备与前端易用性整改（2026-11-06）
+### 6.6 功能块2实现与前端整改（2026-11-06）
 
-**当前仍在 Block1 审核期；下述内容均为下一阶段方案，尚未实现。** Block1 已在 PR #1 远端交付主要代码，本轮静态核查记录见 [Block1 复审](docs/reviews/block-1-static-review-2026-11-06.md)。需先复测路由缓存刷新失败后的实际匹配行为并完成负责人手动验收；PR #1 尚未合并 main。
+负责人已明确授权开始块2。块1R1缓存恢复修复已定向验证；块2实现与证据见任务书第12节。Block1/Block2均不自动合并main，浏览器人工验收待完成。
 
 - [功能块 2 可执行设计](docs/progress/block-2-traffic.md)：直接对齐现有 Control 的 `capacity/refillPerSecond`、`maxConcurrent` 策略及 `Snapshot` 实际协议，不新造数据表与中间件。
 - [测试台易用性改造规范](docs/standards/test-console-ux-v2.md)：首屏五步引导、独立结果卡、版本状态、错误码帮助、可读配置表单和原生 JS 保留全部旧功能。
-- [当前测试台中文使用指南](docs/guides/test-console-guide.md)：针对现有 A/B/C/D/E 页面，从 Docker 启动到发布、私有鉴权与回滚，附预期状态码及排错指引；V2 UI 改造仍待编码。
-- [Block2 Codex 预备提示词](CODEX_BLOCK2_PROMPT.md)：负责人批准 Block2 且 Block1 审查完成后才可交给本地 Codex 实施，不自动跨阶段。
+- [当前测试台中文使用指南](docs/guides/test-console-guide.md)：对应新版分区导航、策略向导、发布和回滚，附IDEA环境文件路径与预期状态码。
+- [Block2 Codex 预备提示词](CODEX_BLOCK2_PROMPT.md)：记录授权门槛与固定实施顺序，不自动进入块3。
 
 从 Block2 开始，前端可用性不是附属外观，而是每次功能块的**强制验收项**：普通使用者应能在中文帮助下独立完成 Demo，并能分辨“草稿”“PERSISTED”“节点已应用”“策略真正执行”。
 
@@ -310,4 +310,11 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 
 ## 8. 开源声明
 
-上游来源：[java-up-up/hmdp-plus](https://github.com/java-up-up/hmdp-plus)，仓库中有 Apache License 2.0。当前文档只记录方案，**尚未移入上游源码**。将来如实际复制/修改受该许可证约束的代码，需要保留对应许可、版权声明与必要归属，检查 NOTICE 要求；不要提交原仓库中的敏感配置、凭证或测试数据。此事项属于阶段 1 的前置核对。
+上游来源：[java-up-up/hmdp-plus](https://github.com/java-up-up/hmdp-plus)，仓库中有 Apache License 2.0。块2仅参考令牌补充数学、Redis TIME与拒绝分支思路，独立适配Lua，不复制旧Servlet/同步Redis业务链路。来源、改动及许可文本见[第三方说明](THIRD_PARTY_NOTICES.md)。未引入Plus依赖模块或敏感配置。
+
+### 功能块 2 本地实现（2026-11-06，待审核）
+
+- 实现分支：`feat/block2-traffic-governance`；块1缓存超时/迟到事件恢复前置修复基线为`6a3e038`。
+- 新发布 RATE_LIMIT/CONCURRENCY 通过 Route 同版元数据实际执行；历史待办策略不自动激活。限速是 Reactive Redis 单Key原子令牌桶，并发上限仅单个Gateway；熔断仍待块3。
+- 测试台默认五步引导，支持分区结果、策略向导、有界请求、真实版本与节点对照；[操作指南](docs/guides/test-console-guide.md)。浏览器人工可用性验收尚未执行。
+- 定向命令与真实结果见[块2进度第12节](docs/progress/block-2-traffic.md)。`scripts/block2-smoke.py`、`scripts/block2-hotspot.py`使用独立临时容器和随机端口，退出清理自己的资源。
