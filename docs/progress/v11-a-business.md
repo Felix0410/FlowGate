@@ -4,7 +4,7 @@
 
 ## A-00 范围与业务流程
 
-用户在正式 /console/：以 ADMIN 登录 → 建立客户 → 建立客户所属应用 → 建立 Free/Pro 套餐 → 为应用绑定一个有效订阅 → 为应用安全创建 Caller 凭证并一次性展示 → 按 app 查询 Scope/状态/订阅。VIEWER 只能查看，OPERATOR 不允许更改套餐与凭证（首版固定）；旧 /admin/callers 创建和吊销 API 仍不受影响。
+用户在正式 /console/：以 ADMIN 登录 → 建立客户 → 建立客户所属应用 → 建立 Free/Pro 套餐 → 为应用绑定一个有效订阅 → 在应用详情看到“凭证待启用”及后续发放入口 → 按 app 查询状态/订阅。**A 阶段只实现应用与主体的数据库关联及凭证 UI 占位，不发放可用于现有 V1 路由的活跃 Token；真正的应用凭证签发和 app-only 访问限制在 B 阶段同一功能块上线。**VIEWER 只能查看，OPERATOR 不允许更改套餐与凭证（首版固定）；旧 /admin/callers 创建和吊销 API 仍不受影响。
 
 ## A-01 数据层任务
 
@@ -15,22 +15,22 @@
 ## A-02 Control 任务
 
 1. 新增 Entity/Mapper/Service/Controller，路由 /admin/developers、/admin/apps、/admin/plans、/admin/subscriptions。采用真实分页查询或合理上限；查询输出关联名称与稳定 ID，支持状态、创建时间。写操作审计含操作者、对象和摘要；不上传完整请求凭证。
-2. 新增 POST /admin/apps/{id}/credentials，复用现有 IdentityService 生成一次性凭证、存储 Redis 摘要；先校验 app 未停用、角色 ADMIN、Scope 不允许冒用 /admin。将 principalId 与 appId 持久关联；若任一步骤失败，数据库事务回滚并尽力清理 Redis 新凭证。明文仅这次响应，之后只展示凭证尾号（若需要，持久化不可逆尾号而非明文）；凭证轮换、旧 Token 删除失败需返回明确失败，不得假装成功。
-3. 新增暂停/恢复应用，暂停立即标记数据库状态并触发关联 Token 吊销；清理失败如实记录为异常/待补偿，不要声称跨系统原子。A 块阶段只保证基础安全与可见状态，**正式 METERED 调用还未启用**，B 块再由持久校验闭环保障停用。
+2. A 阶段先建立应用与原有 CALLER principal 的关联模型，新增 POST /admin/apps/{id}/credentials 的接口合同与产品入口，但在 B 阶段完成网关 app-only 路由隔离前，返回 409 FEATURE_NOT_READY，不真正签发可用 Token。**否则 app Token 可以利用既有 Scope 访问非计量旧路由，破坏“停用 app 必须拒绝”的安全承诺。**B 阶段复用 IdentityService 正式签发一次性 Token、记录关联、轮换/吊销并验证 app-only 边界。
+3. 新增暂停/恢复应用并在 MySQL 中持久化状态；A 阶段不发放应用活跃 Token，故不需要声称已做 Redis 跨系统撤销。B 阶段配合正式发证增加关联 Token 原子吊销与配额授权查库，清理失败要有明确状态/补偿。
 4. 权限按 ADMIN 写/VIEWER 读/OPERATOR 只读客户套餐，复用既有 AdminAuthInterceptor；Caller 本身不得访问 /admin。
 
 ## A-03 正式 /console/ 页面
 
-新增“客户与应用”“套餐与订阅”两个产品导航。业务化新建/编辑表单、客户列表、按客户查看应用、订阅到期/待生效状态、一次性 Token 模态框、空态/失败与字段帮助。用客户/套餐中文名下拉选项，不让用户手填数据库数字 ID；原有服务/API/路由/发布/监控页面保留，旧 /test-console/ 不删。产品使用指南同步更新。
+新增“客户与应用”“套餐与订阅”两个产品导航。业务化新建/编辑表单、客户列表、按客户查看应用、订阅到期/待生效状态、明确的“凭证待 B 阶段启用”提示、空态/失败与字段帮助。用客户/套餐中文名下拉选项，不让用户手填数据库数字 ID；原有服务/API/路由/发布/监控页面保留，旧 /test-console/ 不删。产品使用指南同步更新。
 
 ## A-04 定向测试与通过条件
 
 - Java17 Maven 对新增 Control/Contract 及受影响模块运行 test/package；真实 MySQL8.4+Redis7 隔离实例。
 - 从空 V1 数据库执行 V1 再执行增量 DDL 两次无破坏；已有 fg_principal、路由、发布快照不变。
 - 两客户同名 code/重复 app code 返回 409；无效套餐额度/日期 400；订阅重叠失败；月末日期按 UTC；VIEWER/OPERATOR 写 403；ADMIN 写 201/200；Caller 访问 /admin 401/403。
-- Token 明文仅首次可见、数据库无明文；暂停后新计量验证将在 B 块覆盖，A 块需验证已有 Redis Token 被撤销及审计记录。
+- A 阶段应用凭证接口 409 FEATURE_NOT_READY，不能生成 Redis 活跃凭证或在 UI 上伪造成功；正式一次性 Token 签发/暂停后吊销由 B 块集成验收。A 仍需验证原有旧 Caller 认证、撤销与审计回归。
 - 浏览器 1280px 与 375px 真实可操作，Tab 焦点与中文提示可用；脚本模拟 DOM 不能替代负责人体验。
-- 最小真实业务：新建 2 客户+2 应用+Free/Pro 套餐与订阅+有效 Scope 凭证，保留脱敏 JSON 证据。
+- 最小真实业务：新建 2 客户+2 应用+Free/Pro 套餐与订阅，验证凭证功能未启用的明确提示和旧 Caller 回归，保留脱敏 JSON 证据。
 - 把实际 SHA、文件、命令、通过/失败/跳过计数和阻断问题追加本文件末尾；**本文件当前没有任何已完成测试**。完成后由负责人确认，再开始 B。
 
 ## A-05 明确不做
