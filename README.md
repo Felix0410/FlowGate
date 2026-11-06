@@ -1,6 +1,6 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **当前：Block4新增产品后台 `/console/` 已实现登录、目录编辑、四类治理、发布回滚、调用方和监控审计，定向Java/Node及隔离真实HTTP验证通过。先由负责人体验产品页并复审，再决定新版Block4统一验收；不以旧基线性能替代新产品验收，main未合并。**
+> **当前：Block4正式产品后台 `/console/` 的Java/JS/CSS已远端提交，定向Java10项和产品真实HTTP64条有Codex证据，ChatGPT源码静态复审已完成；Caller旧记录缺少安全列表、负责人1280px/375px与键盘实际浏览器体验、产品后全量回归仍待收口。Block4/V1没有最终验收，PR均Draft，main未合并。**
 >
 > 更新：2026-11-06。审计基准：[`java-up-up/hmdp-plus@03594d1`](https://github.com/java-up-up/hmdp-plus/tree/03594d190275a32d151e5d8b45da24c0f4efbe14)。
 >
@@ -364,6 +364,10 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - 页面顶部“完整使用手册”打开同源离线说明：`http://127.0.0.1:8081/test-console/guide.html`。14章覆盖启动、首次调用、全部字段/按钮、身份、目录、发布回滚、限速并发、超时熔断、结果解释、常见错误及恢复；每个业务页也有就地说明。修改[权威Markdown手册](docs/guides/test-console-guide.md)后运行`python3 scripts/build-console-guide.py`同步网页，`--check`检查一致性。更新资源后重新构建并重启Control，再刷新页面。
 - 正常启动不增加必填配置。仅演示`/demo/fault`时，在Demo的IDEA环境或本机`.env`显式设`FLOWGATE_DEMO_FAULT_ENABLED=true`；默认关闭。不覆盖现有`.env`、密码或Docker数据。
 - 实际命令/结果/差异见[块3进度第11节](docs/progress/block-3-resilience.md)，[业务前端指南](docs/guides/test-console-guide.md)、[故障保护指南](docs/guides/block3-fault-testing.md)。自动HTTP证据为`docs/progress/evidence/block3-smoke.json`，不含认证头、密码、Token或请求Body。
+
+### 产品后台源码静态复审（2026-11-06）
+
+[产品后台审核报告](docs/reviews/product-console-static-review-2026-11-06.md)：确认实际独立产品入口/业务列表/策略/发布/Caller/监控源码和64条HTTP证据；建议补全历史Caller安全只读列表与按行吊销，待负责人真实浏览器体验；最终全工程回归、性能确认及PR合并均未完成。
 
 ### 原验收基线的本机记录
 
