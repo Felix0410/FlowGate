@@ -62,13 +62,13 @@
 
 校验：`failureRateThreshold` 1..100；`slidingWindowSize` 2..100；`minimumNumberOfCalls` 1..slidingWindowSize；`waitDurationMs` 500..60000。默认 **COUNT_BASED** 窗口，半开允许 **2** 次试探（部署固定常量，不添加新参数），自动 HALF_OPEN 转换。只支持 ROUTE 作用域，避免服务级策略/多路由映射复用误义；已有其他 scope 的旧草稿可以保留，但启用绑定发布时返回 400。
 
-新增一个**可选且受控**字段 `fallbackMode`（枚举 `NONE` / `STATIC_JSON`，默认 `NONE`）；旧四字段草稿继续有效。`STATIC_JSON` **只允许匹配 GET/HEAD 且明确只读的路由**；不为 POST/PUT/DELETE 开启 fallback、不自动重试、不提供用户输入的任意 JSON/脚本/外部降级地址。
+新增一个**可选且受控**字段 `fallbackMode`（枚举 `NONE` / `STATIC_JSON`，默认 `NONE`）；旧四字段草稿继续有效。`STATIC_JSON` **只允许匹配 GET 且明确只读的路由**；不为 POST/PUT/DELETE 开启 fallback、不自动重试、不提供用户输入的任意 JSON/脚本/外部降级地址。
 
 **固定行为**：
 1. CLOSED：请求按现有身份→限流→在途许可后进入断路器；下游 HTTP 500/502/503/504 **计为熔断失败**；业务正常 4xx（包括上游 400/404）不计失败，内部认证 401/403、限流 429、并发拒绝 503 **不计入断路器样本**。
 2. 窗口样本量达到 `minimumNumberOfCalls` 且失败率达到阈值，进入 OPEN；此后调用**不进入下游**，返回 HTTP 503 `CIRCUIT_OPEN`。区分真实上游 503 与网关熔断短路。
 3. `waitDurationMs` 后自动 HALF_OPEN，只放 2 次试探；两次成功回 CLOSED，任一次失败回 OPEN。短路及状态转换用独立指标/时间戳说明；断路器状态以当前应用版本所对应的实例为准，不能在测试台凭 HTTP 响应猜状态。
-4. `fallbackMode=STATIC_JSON` 时，**仅 GET/HEAD** 的熔断/受控失败可以返回 HTTP 503，JSON 至少有 `code:"DEGRADED", degraded:true, source:"GATEWAY_FALLBACK", requestId`；这是明确不可用的静态降级结果，**不返回虚构的业务成功数据或 HTTP 200**。不启用时保留原上游 5xx 或明确网关 503/504。
+4. `fallbackMode=STATIC_JSON` 时，**仅 GET** 的熔断/受控失败可以返回 HTTP 503，JSON 至少有 `code:"DEGRADED", degraded:true, source:"GATEWAY_FALLBACK", requestId`；这是明确不可用的静态降级结果，**不返回虚构的业务成功数据或 HTTP 200**。不启用时保留原上游 5xx 或明确网关 503/504。
 5. 固定路由 breaker 名：`fg-cb-<policyId>-<configRevision>-<routeId>`，revision 为参数+fallbackMode 的稳定 SHA 摘要，不直接用 `configVersion`（无关发布不应重置熔断窗口）。同版 Route metadata 保存对象名称；参数更新后创建新 breaker，旧在途仍由旧对象完成；不能用动态原始路径、调用方 ID 或 Token 命名。
 6. 集成 Gateway 官方 `CircuitBreaker` GatewayFilter Factory 和 Reactor Resilience4j；通过受控参数构建对应实例。**动态配置需要在 Route 刷新前创建/注册**；不允许在 Netty 每请求临时构造配置/新断路器。若该具体框架版本工厂缓存与按版本动态命名行为不相容，必须用小测试证明并作薄适配，不退回到自写熔断状态机。
 7. `CircuitBreaker` 与 `SetPath` 的顺序必须使用真实链路测试确认：CB 包裹实际下游调用、无需重复变更请求 Path；`fallbackUri` 只能是内部固定 `forward:/__flowgate/fallback`，不允许用户配置任意 URL，内部处理器对直接访问一律拒绝且不可被已发布公开路径绕过鉴权。只读降级在异常和状态码触发时的行为必须在 Gateway 5.0.4 测试确认，不能只依赖文档示例猜测。
@@ -144,7 +144,7 @@
 | 历史协议 | Block1/2 PENDING 仍不执行；新 Block3 ENFORCED 执行；checksum/schema 兼容；旧版在途请求持旧保护元数据 |
 | Gateway timeout | 超时 504；未绑定无异常改动；下游真实500保留；重复 response commit 受控，许可确实归还 |
 | CircuitBreaker | CLOSED 样本窗口、OPEN 无下游访问、HALF_OPEN 两次探测、重新 CLOSED/OPEN、非5xx失败不计数 |
-| 降级 | 仅 GET/HEAD；HTTP503 + degraded=true；不伪造200，不将认证/限速/Redis故障降级；直接访问内部 fallback 拒绝 |
+| 降级 | 仅 GET；HTTP503 + degraded=true；不伪造200，不将认证/限速/Redis故障降级；直接访问内部 fallback 拒绝 |
 | 版本与缓存 | 同版路由认证+限流+CB；更新参数换 revision，不相关发布保持 state；取消/迟到刷新后缓存与 applied 一致 |
 | 故障恢复 | Control 停止继续已应用规则，重启 Gateway 无可信规则时 fail-closed，恢复追平并上报；Redis故障不绕过 |
 | 计数指标 | 只统计真实原因；不含动态用户/路径/Token；Actuator 本地只读并保留原 Block2 指标 |
