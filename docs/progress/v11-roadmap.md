@@ -11,8 +11,8 @@
 | 序号 | 文档 | 目标 | 当前 |
 |---|---|---|---|
 | 前置 | docs/progress/block-4-acceptance.md | V1 后台手测、完整回归、PR 审核 | 待负责人收口 |
-| A | docs/progress/v11-a-business.md | 客户、应用、套餐、订阅、Caller 凭证、产品 UI | 未开始 |
-| B | docs/progress/v11-b-quota.md | 可信计量准入、MySQL 原子扣额、幂等 Ledger 与 Outbox | 未开始 |
+| A | docs/progress/v11-a-business.md | 客户、应用、套餐、订阅、凭证入口占位、产品 UI | 未开始 |
+| B | docs/progress/v11-b-quota.md | 可信计量准入、正式应用凭证/隔离、MySQL 原子扣额、幂等 Ledger 与 Outbox | 未开始 |
 | C | docs/progress/v11-c-async.md | Kafka、可靠投递、幂等消费、用量查询与对账 | 未开始 |
 | D | docs/progress/v11-d-acceptance.md | SQL 大数据实验、四组性能、双节点故障、产品验收与发布 | 未开始 |
 
