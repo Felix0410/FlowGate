@@ -1,20 +1,21 @@
-# FlowGate｜当前本地Codex统一入口（V1.1-A）
+# FlowGate｜本地Codex唯一当前任务（2026-11-07）
 
-> 2026-11-07。**V11-A编码和定向Java/Node/隔离SQL+HTTP验证已完成，当前等待复审/负责人真实浏览器反馈**，实况见阶段文件A-08。V11-B配额、C Kafka/Outbox、D性能均不得提前编码；不要重复开发A或将其称为V1.1全版本完成。
-> 实施分支：`feat/v11-a-business`，基于`docs/v1.1-openapi-platform`最新设计审查。旧PR #1–#6仍逐级Draft，`main`仍是旧基线；当前新PR为V11-A Draft，不允许自动合并或变更旧PR base。
+> 当前V11-A全部业务代码、产品页面及Codex定向测试**已真实提交远端**。PR #7 `feat/v11-a-business` → `docs/v1.1-openapi-platform`，仍是Draft；main不合并。**目前唯一开发工作是修复A的两项审核P0边界并补真实MySQL测试，不得开始B/C/D。**
 
-## 立即执行顺序
+## 立即阅读
+1. `docs/reviews/v11-a-static-review-2026-11-07.md`：远端真实代码审查，确认历史17 JUnit/155条HTTP、P0-A01和P0-A02；
+2. `CODEX_V11_A_REVIEW_FIX_PROMPT.md`：本地唯一可执行修复任务F0～F4；
+3. `docs/progress/v11-a-business.md` 第A-08/A-09节：历史已交付与当前未解决项；`docs/design/openapi-platform-v1.1.md`第12节确保A不会越界；
+4. `CODEX_V11_A_EXEC_PROMPT.md`是之前A0～A6的历史开发合同，**不要重新编码全部A**。
 
-1. 阅读 `docs/reviews/v11-design-review-2026-11-06.md` 的R01～R06安全边界和`docs/design/openapi-platform-v1.1.md`第12节。
-2. 阅读 `docs/progress/v11-a-business.md` 第A-06/A-07节（**A0～A6唯一代码实施合同**）。
-3. 阅读 `CODEX_V11_A_EXEC_PROMPT.md`（可直接执行的详细指令）。`CODEX_V11_OPENAPI_PROMPT.md`作为总体背景，不能覆盖A专属门禁。
-4. 安全核对本地`git status -sb`、`git fetch origin`、未提交数据、JDK17/IDE/Docker与当前用户的MySQL/Redis卷，不`reset --hard`、`git clean -fd`、`docker prune`、强推或改`.env`。若无可隔离的DB环境先停止真实迁移。
-5. **只编码A**：增量`sql/flowgate-v11.sql`/Entities/Mapper、ADMIN-only客户/应用/套餐/订阅API、行锁串行订阅、`/console/`真实业务页面/中文指南、受影响Java/Node/隔离SQL+HTTP验证，实际命令/退出码/失败情况/提交SHA回填阶段文件。
-6. A阶段`POST /admin/apps/{id}/credentials`只返回`409 FEATURE_NOT_READY`，绝不签发有效APP Token或写`fg:auth:caller:`/`fg:auth:app:`。**B启用真实APP Token时必须采用独立namespace+APP_CALLER用途，与旧V1 Gateway隔离；没有V1最后人工验收/A复审之前不进入B。**
-7. A完成后按Conventional Commits推送`feat/v11-a-business`，保留Draft PR，提交Codex本地真实结果等待ChatGPT和负责人复审；不得自行开始B/C/D或合并main。
+## 本轮目标
+- **F1：同月套餐冻结**。`SubscriptionSchedule.validate`不允许同一app本月已过期的Free订阅后又新增本月Pro订阅，即使两个区间不重叠；下一UTC月首日正常衔接。补JUnit和MySQL真实HTTP反例。
+- **F2：连接池UTC保证**。`connectionTimeZone=UTC`不等于MySQL会话UTC。以受控连接初始化/等价正确方案保障全部业务SQL会话UTC，测试MySQL/JVM非UTC组合及月末`Instant`回读，保护旧V1数据格式。
+- **F3：如有精力改进产品日期选择**：本月/下月首日简洁选项；不得删旧`/console/`与`/test-console/`。
+- **F4：定向17+新增JUnit、Node、独立MySQL/Redis、155旧HTTP所涉范围重新验证**，新证据单独保存，旧历史原样保留。追加SHA/命令/通过数/失败数到A进度；只修改当前A分支，提交Conventional Commits。
+- **之后停止并报告**。V1负责人真实浏览器验收仍待完成；A修复完成后需复审，B/C/D另行安排。
 
-## 永久代码和产品约束
+## 安全和技术长期约束
+Java17/Spring Boot4/Control MVC + MyBatis-Plus/MySQL8.4/Redis7，产品前端原生HTML/CSS/ES Modules。新业务管理写仅ADMIN；A凭证接口保持`409 FEATURE_NOT_READY`，**任何APP有效Token、USAGE_QUOTA、Gateway改动、QuotaBalance/Ledger/Outbox/Kafka均不能提前出现**。原Caller权限/旧快照完全兼容。全部业务关键代码中文注释，长逻辑按1/2/3分条。
 
-Java17、Spring Boot4、Control MVC+MyBatis-Plus、Gateway WebFlux+Redis/Resilience4j和原生`/console/` ES Modules；**A不新增Kafka/新服务/Gateway计量链路/新前端框架**。关键业务中文注释，长流程`// 1.` `// 2.` `// 3.`分点。新业务管理角色ADMIN才能修改，OPERATOR/VIEWER只读，旧V1权限不能改变。数据库迁移不得删改旧表或用户数据；凭证不落日志/请求Body公开证据；静态/DOM合同测试不等于真人浏览器体验。
-
-**当前真实状态：A管理域已实现并定向验证，未获得最终验收；用户持久化库未迁移。下一步只处理A复审/实际体验反馈，不开始B，不合并main。**
+保护用户的未提交内容、IDE进程、Docker持久卷及`.env`；不`reset --hard`、不`git clean -fd`、不全局Docker清理、不强推、不合并任何PR/main。不把Codex的历史push403当成目前远端没有源码，也不把本轮文档提交当成两项P0实际已修。
