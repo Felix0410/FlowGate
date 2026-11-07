@@ -16,6 +16,9 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 /** 只验证当前匹配 Route 的 Caller 权限；Redis 故障 503，凭证无效 401，Scope 不足 403。 */
 @Component
 public class CallerAuthFilter implements GlobalFilter, Ordered {
+    public static final String GENERATION="flowgateAppCredentialGeneration";
+    private boolean quotaReady;
+    @org.springframework.beans.factory.annotation.Autowired(required=false) public void setQuotaSupport(com.flowgate.gateway.quota.QuotaSupport support){this.quotaReady=true;}
     public static final String PRINCIPAL_ID="flowgateCallerPrincipalId";
     private final ReactiveStringRedisTemplate redis;
     public CallerAuthFilter(ReactiveStringRedisTemplate redis) { this.redis = redis; }
@@ -32,14 +35,23 @@ public class CallerAuthFilter implements GlobalFilter, Ordered {
             }
         }
         if (spec.isPublic()) return forward(exchange, chain);
+        var quota=route.getMetadata().get(QuotaPolicy.METADATA);
+        boolean metered=quota instanceof QuotaPolicy.Plan plan && plan.metered();
+        if(metered&&!quotaReady)return reject(exchange,503,"QUOTA_UNAVAILABLE","配额准入组件尚不可用");
         String header = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ") || !header.substring(7).matches("[A-Za-z0-9_-]{43}")) {
+        if (header == null || !header.startsWith("Bearer ") || !header.substring(7).matches(metered?"fgapp_[A-Za-z0-9_-]{43}":"[A-Za-z0-9_-]{43}")) {
             return reject(exchange, 401, "INVALID_CALLER", "需要有效调用方凭证");
         }
         // 2. 非阻塞查询 Caller 专用摘要 key；管理会话不能用于业务 API。
-        return redis.opsForValue().get("fg:auth:caller:" + SnapshotCodec.digest(header.substring(7)))
+        return redis.opsForValue().get((metered?"fg:auth:app:":"fg:auth:caller:") + SnapshotCodec.digest(header.substring(7)))
                 .map(value -> {
                     try {
+                        if(metered){
+                            var session=SnapshotCodec.JSON.readValue(value,AppCredentialSession.class);
+                            if(!"APP_CALLER".equals(session.principalType())||session.principalId()<=0||session.credentialGeneration()<=0)return 401;
+                            if(session.scopes()==null||!session.scopes().contains(spec.requiredScope()))return 403;
+                            exchange.getAttributes().put(PRINCIPAL_ID,session.principalId());exchange.getAttributes().put(GENERATION,session.credentialGeneration());return 200;
+                        }
                         Session session = SnapshotCodec.JSON.readValue(value, Session.class);
                         if (!"CALLER".equals(session.principalType()) || !"CALLER".equals(session.role())) return 401;
                         if (!session.scopes().contains(spec.requiredScope())) return 403;

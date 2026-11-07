@@ -56,3 +56,9 @@ CREATE TABLE IF NOT EXISTS fg_node_capability (
  node_id VARCHAR(200) PRIMARY KEY, features_json JSON NOT NULL,
  version BIGINT NOT NULL, checksum CHAR(64) NOT NULL, last_seen_at TIMESTAMP(3) NOT NULL
 ) ENGINE=InnoDB;
+-- B2凭证代次是MySQL权威，不存Token明文或摘要。
+CREATE TABLE IF NOT EXISTS fg_app_credential_state (
+ principal_id BIGINT PRIMARY KEY, generation BIGINT NOT NULL, enabled BOOLEAN NOT NULL,
+ updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+ FOREIGN KEY (principal_id) REFERENCES fg_principal(id), CHECK (generation > 0)
+) ENGINE=InnoDB;

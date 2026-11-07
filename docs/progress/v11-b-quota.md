@@ -178,3 +178,11 @@ B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/
 新增`fg_node_capability`与`QuotaActivationService`，完整接流名单默认空、激活开关默认false；目标快照含Quota的发布和历史回滚都检查当前可信节点版本/checksum/15秒内能力。默认关闭时旧心跳不依赖B新表；启用后不含features的旧报告覆盖为无能力。Gateway此步**尚不上报支持Quota**，应用凭证仍409；仅在B4真实过滤器完成后增加能力报告。含Quota实际发布/双新节点联调留到B6安全闭环，不声称本步已激活真实计量。
 
 实际`mvn -B -ntp -pl flowgate-control,flowgate-gateway -am test package`退出0：Contract10/Control14/Gateway22共46通过，0失败/跳过。含新增3项Quota协议（私有/唯一/旧NONE）及2项完整名单/默认关闭/缺失过期门禁测试；后续收紧私有API必须有明确路由及未来心跳拒绝，Contract/Control定向复测退出0。B1没有发Token或开放计量流量。
+
+### B2 内部凭证生命周期已实现，公开签发仍409
+
+专用`fgapp_`49字符Token、`AppCredentialSession(APP_CALLER)`、`fg:auth:app:`/index与`fg_app_credential_state`代次完全独立。应用行锁串行关联及generation变更，独立事务提交后才Redis Lua发布；Lua拒绝迟到旧代次覆盖新会话，DB再校验后才返回一次性Token。发布/清理失败返回明确503状态，DB代次/撤销仍有效，不假装跨系统原子。
+
+Gateway增加配额私有路由APP解析及代次属性，但只有B4真实QuotaSupport组件存在才允许走此分支；本步尚无实现，无法代理计量流量。旧43字符Caller/旧namespace不改。公开credentials Controller仍A阶段409，不存在可对用户启用的中间态发证接口。
+
+实际受影响Maven test/package退出0，Contract10/Control15/Gateway22=47通过；新增凭证用例证明DB commit先于新namespace Redis发布、APP_CALLER类型、49字符格式及Redis失败不回滚代次。首次测试编译因Redis/MyBatis重载泛型推断失败，补显式List/Principal类型后复跑通过；不改生产语义迎合测试。真实并发轮换/撤销/残留Token安全验证留B6。未启用应用凭证、未扣额度。
