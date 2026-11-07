@@ -20,9 +20,10 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
         this.identity = identity; this.internalKey = key;
     }
     @Override public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if (Boolean.TRUE.equals(request.getAttribute("v11.auth.checked"))) return true;
         // 1. 控制面也使用独立请求标识，异常响应不泄露底层详情。
         String id = UUID.randomUUID().toString(); request.setAttribute("requestId", id); response.setHeader("X-Request-Id", id);
-        String path = request.getRequestURI();
+        String path = managementPath(request);
         if (path.startsWith("/internal/")) {
             String supplied = request.getHeader("X-FlowGate-Internal-Key");
             if (supplied == null || !MessageDigest.isEqual(internalKey.getBytes(StandardCharsets.UTF_8), supplied.getBytes(StandardCharsets.UTF_8))) {
@@ -41,10 +42,19 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
         boolean permitted = !path.startsWith("/admin/callers") || session.role().equals("ADMIN");
         permitted &= request.getMethod().equals("GET") || path.equals("/admin/auth/logout") || !session.role().equals("VIEWER");
         // V11新管理域全部写动作仅ADMIN；旧V1的OPERATOR写权限保持原契约。
-        boolean newBusiness = java.util.List.of("/admin/developers", "/admin/apps", "/admin/plans", "/admin/subscriptions")
-                .stream().anyMatch(prefix -> path.equals(prefix) || path.startsWith(prefix + "/"));
+        boolean newBusiness = v11Path(path);
         if (newBusiness && !request.getMethod().equals("GET")) permitted &= session.role().equals("ADMIN");
         if (!permitted) throw new ApiFailure(403, "FORBIDDEN", "当前角色无此操作权限");
         return true;
+    }
+    public static boolean v11Path(String path) {
+        return java.util.List.of("/admin/developers", "/admin/apps", "/admin/plans", "/admin/subscriptions")
+                .stream().anyMatch(prefix -> path.equals(prefix) || path.startsWith(prefix + "/"));
+    }
+    /** 与MVC路径段匹配一致：解码段值并移除矩阵参数，避免编码或分号绕开新域ACL。 */
+    public static String managementPath(HttpServletRequest request) {
+        return org.springframework.http.server.RequestPath.parse(request.getRequestURI(), request.getContextPath())
+                .pathWithinApplication().elements().stream().map(element -> element instanceof org.springframework.http.server.PathContainer.PathSegment segment
+                        ? segment.valueToMatch() : element.value()).collect(java.util.stream.Collectors.joining());
     }
 }
