@@ -43,7 +43,7 @@
 - 增量SQL仅CREATE IF NOT EXISTS，新增`fg_quota_balance/fg_quota_ledger/fg_outbox_event`（与B1能力表+B2凭证状态表一共五张）；Outbox预留`lease_owner/lease_until/last_error_code`供C后续使用，但**本块不连Kafka**。
 - `POST /internal/quota/charge`独立于Admin操作，仅Internal Key/本机可信网络；`chargeId,principalId,credentialGeneration,apiId,routeId,appliedVersion,snapshotChecksum,units`。不信任用户的AppId、Header、Body，Control必须读取对应历史ConfigRelease二次核对私有Route和真实USAGE_QUOTA绑定，而非仅核对当前版本。
 - 同一MySQL事务：DB权威当前UTC/订阅/APP+Developer+Scope+generation→创建或读取唯一Balance并冻结订阅版本与单位→`charge_id UNIQUE` Ledger插入→条件扣减余额→Outbox NEW插入→commit才授权；不超额、不产生孤立Ledger/Outbox。
-- 对重复chargeId的Unique竞争，**回滚冲突事务后新事务读取历史**，匹配返回duplicate不再扣，payload变更409；跨UTC月仍返回历史冻结月份，不在新月重扣；若当前App或Token已禁用则403不允许继续代理，保留旧Ledger事实。
+- 对重复chargeId的Unique竞争，**回滚冲突事务后新事务读取历史**，匹配返回duplicate不再扣，payload变更409；跨UTC月仍返回历史冻结月份，不在新月重扣；**历史已成功授权的内部重试不要求新月存在新的有效订阅**，只需当前App/Developer/凭证仍有效，否则上月末丢回包会错误拒绝。若当前App或Token已禁用则403不允许继续代理，保留旧Ledger事实。
 - 并发100次Free5只5笔唯一授权、余额0/Ledger5/Outbox5；相同chargeId并发100只扣1；Control/MySQL故障fail-closed，旧未计量路由不受影响。
 - 提交`feat(v11-b): add transactional quota ledger and outbox`。
 
