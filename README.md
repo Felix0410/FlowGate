@@ -1,5 +1,8 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
+> **V1.1-A（2026-11-07）**：客户/应用/套餐/订阅管理、ADMIN-only授权、/console/新业务页面已远端交付；Codex记录JDK17 17项JUnit/隔离155条HTTP。ChatGPT静态审核发现**本月非重叠套餐重复订阅**与**MySQL连接会话UTC**两项P0边界，待修复并重测，暂不进入真实APP凭证/配额/Kafka。详见[源码复审](docs/reviews/v11-a-static-review-2026-11-07.md)和[Codex修复任务](CODEX_V11_A_REVIEW_FIX_PROMPT.md)。V1/1.1真人前端验收、main合并仍未完成。
+
+
 > **V1.1-A管理域已在功能分支实现并完成定向验证，待复审**：客户、应用、不可变额度套餐、UTC串行订阅及正式产品页面。A阶段不启用应用Token、额度扣减或Kafka；B/C/D尚未编码。**V1仍待负责人最终人工验收，main未合并，不能将A称为V1.1全版本完成。**
 >
 > 入口：[V11-A真实实施与验证](docs/progress/v11-a-business.md#a-08-2026-11-07-codex真实实施与定向结果) · [产品使用指南第8节](docs/guides/product-console-guide.md#openapi) · [阶段路线](docs/progress/v11-roadmap.md)。本机已有数据库尚未迁移，首次使用需按指南执行增量SQL，再重启Control，打开 `/console/` 的“客户与应用”“套餐与订阅”。
