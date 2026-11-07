@@ -1,6 +1,6 @@
 # FlowGate V1.1-A：开发者、应用、套餐与订阅（Codex 编码合同）
 
-> 状态：未开始；先读 docs/design/openapi-platform-v1.1.md 与 CODEX_V11_OPENAPI_PROMPT.md；绝不能把设计写成已完成。基线为已完成 V1 的 Block4 工作树，先确认已有未提交改动/PR。此阶段**不添加 Kafka、不扣月度额度、不修改网关请求链路**。
+> 当前状态（2026-11-07）：**A0～A6业务代码和Codex定向验证已经提交远端，PR #7 Draft；ChatGPT静态审查发现2项必须在B前收口的P0边界，同月非重叠套餐切换与MySQL会话UTC保证，详见第A-09节**。A的17项JUnit/155条HTTP为已存历史证据，非修复完成的结果；不添加Kafka、月度扣减或改Gateway链路。
 
 ## A-00 范围与业务流程
 
@@ -181,3 +181,20 @@ git diff --check
 代码/测试提交依次为`d2ebc6c`（数据模型）、`55496f2`（管理API与订阅）、`05db284`（前置/规范化ACL）、`5cc9227`（产品页面）、`b51f3b4`（测试）、`7c5a5f3`（真实证据/文档）。执行`git push origin feat/v11-a-business`返回`Permission to Felix0410/FlowGate.git denied to Felix0410`、HTTP403，**本轮新实现未推送成功**。保留本地提交，不改凭据、不改推main、不强推或重写历史。既有PR #7仍Draft，远端仍任务基线c70d45b，不宣称PR已包含本次实现或已跑CI。
 
 最终只读确认main仍`84a25d5a7b9545dff3556299efec3c310fc321cf`，测试临时容器已清理，仅原FlowGate持久化MySQL/Redis保留。**V11-A编码与定向验证完成，等待ChatGPT和项目负责人复审；B/C/D不开始，V1.1整体未最终验收。**
+
+
+## A-09 2026-11-07 ChatGPT源码静态审核与定向修复任务
+
+审核起始远端实际完整提交`befc5d0586fa578d9fe6db398363132d4de3e480`，旧第A-08末尾记载的`git push` HTTP403是Codex**当时**的情况；当前GitHub已真实包含五张表、API、前端、155条HTTP证据，不能再说“PR仅任务文档/源码未推送”。保留原历史不修改。
+
+**审核报告**：`docs/reviews/v11-a-static-review-2026-11-07.md`；
+**本地Codex当前唯一修复提示**：`CODEX_V11_A_REVIEW_FIX_PROMPT.md`。
+
+| 优先级 | 实际审核发现 | 任务分配与通过标准 | 当前 |
+|---|---|---|---|
+| P0-A01 | `SubscriptionSchedule.validate`只查区间重叠，已到期本月Free后可同月另建非重叠Pro，和月度套餐冻结设计冲突 | 补本月套餐一次锁定规则；`2026-11-20`已有`[11/1,11/10)`、新`[11/11,12/1)`必须409；下一UTC月首日继续允许；JUnit/真实MySQL | **待Codex修复** |
+| P0-A02 | `connectionTimeZone=UTC`不能单独保证Hikari MySQL会话的`time_zone`是UTC；`nowUtc()`采用会话时区有关的`CURRENT_TIMESTAMP(3)` | 固定所有业务连接UTC会话与映射；非UTC DB/JVM、月末UTC毫秒、旧数据回归实测 | **待Codex修复** |
+| P1-A03 | 新建订阅要求手填完整UTC ISO8601日期字符串，不够符合产品后台定位 | 可改“本月/下月首日”业务选项，保留高级输入；需真实375px/1280px人工体验 | 待改进/人工 |
+| 已通过历史验证 | Codex 17JUnit、Node、155 HTTP，SQL二次迁移、同app行锁201/409、旧Caller签发/吊销 | 仅证明此前已测场景，**不覆盖新发现两项P0** | 有历史证据 |
+
+**后续阶段门禁不变**：本轮**只修A问题**，不实现APP Token、配额、USAGE_QUOTA、Kafka；修复及隔离数据验证通过后，仍需负责人真实产品体验/V1前置综合验收收口，才讨论授权V11-B。全部PR继续Draft，不合并main。Codex下一轮追加真实SHA、命令/退出码与全新脱敏证据；不要覆盖旧155条原始历史。
