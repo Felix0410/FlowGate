@@ -38,6 +38,7 @@ public class SnapshotRouteDefinitionLocator implements RouteDefinitionLocator {
                 var plan=com.flowgate.gateway.protection.ProtectionPolicyResolver.freeze(snapshot,spec);
                 var metadata=new HashMap<String,Object>(route.getMetadata());
                 metadata.put(com.flowgate.gateway.protection.ProtectionPolicyResolver.METADATA,plan);
+                metadata.put(com.flowgate.contract.QuotaPolicy.METADATA,com.flowgate.contract.QuotaPolicy.freeze(snapshot,spec));
                 if(plan.timeoutMs()>0) {
                     metadata.put(org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR,plan.timeoutMs());
                     metadata.put(org.springframework.cloud.gateway.support.RouteMetadataUtils.CONNECT_TIMEOUT_ATTR,connectTimeout);

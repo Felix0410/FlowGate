@@ -26,6 +26,7 @@ mybatis-plus:
   global-config:
     banner: false
 flowgate:
+  quota-activation-enabled: ${FLOWGATE_QUOTA_ACTIVATION_ENABLED:false}
   allowed-upstreams: ${FLOWGATE_ALLOWED_UPSTREAMS:http://127.0.0.1:8085}
   internal-key: ${FLOWGATE_INTERNAL_KEY}
   admin-ttl-seconds: 1800

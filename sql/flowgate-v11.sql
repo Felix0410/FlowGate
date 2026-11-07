@@ -50,3 +50,9 @@ CREATE TABLE IF NOT EXISTS fg_app_principal (
  CONSTRAINT fk_app_principal_application FOREIGN KEY (application_id) REFERENCES fg_application(id),
  INDEX ix_app_principal_application (application_id,principal_id)
 ) ENGINE=InnoDB;
+
+-- B1可信接流节点能力；不改写旧fg_release_node结构。
+CREATE TABLE IF NOT EXISTS fg_node_capability (
+ node_id VARCHAR(200) PRIMARY KEY, features_json JSON NOT NULL,
+ version BIGINT NOT NULL, checksum CHAR(64) NOT NULL, last_seen_at TIMESTAMP(3) NOT NULL
+) ENGINE=InnoDB;

@@ -170,3 +170,11 @@ B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/
 实际`mvn -B -ntp -pl flowgate-control -am test package`退出0，Contract7+Control12=19 JUnit通过，0失败/跳过。V11-A与原产品Node两套、产品离线指南一致性退出0。`scripts/v11-b0-smoke.py`真实运行两套隔离Lab：MySQL默认+08:00、JVM分别Asia/Shanghai和America/Los_Angeles。实际Control闲置Hikari连接会话均+00:00，独立JDBC/Hikari+实际MyBatis Mapper probe证明CURRENT=UTC、Instant时钟正确，2026-11-30T23:59:59.999Z与12-01零点精确回读；包含同月非重叠已过期套餐拒绝409、原A全部权限/锁竞争/旧Caller与节点ONLINE回归。
 
 证据`docs/progress/evidence/v11-b0-smoke.json`passed=true，旧A155条历史证据未覆盖。脚本只设置自己新建MySQL容器的启动默认时区，不修改用户数据库全局时区/原有卷；临时probe表仅测试连接可见。两项P0已通过独立实证，本提交之后才编码B1～B6。
+
+### B1 协议与默认关闭发布门禁已实现
+
+新增独立`QuotaPolicy.Plan`与`ENFORCED_QUOTA_V1`，只允许1..100准入单位、私有启用API/Route且一个实际路由仅一条Quota。旧Rate Rule不解析Quota，旧schemaVersion/checksum不改。路由冻结quota metadata，缓存确认同时核对版本计划；无Quota为NONE并保留原缓存/恢复测试兼容。
+
+新增`fg_node_capability`与`QuotaActivationService`，完整接流名单默认空、激活开关默认false；目标快照含Quota的发布和历史回滚都检查当前可信节点版本/checksum/15秒内能力。默认关闭时旧心跳不依赖B新表；启用后不含features的旧报告覆盖为无能力。Gateway此步**尚不上报支持Quota**，应用凭证仍409；仅在B4真实过滤器完成后增加能力报告。含Quota实际发布/双新节点联调留到B6安全闭环，不声称本步已激活真实计量。
+
+实际`mvn -B -ntp -pl flowgate-control,flowgate-gateway -am test package`退出0：Contract10/Control14/Gateway22共46通过，0失败/跳过。含新增3项Quota协议（私有/唯一/旧NONE）及2项完整名单/默认关闭/缺失过期门禁测试；后续收紧私有API必须有明确路由及未来心跳拒绝，Contract/Control定向复测退出0。B1没有发Token或开放计量流量。

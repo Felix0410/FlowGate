@@ -101,12 +101,15 @@ public class SnapshotPollingService {
         cache.getRoutes().collectList().subscribe(routes -> {
             // 3. 缓存必须恰为候选的所有路由及版本权限；首次无规则也不会凭空开启公共代理。
             var actual = routes.stream().map(route -> route.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC)).toList();
+            boolean quotaMatches=routes.stream().allMatch(route -> route.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC) instanceof RouteSpec trusted
+                    && (com.flowgate.contract.QuotaPolicy.freeze(candidate,trusted).equals(route.getMetadata().get(com.flowgate.contract.QuotaPolicy.METADATA))
+                        || (!com.flowgate.contract.QuotaPolicy.freeze(candidate,trusted).metered() && route.getMetadata().get(com.flowgate.contract.QuotaPolicy.METADATA)==null)));
             boolean protectionMatches=routes.stream().allMatch(route->{
                 Object spec=route.getMetadata().get(SnapshotRouteDefinitionLocator.SPEC);
                 return spec instanceof RouteSpec trusted && com.flowgate.gateway.protection.ProtectionPolicyResolver.freeze(candidate,trusted)
                         .equals(route.getMetadata().get(com.flowgate.gateway.protection.ProtectionPolicyResolver.METADATA));
             });
-            if (protectionMatches && actual.size() == candidate.routes().size() && new HashSet<>(actual).equals(new HashSet<>(candidate.routes()))) {
+            if (quotaMatches && protectionMatches && actual.size() == candidate.routes().size() && new HashSet<>(actual).equals(new HashSet<>(candidate.routes()))) {
                 if (pending == completion && store.candidate() == candidate) completion.tryEmitEmpty();
             }
         }, completion::tryEmitError);
