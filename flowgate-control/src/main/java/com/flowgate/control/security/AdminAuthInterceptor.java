@@ -40,6 +40,10 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
         // 3. 只读与修改分离，Caller 管理仅 ADMIN；未知管理路径由框架返回错误。
         boolean permitted = !path.startsWith("/admin/callers") || session.role().equals("ADMIN");
         permitted &= request.getMethod().equals("GET") || path.equals("/admin/auth/logout") || !session.role().equals("VIEWER");
+        // V11新管理域全部写动作仅ADMIN；旧V1的OPERATOR写权限保持原契约。
+        boolean newBusiness = java.util.List.of("/admin/developers", "/admin/apps", "/admin/plans", "/admin/subscriptions")
+                .stream().anyMatch(prefix -> path.equals(prefix) || path.startsWith(prefix + "/"));
+        if (newBusiness && !request.getMethod().equals("GET")) permitted &= session.role().equals("ADMIN");
         if (!permitted) throw new ApiFailure(403, "FORBIDDEN", "当前角色无此操作权限");
         return true;
     }
