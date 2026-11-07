@@ -67,3 +67,95 @@ B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/
 5. 首个授权Grant之后，下游失败/取消/超时仍保留单位扣减。若框架过滤器实际无法保证熔断OPEN在quota前拒绝，必须通过集成测试证明并在业务合同与UI明确限制，或收窄首版计量API范围，**不可偷偷将语义写成“真正到达Demo才扣”**。
 6. 新计量路由只对App专用身份生效；旧普通Caller仍按V1授权。Public route无鉴权承诺不能被误描述为App token被禁止访问，真正需要保护的端点必须是private metered。
 7. A/B/C都是定向测试和每块独立提交；直到D才进行全量长压测。B不提前集成Kafka broker；Outbox写MySQL即可。
+
+
+## B-07 2026-11-07 经负责人调整：B0吸收V11-A两项P0（本节及B专用设计优先）
+
+> **更新后的权威合同**：`docs/design/v11-b-quota-execution.md`；本地Codex入口`CODEX_V11_B_EXEC_PROMPT.md`。负责人已明确将A遗留问题并入B，因此原本“B之前必须先在A分支修复”的文字现改为：**B0先修并真实复测，不通过绝不能启动B1～B6；无须回写旧A代码分支或覆盖A历史结果**。A的PR #7仍Draft且历史问题未神奇消失；B继承A全部源码后修复。
+
+**阶段总门槛**：
+1. B0只动月度订阅规则/连接UTC时区/定向测试，单独`fix(v11-b)`提交，通过隔离MySQL后才允许继续。
+2. B1/B2/B3先完成策略发布与身份/数据库权威模型；安全能力门禁必须早于真实凭证签发，**不得先放出APP Token再补扣额**。
+3. B4完成实际WebFlux阻断链路后才开放B2凭证API对用户可用，遵循“功能完整才可签发”的安全部署规则；开发过程中可用测试服务与受控内部数据验证，不对正式业务放行。
+4. B5每完成一项后端业务同步在`/console/`真实表单显示，不将测试台做成用户界面。
+5. B6以两Gateway/MySQL/Redis完整验证后才能记录B完成；Kafka消费仍待C，V11-D负责正式长压测。
+
+## B-08 B0｜修补月度锁定与时区（第一提交，P0阻断）
+
+**实际文件**：`SubscriptionSchedule.java`、`PlanSubscriptionService.java`、`ApplicationEntryMapper.java`、`application.yml`、`V11BusinessTest.java`、`scripts/v11-a-smoke.py`追加B0专用测试（或新`scripts/v11-b0-smoke.py`；保留原脚本历史快照）。
+
+1. 先在单元测试里复现旧Free`[2026-11-01,2026-11-10)` + 当前UTC 11月20日 + 新Pro`[11月11日,12月1日)`原代码错误放行；新的校验必须409。**锁定“一个App每UTC月最多一个套餐”**，旧已到期ACTIVE行仍计当月占用；禁止跨计费月的单条订阅时间段（以B设计9/首版可解释规则为准），相邻下月可排队。
+2. 继续保留应用行`FOR UPDATE`、候选当前读；SQL真实并发一201一409；不同应用同计划可并行。
+3. 对Control全部Hikari连接明确设置会话UTC（如`connection-init-sql: SET time_zone = '+00:00'`），配合Connector/J映射测试；`nowUtc()`不能仅依赖系统JVM或迁移SQL的会话。**必须在非UTC MySQL server/JVM时区实测回读TIMESTAMP(3)**，保证11/30末最后毫秒与12/1首毫秒。
+4. 复测V1审计、节点时间/发布快照/旧Caller；有问题最小修补，不改全局MySQL时区或破坏原V1数据。所有实测只用脚本自己创建的MySQL8.4/Redis7容器。
+5. 运行受影响的Java17 Maven、V11-A Node、产品离线指南检查、隔离MySQL订阅真实HTTP；记录修复前失败/修复后通过的证据`docs/progress/evidence/v11-b0-smoke.json`，**不得覆盖旧`v11-a-smoke.json`**。成功提交`fix(v11-b): enforce utc-month plan and database sessions`。
+
+## B-09 B1｜新计量策略、节点能力与发布防降级
+
+**目标文件**：`flowgate-contract/PolicyRules.java`、`flowgate-control/service/{CatalogService,ReleaseService}.java`、`ReleaseController.java`、`Gateway config/SnapshotPollingService.java`、新增`QuotaPolicyResolver.java`/能力表Mapper。
+
+1. `USAGE_QUOTA`参数仅`unitsPerCall`（整数1..100），绑定仅API/ROUTE、private/启用、有真实API关联；同一路由最多一个quota，无其他 scope。
+2. `PolicyRules`独立执行标志`ENFORCED_QUOTA_V1`，`ReleaseService.build`按类型赋值；旧`ENFORCED_BLOCK2`与`ENFORCED_BLOCK3`语义不变。旧快照`schemaVersion=1`、`RouteSpec`结构、checksum校验和旧rollback不修改。
+3. **单独`QuotaPlan`metadata**（`routeId,apiId,units,policyId,appliedVersion,snapshotChecksum`）随路由冻结；绝不能把quota添加到旧`EffectivePolicyResolver.Rule`导致`capacity/refillPerSecond`空取值NPE。
+4. `FLOWGATE_QUOTA_TRAFFIC_NODES`必须显式设置接流节点白名单；默认空拒绝启用Quota。新Gateway在已有节点上报增加`supportedFeatures:["USAGE_QUOTA_V1"]`，Control用新`fg_node_capability`持久记录可信心跳；旧节点未提供capability→未知/不支持，过期/缺失/错checksum→拒绝Quota发布/回滚激活。混合版本1旧1新、2新、1节点失联、回滚无Quota都需测试。
+5. 报告仍保留所有已发布V1快照，不能为新的quota反复覆写历史`fg_config_release.snapshot_json`；Control历史`appliedVersion`不是能力证明。
+
+**验收**：功能门禁可阻止旧节点/缺失节点；只有两受控新Gateway上线+可信报告后才能发布含quota配置，节点应用一致。JDK/真HTTP定向。提交`feat(v11-b): gate metered releases by node features`。
+
+## B-10 B2｜应用专用凭证与安全撤销（与B4完整时才真正开放）
+
+**目标文件**：Control新增`AppCredentialService`/Controller、`flowgate-contract/AppCredentialSession`、Gateway`CallerAuthFilter`、`sql/flowgate-v11.sql`新`fg_app_credential_state`表、产品App页。
+
+1. App Token为`fgapp_`+43随机URL安全字符，独立`fg:auth:app:{digest(fullToken)}`和`fg:auth:app-index:{principalId}`；`fg_principal.principal_type/role=APP_CALLER`。旧V1 Caller仍旧43字符/旧Redis key；两种Token不能在另一种身份模式读取。
+2. `fg_app_principal`关联App，`fg_app_credential_state`保存单调`generation`和enabled，不保存明文/摘要Token。签发/轮换/吊销/应用暂停需先DB提交权威代次或状态，再Redis Lua原子替换/删除；Redis失败不承诺旧Token仍安全，**所有真正计量授权必须核对DB代次+状态**。
+3. `POST /admin/apps/{id}/credentials`从A的409暂时变真实功能，但**本B施工期间用可配置关闭默认的门禁或完成Gateway能力先测后才暴露**。Token仅一次展示，刷新丢失后仅允许轮换；`GET`管理列表脱敏，不提供任何反查明文。
+4. Gateway在计量私有路由只接受App专用Token，在非计量私有路由保持V1普通Caller；现有公开路由行为不变。App校验/Redis故障均在进入下游之前处理。
+5. 同App双管理员竞态签发、轮换、撤销、旧Token存活但DB代次已变化、Redis清理失败、Developer/App停用、旧Gateway不接受App Token，全部定向验证。
+
+**验收**：新应用凭证与旧V1 Caller双向隔离；签发/轮换/吊销强制DB代次，安全性不依赖Redis成功清理。提交`feat(v11-b): isolate app credential lifecycle`。
+
+## B-11 B3｜MySQL原子额度+幂等Ledger+Outbox
+
+**目标文件**：`sql/flowgate-v11.sql`新增`fg_quota_balance/fg_quota_ledger/fg_outbox_event`，对应Entity/Mapper、`QuotaChargeService`、`InternalQuotaController`，管理余额/账本的只读Controller。
+
+1. 权威Balance UNIQUE(app,UTCYYYYMM)冻结subscriptionId/planId/planVersion/totalUnits/remainingUnits，原子条件UPDATE不许负数；真实耗额成功才写Ledger和Outbox的事实。
+2. Internal POST body`chargeId,principalId,credentialGeneration,apiId,routeId,appliedVersion,snapshotChecksum,units`，通过已验证的内部密钥+回环/内网限制；Control以历史`ConfigRelease`对应快照重校验privateness+quota policy/单位/绑定，不接受请求自带appId作为身份。
+3. 计量事务详见权威设计6.2：校验App/Developer/Principal/Scope/订阅和当前UTC月份→冻结余额→Ledger chargeId UNIQUE串行幂等→条件扣减→Outbox写NEW→提交后授权；并发重复如果Unique冲突，**回滚当前事务后在新事务查询已提交的Ledger**，匹配返回duplicate、不匹配409。
+4. **跨月幂等**：同chargeId重试必须从已有Ledger返回原月结果，不能误用当前月份再扣一次；同chargeId不同可信上下文409。若重试时App/Token已失效则403不再代理，历史Ledger仍保留。
+5. Control/MySQL不可用和超时→被计量路由503；未计量业务不访问quota。单位扣减是**授权准入**，已授予后下游500/取消不退款。
+6. 增量表共`fg_app_credential_state`、`fg_node_capability`、`fg_quota_balance`、`fg_quota_ledger`、`fg_outbox_event`五张，不引入Kafka；Outbox预留leaseOwner/leaseUntil/lastErrorCode给C。
+
+**验收**：双Gateway100并发额度5仅5不同grant、5Ledger、5Outbox、remaining0；同chargeId100次只一笔，另payload409，跨UTC月份原归属，MySQL失败不超发。提交`feat(v11-b): persist authoritative quota grants and outbox`。
+
+## B-12 B4｜Gateway非阻塞计量链路与真实过滤器顺序
+
+1. 新`QuotaAdmissionGlobalFilter`候选order=+10（**必须本机验证真实组合链及Spring Gateway 5.0.x，不能只看数字**），目的是处于已有`CallerAuthFilter -100`、`AdmissionGlobalFilter -90`内层，Route CB筛选的短路内侧，但在Netty路由前。原并发许可必须在complete/error/cancel都释放。
+2. 内部Quota WebClient设置短且有总上限timeout、inflight上限、同chargeId有限重试；`Mono.defer`/Reactor非阻塞，不得`block()`/JDBC/同步Redis、不重试下游HTTP POST。
+3. 触发`CB OPEN`必须验证配额请求不执行；如果组合过滤器无法做到不破坏V1，**先拒绝这类混合治理配置的发布**，或由负责人明确批准不同扣量业务语义，不能假装已解决。
+4. Redis速率429、本机并发503在Quota之前短路；Control失联/DB失联仅计量503，未计量路由返回旧V1成功；Grant成功后的下游任何结果仍扣量。
+5. 错误体与已有Request ID统一，`QUOTA_EXHAUSTED`独立429，`QUOTA_UNAVAILABLE`503，权限/订阅403；指标只低基数记录，不用appId/chargeId标签。
+
+**验收**：真实Route CB、订单（请求尝试）不等于成功响应，计量只在授权后转发，取消/超时/异常无本机许可泄漏。提交`feat(v11-b): enforce nonblocking metered admission`。
+
+## B-13 B5｜正式管理产品/指南同步
+
+- 更新`/console/`：应用详情签发/轮换/吊销与一次性复制、订阅本月/下月日期选项、余额和本月使用情况、账本游标分页、API/路由USAGE_QUOTA策略表单、发布中心能力门槛与节点生效状态；原服务/API/路由和故障实验保留。
+- OPERATOR/VIEWER新增业务写按钮只读，后端真403；状态未知显示“未取得/尚未启用”，**不预设余额或以Outbox NEW称为Kafka已统计**。
+- 生成`/console/guide.html`并更新`docs/guides/product-console-guide.md`，以“客户→应用→订阅→签发→计量发布→第六次429→账本”做一条完整中文操作路线。
+- 完整功能与正常页面不是单纯改旧`/test-console/`或引新框架；手机375px、PC1280px使用实际浏览器验收待负责人。
+
+## B-14 B6｜实际代码/SQL/HTTP验收与提交格式
+
+**每个小块提交即运行定向测试；本块最终至少**：
+- Java17 `mvn -B -ntp -pl flowgate-control,flowgate-gateway -am test package`（Maven reactor模块名在Codex本机验证）、旧Controller/Gateway测试与新`V11Quota*Test`；
+- Node`scripts/v11-a-console-test.mjs`、`scripts/product-console-test.mjs`、旧Block2/3控制台合同与新`scripts/v11-b-console-test.mjs`；
+- 新`scripts/v11-b-smoke.py`复用隔离Lab/加入两个新Gateway、MySQL8.4/Redis7、固定可注入UTC Clock；验证额5/100并发、幂等100/跨月、混合旧Gateway、客户暂停/凭证轮换、发布/回滚、Rate/CB/Control/DB故障、旧Caller全链路；
+- 故障注入不破坏用户持久卷，不放明文Token/数据库内网密钥/HTTP Body到Git；原始记录本机`.local/acceptance/`，仓库仅脱敏摘要`docs/progress/evidence/v11-b-*.json`。
+- `docs/progress/v11-b-quota.md`追加每一步实际文件/提交SHA/命令/退出码/通过失败跳过数，不能以A旧17JUnit/155HTTP替代B实测。README、AGENTS、产品指南同步。
+- 如果B0失败，**停止**不签发App Token；如果B1发布门禁不能证明全接流节点支持，**停止**不创建计量Route；如果B3账本幂等失败，**停止**不允许真实代理。
+
+## B-15 Git、阶段状态及剩余债务
+
+- B设计/任务已提交`feat/v11-b-quota`，**本阶段尚未开始编码，也未运行B0/B1/B2/B3/B4测试**。新增合同不能被当成P0已修。
+- B来源是`feat/v11-a-business`，含A复审报告和完整真实代码，PR #7仍Draft。B只在独立分支按B0先修，再逐提交B1～B6；不改A历史，也不自动合并main。
+- **用户本轮已明确将A两项P0纳入B，不再要求A分支先修**；从此B0是实际要做的修复，不需要Codex重新打开A独立修复任务。V1产品真人验收/全量主线收口仍在最终门槛，不能以B完工自动宣告V1.1可发布。
