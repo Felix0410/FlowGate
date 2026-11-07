@@ -25,6 +25,7 @@
 按B设计4与任务B-09：
 - `USAGE_QUOTA`类型只在private启用API/Route生效，`unitsPerCall 1..100`；同一路由实际只允许一个quota，旧四类执行语义不变。
 - 独立`ENFORCED_QUOTA_V1`与`QuotaPlan` metadata，Route同版冻结`apiId/routeId/policyId/units/appliedVersion/checksum`；**不能把Quota加入旧`EffectivePolicyResolver.Rule`容量参数推导导致NPE**，不改历史Snapshot与checksum。
+- **施工期一票否决**：Control `flowgate.quota-activation-enabled=false`为默认；B1仅协议/能力门禁代码尚未完成B4计量过滤器时，不允许真正启用计量发布，Gateway不得提前报告`USAGE_QUOTA_V1`。B4完整认证+限额能力完成并通过隔离实测后才在B6隔离环境显式开启；不擅自打开用户持久化环境开关。
 - 网关节点上报`USAGE_QUOTA_V1`可信capability；Control显式读取部署配置`FLOWGATE_QUOTA_TRAFFIC_NODES`接流节点名单（默认空不能激活）；任何缺失/旧Gateway/STALE/能力未知→拒绝发布包含Quota的配置。回滚到含Quota的历史也验证；回滚到非Quota旧版无此门槛。
 - 单旧+单新Gateway能力拒绝、双新允许、过期心跳拒绝、旧快照回滚/旧Caller兼容真实联调；定向Java测试后提交`feat(v11-b): guard metered publishes by gateway capabilities`。
 
