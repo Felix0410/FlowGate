@@ -62,3 +62,30 @@ CREATE TABLE IF NOT EXISTS fg_app_credential_state (
  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
  FOREIGN KEY (principal_id) REFERENCES fg_principal(id), CHECK (generation > 0)
 ) ENGINE=InnoDB;
+-- B3余额/流水/Outbox同事务权威准入；Outbox只NEW，C阶段才引入Kafka。
+CREATE TABLE IF NOT EXISTS fg_quota_balance (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, application_id BIGINT NOT NULL, period_yyyymm CHAR(6) NOT NULL,
+ subscription_id BIGINT NOT NULL, plan_id BIGINT NOT NULL, plan_version INT NOT NULL,
+ total_units BIGINT NOT NULL, remaining_units BIGINT NOT NULL, version BIGINT NOT NULL DEFAULT 0,
+ created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3), updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+ UNIQUE(application_id,period_yyyymm), FOREIGN KEY(application_id) REFERENCES fg_application(id),
+ FOREIGN KEY(subscription_id) REFERENCES fg_subscription(id), FOREIGN KEY(plan_id) REFERENCES fg_api_plan(id),
+ CHECK(total_units>=0 AND remaining_units>=0 AND remaining_units<=total_units)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS fg_quota_ledger (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, charge_id CHAR(36) NOT NULL UNIQUE, request_fingerprint CHAR(64) NOT NULL,
+ application_id BIGINT NOT NULL, principal_id BIGINT NOT NULL, credential_generation BIGINT NOT NULL,
+ api_id BIGINT NOT NULL, route_id VARCHAR(200) NOT NULL, applied_version BIGINT NOT NULL, policy_id BIGINT NOT NULL,
+ period_yyyymm CHAR(6) NOT NULL, units INT NOT NULL, remaining_units_after BIGINT NOT NULL,
+ created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+ FOREIGN KEY(application_id) REFERENCES fg_application(id), FOREIGN KEY(principal_id) REFERENCES fg_principal(id),
+ FOREIGN KEY(api_id) REFERENCES fg_api(id), FOREIGN KEY(applied_version) REFERENCES fg_config_release(version),
+ CHECK(units BETWEEN 1 AND 100), CHECK(remaining_units_after>=0), INDEX ix_ledger_app_period_id(application_id,period_yyyymm,id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS fg_outbox_event (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, event_id CHAR(36) NOT NULL UNIQUE, event_type VARCHAR(50) NOT NULL,
+ payload_json JSON NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'NEW',
+ next_attempt_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3), attempt_count INT NOT NULL DEFAULT 0,
+ lease_owner VARCHAR(100), lease_until TIMESTAMP(3) NULL, last_error_code VARCHAR(100),
+ created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3), INDEX ix_outbox_claim(status,next_attempt_at,lease_until,id)
+) ENGINE=InnoDB;

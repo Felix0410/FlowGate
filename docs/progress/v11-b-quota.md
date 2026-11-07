@@ -186,3 +186,11 @@ B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/
 Gateway增加配额私有路由APP解析及代次属性，但只有B4真实QuotaSupport组件存在才允许走此分支；本步尚无实现，无法代理计量流量。旧43字符Caller/旧namespace不改。公开credentials Controller仍A阶段409，不存在可对用户启用的中间态发证接口。
 
 实际受影响Maven test/package退出0，Contract10/Control15/Gateway22=47通过；新增凭证用例证明DB commit先于新namespace Redis发布、APP_CALLER类型、49字符格式及Redis失败不回滚代次。首次测试编译因Redis/MyBatis重载泛型推断失败，补显式List/Principal类型后复跑通过；不改生产语义迎合测试。真实并发轮换/撤销/残留Token安全验证留B6。未启用应用凭证、未扣额度。
+
+### B3 已实现并通过受控真实数据库验证
+
+新增余额/唯一chargeId账本/Outbox三表（B新增总计五表），固定SQL初始化唯一余额、持行锁后条件扣减、流水及Outbox同事务；内部端点只接受受信密钥/本机来源与严格字段，查询指定历史版本校验私有Quota/Scope。授权事实不含Body/Header/Token，管理账本不返回fingerprint等内部Hash。
+
+`QuotaChargeService`使用独立READ_COMMITTED事务及应用/客户/身份共享锁，避免等待撤销后仍用旧RR快照授权；余额初始化唯一键竞争由无损upsert序列化，再当前读识别并发重复。UNIQUE冲突路径在整个事务回滚之后新事务重读。原grant重复先查Ledger，不要求次月新订阅；当前DB停用/代次仍先检查。余额冻结套餐/订阅版本，历史跨月订阅显式拒绝，不截断数据。
+
+实际Control/Contract test package退出0。独立`scripts/v11-b3-smoke.py`在自建Lab通过，调用真实Spring事务Bean（web NONE、无公开发证API、当前Gateway仍V1快照）：100线程5额度恰好5grant/95耗尽、Ledger5/Outbox5/余额0；同chargeId100次仅一条新流水/Outbox；不同合法历史上下文409、停用后重放403。重启测试专用Spring上下文，以DB连接session timestamp切到下一UTC月，重复仍返回原月且没有第二余额行。证据单独保存，未覆盖A/B0历史。公开credentials仍409，B4尚未开始计量代理。
