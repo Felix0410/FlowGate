@@ -160,3 +160,13 @@ B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/
 - B设计/任务已提交`feat/v11-b-quota`，**本阶段尚未开始编码，也未运行B0/B1/B2/B3/B4测试**。新增合同不能被当成P0已修。
 - B来源是`feat/v11-a-business`，含A复审报告和完整真实代码，PR #7仍Draft。B只在独立分支按B0先修，再逐提交B1～B6；不改A历史，也不自动合并main。
 - **用户本轮已明确将A两项P0纳入B，不再要求A分支先修**；从此B0是实际要做的修复，不需要Codex重新打开A独立修复任务。V1产品真人验收/全量主线收口仍在最终门槛，不能以B完工自动宣告V1.1可发布。
+
+## B-16 本地实施记录（2026-11-07）
+
+### B0 已独立完成并通过，允许继续B1
+
+`SubscriptionSchedule`按目标UTC月与所有既有订阅区间交集锁定套餐（含已到期/暂停行），新订阅仅单个UTC月；保留应用行锁和相邻下月边界。Hikari强制每个业务连接`SET time_zone='+00:00'`，Mapper使用UTC_TIMESTAMP(3)；原V1节点写入/年龄比较统一UTC，测试夹具同步，不让JVM本地时区污染心跳。
+
+实际`mvn -B -ntp -pl flowgate-control -am test package`退出0，Contract7+Control12=19 JUnit通过，0失败/跳过。V11-A与原产品Node两套、产品离线指南一致性退出0。`scripts/v11-b0-smoke.py`真实运行两套隔离Lab：MySQL默认+08:00、JVM分别Asia/Shanghai和America/Los_Angeles。实际Control闲置Hikari连接会话均+00:00，独立JDBC/Hikari+实际MyBatis Mapper probe证明CURRENT=UTC、Instant时钟正确，2026-11-30T23:59:59.999Z与12-01零点精确回读；包含同月非重叠已过期套餐拒绝409、原A全部权限/锁竞争/旧Caller与节点ONLINE回归。
+
+证据`docs/progress/evidence/v11-b0-smoke.json`passed=true，旧A155条历史证据未覆盖。脚本只设置自己新建MySQL容器的启动默认时区，不修改用户数据库全局时区/原有卷；临时probe表仅测试连接可见。两项P0已通过独立实证，本提交之后才编码B1～B6。

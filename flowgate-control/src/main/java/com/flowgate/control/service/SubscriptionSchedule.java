@@ -15,11 +15,13 @@ public final class SubscriptionSchedule {
         require(start.isBefore(end) && end.isAfter(now) && !start.isBefore(monthStart(now)),"INVALID_PERIOD","日期倒置、已过期或历史月回填不允许");
         Instant next=monthStart(now).atZone(ZoneOffset.UTC).plusMonths(1).toInstant();
         require(!start.isAfter(now) || start.equals(next),"INVALID_PERIOD","未来订阅仅允许下个UTC月首日00:00生效");
-        // 2. 半开区间相接合法，重叠拒绝；当前及排队各至多一条。
-        for(var row:existing) if("ACTIVE".equals(row.status)) {
+        Instant selectedMonth=monthStart(start),selectedEnd=selectedMonth.atZone(ZoneOffset.UTC).plusMonths(1).toInstant();
+        require(!end.isAfter(selectedEnd),"INVALID_PERIOD","每条订阅只能占用一个UTC自然月，变更下月生效");
+        // 2. 同月套餐只可选择一次；已到期/暂停的历史仍占该月，不靠修改行状态绕过。
+        for(var row:existing) {
             boolean overlap=start.isBefore(row.expiresAt) && end.isAfter(row.effectiveAt);
-            boolean queued=start.isAfter(now) && row.effectiveAt.isAfter(now);
-            if(overlap || queued) throw new ApiFailure(409,"SUBSCRIPTION_CONFLICT","订阅期间重叠或已有下月排队订阅");
+            boolean sameMonth=row.effectiveAt.isBefore(selectedEnd) && row.expiresAt.isAfter(selectedMonth);
+            if(overlap || sameMonth) throw new ApiFailure(409,"SUBSCRIPTION_CONFLICT","本UTC月份已选择套餐，变更只能安排下月");
         }
     }
 }

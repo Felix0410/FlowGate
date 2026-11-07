@@ -37,7 +37,7 @@ public class ReleaseController {
         return nodes.selectList(new QueryWrapper<ReleaseNode>().orderByAsc("id").last("LIMIT 100")).stream().map(node->{
             var row=new LinkedHashMap<String,Object>(); row.put("id",node.id);row.put("nodeId",node.nodeId);
             row.put("appliedVersion",node.appliedVersion);row.put("checksum",node.checksum);row.put("lastSeenAt",node.lastSeenAt);
-            long age=node.lastSeenAt==null?Long.MAX_VALUE:Duration.between(node.lastSeenAt,LocalDateTime.now()).getSeconds();
+            long age=node.lastSeenAt==null?Long.MAX_VALUE:Duration.between(node.lastSeenAt,LocalDateTime.now(ZoneOffset.UTC)).getSeconds();
             row.put("freshness",age>=0 && age<=15?"ONLINE":"STALE");
             RuntimeState state=runtimeStates.get(node.nodeId);
             boolean known=state!=null && state.version()==node.appliedVersion && state.checksum().equals(node.checksum);
@@ -74,7 +74,7 @@ public class ReleaseController {
         if (node != null && node.appliedVersion > input.version()) return;
         boolean create = node == null;
         if (create) { node = new ReleaseNode(); node.nodeId = input.nodeId(); }
-        node.appliedVersion = input.version(); node.checksum = input.checksum(); node.lastSeenAt = LocalDateTime.now().withNano(0);
+        node.appliedVersion = input.version(); node.checksum = input.checksum(); node.lastSeenAt = LocalDateTime.now(ZoneOffset.UTC).withNano(0);
         Rules.require(!create || nodes.selectCount(new QueryWrapper<ReleaseNode>())<100,"节点数超过本机演示上限");
         if (create) nodes.insert(node); else nodes.updateById(node);
         if(input.circuitStates()==null) runtimeStates.remove(input.nodeId());
