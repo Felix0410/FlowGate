@@ -1,8 +1,8 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **V1.1 新业务方向（规划中，尚未编码）**：FlowGate 拟增量发展为「第三方开发者 OpenAPI 接入、套餐配额与流量保障平台」，沿用现有 Gateway/Control/Redis/动态发布，增加开发者应用、套餐订阅、MySQL 权威累计额度账本、Kafka+Outbox 异步用量、对账与 SQL 优化。**此设计不等于已交付，V1 仍待人工验收，旧 PR 未合并。**
+> **V1.1-A管理域已在功能分支实现并完成定向验证，待复审**：客户、应用、不可变额度套餐、UTC串行订阅及正式产品页面。A阶段不启用应用Token、额度扣减或Kafka；B/C/D尚未编码。**V1仍待负责人最终人工验收，main未合并，不能将A称为V1.1全版本完成。**
 >
-> 入口：[V1.1 详细业务及一致性设计](docs/design/openapi-platform-v1.1.md) · [阶段路线与真实状态](docs/progress/v11-roadmap.md) · [Codex 阶段实施指令](CODEX_V11_OPENAPI_PROMPT.md)。正式开发在负责人确认旧 V1 验收基线后从 **V11-A** 开始。
+> 入口：[V11-A真实实施与验证](docs/progress/v11-a-business.md#a-08-2026-11-07-codex真实实施与定向结果) · [产品使用指南第8节](docs/guides/product-console-guide.md#openapi) · [阶段路线](docs/progress/v11-roadmap.md)。本机已有数据库尚未迁移，首次使用需按指南执行增量SQL，再重启Control，打开 `/console/` 的“客户与应用”“套餐与订阅”。
 
 > **当前：Block4正式产品后台 `/console/` 的Java/JS/CSS已远端提交，定向Java10项和产品真实HTTP64条有Codex证据，ChatGPT源码静态复审已完成；Caller旧记录缺少安全列表、负责人1280px/375px与键盘实际浏览器体验、产品后全量回归仍待收口。Block4/V1没有最终验收，PR均Draft，main未合并。**
 >

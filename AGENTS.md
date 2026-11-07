@@ -1,6 +1,6 @@
 # FlowGate｜当前本地Codex统一入口（V1.1-A）
 
-> 2026-11-06。负责人要求审查V1.1设计并分配开发任务。设计审查已完成，**仅V11-A管理业务代码获安排，尚未开发/实测**；V11-B配额、C Kafka/Outbox、D性能均不得提前编码。
+> 2026-11-07。**V11-A编码和定向Java/Node/隔离SQL+HTTP验证已完成，当前等待复审/负责人真实浏览器反馈**，实况见阶段文件A-08。V11-B配额、C Kafka/Outbox、D性能均不得提前编码；不要重复开发A或将其称为V1.1全版本完成。
 > 实施分支：`feat/v11-a-business`，基于`docs/v1.1-openapi-platform`最新设计审查。旧PR #1–#6仍逐级Draft，`main`仍是旧基线；当前新PR为V11-A Draft，不允许自动合并或变更旧PR base。
 
 ## 立即执行顺序
@@ -17,4 +17,4 @@
 
 Java17、Spring Boot4、Control MVC+MyBatis-Plus、Gateway WebFlux+Redis/Resilience4j和原生`/console/` ES Modules；**A不新增Kafka/新服务/Gateway计量链路/新前端框架**。关键业务中文注释，长流程`// 1.` `// 2.` `// 3.`分点。新业务管理角色ADMIN才能修改，OPERATOR/VIEWER只读，旧V1权限不能改变。数据库迁移不得删改旧表或用户数据；凭证不落日志/请求Body公开证据；静态/DOM合同测试不等于真人浏览器体验。
 
-**当前真实状态：A任务已分配，业务代码与A实测还未执行；V1.1全部处于开发前准备。**
+**当前真实状态：A管理域已实现并定向验证，未获得最终验收；用户持久化库未迁移。下一步只处理A复审/实际体验反馈，不开始B，不合并main。**

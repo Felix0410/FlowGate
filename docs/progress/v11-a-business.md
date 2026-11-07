@@ -117,3 +117,61 @@ P0界面契约：全部列表真实API，查询失败不显示0；空态可点�
 - 导航只做图片/静态表单、没有真实列表/增改API，或新产品页变成手填JSON → **不能验收**。
 - SQL涉及用户个人数据库/Docker volume、执行历史表删除或无法证明迁移幂等 → **停止与报告**。
 - 当前没有`docs/acceptance/v11-final-results.md`是正确的；完整总结留到D阶段，A只记录真实定向测试，不虚报Kafka/月底扣量已经实现。
+
+## A-08 2026-11-07 Codex真实实施与定向结果
+
+**当前：A0～A6管理域编码和定向验证完成，等待ChatGPT/负责人复审；不是V1.1全版本完成。B/C/D未编码，V1真人验收仍未代做，main未合并。**
+
+### 基线、实现文件与业务边界
+
+- 从干净的`test/block4-final-acceptance@2ac5998`检查、fetch后安全检出远端既有`feat/v11-a-business@c70d45b6b89d9a7e23f1ae145700ae0090d8d504`。只读确认PR#7为Draft、base为`docs/v1.1-openapi-platform`，不改旧PR base。Java17.0.18/Maven3.9.13、MySQL8.4/Redis7；原两个持久化容器和IDE/JVM均不由测试停止，.env未修改。
+- A1 `d2ebc6c`：`sql/flowgate-v11.sql`五个CREATE IF NOT EXISTS与UTC迁移会话设置；五Entity/五Mapper。新增表仅`fg_developer/fg_application/fg_api_plan/fg_subscription/fg_app_principal`，外键、代码唯一、额度1..1000000/状态/区间CHECK及关联游标索引。旧初始化SQL未改；没有QuotaBalance/Ledger/Outbox/Kafka或Gateway改动。
+- A2/A3逻辑相连，合并提交`55496f2`：`DeveloperApplicationService/PlanSubscriptionService/SubscriptionSchedule/BusinessInputs`与两个领域Controller；只读列表为稳定afterId+limit1..100，应用/订阅可按父ID过滤，详情返回关联名称和UTC时间。客户/应用PATCH保留未提交字段，应用归属创建后固定；套餐代码/额度/版本不可原地修改，只允许名称和状态变更。订阅只创建ACTIVE并查询，期间半开、不开放任意PATCH。
+- 订阅事务先对应用`FOR UPDATE`，再对客户/套餐`FOR SHARE`读取状态（允许不同应用共享同一客户/套餐并行），候选区间用`FOR UPDATE`当前读避免RR快照遗漏前一事务；当前/次月规则由数据库时间和UTC日历判断，插入及审计同事务，套餐版本冻结。没有部分唯一索引/Redis锁或sleep模拟串行。
+- ACL修正`05db284`：新域四前缀全部写仅ADMIN、OPERATOR/VIEWER读，旧正常V1 OPERATOR写权限不变。真实HTTP发现MVC会在Interceptor前将未开放方法返回405，为满足“先401/403”的固定矩阵，增加仅覆盖新域的`V11ManagementFilter`复用原Session/ACL，认证后才进MVC；规范化解码路径段/矩阵参数，实测`/admin/%61pps`和分号路径也403，不可绕过。
+- A4 `5cc9227`：新增`console/openapi-business.js`并扩展已有导航；客户/应用/套餐/订阅真实列表、游标分页、按名称关联（选项每批100可继续）、回填编辑、暂停/恢复、UTC期间/父级状态、空/错/重读。ADMIN写按钮，其他角色只读；规则不再让用户手写ID/JSON。A阶段凭证按钮实际POST并明确409 FEATURE_NOT_READY，没有Token/余额假数据，业务保存不误称路由发布或计量生效。V1原页面与开发工具保留。
+- A5 `b51f3b4`：新增`V11BusinessTest.java`、`scripts/v11-a-console-test.mjs`、`scripts/v11-a-smoke.py`。指南补第8节完整上手路线、增量迁移命令与未来功能边界，生成离线`/console/guide.html`。
+
+### 固定API与脱敏响应示例
+
+新四域GET列表/详情，客户/应用/套餐POST/PATCH、订阅仅POST/GET；`POST /admin/apps/{id}/credentials`仅占位。字段结构示例（仅表示格式，非真实用户记录）：
+
+```json
+{"id":1,"developerId":1,"developerName":"客户甲","developerStatus":"ACTIVE","code":"app-a","name":"查询应用","status":"ACTIVE","createdAt":"2026-11-07T00:00:00Z","updatedAt":"2026-11-07T00:00:00Z","credentialStatus":"FEATURE_NOT_READY"}
+```
+
+订阅返回`applicationId/applicationName/planId/planName/effectiveAt/expiresAt/status/planVersionSnapshot/periodState/parentsActive`及时间/稳定id。CURRENT/SCHEDULED/EXPIRED是数据库时钟派生的期间状态，父级是否启用另列，不承诺准入/扣额已启用。重复代码409 DUPLICATE_CODE；重叠409 SUBSCRIPTION_CONFLICT；凭证409 FEATURE_NOT_READY；无效参数/不可变字段400；缺失404；停用应用/客户拒绝新订阅403；停用套餐400。失败响应只含code/message/requestId，不返回SQL/凭证。
+
+### 实际执行的命令和结果
+
+```bash
+source .env
+mvn -B -ntp -pl flowgate-control -am test package
+node scripts/v11-a-console-test.mjs
+node scripts/product-console-test.mjs
+node scripts/block2-console-test.js
+node scripts/block3-console-test.js
+node --check flowgate-control/src/main/resources/static/console/openapi-business.js
+python3 scripts/build-console-guide.py --product --check
+python3 scripts/build-console-guide.py --check
+PYTHONPYCACHEPREFIX=/tmp/flowgate-v11-pycache python3 -m py_compile scripts/v11-a-smoke.py
+python3 scripts/v11-a-smoke.py
+git diff --check
+```
+
+- Java定向最终退出0：**17项通过，0失败/错误/跳过**（Contract7、Control10；Control含原3+新增V11七项）。新增覆盖输入/UTC月末毫秒与相邻端点/历史月拒绝、角色及未开放方法/编码路径、凭证占位无Identity或审计副作用、重复代码409、套餐额度不可变、应用锁先于候选当前读且冲突不插入/审计。数据库互斥不靠mock断言，另用下述真MySQL证明。
+- Node四条脚本均退出0：新增V11真实ES模块及DOM事件创建四类对象、名称关联、只读角色、套餐编辑不提交额度、PATCH完整保留、游标过滤、凭证409不造Token、列表失败显示未知；原产品和开发工具全部旧契约通过。语法/两份离线指南一致性/py_compile通过；不是1280px/375px真人体验。
+- SQL独立初验和最终HTTP均在脚本自建MySQL8.4/Redis7、随机回环端口与自有JVM上完成；V1初始化之后V11 DDL执行两次，列/索引摘要不变，旧principal/route/release数量和快照摘要不变。没有对负责人持久化库执行DDL。
+- 实链路包含2客户/2应用、Free5/Pro20，另2应用供并行受控测试；全部新域角色矩阵及旧Caller/Admin用途隔离、重复/非法/404/405、暂停/恢复/不可变套餐；应用凭证接口未增加principal/映射/Redis app或caller键/审计记录。
+- 并发使用独立控制连接先持应用行锁，Barrier启动两个HTTP事务，再查询`performance_schema.data_lock_waits`确认**两个真实锁等待**后释放：恰好201/409；不同应用同客户/套餐时，锁住其中一个，另一个在释放前成功，证明无全域串行。创建当前与相邻次月排队成功、重叠/非法日期失败，成功订阅审计恰好5条，失败无孤立记录。
+- 旧Caller签发→私有路由200→吊销→401、公开路由200、V1快照checksum不变；新/旧产品入口实际200。最终脱敏HTTP数量与固定源码SHA在后续补记，失败/原始调试日志仅保留本机`.local/acceptance/`。
+
+首次HTTP因未开放PUT/DELETE在MVC先返回405，未满足约定403；已作上述新域前置过滤修正并用Java/真实HTTP复测，**不是放宽测试预期**。日期JSON可省略`.000`，测试按UTC Instant比较，不因展示精度假报时区问题。未经实际运行的项目没有填为通过。
+
+### 剩余门槛、依赖和本地使用
+
+无新增Maven/npm运行依赖，无新Plus复制；沿用既有MyBatis-Plus和V1审计/会话。新增关键Java/JS与长流程中文编号注释已检查，凭证不持久化、不进入公开证据。Gateway源码与旧初始化SQL无改动。
+
+负责人持久化数据库**尚未迁移**，需在确认目标与备份后执行`sql/flowgate-v11.sql`，构建并重启Control；安全命令见产品指南第8节，不需要新密码或中间件。1280px/375px、Tab/焦点、真实浏览器业务体验未执行；V1最终人工验收/A代码复审未通过前不进入B。A不提供实际余额、用量、计量、Kafka、活跃APP凭证；未创建V11最终验收报告、未跑全项目/长压测、未合并main。
+
+最终独占实测基线`b51f3b455f9f589a6d5f2f1bf3bf1d214154e59e`，`docs/progress/evidence/v11-a-smoke.json`为passed=true：**155条已记录HTTP**（200×45、201×24、204×1、400×17、401×11、403×42、404×5、405×3、409×7）。错误状态均为有意验证的预期结果；辅助SQL锁控制/轮询不是HTTP条目。两处真实锁等待及异应用独立完成已记录为断言摘要，不含凭证/Body/Header。原始JSON/失败日志仅本机`.local/acceptance/`保留。静态产品资源与最终Control Jar逐项一致，所有测试自建资源已在finally清理。
