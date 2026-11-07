@@ -1,6 +1,6 @@
 # FlowGate V1.1-B：累计配额账本、可信准入与一致性（Codex 编码合同）
 
-> 状态：未开始。前置 A 已完成且负责人确认。先阅读 docs/design/openapi-platform-v1.1.md 第 3–6、9 节及现有 CallerAuthFilter / AdmissionGlobalFilter / ReleaseService / PolicyRules；本块不引入 Kafka，先完成单数据库权威闭环。
+> **状态（2026-11-07）**：B详细设计和开发任务已提交，**B0～B6代码与真实B测试均未开始**。负责人明确将A复审遗留的同月套餐切换及MySQL UTC两个P0纳入B0，B0隔离实测通过后才允许编码B1～B6；原A源码和155条证据不覆盖。权威新合同 `docs/design/v11-b-quota-execution.md`，执行 `CODEX_V11_B_EXEC_PROMPT.md`。B不引入Kafka，先实现单MySQL权威额度闭环。
 
 ## B-00 准入语义固定
 
