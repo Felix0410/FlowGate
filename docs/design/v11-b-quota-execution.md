@@ -103,9 +103,9 @@
 
 **建议具体事务算法（实现要与测试一致）**：
 1. 检查Internal Key和请求参数/UUID长度、固定上限，查询可信历史`fg_config_release[appliedVersion]`与checksum，校验启用/私有/相同route+API+policy+units，不能用Control最新配置替代；不存在/不匹配拒绝，不扣量。
-2. MySQL事务中获得Application共享锁并检查Developer、Principal`APP_CALLER`、`fg_app_principal`、credentialGeneration+enabled、当前有效订阅/冻结Plan版本、Scope。与A客户/应用修改的独占锁配合，保证状态转换不会在判定过程中偷偷穿透；锁顺序统一`app→developer→plan/subscription→balance→ledger/outbox`避免循环锁。
-3. **先按`chargeId`查历史Ledger**：如果有，按规范化不可变参数计算/比对fingerprint（包括可信appId/principalId、generation、apiId、routeId、policyId、units、appliedVersion、checksum，但**不包含当前UTC月**）。匹配且当前凭证/应用仍允许才返回旧grant，`periodUtc`取**原Ledger中被冻结的月份**；不同内容409；同chargeId跨UTC月不产生第二月扣减。若grant后应用被停用，历史仍存在但这次重试403，不借历史成功绕过停用。
-4. 首次Grant从数据库UTC clock计算当前`YYYYMM`，确认一条当月有效订阅；若Balance不存在，插入唯一`(app,period)`冻结`subscriptionId+planId+planVersion+totalUnits`。并发首次初始化因唯一键竞争必须可恢复，不能创造两个余额行。
+2. MySQL事务中获得Application共享锁，验证Developer、Principal`APP_CALLER`、`fg_app_principal`、credentialGeneration+enabled与Scope；与A客户/应用修改的独占锁配合，保证状态转换不会在判定过程中偷偷穿透；锁顺序统一`app→developer→plan/subscription→balance→ledger/outbox`避免循环锁。
+3. **先按`chargeId`查历史Ledger**：如果有，按规范化不可变参数计算/比对fingerprint（包括可信appId/principalId、generation、apiId、routeId、policyId、units、appliedVersion、checksum，但**不包含当前UTC月**）。匹配且当前凭证/应用/Developer仍允许才返回旧grant，`periodUtc`取**原Ledger中被冻结的月份**；不同内容409；同chargeId跨UTC月不产生第二月扣减。**历史grant重试不能要求新的当前月份仍有有效订阅**，否则11月末已授权、12月初响应丢失的重试会被误拒；但DB停用/吊销或generation变更时仍必须拒绝新代理放行，历史事实不删除。
+4. **仅首次Grant**从数据库UTC clock计算当前`YYYYMM`，确认一条当月有效订阅并冻结Plan版本；若Balance不存在，插入唯一`(app,period)`冻结`subscriptionId+planId+planVersion+totalUnits`。并发首次初始化因唯一键竞争必须可恢复，不能创造两个余额行。
 5. 在**同一事务**执行Ledger唯一`charge_id`插入（也起幂等竞争序列化作用），再`UPDATE fg_quota_balance SET remaining_units=remaining_units-:units,version=version+1 WHERE ... AND remaining_units>=:units`（更新行数必须为1），最后插入Outbox事件；全部提交才返回200。更新0行→显式429并回滚未完成的Ledger/Outbox；别捕获SQL异常并在已rollback-only事务内继续写。
 6. **并发重复chargeId处理**：另一事务可能先通过初始SELECT，最终在UNIQUE insert等待后遇重复；必须整体回滚该尝试，再开独立新的已提交读取来比较fingerprint与原Grant并返回duplicate，而不是让不同的请求各扣一次。第一次执行先声明已插入Ledger而未扣减也只是在未提交事务内可见，事务回滚不会留下悬空Ledger。
 7. 没有quota grant的401/403/429/503**不能产生Ledger/Outbox记录**；被Redis RATE_LIMIT或本机CONCURRENCY拒绝不得请求Control；成功grant后下游5xx/超时/cancel不退款。
