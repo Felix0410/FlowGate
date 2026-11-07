@@ -1,5 +1,7 @@
 # FlowGate V11-A｜2026-11-07 源码复审后的最小修复任务
 
+> **已被负责人2026-11-07新决定替代**：本文件保留为V11-A静态复审历史资料，**不要直接在A分支执行F0～F4**。这两项P0现归`feat/v11-b-quota`的**B0**，以`docs/design/v11-b-quota-execution.md`第3节及`CODEX_V11_B_EXEC_PROMPT.md`为唯一实际修复合同；B0未实测前不得进入真实计量。
+
 > 当前V11-A业务实现已真实提交远端；Codex本轮**不重新开发A，也不得进入B/C/D**。请先完整阅读 `docs/reviews/v11-a-static-review-2026-11-07.md`。本文件把该报告转为唯一可编码清单。
 > 目标分支：`feat/v11-a-business`（现有Draft PR #7），不是`main`或`docs/v1.1-openapi-platform`。禁止删除旧155条HTTP证据，未重跑的测试不能宣称通过。
 

@@ -1,5 +1,7 @@
 # Codex 工作指令｜FlowGate V1.1 OpenAPI 平台业务化改造
 
+> **2026-11-07 用户最新授权覆盖以下旧A指令**：V11-A已编码并有历史17JUnit/155HTTP，A审核两项P0现**并入V11-B B0**。当前唯一有效的本地编码指令是`CODEX_V11_B_EXEC_PROMPT.md`，权威细节`docs/design/v11-b-quota-execution.md`及`docs/progress/v11-b-quota.md` B-07～B-15；B0实测通过前不开展B1，B真正身份和配额闭环完成前不对外签发APP Token/发布计量。以下文字为旧V11-A阶段历史合同，仅作背景，**不得当成当前任务执行**。
+
 > **2026-11-06 已完成V11设计复审**：严格先读 `docs/reviews/v11-design-review-2026-11-06.md`、`docs/design/openapi-platform-v1.1.md`第12节，再执行 **`CODEX_V11_A_EXEC_PROMPT.md`**。后者是当前唯一详细的本地编码交接；新应用Token、USAGE_QUOTA、Kafka和四组性能均尚未实现。V1人工浏览器验收与最终收口仍待负责人进行，V11-A可在隔离新分支先做不激活Token的管理域，B之前须完成前置门槛。
 
 > 当前默认工作仅为**阅读规划并开始 V11-A（前提：负责人确认旧 V1 收口与工作树安全）**。不得把设计文档标记为已编码。具体业务约束权威源：docs/design/openapi-platform-v1.1.md。
