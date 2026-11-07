@@ -19,7 +19,7 @@ export function createApi(transport = (...args) => fetch(...args), expired = () 
       if (!response.ok) {
         if (response.status === 401 && !publicRequest && !gateway) { clear(); expired(); }
         const explanations = {401: '登录已过期，请重新登录', 403: '当前角色没有此操作权限', 409: '数据已变化或名称重复。请重新读取并核对，不会自动重试', 503: '依赖暂不可用，请检查工作台后重试'};
-        const message = response.status === 409 ? (data?.message || '版本变化或名称重复') + '。请取消本次操作，重新读取并核对，不会自动重试。' : data?.message || explanations[response.status] || '请求未成功，请检查输入或稍后重试';
+        const message = response.status === 409 && data?.code !== 'FEATURE_NOT_READY' ? (data?.message || '版本变化或名称重复') + '。请取消本次操作，重新读取并核对，不会自动重试。' : data?.message || explanations[response.status] || '请求未成功，请检查输入或稍后重试';
         const error = new Error(message);
         error.status = response.status; error.code = data?.code; error.requestId = response.headers.get('X-Request-Id'); throw error;
       }
