@@ -1,0 +1,737 @@
+{
+  "passed": true,
+  "recordedAt": "2026-11-07T10:00:04.750615+00:00",
+  "gitSha": "b51f3b455f9f589a6d5f2f1bf3bf1d214154e59e",
+  "checks": {
+    "migration": {
+      "passed": true,
+      "oldFacts": {
+        "fg_principal": "1",
+        "fg_route": "4",
+        "fg_config_release": "1",
+        "snapshotsSha256": "2bbc11e68ab25213042b31d88b9625bef346d5da00a04c3eb373b5e62797e63f"
+      },
+      "columnsSha256": "9444bbf8f4177604f0bc1bdf0f6a8575558bb4500d0170a9eeba26c1409dc369",
+      "indexesSha256": "3cdbe8d60c6d33e484bc92c164231114b277cdbc876d7cdae0411b174e0996a6"
+    },
+    "rbacAndNoCredentialSideEffects": true,
+    "subscriptionRace": {
+      "sameApplication": [
+        201,
+        409
+      ],
+      "bothWaitedOnMysqlLock": true,
+      "differentApplicationsProgressIndependently": true,
+      "currentAndQueuedAdjacent": true,
+      "planVersionSnapshot": 1
+    },
+    "v1CallerAndSnapshotCompatibility": true
+  },
+  "requests": [
+    {
+      "path": "/status",
+      "status": 200
+    },
+    {
+      "path": "/actuator/health",
+      "status": 200
+    },
+    {
+      "path": "/actuator/health",
+      "status": 200
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/plans",
+      "status": 201
+    },
+    {
+      "path": "/admin/developers",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/plans",
+      "status": 201
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers?afterId=0&limit=1",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers?afterId=1&limit=1",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers/999999",
+      "status": 404,
+      "code": "NOT_FOUND"
+    },
+    {
+      "path": "/admin/developers?limit=0",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/developers?afterId=-1",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps?afterId=0&limit=1",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps?afterId=1&limit=1",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/999999",
+      "status": 404,
+      "code": "NOT_FOUND"
+    },
+    {
+      "path": "/admin/apps?limit=0",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/apps?afterId=-1",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans?afterId=0&limit=1",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans?afterId=1&limit=1",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans/999999",
+      "status": 404,
+      "code": "NOT_FOUND"
+    },
+    {
+      "path": "/admin/plans?limit=0",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/plans?afterId=-1",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/developers",
+      "status": 409,
+      "code": "DUPLICATE_CODE"
+    },
+    {
+      "path": "/admin/apps",
+      "status": 409,
+      "code": "DUPLICATE_CODE"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 409,
+      "code": "DUPLICATE_CODE"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/developers",
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 400,
+      "code": "IMMUTABLE_PLAN"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 400,
+      "code": "IMMUTABLE_OWNER"
+    },
+    {
+      "path": "/admin/apps",
+      "status": 404,
+      "code": "NOT_FOUND"
+    },
+    {
+      "path": "/admin/apps?developerId=1&limit=100",
+      "status": 200
+    },
+    {
+      "path": "/admin/callers",
+      "status": 201
+    },
+    {
+      "path": "/admin/developers",
+      "status": 401,
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "path": "/admin/developers",
+      "status": 401,
+      "code": "INVALID_SESSION"
+    },
+    {
+      "path": "/admin/developers",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/developers",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/developers/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps",
+      "status": 401,
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "path": "/admin/apps",
+      "status": 401,
+      "code": "INVALID_SESSION"
+    },
+    {
+      "path": "/admin/apps",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 401,
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 401,
+      "code": "INVALID_SESSION"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 401,
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 401,
+      "code": "INVALID_SESSION"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 200
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 200
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps;x=1",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/%61pps",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1;v=1/credentials",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/services",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1/credentials",
+      "status": 401,
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "path": "/admin/apps/1/credentials",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1/credentials",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/1/credentials",
+      "status": 409,
+      "code": "FEATURE_NOT_READY"
+    },
+    {
+      "path": "/admin/apps/1/credentials",
+      "status": 405,
+      "code": "METHOD_NOT_ALLOWED"
+    },
+    {
+      "path": "/admin/apps/2/credentials",
+      "status": 401,
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "path": "/admin/apps/2/credentials",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/2/credentials",
+      "status": 403,
+      "code": "FORBIDDEN"
+    },
+    {
+      "path": "/admin/apps/2/credentials",
+      "status": 409,
+      "code": "FEATURE_NOT_READY"
+    },
+    {
+      "path": "/admin/apps/2/credentials",
+      "status": 405,
+      "code": "METHOD_NOT_ALLOWED"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 409,
+      "code": "SUBSCRIPTION_CONFLICT"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 409,
+      "code": "SUBSCRIPTION_CONFLICT"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 400,
+      "code": "INVALID_PERIOD"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 400,
+      "code": "INVALID_PERIOD"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 400,
+      "code": "INVALID_PERIOD"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 400,
+      "code": "INVALID_PERIOD"
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 404,
+      "code": "NOT_FOUND"
+    },
+    {
+      "path": "/admin/apps/2",
+      "status": 200
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 403,
+      "code": "APP_DISABLED"
+    },
+    {
+      "path": "/admin/apps/2",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers/2",
+      "status": 200
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 403,
+      "code": "DEVELOPER_DISABLED"
+    },
+    {
+      "path": "/admin/developers/2",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 400,
+      "code": "PLAN_DISABLED"
+    },
+    {
+      "path": "/admin/plans/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 405,
+      "code": "METHOD_NOT_ALLOWED"
+    },
+    {
+      "path": "/admin/subscriptions/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/subscriptions?applicationId=1&limit=100",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/api/demo/fast/123",
+      "status": 200
+    },
+    {
+      "path": "/api/private/fast/123",
+      "status": 200
+    },
+    {
+      "path": "/admin/callers/5/revoke",
+      "status": 204
+    },
+    {
+      "path": "/api/private/fast/123",
+      "status": 401,
+      "code": "INVALID_CALLER"
+    },
+    {
+      "path": "/console/",
+      "status": 200
+    },
+    {
+      "path": "/console/openapi-business.js",
+      "status": 200
+    },
+    {
+      "path": "/console/guide.html",
+      "status": 200
+    },
+    {
+      "path": "/test-console/",
+      "status": 200
+    }
+  ]
+}
