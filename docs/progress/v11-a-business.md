@@ -175,3 +175,9 @@ git diff --check
 负责人持久化数据库**尚未迁移**，需在确认目标与备份后执行`sql/flowgate-v11.sql`，构建并重启Control；安全命令见产品指南第8节，不需要新密码或中间件。1280px/375px、Tab/焦点、真实浏览器业务体验未执行；V1最终人工验收/A代码复审未通过前不进入B。A不提供实际余额、用量、计量、Kafka、活跃APP凭证；未创建V11最终验收报告、未跑全项目/长压测、未合并main。
 
 最终独占实测基线`b51f3b455f9f589a6d5f2f1bf3bf1d214154e59e`，`docs/progress/evidence/v11-a-smoke.json`为passed=true：**155条已记录HTTP**（200×45、201×24、204×1、400×17、401×11、403×42、404×5、405×3、409×7）。错误状态均为有意验证的预期结果；辅助SQL锁控制/轮询不是HTTP条目。两处真实锁等待及异应用独立完成已记录为断言摘要，不含凭证/Body/Header。原始JSON/失败日志仅本机`.local/acceptance/`保留。静态产品资源与最终Control Jar逐项一致，所有测试自建资源已在finally清理。
+
+### 本轮Git交付实际结果
+
+代码/测试提交依次为`d2ebc6c`（数据模型）、`55496f2`（管理API与订阅）、`05db284`（前置/规范化ACL）、`5cc9227`（产品页面）、`b51f3b4`（测试）、`7c5a5f3`（真实证据/文档）。执行`git push origin feat/v11-a-business`返回`Permission to Felix0410/FlowGate.git denied to Felix0410`、HTTP403，**本轮新实现未推送成功**。保留本地提交，不改凭据、不改推main、不强推或重写历史。既有PR #7仍Draft，远端仍任务基线c70d45b，不宣称PR已包含本次实现或已跑CI。
+
+最终只读确认main仍`84a25d5a7b9545dff3556299efec3c310fc321cf`，测试临时容器已清理，仅原FlowGate持久化MySQL/Redis保留。**V11-A编码与定向验证完成，等待ChatGPT和项目负责人复审；B/C/D不开始，V1.1整体未最终验收。**
