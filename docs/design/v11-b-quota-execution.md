@@ -56,6 +56,7 @@
 ### 4.2 可接流网关能力门槛（不能只相信节点ONLINE）
 
 - 给本地演示明确`FLOWGATE_QUOTA_TRAFFIC_NODES`白名单，例如`gw-a,gw-b`。**默认空=拒绝启用计量策略**，不默认为某个随意上报的nodeId；部署者需确认它就是可接受业务流量的完整节点集合。
+- **阶段功能开关**：Control新增`flowgate.quota-activation-enabled`默认`false`，在B1/B2/B3施工期间即使存在草稿USAGE_QUOTA也**不允许发布启用**，返回`QUOTA_FEATURE_NOT_READY`。仅B4完整认证+非阻塞扣额链路在隔离真实联调通过后，B6测试环境才显式开启；部署到用户持久化环境须另行授权。Gateway不得在B1只有元数据/节点上报、**尚无真实Quota Filter**时提前宣告支持`USAGE_QUOTA_V1`；supportedFeatures只有在配额认证/准入组件实际可用的最终二进制中才能包含该能力。
 - 新Gateway在已有`POST /internal/nodes/applied`上报附加`supportedFeatures:["USAGE_QUOTA_V1"]`，旧请求不含字段必须兼容且将该节点能力标为未知/不支持，不能沿用旧心跳遗留能力。可最小新增`fg_node_capability(node_id PK,features_json,version,checksum,last_seen_at)`，避免破坏原`fg_release_node`旧结构。旧节点心跳或过期/版本校验失败、白名单节点缺失或不支持Quota→发布含Quota的配置一律409 `GATEWAY_CAPABILITY_NOT_READY`。
 - 新节点必须能先应用旧V1快照并上报能力，之后才发布新Quota；Control以受信internal key和明确接流节点表校验。不能仅用一个支持的节点+两个其他未上报节点就允许发布。**这只是本机部署证明**，真实线上仍需接入层下线/排空旧节点，不能因心跳声称自动隔离所有未知公网副本。
 - 某旧节点仍握旧快照时，无法使用独立App Token；新APP业务不会从旧节点偷跑扣量。旧普通Caller旧业务行为在升级窗口可维持，但平台不能把它统计为已计量应用调用。
