@@ -98,7 +98,8 @@ B 阶段必须与 app-only 网关访问限制**同一版本**上线 POST /admin/
 2. `PolicyRules`独立执行标志`ENFORCED_QUOTA_V1`，`ReleaseService.build`按类型赋值；旧`ENFORCED_BLOCK2`与`ENFORCED_BLOCK3`语义不变。旧快照`schemaVersion=1`、`RouteSpec`结构、checksum校验和旧rollback不修改。
 3. **单独`QuotaPlan`metadata**（`routeId,apiId,units,policyId,appliedVersion,snapshotChecksum`）随路由冻结；绝不能把quota添加到旧`EffectivePolicyResolver.Rule`导致`capacity/refillPerSecond`空取值NPE。
 4. `FLOWGATE_QUOTA_TRAFFIC_NODES`必须显式设置接流节点白名单；默认空拒绝启用Quota。新Gateway在已有节点上报增加`supportedFeatures:["USAGE_QUOTA_V1"]`，Control用新`fg_node_capability`持久记录可信心跳；旧节点未提供capability→未知/不支持，过期/缺失/错checksum→拒绝Quota发布/回滚激活。混合版本1旧1新、2新、1节点失联、回滚无Quota都需测试。
-5. 报告仍保留所有已发布V1快照，不能为新的quota反复覆写历史`fg_config_release.snapshot_json`；Control历史`appliedVersion`不是能力证明。
+5. **分阶段激活门槛**：Control设置`flowgate.quota-activation-enabled=false`（默认），B1只有协议和节点能力检查时不得真正发布生效；Gateway仅在B4认证+Quota Filter实际完成后上报`USAGE_QUOTA_V1`。B6隔离联调可显式开启，用户持久化部署不自动开启，禁止半成品Gateway接受计量流量。
+6. 报告仍保留所有已发布V1快照，不能为新的quota反复覆写历史`fg_config_release.snapshot_json`；Control历史`appliedVersion`不是能力证明。
 
 **验收**：功能门禁可阻止旧节点/缺失节点；只有两受控新Gateway上线+可信报告后才能发布含quota配置，节点应用一致。JDK/真HTTP定向。提交`feat(v11-b): gate metered releases by node features`。
 
