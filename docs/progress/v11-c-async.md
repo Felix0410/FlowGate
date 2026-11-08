@@ -112,3 +112,7 @@
 ### C1 已通过
 
 Control唯一新增starter-kafka，由Boot4.0.9解析Spring Kafka4.0.8/Kafka客户端4.1.2；其他模块不加依赖。Async默认OFF、mq profile可选单KRaft，无Kafka仍真启动Control/两个Gateway。严格8字段事件测试2项通过；两张C表DDL重复执行通过；真实Spring B服务100并发5额度、100幂等/跨月不受影响。命令`mvn -B -ntp -pl flowgate-control -am test package`及定向V11UsageEventTest退出0；`python3 scripts/v11-c1-smoke.py`退出0，证据`evidence/v11-c1-smoke.json`。未启动用户Kafka/持久卷。
+
+### C2 已实现并验证
+
+短事务SKIP LOCKED批次<=20、30秒租约与每轮唯一owner、过期第8次FAILED；事务外Kafka Future ACK/10秒上限/实例100在途，SENT和失败回写均校验有效lease+owner。ACK之前不写SENT，租约丢失更新0不报成功。新增2项Future/真实TransactionTemplate测试通过。`python3 scripts/v11-c2-smoke.py`真MySQL双线程各领取3条、有效租约6条不重叠、过期重领换owner、旧owner更新0/新owner1、Ledger不改，退出0；证据`evidence/v11-c2-smoke.json`。真实Broker故障与进程崩溃仍在C6验证，不以mock ACK替代。

@@ -12,5 +12,6 @@ public class OutboxEventEntry {
  public String leaseOwner;
  public java.time.Instant leaseUntil;
  public String lastErrorCode;
+ @TableField(insertStrategy=FieldStrategy.NEVER) public java.time.Instant nextAttemptAt;
  @TableField(insertStrategy=FieldStrategy.NEVER,updateStrategy=FieldStrategy.NEVER) public java.time.Instant createdAt;
 }
