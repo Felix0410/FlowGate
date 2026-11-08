@@ -1,26 +1,21 @@
-# FlowGate｜本地Codex当前唯一阶段入口：V11-C（2026-11-08）
+# FlowGate｜当前本地Codex唯一任务：V11-C源码复审定向修复（2026-11-08）
 
-> 2026-11-08：C0先验证B小修后，C1～C6已在当前功能分支完成本地实现与定向验证：Java67项、6套Node、真实Kafka/MySQL/Redis/双Gateway26组故障验收及默认OFF旧V1兼容。以`docs/progress/v11-c-async.md` C-09和新证据为准；本地通过不等于远端交付、最终验收或可合并。
-> 目标分支`feat/v11-c-async-usage`，来自`feat/v11-b-quota`完整B实现与复审修复；C独立Draft PR→B，原#1～#8和main不自动合并/改base。
+> **V11-C的C0～C6 Java/Kafka/SQL/前端与实际测试证据已经真实提交GitHub**，PR #9仍Draft。Codex记录JDK17 **67 JUnit**、**26组真实Kafka/HTTP故障场景**及109 Ledger=Outbox=Consumed=每日授权数，ChatGPT已审读远端源码与证据但**未独立运行本机Java/Kafka/MySQL或真人浏览器**。目前不是从头开发C，也不是开始D。
+>
+> **当前唯一执行合同：`CODEX_V11_C_REVIEW_FIX_PROMPT.md`**；源码审核报告`docs/reviews/v11-c-static-review-2026-11-08.md`；真实历史实施`docs/progress/v11-c-async.md`的C-09/C-10。旧`CODEX_V11_C_EXEC_PROMPT.md`为已完成C0～C6历史阶段合同，不再按原路线从头重写。
 
-## 必须按顺序阅读
+## 本轮必须依次完成的三个边界
 
-1. `docs/design/v11-c-async-execution.md`：**当前C权威设计**。业务事实、8字段事件合同、两张新表、Kafka最小可选环境、Outbox租约、消费DB幂等、管理API、封账对账、前端和安全故障矩阵。
-2. `docs/progress/v11-c-async.md` 第C-08节之后：C0～C6唯一可编码的分步任务、提交与实测门槛。原C-00～07只是历史概要。
-3. `CODEX_V11_C_EXEC_PROMPT.md`：直接给本地Codex的操作细节，C0先实际补测B小修再开发C1。
-4. `docs/reviews/v11-b-static-review-2026-11-08.md`、`docs/progress/v11-b-quota.md`第B-19节、`sql/v11-b-upgrade-preflight.sql`、实际`QuotaChargeService`、`AppCredentialController`及Outbox/Quota Mapper。历史`CODEX_V11_B_REVIEW_FIX_PROMPT.md`为旧派工，本轮**B已写修复源码不需重新设计，只需C0独立运行并修实测问题**。
+1. **P1-C01：Kafka容器日志持久性 + 已SENT未消费的恢复**。现Compose Kafka日志无volume，容器重建/保留期清除会让已Broker ACK、Outbox=SENT而尚未Consumed的事件失去自动重发路径。新增独立Kafka命名卷，并实现有安全时间门槛、ADMIN审计、CAS的原eventId补投；在隔离Compose/隔离Broker丢失场景真实测不多扣/不双计。
+2. **P1-C02：区分MySQL瞬时故障和永久毒消息**。当前`UsageKafkaConfiguration`所有异常都暂停分区。数据库断开又恢复时需自动有界退避、同offset重试、最终追平，不需要重启Control；真正invalid/event冲突仍暂停、不ACK、其他分区继续。
+3. **P1-C03：Ledger与Outbox完整性对账**。`AsyncUsageReadMapper.Sql.reconciliation`的INNER JOIN会忽略缺失Outbox的权威Ledger。增加有界只读不完整事件诊断，孤儿Ledger/重复Outbox必须显示完整性异常而不是0/MATCH；真实MySQL反例、中文前端提示。
 
-## 分阶段门槛
+## 实测、Git、安全
 
-- **C0阻断**：仅用隔离MySQL/Redis真实测试B的存量同月订阅/余额冻结409、计量OFF仍可撤销既有APP Token、Java17/Node/双Gateway B旧回归。新补丁没有真正跑通过前**不能启动C1**；测试失败修源码后重跑，不伪造证据。
-- **C1**：只给Control增Boot4兼容的`spring-boot-starter-kafka`、`mq`可选单KRaft本地Broker、Async默认OFF和两张ConsumedEvent/UsageDaily新表。**默认无Kafka仍可启动V1/B**。
-- **C2**：MySQL`SKIP LOCKED`短事务领取Outbox与lease，COMMIT后KafkaTemplate发送，受控inflight/backoff/FAILED/迟到Owner CAS；允许至少一次重复投递。
-- **C3**：收到事件与本地Outbox/Ledger校验后，ConsumedEvent唯一去重+UsageDaily UPSERT同MySQL事务，**数据库真正提交后才确认Kafka offset**；重复消息不双计，DLT不确认时保留偏移。
-- **C4/C5**：真实运营API、ADMIN-only失败事件重投、封账UTC日对账与`/console/`“用量统计/异步事件/对账中心”三组业务页面，中文指南同步；SENT不等于已聚合，PENDING不等于错账。
-- **C6**：Java17/Node/隔离Kafka+MySQL8.4/Redis7/双Gateway真HTTP和宕机恢复测试，脱敏证据、SHA/退出码、负责人真人浏览器验收待办。完成C后停止，不自行进入D、合并main或做长压测。
+- 目标分支`feat/v11-c-async-usage`，base`feat/v11-b-quota`，PR #8/#9继续Draft。先`git status -sb`、`git fetch origin`、`git log -1`核对已提交工作；**绝不reset-hard/clean-fd/强推/merge main**。
+- 必须使用随机端口/新容器及新的Kafka测试卷，禁止操作用户现有MySQL/Redis/Kafka持久卷、.env、IDE/旧JVM。新增Kafka卷是Compose配置变更，不能不经负责人允许重启用户已有Kafka并误当迁移完成。
+- Java17 Spring Boot4/MySQL8.4/Redis7/Kafka4.1.1（Control-only Kafka），原生ES modules；**不加Kafka Streams、CDC、Seata、Nacos、额外Java服务、Vue/React/npm**。关键长逻辑中文注释按1/2/3逐项写。
+- 按修复合同扩展JUnit、Node旧新产品和两Gateway真实Kafka/MySQL故障测试；**保留原C0～C6 26组与67JUnit的历史证据**，新`docs/progress/evidence/v11-c-review-fix-smoke.json`只有实测后才生成。进度记录完整SHA、命令/退出码、通过失败跳过数以及原C测试回归。
+- 完成后停在PR #9 Draft并交ChatGPT复审与负责人真人1280px/375px/键盘测试。**不开始V11-D、不合并main或所有Stacked PR**。
 
-## 固定工程约束
-
-Java17、Spring Boot4、Control MVC/MyBatis/MySQL，Gateway WebFlux/Redis/Lua，前端原生ES modules；**Kafka不能放到Gateway或MySQL扣额热路径**。不得引Kafka Streams/Debezium/Nacos/Seata/Redis Stream/新Java微服务/新JS框架。Java/JS关键长逻辑使用充足中文注释，按`// 1.`、`// 2.`、`// 3.`分点。所有程序和证据不能泄露Token、内部密钥、HTTP Body、用户原始日志；保护用户未提交工作树、IDE、.env、已有Docker持久卷。禁止`git reset --hard`/`git clean -fd`/`docker prune`/强推或未经授权合并PR。
-
-**当前停在C复审：B小修C0已独立通过、C业务实现及定向验收已完成。只处理明确授权审核修复；不进入D、不做长期压测、不合并。用户真实库未迁移、Async与Quota未自动激活，1280px/375px/键盘真人浏览器验收仍待负责人。**
+**当前真实状态：C0～C6已实现有历史测试证据，本轮3项静态审查边界待Codex编码与新故障实测，整个V1.1未最终交付。**
