@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "checks": [
+    "双新Gateway真HTTP100并发Free5：5通过/95耗尽，Ledger5=Outbox5/余额0；身份域隔离",
+    "内部HTTP同chargeId100并发仅1流水；历史版本可重试，checksum/API/units/版本错误和payload冲突409",
+    "轮换/撤销后即使Redis残留旧Token仍403；应用/客户暂停不扣额",
+    "双管理员并发首次签发仅1主体/1成功/1冲突",
+    "真实官方Route CB先于Quota：OPEN零扣额/零下游；Quota429不降级不触发CB，双节点状态独立",
+    "Grant后真实500/超时仍扣；Rate429/并发503先拒绝不扣；完成后许可复用",
+    "真实客户端取消不退款，本机并发许可可再次使用",
+    "Control成功提交后丢回包：实际WebClient同chargeId重试，1扣额/1下游POST；Header/Body/201/RequestId透传且伪造身份被清理",
+    "实际FilteringWebHandler排序日志：Auth → Rate/Concurrency → 官方CB → Quota → Netty",
+    "无订阅/Scope不足不扣；内部配额不接受管理凭证",
+    "新增凭证API真实HTTP：OPERATOR/VIEWER可读，签发/轮换/撤销全部403",
+    "实际Quota指标可读且无身份/charge高基数标签",
+    "实际A旧Gateway+新Gateway：App格式401/旧Caller200，含Quota发布及历史回滚409",
+    "Control停机仅计量503，非计量公开路径200，不新增流水",
+    "MySQL失联计量503，旧非计量公开路径200",
+    "真实Control HTTP跨UTC月重复返回原月，不要求新月订阅且无第二余额",
+    "Redis Lua发布失败返回503但DB代次已前进，旧Redis Token不可复活",
+    "Redis Lua撤销清理真实失败仍DB enabled=false，旧会话403不扣额",
+    "回滚旧快照后默认OFF凭证409，旧Caller正常/APP不可跨域",
+    "真实HTTP产品入口/新资源/指南可达；全部Ledger与Outbox守恒且仅NEW"
+  ],
+  "evidenceType": "real HTTP + isolated MySQL8.4/Redis7/two Gateway",
+  "ownerBrowserAcceptance": "not executed"
+}

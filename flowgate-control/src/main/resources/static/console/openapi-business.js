@@ -128,11 +128,13 @@ export function appReceipt(ctx) {
 export async function manageCredentials(ctx, app) {
   try {
     // 1. 独立读取真实状态，不沿用A阶段固定占位或将错误当作未签发。
+    const ticket = ctx.secretEpoch || 0, role = ctx.role;
     const state = await ctx.api.request('/admin/apps/' + app.id + '/credentials/status');
+    if (ticket !== (ctx.secretEpoch || 0) || role !== ctx.role) return;
     if (state.status === 'FEATURE_NOT_READY') { ctx.flash('应用凭证尚未启用。需要完整B链路、显式开关和全部接流节点能力就绪；请查看发布中心。'); return; }
     const fields = formFields([{name: 'scopes', label: '授权范围', value: '', required: false, help: '例如 demo:read，以逗号或空格分隔，必须包含计量私有API的requiredScope。轮换需要重新输入完整范围。'}]);
     const actions = h('div', {class: 'actions'});
-    const labels = {NOT_ISSUED: '尚未签发', ACTIVE: '已签发（Token有效期请以回执为准）', REVOKED: '已撤销'};
+    const labels = {NOT_ISSUED: '尚未签发', ACTIVE: '凭证代次已启用（不代表Redis会话可用或未过期）', REVOKED: '已撤销'};
     for (const [action, label] of state.status === 'NOT_ISSUED' ? [['issue', '首次签发']] : [['rotate', '轮换凭证'], ['revoke', '撤销凭证']]) {
       actions.append(permissionButton(label, () => {
         const scopes = fields.values().scopes, epoch = ctx.secretEpoch || 0;

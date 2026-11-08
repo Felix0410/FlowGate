@@ -35,4 +35,7 @@ await page.descendants().find(e=>e.tagName==='button'&&e.textContent==='查询�
 assert.match(page.textContent,/尚无余额记录/);assert.match(page.textContent,/private/);assert.match(page.textContent,/202611/);
 assert.ok(calls.at(-1).path.includes('afterId=0'));offline=true;
 await page.descendants().find(e=>e.tagName==='button'&&e.textContent==='查询余额与流水').fire('click');assert.match(page.textContent,/状态未知/);assert.doesNotMatch(page.textContent,/private/);
+// 导航/登出后到达的状态响应不能重新打开模态或接回旧凭证。
+let resolveStatus;const staleCtx={...ctx,role:'ADMIN',secretEpoch:0,api:{request:()=>new Promise(resolve=>{resolveStatus=resolve;})}};
+const pending=manageCredentials(staleCtx,app);staleCtx.secretEpoch++;resolveStatus({status:'ACTIVE',generation:1});await pending;assert.equal(dialog.open,false);
 console.log('PASS V11-B UTC月份/Quota规则/凭证确认与ADMIN权限/一次性密码回执清理/余额未知与流水/故障不显示旧余额');

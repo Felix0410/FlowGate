@@ -1,9 +1,9 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **V1.1-B设计已提交（2026-11-07）**：负责人决定将V11-A残留的“同月套餐切换”与“MySQL会话UTC”两个P0一并纳入B0，先修并通过隔离数据库实测再开发B1～B6。B设计包含独立APP Token、USAGE_QUOTA发布节点能力门槛、MySQL权威额度与同事务Ledger/Outbox、Gateway非阻塞准入、/console/业务界面、双网关与跨月幂等测试。**目前B只有设计/详细任务，未实施B代码或实测，也不引入Kafka**。详见[完整B设计](docs/design/v11-b-quota-execution.md)、[B0～B6任务](docs/progress/v11-b-quota.md)、[Codex B指令](CODEX_V11_B_EXEC_PROMPT.md)。
+> **V1.1-B已在功能分支实现（待复审）**：B0两项P0、独立App Token与代次、USAGE_QUOTA节点门禁、MySQL权威余额/Ledger/Outbox、非阻塞Gateway计量及业务控制台已实现。计量开关默认OFF，不自动迁移本机持久数据库、不启用Kafka。实际测试、提交和未完成的人工验收以[B实施记录](docs/progress/v11-b-quota.md)为准。设计合同见[完整B设计](docs/design/v11-b-quota-execution.md)。V11-C/D未开始，旧Draft PR和main不动。
 
 
-> **V1.1-A管理域已在功能分支实现并完成定向验证，复审缺口已迁入B0**：客户、应用、不可变额度套餐、UTC串行订阅及正式产品页面。A阶段不启用应用Token、额度扣减或Kafka；B/C/D尚未编码。**V1仍待负责人最终人工验收，main未合并，不能将A称为V1.1全版本完成。**
+> **V1.1-A管理域已在功能分支实现并完成定向验证，复审缺口已迁入B0**：客户、应用、不可变额度套餐、UTC串行订阅及正式产品页面。A历史交付不启用应用Token、额度扣减或Kafka；B在独立分支增量实现，C/D未编码。**V1仍待负责人最终人工验收，main未合并，不能将A称为V1.1全版本完成。**
 >
 > 入口：[V11-A真实实施与验证](docs/progress/v11-a-business.md#a-08-2026-11-07-codex真实实施与定向结果) · [产品使用指南第8节](docs/guides/product-console-guide.md#openapi) · [阶段路线](docs/progress/v11-roadmap.md)。本机已有数据库尚未迁移，首次使用需按指南执行增量SQL，再重启Control，打开 `/console/` 的“客户与应用”“套餐与订阅”。
 
@@ -379,3 +379,33 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 ### 原验收基线的本机记录
 
 获知产品化新门槛前，Codex按df00937任务书运行了Java34项、隔离HTTP/容量与三组两轮对照，见[历史基线报告](docs/acceptance/final-results.md)。这些结果不含新产品后台，不能作为新版Block4完成的依据。当前先执行产品化合同。
+
+
+### V11-B 本地部署与抽查（默认不激活计量）
+
+代码完成不等于用户持久环境已部署。先备份目标库并核对分支；现有V1库在维护窗口执行`sql/flowgate-v11.sql`（含A五表与B五表，只有CREATE IF NOT EXISTS，不会修改已有旧表）。容器初始脚本只建V1表，重启已有容器不会自动补这些新表。执行示例（运行者自行确认目标库）：
+
+```bash
+source .env
+docker compose -f compose.local.yml exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u "$MYSQL_USER" flowgate' < sql/flowgate-v11.sql
+mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package
+```
+
+IDEA继续使用原三个Application运行配置并加载根`.env`；Control为MVC，Gateway为WebFlux，JDK17，不改主类或额外引框架。Demo/Control/Gateway端口默认8085/8081/8080，启动前停止自己重复运行的旧实例。内部密钥必须在Control/Gateway完全相同；本轮未修改用户`.env`。
+
+计量部署需要B完整二进制、上述表、所有接流节点更新后显式配置（由部署负责人确认，不在仓库默认开启）：
+
+- Control：`FLOWGATE_QUOTA_ACTIVATION_ENABLED=true`，`FLOWGATE_QUOTA_TRAFFIC_NODES=local-gateway`（多副本填写完整、逗号分隔的实际节点名）。缺名单/旧节点/心跳过期/版本校验和不一致会拒绝签发和计量发布。
+- Gateway：每副本不同的`FLOWGATE_NODE_ID`，与完整接流名单一致；共用同一Control、MySQL、Redis环境和内部密钥。先发布非计量V1路由让全部新节点确认能力，再签发App Token和发布计量规则。旧普通Caller用于非计量私有路由，App Token只用于计量私有路由。
+- 浏览器：`http://127.0.0.1:8081/console/`，按[中文指南](docs/guides/product-console-guide.md)的“客户→应用→订阅→签发→计量发布→第六次429→账本”操作。只读角色不能签发/变更业务管理记录。没有余额行不是余额0；授权成功即消耗，业务失败也不退款。
+
+隔离验收使用`source .env`后运行`python3 scripts/v11-b-smoke.py`。脚本需Docker，可执行Java17，并先构建当前三个模块。混合版本用例还需从A基线构建独立历史夹具（不切换当前分支）：
+
+```bash
+mkdir -p .local/v11-a-legacy-binary
+git archive befc5d0586fa578d9fe6db398363132d4de3e480 | tar -x -C .local/v11-a-legacy-binary
+mvn -B -ntp -f .local/v11-a-legacy-binary/pom.xml -pl flowgate-gateway -am package -DskipTests
+python3 scripts/v11-b-smoke.py
+```
+
+历史夹具的`-DskipTests`只是生成旧版本网关二进制，不代表重测A。脚本只创建/清理独立随机端口容器及进程，不操作原持久卷；原始脱敏结果在`.local/acceptance/`，仓库证据在`docs/progress/evidence/`。负责人真实浏览器1280px/375px/键盘验收仍待执行。

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "result": {
+    "passed": true,
+    "differentChargeConcurrency": 100,
+    "grants": 5,
+    "exhausted": 95,
+    "duplicateConcurrency": 100,
+    "duplicateLedger": 1,
+    "outboxMatchesLedger": true,
+    "crossMonthOriginalPeriod": "202611",
+    "disabledReplayDenied": true
+  }
+}

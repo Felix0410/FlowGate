@@ -1,6 +1,6 @@
 # FlowGate V1.1-B：累计配额账本、可信准入与一致性（Codex 编码合同）
 
-> **状态（2026-11-07）**：B详细设计和开发任务已提交，**B0～B6代码与真实B测试均未开始**。负责人明确将A复审遗留的同月套餐切换及MySQL UTC两个P0纳入B0，B0隔离实测通过后才允许编码B1～B6；原A源码和155条证据不覆盖。权威新合同 `docs/design/v11-b-quota-execution.md`，执行 `CODEX_V11_B_EXEC_PROMPT.md`。B不引入Kafka，先实现单MySQL权威额度闭环。
+> **当前状态（2026-11-08）**：B0～B6本地实现与定向验收已完成，等待复审；当前代码/命令/证据见B-16、B-17。B-01～B-15保留2026-11-07设计时的历史状态，不能代替下方实际交付记录。远端推送状态另记，不自动合并、不进入C/D/Kafka。
 
 ## B-00 准入语义固定
 
@@ -206,3 +206,44 @@ Gateway增加配额私有路由APP解析及代次属性，但只有B4真实Quota
 新增配额与账本页面，应用名称选择、UTC月、MySQL余额和安全流水游标分页；不存在余额行显示尚未冻结，不冒充0。应用页接真实凭证status、确认签发/轮换/撤销、一次性密码输入回执/复制/清空；离页/退出同时销毁回执与模态DOM，迟到响应按epoch丢弃。新增计量规则表单及发布中心实际开关/完整接流名单/节点能力提示，订阅增本月/下月UTC选项；中文指南生成完成，无Kafka图表或新JS框架。
 
 已执行Node：`v11-a-console-test.mjs`、`product-console-test.mjs`、`block2-console-test.js`、`block3-console-test.js`、`v11-b-console-test.mjs`全部退出0。B新增测试执行真实模块与模拟DOM，覆盖UTC跨年月份、units边界、只读权限、确认签发、一次性回执清空、空余额和读取失败不显示旧事实。曾误用两个旧测试的.mjs后缀，命令MODULE_NOT_FOUND；按实际.js文件名执行通过。1280/375px与键盘真人浏览器验收未执行，留负责人。
+
+
+## B-17 B6定向验收与交付状态（2026-11-08）
+
+### 代码与提交
+
+| 阶段 | 本地提交 | 结果 |
+| --- | --- | --- |
+| B0 | `9a4708b` | 同月套餐禁止第二次选择、Hikari会话UTC；先独立真库通过才开始B1 |
+| B1 | `a92a709` | 独立Quota协议、冻结Route计划与完整接流节点门禁 |
+| B2 | `57721f2` | APP_CALLER专用Token/namespace、持久generation与DB先提交 |
+| B3 | `1058467` | MySQL余额/唯一Ledger/Outbox同事务、历史版本重验与幂等 |
+| B4 | `1ca5f6f` | 非阻塞WebClient预准入、官方CB顺序/错误边界及受控公开凭证 |
+| B5 | `0d5438a` | 原生业务控制台、真实凭证/余额/账本/计量规则及中文指南 |
+| B6 | 本节所在提交 | 真HTTP/隔离故障与边界测试、脱敏证据和部署说明 |
+
+B6额外补`V11QuotaCredentialControllerTest`2项验证默认OFF无发证副作用、缺节点禁止签发但不阻碍安全撤销；Gateway测试另补取消释放全部64个hop槽、满载503与身份域/namespace隔离。UI凭证status迟到响应按epoch隔离，ACTIVE只说明DB代次启用，不声称Redis会话可用或未过期。
+
+### 实际执行结果
+
+- `source .env`后Java17运行`mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`，退出0；Contract10/Control17/Gateway26/Demo4，共**57项、失败0、错误0、跳过0**。这是当前新增/修改及直接受影响模块定向验证，没有执行全项目统一大回归或长期性能压测。
+- `node scripts/v11-a-console-test.mjs`、`node scripts/product-console-test.mjs`、`node scripts/block2-console-test.js`、`node scripts/block3-console-test.js`、`node scripts/v11-b-console-test.mjs`均退出0；补UI迟到响应测试后受影响两套再次通过。`python3 scripts/build-console-guide.py --product --check`退出0。Node为真实ES模块/模拟DOM，不是负责人浏览器体验。
+- `python3 scripts/v11-b-smoke.py`最终退出0，**20组真实HTTP断言通过**。证据`evidence/v11-b-smoke.json`：MySQL8.4、Redis7、两个实际新Gateway、Control、Demo/受控HTTP下游，均专用随机端口，无用户持久卷。100并发Free5精确5grant/95耗尽；内部100次同chargeId仅1条新Ledger/Outbox；各余额total=remaining+SUM(ledger.units)，Ledger逐笔匹配Outbox，仅NEW。
+- 真实HTTP覆盖：49位App格式与旧Caller隔离、轮换/撤销残留Redis仍403、App/Developer停用、并发双发证仅1主体、历史版本/校验和/API/units/payload冲突、当前版本更新后旧版本仍可重试、无Scope/订阅不扣、ADMIN写与OPERATOR/VIEWER只读、低基数实际指标、Control/MySQL不可用计量503且公开非计量200。
+- 实际官方Route CB：OPEN零配额调用/零下游；Quota429不假降级、不计失败样本；Rate429/并发503先短路不扣，Grant后500/timeout/cancel仍扣且许可释放。**运行FilteringWebHandler DEBUG排序日志**确认Auth→Admission→官方CB→Quota→Netty，不用手写order代替运行证据。
+- 透明HTTP代理在Control提交成功后丢首次回包，实际WebClient重试同chargeId，只有1扣额/1下游POST。验证POST Body/业务Header/201/RequestId真实透传，Authorization及伪造AppId/ChargeId清理。
+- 实际启动A基线`befc5d0586fa578d9fe6db398363132d4de3e480`独立历史Jar（`.local/v11-a-legacy-binary`构建，未切换/修改A分支）；单旧+单新时App401、旧Caller200，含Quota发布/历史回滚409；换回新节点并等真实能力心跳才允许计量发布。
+- 重启测试Control，用真实Hikari连接session timestamp切到下UTC月：旧charge仍返回原月、无第二余额、没有新月订阅仍可重试；新的charge则因无新月订阅403，证明时钟确已推进。恢复正常时钟后继续。Redis ACL只拒绝Lua时轮换/撤销真实返回503，但DB代次/禁用已提交，恢复Redis后旧会话仍403，绝不恢复旧授权。
+- `python3 scripts/v11-a-smoke.py`在当前B代码默认OFF环境重跑退出0，**155条HTTP记录**，重复增量迁移、旧快照/表/索引事实、角色矩阵、同App锁竞争、旧Caller授权/撤销及产品资源兼容；新摘要`evidence/v11-b-a-compat.json`，原A历史证据不覆盖。B3原独立Spring服务并发/跨月实测摘要保存`evidence/v11-b3-smoke.json`；B0证据保留。
+
+### 初次失败与最终收敛
+
+初次沙箱Mockito attach受限；沙箱外定向命令通过。B6夹具初次上游路径没用`/demo/`，后续新增下游没有同步Gateway白名单，均被真实校验拒绝，修正测试配置而非放宽业务规则。混合版本恢复时测试提前读到旧能力，改为等待新节点真实心跳。日志级别环境变量会丢类名大小写，改精确Spring JSON配置后取得真实排序日志。跨月夹具曾用环境别名覆盖Hikari初始化而触发pool sealed启动失败，改用与B3一致的明确命令行初始化参数；最终正反向跨月HTTP均通过。故障注入期间已取消HTTP连接可产生测试代理BrokenPipe日志，最终断言和清理正常；代理现忽略预期断连噪声。失败尝试仍在本机`.local/acceptance/`保留，不冒充通过。
+
+### 依赖、注释、保护与剩余门槛
+
+未增加Maven依赖/npm库/新框架；复用原生WebClient/Reactor、官方Gateway CB与Resilience4j、Micrometer、既有MyBatis-Plus事务和Redis Lua/会话基础。Plus没有整块复制业务代码，也未新增Redisson/Kafka/分布式锁。核心Quota协议/交易/凭证/门禁/过滤器/页面有中文类或流程说明，关键长流程含`// 1.`、`// 2.`、`// 3.`；`git diff --check`通过，新增SQL只有CREATE IF NOT EXISTS。仅新增当前B范围文件。
+
+用户`.env`、IDE配置、原持久容器/卷未修改或停机。所有本轮Lab仅终止自建JVM并清理自建容器；最终Docker只剩原`flowgate-local-mysql-1`与`flowgate-local-redis-1`。部署说明与占位`.env.example`补开关默认false/名单默认空，**用户真实库未迁移，正式环境未激活计量**。需负责人备份后确认增量SQL、升级完整接流节点并显式设置开关/名单，再按中文指南抽查。默认关闭可继续旧V1/Caller。
+
+B完成的是功能分支实现与定向验收，**ChatGPT源码复审、负责人1280px/375px/键盘真人浏览器验收、旧V1/PR正式收口、V11-D长期性能验收均未执行**。不承诺长期吞吐或Kafka投递；Outbox积累与未来消费/清理由C设计处理。阶段到此停止，不进入C/D。
