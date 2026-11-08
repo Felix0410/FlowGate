@@ -266,6 +266,15 @@ try:
  r=lab.admin_call(200,'/admin/releases/1/rollback',body={'expectedVersion':lab.version});lab.version=r['version'];lab.applied()
  lab.restart_control({'FLOWGATE_QUOTA_ACTIVATION_ENABLED':'false'})
  lab.admin_call(409,f"/admin/apps/{testapp['id']}/credentials",body={'scopes':['demo:read']})
+ # OFF只禁止新签发/轮换，不阻碍ADMIN紧急撤销已签发的DB身份。
+ still_active=lab.admin_call(200,f"/admin/apps/{crossapp['id']}/credentials/status")
+ assert still_active['status']=='ACTIVE' and still_active['issuanceEnabled'] is False
+ lab.admin_call(409,f"/admin/apps/{crossapp['id']}/credentials/rotate",body={'scopes':['demo:read']})
+ lab.admin_call(200,f"/admin/apps/{crossapp['id']}/credentials/revoke",body={})
+ assert lab.sql(f"SELECT enabled FROM fg_app_credential_state WHERE principal_id={crosscred['principalId']}")=='0'
+ disabled=lab.admin_call(200,f"/admin/apps/{crossapp['id']}/credentials/status")
+ assert disabled['status']=='REVOKED' and disabled['issuanceEnabled'] is False
+ lab.check('真实HTTP：计量OFF时现存凭证允许ADMIN紧急撤销；签发/轮换仍被门禁拒绝')
  lab.expect(200,'/api/private/fast/1',base=gw,token=old_caller);lab.expect(401,'/api/private/fast/1',base=gw,token=testtoken)
  lab.check('回滚旧快照后默认OFF凭证409，旧Caller正常/APP不可跨域')
  for path in ['/console/','/console/quota.js','/console/guide.html']:lab.expect(200,path)
