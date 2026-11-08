@@ -248,3 +248,12 @@ Compose新增独立kafka-data卷，实际日志目录改为镜像预置UID1000�
 README/AGENTS/中文指南及离线HTML同步，未新增Java/npm依赖、Kafka Streams/CDC/微服务，不引入任何数据库DDL/自动修复权威余额。SENT补投和完整性异常均有产品按钮/中文解释及真实权限；常驻启动涉及新Kafka命名卷，已给负责人单独确认选项，当前未收到该项授权，未擅自启动用户Kafka或迁移任何原数据。源码测试通过与实际常驻部署分开记录。
 
 已到本轮修复停止门槛，后续只等待复审、负责人真实1280px/375px/键盘体验及明确授权部署；不自行进入D、不合并main/PR #8/#9。远端交付状态以随后实际push/ls-remote结果记录，不用历史403推断当前远端没有C代码。
+
+
+### C-10.6 远端交付核验
+
+原生git push本次仍返回HTTP403，未改凭证、未改推main。随后通过已连接且确认具写权限的GitHub应用，将完全相同的27个修复文件交付到原功能分支feat/v11-c-async-usage：代码提交0240936728cea7dc5eae1736d4acac062edbce57，父提交ed5a312da82de0d1bfbfae00878fb8d42a4ade82。远端源码树0063a6342d6b7a77963a0c6765434cc6b6a21acf与已测试本地de8aa28a82d61c32b9a12a75f5e8dc5a99b97480的树逐字一致，原生git ls-remote也已确认代码提交。
+
+更新引用使用expected_sha核验原HEAD且force=false，只推进同一C分支；main及旧PR base未改，PR #9保持Draft。原本地分步提交全部保留于本地feat/v11-c-review-local-history-de8aa28归档分支（不推送）；当前交付说明另作后续文档提交，再将本地同名功能分支跟踪远端，不reset/rebase或重写共享历史。
+
+上述成功是修复源码与证据的远端交付，不是用户环境常驻Kafka部署。常驻Kafka新卷启动授权仍未收到，用户.env/MySQL/Redis原持久资源未改，Async默认OFF。等待ChatGPT复审和负责人真人浏览器验收，不进入D、不合并。
