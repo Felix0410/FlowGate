@@ -255,3 +255,13 @@ B完成的是功能分支实现与定向验收，**ChatGPT源码复审、负责�
 实际执行`git push origin HEAD:refs/heads/feat/v11-b-quota`退出128，GitHub返回`Permission to Felix0410/FlowGate.git denied to Felix0410`、HTTP403。**本轮B代码未远端交付，不把本地通过写成PR已更新。**随后只读`git ls-remote --heads origin feat/v11-b-quota main`确认：远端B仍`2d0106a3ed51a36049cdcd62c92d53acc1a40016`（设计），main为`84a25d5a7b9545dff3556299efec3c310fc321cf`。没有改推main、强推、合并或改其他分支历史。远端分支地址：<https://github.com/Felix0410/FlowGate/tree/feat/v11-b-quota>，目前仅旧设计内容；本地代码请在修复GitHub写权限后推送同一功能分支供审查。
 
 这条交付说明单独提交，不改业务代码、测试或`.env`；本轮工作到B阶段停止。
+
+
+## B-18 ChatGPT远端源码复审（2026-11-08）
+
+- 复审起点GitHub实际HEAD：`8de389f2820dc4cdab43b98e90a046b511862859`，**B0～B6 Java/SQL/JS/脚本和证据目前已经可从GitHub读取**；第B-17末尾Codex自己的`git push` HTTP403是**当时**失败的历史陈述，应保留，但不能当成当前PR只有设计的状态。PR #8仍Draft，base=A，main未改。
+- **完整复审报告**：`docs/reviews/v11-b-static-review-2026-11-08.md`；**本地Codex下一轮唯一交接**：`CODEX_V11_B_REVIEW_FIX_PROMPT.md`。无需重新开发B0～B6，也不提前开发C/D。
+- 仓库已有Codex真实记录：最终定向Java 57项通过、`v11-b-smoke.json`20组真HTTP场景（含100并发Free5→5授权/95拒绝、5Ledger/5Outbox、跨月幂等、双Gateway、混合旧版、CB顺序、Control/Redis/DB故障）、旧A 155条兼容HTTP。**ChatGPT本次只是源码/证据审核，没有在用户本地重新执行以上测试或真人浏览器操作**。
+- **P1-B01（用户实际数据库开启计量前必核）**：B0禁止*未来*同月二次套餐，但A阶段可能已经存有同月分段的旧订阅。`QuotaChargeService.grant`在余额已存在时未显式比较Balance冻结的`subscriptionId/planId/planVersion/totalUnits`与本次选中订阅；应按事务内行锁比较，遇不匹配409拒绝而不扣，并提供只读迁移预检，不自动修改旧数据；补真MySQL历史脏数据反例。
+- **P1-B02（安全运营）**：当前`AppCredentialController.revoke`在功能开关OFF时直接409，管理员不能撤销之前签发的现存APP Token。应让已存在凭证的撤销与Quota激活状态/节点名单解耦，签发和轮换仍严格受门禁，DB代次是权威；补OFF撤销/Redis清理失败/恢复后旧Token仍403等真实HTTP与Controller测试，并同步产品状态。
+- 最终人工验收`/console/`1280px/375px+ADMIN/OPERATOR/VIEWER业务路径，以及现有V1主线/Stacked PR合并、C Kafka与D长期四组对照均未完成。**本轮文档写入不表示上述两项修复代码已完成**。Codex修复后继续提交真实SHA/测试记录并等待复审，PR仍Draft。
