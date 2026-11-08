@@ -37,6 +37,14 @@ public class QuotaChargeService {
   String fingerprint=SnapshotCodec.digest(SnapshotCodec.JSON.writeValueAsString(List.of(app.id,q.principalId(),q.credentialGeneration(),q.apiId(),q.routeId(),plan.policyId(),q.units(),q.appliedVersion(),q.snapshotChecksum())));
   return new Context(app,route,plan.policyId(),fingerprint);
  }
+ /** 余额冻结后不可切换套餐/订阅；仅比较并拒绝，不修改已有额度、流水或订阅。 */
+ static void requireFrozenBalance(QuotaBalanceEntry balance,SubscriptionEntry sub,ApiPlanEntry plan){
+  if(balance==null||!Objects.equals(balance.subscriptionId,sub.id)
+      ||!Objects.equals(balance.planId,plan.id)
+      ||!Objects.equals(balance.planVersion,sub.planVersionSnapshot)
+      ||!Objects.equals(balance.totalUnits,plan.monthlyUnits))
+   throw new ApiFailure(409,"QUOTA_SUBSCRIPTION_MISMATCH","本月余额冻结的订阅或套餐与当前授权不一致，请核对存量数据");
+ }
  private Map<String,Object> response(QuotaLedgerEntry row,boolean duplicate){return Map.of("chargeId",row.chargeId,"chargedUnits",row.units,"periodUtc",row.periodYyyymm,"remainingUnits",row.remainingUnitsAfter,"duplicate",duplicate);}
  private Map<String,Object> duplicate(QuotaLedgerEntry old,Context c){if(!old.requestFingerprint.equals(c.fingerprint))throw new ApiFailure(409,"IDEMPOTENCY_CONFLICT","同chargeId的可信业务参数不同");return response(old,true);}
  public Map<String,Object> charge(QuotaCharge q){
@@ -56,7 +64,13 @@ public class QuotaChargeService {
   if(plan==null||!"ACTIVE".equals(plan.status))throw denied("NO_ACTIVE_SUBSCRIPTION","套餐已停用");
   var begin=SubscriptionSchedule.monthStart(now);var end=begin.atZone(ZoneOffset.UTC).plusMonths(1).toInstant();
   if(sub.effectiveAt.isBefore(begin)||sub.expiresAt.isAfter(end))throw denied("NO_ACTIVE_SUBSCRIPTION","历史跨月订阅需人工处理，不能静默截断");
+  // 4. B0只禁止新写入，A时代可能留下同月分段旧订阅；本月任意两条都不能猜测该冻结哪一套餐。
+  long occupied=subscriptions.selectCount(new QueryWrapper<SubscriptionEntry>()
+      .eq("application_id",c.app.id).lt("effective_at",end).gt("expires_at",begin));
+  if(occupied!=1)throw new ApiFailure(409,"QUOTA_SUBSCRIPTION_MISMATCH","本月存在多条历史订阅，请先完成只读迁移核查");
   balances.initialize(c.app.id,period,sub.id,plan.id,sub.planVersionSnapshot,plan.monthlyUnits);var balance=balances.locked(c.app.id,period);
+  // 5. ON DUPLICATE KEY只是防止双建余额，不代表旧余额所冻结的套餐仍与当前授权一致。
+  requireFrozenBalance(balance,sub,plan);
   // 持余额行锁后的当前读还可识别同应用并发重复，额度恰好耗尽时也不误返回429。
   old=ledger.current(q.chargeId());if(old!=null)return duplicate(old,c);
   if(balance.remainingUnits<q.units())throw new ApiFailure(429,"QUOTA_EXHAUSTED","本月准入单位已耗尽");
