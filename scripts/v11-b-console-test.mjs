@@ -9,9 +9,9 @@ assert.deepEqual(policyParameters('USAGE_QUOTA', {unitsPerCall:'5'}), {unitsPerC
 assert.throws(()=>policyParameters('USAGE_QUOTA', {unitsPerCall:101}), /整数/);
 assert.deepEqual(policyTypes.USAGE_QUOTA.scopes,['API','ROUTE']);
 assert.throws(()=>quotaQuery(0,'202611'),/应用/);assert.throws(()=>quotaQuery(2,'202613'),/月份/);
-const calls=[];let status='NOT_ISSUED', offline=false, feedback='';
+const calls=[];let status='NOT_ISSUED', offline=false, feedback='', activationOff=false;
 const api={request:async(path, options={})=>{calls.push({path,...options});if(offline)throw new Error('不可达');
- if(path.includes('/credentials/status'))return {status,generation:1};
+ if(path.includes('/credentials/status'))return {status,generation:1,issuanceEnabled:!activationOff};
  if(path.includes('/credentials'))return {token:'fgapp_'+'a'.repeat(43),expiresInSeconds:3600,generation:1};
  if(path.startsWith('/admin/apps?'))return [{id:2,name:'业务应用',code:'app'}];
  if(path.includes('/balances?'))return [];
@@ -30,6 +30,12 @@ assert.match(dialog.textContent,/确认首次签发/);await dialog.children[0].f
 const receipt=appReceipt(ctx), input=receipt.descendants().find(e=>e.tagName==='input');assert.equal(input.attrs.type,'password');assert.equal(input.value,ctx.appIssued.token);
 await receipt.descendants().find(e=>e.tagName==='button'&&e.textContent==='清空凭证').fire('click');assert.equal(input.value,'');assert.equal(ctx.appIssued,null);
 ctx.role='VIEWER';status='ACTIVE';await manageCredentials(ctx,app);assert.ok(dialog.descendants().filter(e=>['轮换凭证','撤销凭证'].includes(e.textContent)&&e.tagName==='button').every(e=>e.disabled));dialog.close();
+// 功能关闭仍须能撤销现存凭证，但签发和轮换没有可操作入口。
+ctx.role='ADMIN';activationOff=true;status='ACTIVE';await manageCredentials(ctx,app);
+assert.match(dialog.textContent,/紧急撤销/);
+assert.ok(dialog.descendants().some(e=>e.tagName==='button'&&e.textContent==='撤销凭证'&&!e.disabled));
+assert.ok(!dialog.descendants().some(e=>e.tagName==='button'&&e.textContent==='轮换凭证'));
+dialog.close();activationOff=false;
 const page=await renderQuota(ctx);page.descendants().find(e=>e.attrs?.name==='apps').value='2';page.descendants().find(e=>e.attrs?.name==='period').value='202611';
 await page.descendants().find(e=>e.tagName==='button'&&e.textContent==='查询余额与流水').fire('click');
 assert.match(page.textContent,/尚无余额记录/);assert.match(page.textContent,/private/);assert.match(page.textContent,/202611/);
