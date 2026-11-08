@@ -116,3 +116,9 @@ Control唯一新增starter-kafka，由Boot4.0.9解析Spring Kafka4.0.8/Kafka客�
 ### C2 已实现并验证
 
 短事务SKIP LOCKED批次<=20、30秒租约与每轮唯一owner、过期第8次FAILED；事务外Kafka Future ACK/10秒上限/实例100在途，SENT和失败回写均校验有效lease+owner。ACK之前不写SENT，租约丢失更新0不报成功。新增2项Future/真实TransactionTemplate测试通过。`python3 scripts/v11-c2-smoke.py`真MySQL双线程各领取3条、有效租约6条不重叠、过期重领换owner、旧owner更新0/新owner1、Ledger不改，退出0；证据`evidence/v11-c2-smoke.json`。真实Broker故障与进程崩溃仍在C6验证，不以mock ACK替代。
+
+### C3 已通过事务/幂等定向验证
+
+严格比对本地Outbox八字段及Ledger后，同事务插ConsumedEvent与Daily UPSERT；唯一冲突先回滚后新事务确认，不把同charge不同event当正常重复。Listener在TransactionTemplate真实提交返回后ACK。首版按设计保守策略暂停毒消息分区、seek所有未处理offset、不ACK、不依赖未经确认DLT；修复后需重启消费者，C6实测偏移保护。
+
+Java构建与2项Listener ACK顺序/失败不ACK测试退出0；`python3 scripts/v11-c3-smoke.py`退出0，真实MySQL100线程仅1次汇总、日表SQL故障没有孤立消费标记、修复可重放、日归属取Outbox UTC边界而非Ledger插入日、同charge换event冲突。证据`evidence/v11-c3-smoke.json`。初次冲突夹具用字符串替换忽略MySQL JSON空格，未真正改units；改结构化事件后验证通过。多阶段脚本曾过早设置passed=true，已改为最后一个probe成功才标通过，旧失败尝试不能作为证据。

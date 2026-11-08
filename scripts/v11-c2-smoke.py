@@ -17,10 +17,10 @@ try:
  child=subprocess.run([b.JAVA,'-cp',str(classes)+os.pathsep+str(libs/'*'),str(ROOT/'scripts/V11QuotaDbProbe.java')],env=lab.env,capture_output=True,text=True)
  (lab.temp/'quota-probe.log').write_text(child.stdout+'\n'+child.stderr)
  assert child.returncode==0,child.stderr[-3500:]
- result=json.loads(next(line for line in child.stdout.splitlines() if line.startswith('{')));assert result['passed'];passed=True
+ result=json.loads(next(line for line in child.stdout.splitlines() if line.startswith('{')));assert result['passed'];passed=False
  child=subprocess.run([b.JAVA,'-cp',str(classes)+os.pathsep+str(libs/'*'),str(ROOT/'scripts/V11OutboxLeaseProbe.java')],env=lab.env,capture_output=True,text=True)
  (lab.temp/'lease-probe.log').write_text(child.stdout+'\n'+child.stderr);assert child.returncode==0,child.stderr[-1500:]
- result=json.loads(next(line for line in child.stdout.splitlines() if line.startswith('{')));assert result['passed']
+ result=json.loads(next(line for line in child.stdout.splitlines() if line.startswith('{')));assert result['passed'];passed=True
  print('PASS C2 两Worker真MySQL互斥领取/提交释放/过期重领/旧owner写0/新owner写1',flush=True)
 finally:
  lab.close();target=ROOT/('.local/acceptance/v11-c2-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')+'.json');target.parent.mkdir(parents=True,exist_ok=True);target.write_text(json.dumps({'passed':passed,'result':result},ensure_ascii=False,indent=2));target.chmod(0o600);print('C2本机证据：',target,'passed=',passed)
