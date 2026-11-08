@@ -31,6 +31,8 @@ public class SnapshotPollingService {
     private com.flowgate.gateway.protection.CircuitBreakerConfigRegistry protection;
     @org.springframework.beans.factory.annotation.Autowired
     public void setProtection(com.flowgate.gateway.protection.CircuitBreakerConfigRegistry protection) { this.protection=protection; }
+    private boolean quotaReady;
+    @org.springframework.beans.factory.annotation.Autowired(required=false) public void setQuotaSupport(com.flowgate.gateway.quota.QuotaSupport support){this.quotaReady=true;}
     private final AtomicBoolean applying = new AtomicBoolean();
     private volatile CachingRouteLocator routeCache;
     public SnapshotPollingService(ActiveSnapshotStore store, ApplicationEventPublisher events,
@@ -128,7 +130,7 @@ public class SnapshotPollingService {
         Snapshot current = store.applied();
         if (current == null) return Mono.empty();
         return client.post().uri("/internal/nodes/applied").bodyValue(Map.of("nodeId", nodeId, "version", current.version(), "checksum", current.checksum(),
-                "circuitStates",protection==null?List.of():protection.states(current)))
+                "circuitStates",protection==null?List.of():protection.states(current),"supportedFeatures",quotaReady?List.of(QuotaPolicy.FEATURE):List.of()))
                 .retrieve().toBodilessEntity().timeout(Duration.ofSeconds(3)).then();
     }
     @PreDestroy public void close() { if (running != null) running.dispose(); }

@@ -194,3 +194,9 @@ Gateway增加配额私有路由APP解析及代次属性，但只有B4真实Quota
 `QuotaChargeService`使用独立READ_COMMITTED事务及应用/客户/身份共享锁，避免等待撤销后仍用旧RR快照授权；余额初始化唯一键竞争由无损upsert序列化，再当前读识别并发重复。UNIQUE冲突路径在整个事务回滚之后新事务重读。原grant重复先查Ledger，不要求次月新订阅；当前DB停用/代次仍先检查。余额冻结套餐/订阅版本，历史跨月订阅显式拒绝，不截断数据。
 
 实际Control/Contract test package退出0。独立`scripts/v11-b3-smoke.py`在自建Lab通过，调用真实Spring事务Bean（web NONE、无公开发证API、当前Gateway仍V1快照）：100线程5额度恰好5grant/95耗尽、Ledger5/Outbox5/余额0；同chargeId100次仅一条新流水/Outbox；不同合法历史上下文409、停用后重放403。重启测试专用Spring上下文，以DB连接session timestamp切到下一UTC月，重复仍返回原月且没有第二余额行。证据单独保存，未覆盖A/B0历史。公开credentials仍409，B4尚未开始计量代理。
+
+### B4 本地实现与组合过滤器验证（2026-11-08）
+
+新增非阻塞Quota Filter（order=10、单机64个hop、每次2秒/总5秒、仅网络错误同chargeId重试一次），成功Grant才转发；配额拒绝独立异常不算CB失败样本，不进入假降级。Request ID入口删除外部AppId/ChargeId，Route冻结策略和身份属性构成内部请求；指标仅routeId/固定outcome。只有真实QuotaSupport组件存在才上报能力；公开凭证还受默认OFF及全接流名单门禁保护，用户环境未激活。
+
+新增`V11QuotaFilterTest`，使用当前5.0.4官方`SpringCloudCircuitBreakerResilience4JFilterFactory`与实际Resilience4j注册表，按真实Route CB order=1组合Quota order=10。已执行：未计量零Control hop、429无下游且不算CB样本、不假降级、OPEN零新增hop/下游。最终真实双Gateway HTTP组合与故障注入仍在B6验证，不能以此代替B6。定向Maven test/package Contract10+Control15+Gateway24=49通过，失败/跳过0；首次沙箱运行Mockito attach不可用，沙箱外同命令退出0。未运行全项目回归。

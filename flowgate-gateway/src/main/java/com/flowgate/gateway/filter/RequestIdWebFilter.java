@@ -26,7 +26,7 @@ public class RequestIdWebFilter implements WebFilter {
                 request.headers(headers -> {
                     headers.set(HEADER, requestId);
                     // 客户端不能注入可信身份或内部控制密钥；Caller 凭证另由路由过滤器验证。
-                    for (String untrusted : java.util.List.of("X-User-Id", "X-Principal-Id", "X-Scopes", "X-FlowGate-Internal-Key")) {
+                    for (String untrusted : java.util.List.of("X-User-Id", "X-Principal-Id", "X-Scopes", "X-FlowGate-Internal-Key", "X-App-Id", "X-Charge-Id")) {
                         headers.remove(untrusted);
                     }
                 })).build();
