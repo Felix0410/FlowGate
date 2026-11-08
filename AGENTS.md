@@ -1,19 +1,26 @@
-# FlowGate｜当前本地Codex唯一任务：V11-B复审收口
+# FlowGate｜本地Codex当前唯一阶段入口：V11-C（2026-11-08）
 
-> 2026-11-08：**V11-B B0～B6实际Java/SQL/JS代码和Codex定向测试已远端提交**，PR #8仍Draft。当前不重新开发B、不提前开启C Kafka或D性能任务。静态复审发现两项小范围P1缺口，须在实际迁移/对外激活配额之前完善。
-> 最新源代码审核：`docs/reviews/v11-b-static-review-2026-11-08.md`。**当前唯一详细执行提示：`CODEX_V11_B_REVIEW_FIX_PROMPT.md`**。
+> 负责人已授权“设计C，并同步完成B小修”。C详细设计与分阶段任务已写入GitHub，但**C的Kafka/Outbox Worker/Consumer/用量统计/对账源码尚未开发，C真实测试也未运行**。B的两项复审小修已实际提交Java/前端/SQL/测试源码，**仍待本地真实JDK17/MySQL8.4/Redis7验证**，这一验证是C0第一个工作任务。
+> 目标分支`feat/v11-c-async-usage`，来自`feat/v11-b-quota`完整B实现与复审修复；C独立Draft PR→B，原#1～#8和main不自动合并/改base。
 
-## 本轮只做的事
+## 必须按顺序阅读
 
-1. 先安全核对`git status -sb`、`git fetch origin`与`feat/v11-b-quota`当前远端HEAD；本地未提交工作与既有数据库/容器/IDE/`.env`均不能覆盖，禁止`reset --hard`、`clean -fd`、强推及合并main。
-2. 阅读 `docs/reviews/v11-b-static-review-2026-11-08.md` 和 `CODEX_V11_B_REVIEW_FIX_PROMPT.md`，对照 `docs/progress/v11-b-quota.md` 的B-16～B-18真实已实现记录。
-3. **F1：余额冻结与存量订阅一致性**。现B0锁住未来新建同月第二套餐，但A旧表可能已有历史同月分段。`QuotaChargeService`复用已有余额时要比较冻结订阅/套餐/版本/额度，不一致须失败关闭、不能修改余额或账本；加只读迁移预检和真实MySQL反例。
-4. **F2：紧急凭证撤销**。管理员在Quota激活开关关闭/节点失联时也应能够撤销此前已签发的APP Token，通过DB generation+1/disabled确保后续不能重新使用；签发与轮换依旧受完整门禁。若未迁移B表且无凭证，默认旧V1安全行为不回归。前端显示真实的可撤销状态。
-5. 受影响Java17/Maven、Node产品、真实隔离MySQL/Redis+双Gateway原B6最小回归；新证据独立新增、不得覆盖A历史155条/B原20组，更新README/阶段记录/产品指南，逐个Conventional Commit。未实际执行写“未执行”。
-6. 完成后**停下等待ChatGPT代码复审与负责人真人浏览器体验**，不开始V11-C Kafka、不自行合并任何PR/main，不重做B0～B6。
+1. `docs/design/v11-c-async-execution.md`：**当前C权威设计**。业务事实、8字段事件合同、两张新表、Kafka最小可选环境、Outbox租约、消费DB幂等、管理API、封账对账、前端和安全故障矩阵。
+2. `docs/progress/v11-c-async.md` 第C-08节之后：C0～C6唯一可编码的分步任务、提交与实测门槛。原C-00～07只是历史概要。
+3. `CODEX_V11_C_EXEC_PROMPT.md`：直接给本地Codex的操作细节，C0先实际补测B小修再开发C1。
+4. `docs/reviews/v11-b-static-review-2026-11-08.md`、`docs/progress/v11-b-quota.md`第B-19节、`sql/v11-b-upgrade-preflight.sql`、实际`QuotaChargeService`、`AppCredentialController`及Outbox/Quota Mapper。历史`CODEX_V11_B_REVIEW_FIX_PROMPT.md`为旧派工，本轮**B已写修复源码不需重新设计，只需C0独立运行并修实测问题**。
 
-## 技术与安全固定约束
+## 分阶段门槛
 
-Java17/Spring Boot4、Control MVC+MyBatis/MySQL8.4、Gateway WebFlux/Redis7、原生`/console/` JS ES modules；配额MySQL Balance/Ledger/Outbox权威同事务，Redis只处理Token和速率，App Token不进入旧Caller namespace，成功grant不按业务HTTP2xx退款。本轮不增Kafka/Seata/Nacos/Vue/React/npm。中文注释，关键长流程按1/2/3分点；保护原有用户容器/个人DB/密钥和全部旧PR。
+- **C0阻断**：仅用隔离MySQL/Redis真实测试B的存量同月订阅/余额冻结409、计量OFF仍可撤销既有APP Token、Java17/Node/双Gateway B旧回归。新补丁没有真正跑通过前**不能启动C1**；测试失败修源码后重跑，不伪造证据。
+- **C1**：只给Control增Boot4兼容的`spring-boot-starter-kafka`、`mq`可选单KRaft本地Broker、Async默认OFF和两张ConsumedEvent/UsageDaily新表。**默认无Kafka仍可启动V1/B**。
+- **C2**：MySQL`SKIP LOCKED`短事务领取Outbox与lease，COMMIT后KafkaTemplate发送，受控inflight/backoff/FAILED/迟到Owner CAS；允许至少一次重复投递。
+- **C3**：收到事件与本地Outbox/Ledger校验后，ConsumedEvent唯一去重+UsageDaily UPSERT同MySQL事务，**数据库真正提交后才确认Kafka offset**；重复消息不双计，DLT不确认时保留偏移。
+- **C4/C5**：真实运营API、ADMIN-only失败事件重投、封账UTC日对账与`/console/`“用量统计/异步事件/对账中心”三组业务页面，中文指南同步；SENT不等于已聚合，PENDING不等于错账。
+- **C6**：Java17/Node/隔离Kafka+MySQL8.4/Redis7/双Gateway真HTTP和宕机恢复测试，脱敏证据、SHA/退出码、负责人真人浏览器验收待办。完成C后停止，不自行进入D、合并main或做长压测。
 
-**当前真实状态：B技术主体已交付、Codex集成测试有证据，静态复审新增2项小范围修复尚未编码，V11.1最终验收未完成。**
+## 固定工程约束
+
+Java17、Spring Boot4、Control MVC/MyBatis/MySQL，Gateway WebFlux/Redis/Lua，前端原生ES modules；**Kafka不能放到Gateway或MySQL扣额热路径**。不得引Kafka Streams/Debezium/Nacos/Seata/Redis Stream/新Java微服务/新JS框架。Java/JS关键长逻辑使用充足中文注释，按`// 1.`、`// 2.`、`// 3.`分点。所有程序和证据不能泄露Token、内部密钥、HTTP Body、用户原始日志；保护用户未提交工作树、IDE、.env、已有Docker持久卷。禁止`git reset --hard`/`git clean -fd`/`docker prune`/强推或未经授权合并PR。
+
+**当前真实状态：B小修已编码待实测；C只设计/派工，尚无C业务实现和C测试证据。**
