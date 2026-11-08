@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "result": {
+    "passed": true,
+    "sameDayCompositePagination": true,
+    "reconciliation": [
+      "PENDING",
+      "MATCH",
+      "MISMATCH"
+    ],
+    "failedRetryAuditedOnce": true,
+    "payloadRedacted": true
+  }
+}

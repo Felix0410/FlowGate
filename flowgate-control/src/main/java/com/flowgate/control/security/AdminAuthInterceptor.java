@@ -48,7 +48,7 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
         return true;
     }
     public static boolean v11Path(String path) {
-        return java.util.List.of("/admin/developers", "/admin/apps", "/admin/plans", "/admin/subscriptions", "/admin/quota")
+        return java.util.List.of("/admin/developers", "/admin/apps", "/admin/plans", "/admin/subscriptions", "/admin/quota", "/admin/usage", "/admin/async-events", "/admin/reconciliation")
                 .stream().anyMatch(prefix -> path.equals(prefix) || path.startsWith(prefix + "/"));
     }
     /** 与MVC路径段匹配一致：解码段值并移除矩阵参数，避免编码或分号绕开新域ACL。 */
