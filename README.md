@@ -1,5 +1,8 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
+> **2026-11-08 V11-C（设计完成、尚未开始编码）**：已完成[Kafka/Outbox可靠投递和用量对账详细设计](docs/design/v11-c-async-execution.md)、[C0～C6任务](docs/progress/v11-c-async.md)、[本地Codex提示](CODEX_V11_C_EXEC_PROMPT.md)，计划只在Control中加入可选Kafka，默认`FLOWGATE_ASYNC_ENABLED=false`，新增ConsumedEvent/UsageDaily并以MySQL权威Ledger对账。**Kafka Worker/Consumer/用量页面尚未实施，不能说异步能力已完成**。B两项小修（旧订阅与冻结余额失败关闭、计量OFF紧急撤销APP Token）已经实际提交源码/前端/SQL/JUnit/B6脚本，但新补丁的真实Java/MySQL回归尚未执行；Codex必须先完成C0再编码C1～C6。旧PR/main不自动合并。
+
+
 > **V11-B（2026-11-08）**：B0～B6的Java/SQL/Gateway计量、MySQL余额/Ledger/Outbox、独立APP Token、正式产品页与Codex隔离测试**均已远端交付**；Codex记录57项JUnit及20组双Gateway真实HTTP场景（Free5/100并发恰好5Grant/95拒绝）。ChatGPT源码复审建议补齐**存量A同月订阅预检与冻结余额核验**、**计量功能OFF时允许紧急撤销已签发凭证**。详见[审核报告](docs/reviews/v11-b-static-review-2026-11-08.md)和[Codex定向修复](CODEX_V11_B_REVIEW_FIX_PROMPT.md)。上述小修尚未编码/重测，V1/V11真人浏览器验收与主线合并未完成；Kafka属于V11-C，不在B中。
 
 
