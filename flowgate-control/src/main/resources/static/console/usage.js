@@ -1,0 +1,64 @@
+import {h, button, notice, table, formFields, permissionButton, openDialog} from './ui.js';
+import {reference} from './openapi-business.js';
+export function usageQuery(values, cursor = '') {
+  const from = Date.parse(values.from + 'T00:00:00Z'), to = Date.parse(values.to + 'T00:00:00Z');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(values.from) || !/^\d{4}-\d{2}-\d{2}$/.test(values.to) || !Number.isFinite(from) || !Number.isFinite(to) || from > to || to - from > 30 * 86400000) throw new Error('请选择最多31天的有效UTC日期范围');
+  const q = new URLSearchParams({from: values.from, to: values.to, limit: '20'});
+  for (const key of ['applicationId', 'apiId']) if (values[key]) q.set(key, values[key]);
+  if (cursor) q.set('cursor', cursor); return q.toString();
+}
+/** 稳定复合游标由服务器提供，不从日期自行推测下一页。 */
+export async function renderUsage(ctx, reconciliation = false) {
+  ctx.heading(reconciliation ? '对账中心' : '用量统计', reconciliation ? '只核对已关闭UTC日。PENDING表示尚未追平，MATCH表示账本与读模型一致，MISMATCH需诊断；不会自动改余额。' : '每日授权单位与准入次数来自异步读模型，可能延迟；不是成功响应次数或收费金额。');
+  const app = await reference(ctx.api, 'apps', '按应用名称查询', '', true);
+  const end = new Date(); if (reconciliation) end.setUTCDate(end.getUTCDate() - 1); const start = new Date(end); start.setUTCDate(start.getUTCDate() - 6);
+  const fields = formFields([{name: 'apiId', label: 'API接口', value: '', options: [{value: '', label: '全部接口'}, ...(ctx.data.apis || []).map(a => ({value: a.id, label: a.method + ' ' + a.publicPath}))]}, {name: 'from', label: '开始UTC日期（含）', type: 'date', value: start.toISOString().slice(0, 10)}, {name: 'to', label: '结束UTC日期（含）', type: 'date', value: end.toISOString().slice(0, 10), help: reconciliation ? '必须是昨天或更早；后端以数据库UTC时间复验。' : '最多31天；统计可能落后于配额账本。'}]);
+  const body = h('section', {class: 'card'}, notice('尚未读取，请选择条件并查询。')), info = h('div', {'aria-live': 'polite'});
+  let cursor = null, rows = [], busy = false, active = '';
+  const more = button('读取下一页', () => load(false)); more.hidden = true;
+  const query = button('查询', () => load(true), {class: 'primary'});
+  const values = () => ({...fields.values(), applicationId: app.input.value});
+  async function load(reset) {
+    if (busy) return; busy = true; query.disabled = more.disabled = true;
+    try {
+      // 1. 查询变更后必须重读，不拼接不同应用/日期的页。
+      const key = usageQuery(values()); if (!reset && active !== key) throw new Error('条件已改变，请重新查询');
+      if (reset) { rows = []; cursor = null; more.hidden = true; body.replaceChildren(notice('正在读取…')); }
+      const result = await ctx.api.request((reconciliation ? '/admin/reconciliation?' : '/admin/usage?') + usageQuery(values(), reset ? '' : cursor));
+      if (usageQuery(values()) !== key) { body.replaceChildren(notice('查询条件已改变，请重新查询。')); more.hidden = true; return; }
+      // 2. 服务器nextCursor保留同日App/API位置，不丢同日记录，也不制造0汇总。
+      active = key; rows = reset ? result.rows : [...rows, ...result.rows]; cursor = result.nextCursor; more.hidden = !cursor;
+      const headers = reconciliation ? ['UTC日', '应用', 'API', '权威单位/次数', '已消费单位/次数', '聚合单位/次数', '待消费', '对账状态'] : ['UTC日', '应用', 'API', '授权单位', '准入次数', '最后聚合时间'];
+      body.replaceChildren(table(headers, rows.map(r => reconciliation ? [r.dayUtc, r.applicationName || '名称未取得', r.apiName || '名称未取得', r.expectedUnits + '/' + r.expectedCount, r.consumedUnits + '/' + r.consumedCount, r.aggregatedUnits + '/' + r.aggregatedCount, r.outboxBacklog, ({PENDING: '待追平 PENDING', MATCH: '一致 MATCH', MISMATCH: '不一致 MISMATCH'})[r.status] || '未知'] : [r.dayUtc, r.applicationName || '名称未取得', r.apiName || '名称未取得', r.authorizedUnits, r.grantCount, r.lastAggregatedAt || '未取得']), '所选条件暂无读模型记录。可能尚未调用、异步关闭或处理延迟；不等于授权消耗为0。'));
+      info.replaceChildren(notice('数据库快照：' + result.asOfUtc + '；异步开关：' + (result.asyncEnabled ? '开启，仍可能延迟' : '关闭，统计可能滞后') + '。实时权威消耗请看“配额与账本”。'));
+    } catch (e) { info.replaceChildren(notice('读取失败，当前状态未知：' + e.message, 'error')); if (reset) body.replaceChildren(); more.hidden = true; }
+    // 3. 网络失败不伪造0，不自动改权威数据；写修复没有在本期开放。
+    finally { busy = false; query.disabled = more.disabled = false; }
+  }
+  return h('div', {}, app.node, fields.node, query, info, body, more);
+}
+export async function retryAsyncEvent(api, role, id) {
+  if (role !== 'ADMIN') throw new Error('只有ADMIN可重投失败事件');
+  return api.request('/admin/async-events/' + id + '/retry', {method: 'POST'});
+}
+export async function renderAsyncEvents(ctx) {
+  ctx.heading('异步事件', 'NEW待投递、LEASED发送中、SENT仅表示Kafka已确认、FAILED需处理。是否已消费单独显示；重投保留原事件，不再扣额度。');
+  const fields = formFields([{name: 'status', label: '事件状态', value: '', options: [{value: '', label: '全部'}, ...['NEW', 'LEASED', 'SENT', 'FAILED'].map(value => ({value, label: value}))]}]);
+  const summary = h('section', {class: 'card'}), body = h('section', {class: 'card'}), error = h('div', {'aria-live': 'polite'}); let rows = [], after = 0, active = '', busy = false;
+  const more = button('读取下一页事件', () => load(false)); more.hidden = true;
+  const reload = button('查询与刷新', () => load(true));
+  async function load(reset) {
+    if (busy) return; busy = true; reload.disabled = more.disabled = true;
+    try {
+      const selected = fields.values().status; if (!reset && selected !== active) throw new Error('状态已改变，请重新查询');
+      if (reset) { rows = []; after = 0; body.replaceChildren(); summary.replaceChildren(notice('正在读取实际异步状态…')); }
+      const [state, page] = await Promise.all([ctx.api.request('/admin/async-events/summary'), ctx.api.request('/admin/async-events?afterId=' + (reset ? 0 : after) + '&limit=20' + (selected ? '&status=' + selected : ''))]);
+      if (fields.values().status !== selected) { body.replaceChildren(); summary.replaceChildren(notice('条件已改变，请重新查询。')); more.hidden = true; return; }
+      active = selected; rows = reset ? page : [...rows, ...page]; after = rows.at(-1)?.id || 0; more.hidden = page.length < 20;
+      summary.replaceChildren(notice('异步：' + (state.asyncEnabled ? '开启' : '关闭') + '；Broker：' + state.broker.state + '（实际检查于' + state.broker.checkedAt + '）'), table(['待投递', '租约发送中', 'Kafka已确认', '失败', '尚未消费', '最旧待投递秒数'], [[state.newCount, state.leasedCount, state.sentCount, state.failedCount, state.pendingConsumption, state.oldestAgeSeconds]]), notice(state.poisonPolicy));
+      body.replaceChildren(table(['事件短标', '状态', '是否已消费', '尝试次数', '下次尝试/租约到期', '错误码', '操作'], rows.map(row => [row.eventLabel, row.status, row.consumed ? '已消费' : '尚未消费', row.attemptCount, row.nextAttemptAt || row.leaseUntil || '未取得', row.lastErrorCode || '无', row.status === 'FAILED' ? permissionButton('重投', () => openDialog('确认重投失败事件', notice('只重排事件“' + row.eventLabel + '”，保留原eventId。消费者幂等，不重新扣配额。'), async () => { await retryAsyncEvent(ctx.api, ctx.role, row.id); await load(true); }, {submitLabel: '确认重投'}), ctx.role, true) : '—']), '暂无所选事件。')); error.replaceChildren();
+    } catch (e) { summary.replaceChildren(notice('状态未取得')); if (reset) body.replaceChildren(); error.replaceChildren(notice(e.message, 'error')); more.hidden = true; }
+    finally { busy = false; reload.disabled = more.disabled = false; }
+  }
+  await load(true); return h('div', {}, fields.node, reload, error, summary, body, more);
+}

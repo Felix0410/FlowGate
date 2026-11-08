@@ -143,3 +143,16 @@ mvn -B -ntp -pl flowgate-control -am package -DskipTests
 **紧急撤销**：即使`FLOWGATE_QUOTA_ACTIVATION_ENABLED=false`，先前签发的应用凭证仍可以由ADMIN在“应用管理→管理凭证”查看实际状态并点击“撤销凭证”。这项操作推进MySQL凭证代次、停用旧凭证；签发和轮换仍需激活完整配额链路和节点能力，不会因撤销入口开放而绕过。停用期间余额服务本来就失败关闭；若Redis清理失败，数据库代次仍阻止旧Token在恢复后使用。OPERATOR和VIEWER不能撤销。
 
 **实现与测试区别**：上述小修Java、前端、JUnit、Node和隔离HTTP测试脚本已经提交，真实Java17/MySQL/Redis补测尚待V11-C的C0门槛；不能把“代码已修”当成“正式库已迁移、浏览器已验收”。
+
+## V11-C：异步用量、失败事件与封账对账
+
+先完成B部署。C只在Control增加Kafka异步处理，不改变Gateway扣额链路。部署负责人在正确目标库执行`sql/flowgate-v11-c.sql`新增两张读模型表，重启新版Control；默认`FLOWGATE_ASYNC_ENABLED=false`，不启动Kafka也能继续B配额业务，Outbox会积压。单机演示可运行`docker compose -f compose.local.yml --profile mq up -d kafka`，然后为Control设置`FLOWGATE_ASYNC_ENABLED=true`和`FLOWGATE_KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092`再重启。Gateway不配置Kafka。不要将单Broker演示当作生产高可用。
+
+1. “用量统计”：按应用名称、API和UTC日期查询，最多31天。显示每日授权单位、准入次数及最后聚合时间；这不是成功响应次数，也不是收费金额。没有记录时可能尚未调用、异步关闭或消费延迟，不能理解为消费为0。“读取下一页”使用完整日/应用/API游标，同一天多应用也不会漏页。
+2. “异步事件”：查看实际开关、Broker探测状态及检查时间、NEW/LEASED/SENT/FAILED数量和未消费数。NEW待投递；LEASED正在有界发送；SENT仅表示Broker确认，**不代表已统计**；FAILED需要诊断。事件列表不提供原始payload、用户Header或Token。
+3. FAILED处理：ADMIN先核对错误码、Broker/数据库状态，点击该事件“重投”并二次确认。它只将原事件重新排队，保留原eventId，不再扣额度；两个管理员同时点仅一人成功，另一人409后重新读取。OPERATOR/VIEWER可读，不可重投。
+4. “对账中心”：选择昨天及更早的UTC封账日，最多31天。比较权威Ledger授权单位/次数、已消费单位/次数和Daily聚合值。PENDING表示仍有事件未消费，先排查异步关闭、Broker故障、租约、FAILED或暂停分区；追平后应MATCH。MISMATCH表示事件已消费齐全但读模型不同，需负责人诊断；页面不自动改余额、流水或日表。
+5. Kafka停机：MySQL有效且额度足够时，B授权继续成功并积压Outbox；恢复后逐步投递、幂等汇总。不要反复发送业务请求来“修统计”，每次新业务尝试可能再次消耗额度。消费重复不会再次加总；重投、重启也不会生成新Grant。
+6. 毒消息/消费数据库故障：首版暂停问题分区并保留原offset，不发送没有ACK保证的DLT。查看进程计数与待消费数；确认修复数据/依赖后重启Control消费者，继续原offset。暂停期间其他分区可继续；不要自行跳过offset或删除Outbox/ConsumedEvent。进程计数重启归零，不是持久账本。
+
+若API读取失败，页面显示状态未知，不用旧数或0冒充当前数据。Broker状态是带检查时间的短缓存真实探测，SENT、consumer lag、节点健康都不能单独证明对账一致。用量与对账日归属按Outbox不可变UTC事件时间，不能用Ledger插入日期替代。负责人仍需在1280px/375px和键盘操作中验收这三页；自动测试不能代替。

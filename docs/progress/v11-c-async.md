@@ -128,3 +128,7 @@ Java构建与2项Listener ACK顺序/失败不ACK测试退出0；`python3 scripts
 新增usage/async-events/summary/retry/reconciliation API及新V11 ACL路径；事件列表无payload，FAILED条件重排+审计同事务，原eventId/权威账本不动。Usage和对账完整(day,app,api)降序游标，最多31天/100条；对账只读REPEATABLE_READ单快照且仅封账UTC日。Broker状态来自有检查时间的有界真实Admin探测，OFF不建Admin客户端；进程计数只有固定枚举，重启归零。
 
 `mvn -B -ntp -pl flowgate-control -am test package`退出0，新增游标2项；`python3 scripts/v11-c4-smoke.py`退出0，真MySQL同日两个App limit1分页不遗漏、PENDING→MATCH→手工读模型差异MISMATCH、重试仅一次审计/第二次409、今日400、事件数据脱敏。证据`evidence/v11-c4-smoke.json`。Kafka真实探测/运营HTTP权限留C6完整联调。
+
+### C5 业务页面已实现
+
+新增原生usage.js及“用量统计/异步事件/对账中心”导航，应用/API名称筛选、UTC日期、服务器复合游标、实际Broker/积压状态、SENT与已消费分离、ADMIN二次确认FAILED重排。读失败显示未知，空读模型不声称0消耗。B配额页同步异步语义，中文指南及同源离线HTML已生成。`node scripts/v11-c-console-test.mjs`、原product/B控制台测试退出0；新测试执行真实模块与模拟DOM，覆盖日期/游标/延迟/PENDING/只读/确认重投/断网。真实1280/375px及键盘体验未执行，留负责人。
