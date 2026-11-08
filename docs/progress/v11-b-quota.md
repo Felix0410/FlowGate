@@ -265,3 +265,14 @@ B完成的是功能分支实现与定向验收，**ChatGPT源码复审、负责�
 - **P1-B01（用户实际数据库开启计量前必核）**：B0禁止*未来*同月二次套餐，但A阶段可能已经存有同月分段的旧订阅。`QuotaChargeService.grant`在余额已存在时未显式比较Balance冻结的`subscriptionId/planId/planVersion/totalUnits`与本次选中订阅；应按事务内行锁比较，遇不匹配409拒绝而不扣，并提供只读迁移预检，不自动修改旧数据；补真MySQL历史脏数据反例。
 - **P1-B02（安全运营）**：当前`AppCredentialController.revoke`在功能开关OFF时直接409，管理员不能撤销之前签发的现存APP Token。应让已存在凭证的撤销与Quota激活状态/节点名单解耦，签发和轮换仍严格受门禁，DB代次是权威；补OFF撤销/Redis清理失败/恢复后旧Token仍403等真实HTTP与Controller测试，并同步产品状态。
 - 最终人工验收`/console/`1280px/375px+ADMIN/OPERATOR/VIEWER业务路径，以及现有V1主线/Stacked PR合并、C Kafka与D长期四组对照均未完成。**本轮文档写入不表示上述两项修复代码已完成**。Codex修复后继续提交真实SHA/测试记录并等待复审，PR仍Draft。
+
+
+## B-19 2026-11-08 复审小修源码已提交，实测仍待C0
+
+负责人要求**设计V11-C的同时完成B小修**，本轮ChatGPT通过GitHub提交了实际Java、JS、JUnit、SQL及B6验收脚本的修改，而非仅出具任务书：
+
+1. `QuotaChargeService.grant`：对当前UTC月用已存在全部订阅的区间交集计数，若同月历史分段超出1条返回409`QUOTA_SUBSCRIPTION_MISMATCH`，不创建本次新Ledger/Outbox；Balance锁定后通过`requireFrozenBalance`比较`subscriptionId/planId/planVersion/totalUnits`，不匹配返回同一明确409且不扣量。不覆盖原冻结额度、不自动修旧A数据，原chargeId历史幂等仍先于当前新Grant核验。
+2. `AppCredentialController`：去掉`/revoke`对activation开关的阻断，ADMIN可在计量OFF/节点未知时将已发Token的DB代次递增并enabled=false；`/issue`和`/rotate`继续调用`ready()`门禁。状态接口对旧未签发OFF保留`FEATURE_NOT_READY`，对已签发主体返回真实代次并`issuanceEnabled=false`；`/console/`OFF只显示撤销不显示轮换。
+3. 新`sql/v11-b-upgrade-preflight.sql`：只读统计同月双订阅、历史跨月订阅、已有余额定义错配、冻结月另有订阅四类风险；不改用户数据库。新增`V11QuotaFrozenBalanceTest`及修改`V11QuotaCredentialControllerTest`、`v11-b-console-test.mjs`和`v11-b-smoke.py`（真实HTTP OFF撤销/余额冻结409）。
+4. **本轮没有实际运行Maven、Node、MySQL/Redis/Docker/双网关**：代码提交不等于以上新回归通过，原B历史57JUnit与20组HTTP不覆盖本次新补丁。新的C阶段开发必须先完成**C0**隔离实测，修复任何新发现问题后再引入Kafka。
+5. 旧B测试、Kafka未引入、配额默认OFF、旧PR仍Draft、main不变；用户持久数据库未迁移、未执行预检。新设计已在下游`feat/v11-c-async-usage`，完整合同`docs/design/v11-c-async-execution.md`。B修复的真实实测结果由本地Codex在C0追加证据后才能标验收通过。
