@@ -25,7 +25,7 @@ public class AppCredentialController {
   Object raw=credentials.summary(id);
   if(!(raw instanceof Map<?,?> summary))throw new ApiFailure(503,"CREDENTIAL_STATUS_UNAVAILABLE","凭证状态未取得");
   Object state=summary.get("status");
-  if(!activation.enabled()&&!Set.of("ACTIVE","REVOKED").contains(state))return Map.of("status","FEATURE_NOT_READY");
+  if(!activation.enabled()&&!("ACTIVE".equals(state)||"REVOKED".equals(state)))return Map.of("status","FEATURE_NOT_READY");
   var result=new LinkedHashMap<String,Object>();
   summary.forEach((key,value)->{if(key instanceof String k && value!=null)result.put(k,value);});
   result.put("issuanceEnabled",activation.enabled());
