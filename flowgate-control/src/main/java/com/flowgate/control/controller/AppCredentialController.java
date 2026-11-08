@@ -16,6 +16,19 @@ public class AppCredentialController {
  private List<String> scopes(Map<String,Object> input){BusinessInputs.fields(input,"scopes");Object value=input.get("scopes");BusinessInputs.require(value instanceof List<?> && ((List<?>)value).stream().allMatch(String.class::isInstance),"VALIDATION_ERROR","Scope列表必须为字符串");return ((List<?>)value).stream().map(String.class::cast).toList();}
  @PostMapping public Object issue(@PathVariable long id,@RequestBody Map<String,Object> input,HttpServletRequest request){ready(id);return credentials.issue(id,scopes(input),false,actor(request));}
  @PostMapping("/rotate") public Object rotate(@PathVariable long id,@RequestBody Map<String,Object> input,HttpServletRequest request){ready(id);return credentials.issue(id,scopes(input),true,actor(request));}
- @PostMapping("/revoke") public Object revoke(@PathVariable long id,HttpServletRequest request){apps.application(id);if(!activation.enabled())throw new ApiFailure(409,"FEATURE_NOT_READY","应用凭证功能未启用");credentials.revoke(id,actor(request));return Map.of("status","REVOKED");}
- @GetMapping("/status") public Object status(@PathVariable long id){apps.application(id);return activation.enabled()?credentials.summary(id):Map.of("status","FEATURE_NOT_READY");}
+ // 1. 紧急撤销是安全动作，不能被新签发开关或接流节点缺失阻止；DB代次始终是权威。
+ @PostMapping("/revoke") public Object revoke(@PathVariable long id,HttpServletRequest request){apps.application(id);credentials.revoke(id,actor(request));return Map.of("status","REVOKED");}
+ @GetMapping("/status") public Object status(@PathVariable long id){
+  apps.application(id);
+  // 2. 计量关闭时也需要查询曾签发凭证的真实状态，才能在产品后台提供紧急撤销入口。
+  // 尚无凭证时保留旧FEATURE_NOT_READY空态；仅影响管理查询，不启用新签发。
+  Object raw=credentials.summary(id);
+  if(!(raw instanceof Map<?,?> summary))throw new ApiFailure(503,"CREDENTIAL_STATUS_UNAVAILABLE","凭证状态未取得");
+  Object state=summary.get("status");
+  if(!activation.enabled()&&!Set.of("ACTIVE","REVOKED").contains(state))return Map.of("status","FEATURE_NOT_READY");
+  var result=new LinkedHashMap<String,Object>();
+  summary.forEach((key,value)->{if(key instanceof String k && value!=null)result.put(k,value);});
+  result.put("issuanceEnabled",activation.enabled());
+  return result;
+ }
 }
