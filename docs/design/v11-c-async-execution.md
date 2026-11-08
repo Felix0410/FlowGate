@@ -157,13 +157,14 @@ Listener条件启用，使用Spring Kafka `@KafkaListener` + String JSON解码�
 
 | API | 用途与返回 | 权限 |
 |---|---|---|
-| `GET /admin/usage?applicationId=&apiId=&from=YYYY-MM-DD&to=YYYY-MM-DD&afterDay=&limit=20` | `fg_usage_daily`按UTC日期/业务名称展示，默认最近7天、跨度最多31天，limit1..100，unknown不显示0 | ADMIN/OPERATOR/VIEWER |
+| `GET /admin/usage?applicationId=&apiId=&from=YYYY-MM-DD&to=YYYY-MM-DD&cursor=&limit=20` | `fg_usage_daily`按UTC日期/业务名称展示，默认最近7天、跨度最多31天，limit1..100；游标为(dayUtc,appId,apiId)组合，unknown不显示0 | ADMIN/OPERATOR/VIEWER |
 | `GET /admin/async-events?status=&afterId=0&limit=20` | `NEW/LEASED/SENT/FAILED`只读列表，id、eventId短标、类型、尝试次数、排队/lease时间、lastErrorCode；**不返回payload/token/堆栈** | ADMIN/OPERATOR/VIEWER |
 | `GET /admin/async-events/summary` | 总NEW/LEASED/FAILED/待消费数、最旧事件年龄、Async启用与Broker状态（实际探测） | ADMIN/OPERATOR/VIEWER |
 | `POST /admin/async-events/{id}/retry` | 只允许FAILED→NEW，retain原eventId、条件where防抢占，操作写审计；不改变Ledger/余额/已消费标记 | ADMIN |
 | `GET /admin/reconciliation?from=&to=&applicationId=&apiId=&limit=20` | 仅关闭UTC日，显示权威授权单位、已消费事件单位、Daily聚合值、缺失数量、状态`PENDING/MATCH/MISMATCH`和asOfUtc | ADMIN/OPERATOR/VIEWER |
 | `POST /admin/reconciliation/recheck` | 可选仅触发有限已关闭日重新核对与补投**已有**Outbox，不能直接改余额或创建新的grant；需审计 | ADMIN（C首版可不开放，页面只提供刷新） |
 
+- **稳定复合游标**：UsageDaily主键是(day_utc,application_id,api_id)，不能只用afterDay，否则同一天多App/API会丢页。按(dayUtc,appId,apiId)降序，使用固定白名单解析的base64url复合cursor与SQL行值字典序条件分页；返回nextCursor（末页null）。对账按相同三元组稳定分页，不能用裸offset或未完整的日期游标。
 - 运营接口错误体沿用requestId、400非法日期/限制、401未登录、403越权、404未找到、409租约/状态冲突、503 DB/Kafka不可用。
 - `GET /admin/usage`读模型允许延迟，必须同时展示lastAggregatedAt/asOfUtc/lag状态；Kafka停机/异步OFF时前端标“统计可能延迟”，不能把一条0汇总写成“从未使用”。
 
