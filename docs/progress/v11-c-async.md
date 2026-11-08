@@ -60,3 +60,45 @@
 | C5 | Java/Node/隔离Kafka+MySQL/Redis真实故障脚本，脱敏证据和阶段SHA | 停Kafka→授权仍成功/outbox堆积→恢复→对账；重复事件只计1；最终FAILED可诊断 |
 
 **C阶段不做新Gateway Kafka客户端**，不等待Kafka ack才放行、不重新扣余额、不将`SKIP LOCKED`当权威额度查询、不无界提交失败事件。Outbox状态及lease owner更新必须有条件where，不被迟到worker覆盖。全量性能留D。
+
+
+## C-08 2026-11-08 当前执行合同：C0～C6
+
+**优先读取`docs/design/v11-c-async-execution.md`全文和`CODEX_V11_C_EXEC_PROMPT.md`**；本节覆盖上面C-00～C-07模糊处。当前**只有C设计和任务，C代码/测试未实现**。B两项复审小修的源码/前端/SQL/JUnit已提交上游B，但ChatGPT尚未执行真实JVM/MySQL，故C0是不可绕过的测试门槛。
+
+| 块 | 具体开发任务 | 门槛 |
+|---|---|---|
+| **C0** | 在隔离MySQL/Redis运行B修复后Java17、旧/新Node和真实HTTP；历史A同月两订阅、Balance冻结不匹配均409；Quota OFF时已发凭证可紧急撤销，重新开启旧代次不复活；只读`sql/v11-b-upgrade-preflight.sql` | 未实测通过**不做C1** |
+| **C1** | Control pom加Boot管理的`spring-boot-starter-kafka`；Kafka单KRaft容器可选`mq` profile；`FLOWGATE_ASYNC_ENABLED=false`默认；新增`sql/flowgate-v11-c.sql`两表及严格8字段事件DTO | 无Kafka时B/V1继续可用，DDL两次幂等 |
+| **C2** | `OutboxClaimService`短事务20条`SKIP LOCKED`；LEASED/owner/30s租约，事务外KafkaTemplate异步send；ACK owner条件SENT，失败有限退避/8次FAILED | 双Worker/迟到ACK/过期重领不吞事件 |
+| **C3** | `UsageAggregationService`：校验Outbox+Ledger、唯一`consumed_event(eventId,chargeId,hash)`与`usage_daily`UPSERT同事务；Listener在DB commit后手动ack；DLT ACK不可确认则不提交原offset | 重放100次仅计1；事务/offset故障不双计 |
+| **C4** | `/admin/usage`、`/admin/async-events`（含summary和ADMIN安全重试）、`/admin/reconciliation`只允许封账UTC日期；READ_ONLY RepeatableRead核对B Ledger + Outbox事件时间/Consumed + Daily | PENDING/MATCH/MISMATCH准确；RBAC/admin审计 |
+| **C5** | `/console/`三组真实页面：“用量统计”“异步事件”“对账中心”，中文指南和生成静态帮助同步；SENT只表示Kafka ACK | 无假统计、无裸JSON/内部ID必填、Node通过 |
+| **C6** | `scripts/v11-c-smoke.py`隔离Kafka/MySQL8.4/Redis7/双Gateway；停Kafka继续B授权、重启追平、Ack崩溃/Offset崩溃/租约竞态、DLT/手动重放、旧Caller回归 | 新脱敏证据、SHA/退出码/失败历史齐全 |
+
+### C0：B小修前置实际交接
+
+固定当前父B HEAD、用户未提交内容和专用随机端口Lab。先执行：
+- `mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`；旧`v11-b-console-test.mjs`、V11-A与V1产品Node回归；
+- `python3 scripts/v11-b-smoke.py`（需先按README构建历史A二进制，勿覆盖B/current）；还需在隔离MySQL注入A允许的同月分段旧订阅及冻结Balance字段错配，使预检风险计数非零、下一笔新Grant被拒且余额/Ledger/Outbox不变；
+- activation OFF前先签发、OFF后ADMIN成功撤销、旧代次仍不可恢复；OPERATOR/VIEWER仍403；新页面只有撤销入口，禁止签发/轮换。
+
+若现有B小修测试覆盖不足，**先补完整可运行真实用例**。`docs/progress/evidence/v11-c0-b-fix-smoke.json`仅实际运行后生成，不得复制旧B20组冒充新证据；C0通过后再开始Kafka业务。若必须修复编译/SQL，保留B独立分支历史并明确C继承中的补丁。
+
+### C1～C3：文件与事务提交规范
+
+1. `sql/flowgate-v11-c.sql`：`fg_consumed_event(event_id PK,charge_id UNIQUE,payload_sha256,consumed_at)`及`fg_usage_daily(day_utc,application_id,api_id,authorized_units,grant_count,updated_at,PK(day_utc,app,api))`；原B/Outbox表只读不DROP。
+2. `flowgate-control/service/{OutboxClaimService,OutboxPublisher,UsageAggregationService}`、`listener/UsageEventListener`和对应Entity/Mapper，小步使用现有MyBatis/TransactionTemplate、Spring Kafka API。Claim事务立即提交，Kafka await只能在事务外。Consumer先比对本地Outbox和Ledger，再同事务去重/UPSERT；ack只能在服务事务方法返回后。
+3. 事件严格8字段`version,eventId,chargeId,applicationId,apiId,periodUtc,units,eventTime`。日归属用B Outbox的`eventTime`，不是可能跨日的Ledger插入`created_at`。Kafka本机单Broker不是HA或跨DB exactly-once；未启用异步不影响Quota。
+4. 异常重投必须用原eventId；`SKIP LOCKED`只用于队列领取；Worker持有lease的CAS条件包括owner+id+状态和租约有效性；Consumer毒消息DLT失败不能ack源offset。
+
+推荐提交：`test(v11-c): verify b review fixes in isolated mysql` → `feat(v11-c): configure optional kafka usage schema` → `feat(v11-c): publish leased outbox at least once` → `feat(v11-c): dedupe consumed grants transactionally`。
+
+### C4～C6：运营和真实证据
+
+- AdminAuthInterceptor.v11Path新增C路径：ADMIN才能POST FAILED重试，OPERATOR/VIEWER只读，Caller不可登录；返回不含Outbox payload原文。日期<=UTC昨天，查询最多31天、稳定游标limit1..100，PENDING不等于错账。
+- UI沿用`static/console`原生ES Modules，真实应用/API下拉、空/错/待处理显示；同步`docs/guides/product-console-guide.md`和`/console/guide.html`。真人375px/1280px仍留负责人。
+- 新`scripts/v11-c-console-test.mjs`与`scripts/v11-c-smoke.py`最少证明：Broker down仍Quota授权并Outbox积压；恢复→aggregate追平；重投/DB提交未ack不重复；两个Worker lease互斥；封账日先PENDING后MATCH，故意更改隔离读模型后MISMATCH；安全重放不改Ledger/Balance；无Kafka旧V1/旧Caller不回归。
+- 真实命令、退出码、通过/失败/跳过、Git SHA、版本、隔离容器信息回填本文件新增C-09（实施证据节，避免和本节冲突），仓库只留脱敏`docs/progress/evidence/v11-c-*.json`；未执行标未执行。完成后等待ChatGPT复审和负责人浏览器验收，**不自动进入D或合并main**。
+
+**当前真实状态**：B小修代码已写、真实复测待Codex；C只有设计文档、任务书和开发指令，Worker/Consumer/UsageDaily/对账尚未编码。旧PR均Draft。
