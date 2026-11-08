@@ -247,3 +247,11 @@ B6额外补`V11QuotaCredentialControllerTest`2项验证默认OFF无发证副作�
 用户`.env`、IDE配置、原持久容器/卷未修改或停机。所有本轮Lab仅终止自建JVM并清理自建容器；最终Docker只剩原`flowgate-local-mysql-1`与`flowgate-local-redis-1`。部署说明与占位`.env.example`补开关默认false/名单默认空，**用户真实库未迁移，正式环境未激活计量**。需负责人备份后确认增量SQL、升级完整接流节点并显式设置开关/名单，再按中文指南抽查。默认关闭可继续旧V1/Caller。
 
 B完成的是功能分支实现与定向验收，**ChatGPT源码复审、负责人1280px/375px/键盘真人浏览器验收、旧V1/PR正式收口、V11-D长期性能验收均未执行**。不承诺长期吞吐或Kafka投递；Outbox积累与未来消费/清理由C设计处理。阶段到此停止，不进入C/D。
+
+### 远端交付核对（2026-11-08）
+
+完整B代码/测试/证据提交：`097b88b5c44c97b4c0d7e42d1700dbda32d1391a`（之前B0～B5提交见上表），分支`feat/v11-b-quota`。提交前逐次核对分支、工作区和暂存范围，显式列文件暂存，无`git add .`。最终本地定向通过，等待ChatGPT和项目负责人审核。
+
+实际执行`git push origin HEAD:refs/heads/feat/v11-b-quota`退出128，GitHub返回`Permission to Felix0410/FlowGate.git denied to Felix0410`、HTTP403。**本轮B代码未远端交付，不把本地通过写成PR已更新。**随后只读`git ls-remote --heads origin feat/v11-b-quota main`确认：远端B仍`2d0106a3ed51a36049cdcd62c92d53acc1a40016`（设计），main为`84a25d5a7b9545dff3556299efec3c310fc321cf`。没有改推main、强推、合并或改其他分支历史。远端分支地址：<https://github.com/Felix0410/FlowGate/tree/feat/v11-b-quota>，目前仅旧设计内容；本地代码请在修复GitHub写权限后推送同一功能分支供审查。
+
+这条交付说明单独提交，不改业务代码、测试或`.env`；本轮工作到B阶段停止。
