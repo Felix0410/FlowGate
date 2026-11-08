@@ -1,7 +1,7 @@
-# FlowGate｜当前本地Codex唯一任务：V11-B复审收口
+# FlowGate｜V11-B复审小修已编码，后续转入V11-C0验证
 
-> 2026-11-08：**V11-B B0～B6实际Java/SQL/JS代码和Codex定向测试已远端提交**，PR #8仍Draft。当前不重新开发B、不提前开启C Kafka或D性能任务。静态复审发现两项小范围P1缺口，须在实际迁移/对外激活配额之前完善。
-> 最新源代码审核：`docs/reviews/v11-b-static-review-2026-11-08.md`。**当前唯一详细执行提示：`CODEX_V11_B_REVIEW_FIX_PROMPT.md`**。
+> 2026-11-08：V11-B主体与**两项复审小修源码/前端/只读SQL/Java与Node/B6测试脚本均已实际提交**，PR #8仍Draft。新补丁的真实Java17/MySQL/Redis/双Gateway回归**尚未执行**；下一步在下游`feat/v11-c-async-usage`按`CODEX_V11_C_EXEC_PROMPT.md`先完成C0真库验证，C0不通过不开发Kafka。不重新实施F1/F2，不合并main。
+> 最新源代码审核：`docs/reviews/v11-b-static-review-2026-11-08.md`。**历史修复提示：`CODEX_V11_B_REVIEW_FIX_PROMPT.md`；当前唯一执行入口：C分支`CODEX_V11_C_EXEC_PROMPT.md`的C0**。
 
 ## 本轮只做的事
 
