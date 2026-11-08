@@ -1,6 +1,6 @@
 # FlowGate V1.1 开发路线与真实状态
 
-更新：2026-11-07。**V11-A主体编码和Codex定向验证已完成；负责人同意将A静态复审的两项P0并入B0。V11-B详细设计/派工已提交，但B0～B6的代码和实测均未开始；C/D未开始。** V1负责人最终验收尚未收口，不宣称V1.1全版本完成。
+更新：2026-11-08。**V11-A已交付；V11-B B0～B6已实际编码并提交远端，Codex记录57项JUnit/20组真实双Gateway场景通过。ChatGPT静态复审补充两项B上线前P1收口问题，尚未修改代码。V11-C Kafka和V11-D正式最终验收未开始。** V1负责人最终验收尚未收口，不宣称V1.1全版本完成。
 
 ## 为什么要做这次业务调整？
 
@@ -12,12 +12,12 @@
 |---|---|---|---|
 | 前置 | docs/progress/block-4-acceptance.md | V1 后台手测、完整回归、PR 审核 | 待负责人收口 |
 | A | docs/progress/v11-a-business.md | 客户、应用、套餐、订阅、凭证入口占位、产品 UI | 管理代码与17JUnit/155HTTP已交付；两项P0明确并入B0，A凭证仍未激活 |
-| B | docs/progress/v11-b-quota.md | B0修A遗留一致性P0，再实现App身份/可信额度/Ledger/Outbox/Gateway计量 | **设计/详细Codex任务已交付；编码与实测未开始** |
+| B | docs/progress/v11-b-quota.md | B0修A遗留，APP凭证、MySQL权威Quota/Ledger/Outbox、Gateway非阻塞计量 | **B0～B6实装与定向验收已交付；2项静态复审P1待小修** |
 | C | docs/progress/v11-c-async.md | Kafka、可靠投递、幂等消费、用量查询与对账 | 未开始 |
 | D | docs/progress/v11-d-acceptance.md | SQL 大数据实验、四组性能、双节点故障、产品验收与发布 | 未开始 |
 
 - 业务与技术总设计：docs/design/openapi-platform-v1.1.md。
-- Codex当前唯一实施入口：`CODEX_V11_B_EXEC_PROMPT.md`，权威B设计`docs/design/v11-b-quota-execution.md`。**B0必须先修同月套餐/数据库UTC并实测通过，才允许启动B1～B6；A历史修复指令不再单独执行**。
+- Codex当前唯一开发入口：`CODEX_V11_B_REVIEW_FIX_PROMPT.md`，审核`docs/reviews/v11-b-static-review-2026-11-08.md`。**B0～B6已完成，不重新实现；先处理存量A订阅/Balance匹配与激活OFF撤销，复测后等待V11-C后续授权**。
 - 原有 /console/ 作为正式后台继续迭代、/test-console/ 只作为技术验证入口。每阶段同步 UI、指南与进度。
 - 每阶段的真实执行日志和 Git SHA 以后按节追加，不提前勾选。完成 D 之后才申请审核是否合并，新功能绝不自动合并 main。
 
@@ -47,3 +47,7 @@ V11-A当前远端PR #7包含真实五表/API/前端、17JUnit和155条Codex HTTP
 - 第一个工作B0包含同App同UTC月不得切换第二套餐、Hikari池MySQL会话强制UTC及旧V1时间字段回归；没有独立MySQL实测不继续B。
 - B1策略/可信节点能力但施工期开关默认OFF；B2独立`fgapp_`身份+DB generation，公开发证接口在B3/B4认证/计量闭环前仍409；B3权威MySQL Balance+Ledger+Outbox，B4 Gateway非阻塞准入，B5正式`/console/`，B6真实双网关测试。
 - Kafka消费与用量统计仍仅V11-C，10万级SQL/四组性能仍D；旧A 155 HTTP与17JUnit不等于B完成，用户V1/新产品真人体验仍待收口。
+
+## 2026-11-08 B阶段远端复审补充
+
+GitHub目前能读到B0～B6全部实现和历史定向证据，旧Codex曾push403是它当时的记录，非当前源码缺失。B的5Grant/95拒绝与Ledger/Outbox守恒证据已核对脚本，尚无ChatGPT本机独立运行/人工浏览器验收。最新审核P1：用户存量A同月多订阅/余额冻结一致性检查、计量关闭时允许ADMIN紧急撤销已签发凭证。细节见当前B专属审核报告与Codex修复提示；C/D仍未编码。
