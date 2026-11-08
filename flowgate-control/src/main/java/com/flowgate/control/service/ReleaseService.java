@@ -16,6 +16,8 @@ public class ReleaseService {
     private final ConfigStateMapper state;
     private final ConfigReleaseMapper releases;
     private final AuditService audit;
+    private QuotaActivationService quota;
+    @org.springframework.beans.factory.annotation.Autowired public void setQuota(QuotaActivationService quota) { this.quota=quota; }
     public ReleaseService(CatalogService catalog, ConfigStateMapper state, ConfigReleaseMapper releases, AuditService audit) {
         this.catalog = catalog; this.state = state; this.releases = releases; this.audit = audit;
     }
@@ -59,6 +61,10 @@ public class ReleaseService {
         Snapshot candidate = rollback == null ? build(next) : rollback(rollback, next);
         Rules.routes(candidate.routes(), next, catalog.allowed());
         PolicyRules.validate(candidate);
+        if (candidate.routes().stream().anyMatch(route -> QuotaPolicy.freeze(candidate,route).metered())) {
+            if(quota==null)throw new ApiFailure(409,"QUOTA_FEATURE_NOT_READY","配额链路未启用");
+            quota.requireReady(current.currentVersion,current.currentVersion==0?"":find(current.currentVersion).sha256);
+        }
         // 2. CAS 防止两个发布者丢更新；失败会回滚全部写入，没有孤立版本。
         if (state.advance(expected, current.optimisticVersion, next) != 1) throw new ApiFailure(409, "VERSION_CONFLICT", "其他发布已先提交");
         ConfigRelease release = new ConfigRelease(); release.version = next; release.sha256 = candidate.checksum();
@@ -108,7 +114,7 @@ public class ReleaseService {
                 apis.stream().map(a -> Map.<String,Object>of("id", a.id, "serviceId", a.serviceId, "method", a.method, "publicPath", a.publicPath,
                         "upstreamPath", a.upstreamPath, "isPublic", a.isPublic, "requiredScope", a.requiredScope, "enabled", a.enabled)).toList(), specs,
                 policies.stream().map(p -> Map.<String,Object>of("id", p.id, "code", p.code, "type", p.type, "scope", p.scope,
-                        "parametersJson", p.parametersJson, "enabled", p.enabled, "executionStatus", Set.of("RATE_LIMIT","CONCURRENCY").contains(p.type) ? PolicyRules.ENFORCED : PolicyRules.PROTECTED)).toList(),
+                        "parametersJson", p.parametersJson, "enabled", p.enabled, "executionStatus", PolicyRules.execution(p.type))).toList(),
                 bindings.stream().map(b -> {
                     var entry = new LinkedHashMap<String,Object>();
                     entry.put("id",b.id); entry.put("policyId",b.policyId); entry.put("targetType",b.targetType); entry.put("targetId",b.targetId);

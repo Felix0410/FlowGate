@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "recordedAt": "2026-11-08T08:40:07.489131+00:00",
+  "httpRecords": 155,
+  "checks": {
+    "migration": {
+      "passed": true,
+      "oldFacts": {
+        "fg_principal": "1",
+        "fg_route": "4",
+        "fg_config_release": "1",
+        "snapshotsSha256": "0b5804f911991a1d1778fd49e2b15432a5ddf82a9603f2c6a487aac419c187f2"
+      },
+      "columnsSha256": "6f18004e8a8115d4360ab80134ee31f30df9e9b19288202b6c33b972c98c51c0",
+      "indexesSha256": "257f9b0496317f6e39be24a565d16fba661b65d6d710d419689aff9bf73504ed"
+    },
+    "rbacAndNoCredentialSideEffects": true,
+    "subscriptionRace": {
+      "sameApplication": [
+        201,
+        409
+      ],
+      "bothWaitedOnMysqlLock": true,
+      "differentApplicationsProgressIndependently": true,
+      "currentAndQueuedAdjacent": true,
+      "planVersionSnapshot": 1
+    },
+    "v1CallerAndSnapshotCompatibility": true
+  },
+  "scope": "B版本默认OFF的A接口兼容，旧A历史证据不覆盖"
+}

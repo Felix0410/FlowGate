@@ -26,7 +26,7 @@ public class CircuitBreakerConfigRegistry {
             var config=CircuitBreakerConfig.custom().failureRateThreshold(p.get("failureRateThreshold").intValue())
                     .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED).slidingWindowSize(p.get("slidingWindowSize").intValue())
                     .minimumNumberOfCalls(Math.max(2,p.get("minimumNumberOfCalls").intValue())).waitDurationInOpenState(Duration.ofMillis(p.get("waitDurationMs").intValue()))
-                    .permittedNumberOfCallsInHalfOpenState(2).automaticTransitionFromOpenToHalfOpenEnabled(true).build();
+                    .ignoreException(error->error instanceof com.flowgate.gateway.quota.QuotaDenied).permittedNumberOfCallsInHalfOpenState(2).automaticTransitionFromOpenToHalfOpenEnabled(true).build();
             factory.configure(builder->builder.circuitBreakerConfig(config).timeLimiterConfig(TimeLimiterConfig.ofDefaults()),name);
             var breaker=factory.getCircuitBreakerRegistry().circuitBreaker(name,config);
             // 2. 标签只含已发布routeId与固定事件，不以版本/用户/原始路径注册指标。

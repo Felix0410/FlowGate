@@ -20,8 +20,10 @@ public class ReleaseController {
     public ReleaseController(ReleaseService releases, ReleaseNodeMapper nodes, AuditLogMapper audits) {
         this.releases = releases; this.nodes = nodes; this.audits = audits;
     }
+    private com.flowgate.control.service.QuotaActivationService quota;
+    @org.springframework.beans.factory.annotation.Autowired public void setQuota(com.flowgate.control.service.QuotaActivationService value){this.quota=value;}
     public record Expected(Long expectedVersion) {}
-    public record Applied(String nodeId, long version, String checksum,List<Map<String,String>> circuitStates) {}
+    public record Applied(String nodeId, long version, String checksum,List<Map<String,String>> circuitStates,List<String> supportedFeatures) {}
     private record RuntimeState(long version,String checksum,List<Map<String,String>> states) {}
     private final Map<String,RuntimeState> runtimeStates=new ConcurrentHashMap<>();
     @GetMapping("/admin/releases") public Object history() { return releases.history(); }
@@ -37,11 +39,12 @@ public class ReleaseController {
         return nodes.selectList(new QueryWrapper<ReleaseNode>().orderByAsc("id").last("LIMIT 100")).stream().map(node->{
             var row=new LinkedHashMap<String,Object>(); row.put("id",node.id);row.put("nodeId",node.nodeId);
             row.put("appliedVersion",node.appliedVersion);row.put("checksum",node.checksum);row.put("lastSeenAt",node.lastSeenAt);
-            long age=node.lastSeenAt==null?Long.MAX_VALUE:Duration.between(node.lastSeenAt,LocalDateTime.now()).getSeconds();
+            long age=node.lastSeenAt==null?Long.MAX_VALUE:Duration.between(node.lastSeenAt,LocalDateTime.now(ZoneOffset.UTC)).getSeconds();
             row.put("freshness",age>=0 && age<=15?"ONLINE":"STALE");
             RuntimeState state=runtimeStates.get(node.nodeId);
             boolean known=state!=null && state.version()==node.appliedVersion && state.checksum().equals(node.checksum);
             row.put("circuitStates",known?state.states():List.of());row.put("runtimeStateKnown",known);
+            row.put("supportedFeatures",quota==null?List.of():quota.features(node.nodeId));
             row.put("runtimeNote","最近上报的运行状态；节点或控制面重启后可能重置，请核对lastSeenAt");
             return row;
         }).toList();
@@ -53,6 +56,7 @@ public class ReleaseController {
     }
     @GetMapping("/internal/snapshots/current") public Object snapshot() { return releases.snapshot(); }
     @PostMapping("/internal/nodes/applied") @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+    @org.springframework.transaction.annotation.Transactional
     public void applied(@RequestBody Applied input) {
         Rules.text(input.nodeId(), "节点 ID");
         var release = releases.find(input.version());
@@ -74,9 +78,10 @@ public class ReleaseController {
         if (node != null && node.appliedVersion > input.version()) return;
         boolean create = node == null;
         if (create) { node = new ReleaseNode(); node.nodeId = input.nodeId(); }
-        node.appliedVersion = input.version(); node.checksum = input.checksum(); node.lastSeenAt = LocalDateTime.now().withNano(0);
+        node.appliedVersion = input.version(); node.checksum = input.checksum(); node.lastSeenAt = LocalDateTime.now(ZoneOffset.UTC).withNano(0);
         Rules.require(!create || nodes.selectCount(new QueryWrapper<ReleaseNode>())<100,"节点数超过本机演示上限");
         if (create) nodes.insert(node); else nodes.updateById(node);
+        if(quota!=null)quota.record(input.nodeId(),input.version(),input.checksum(),input.supportedFeatures());
         if(input.circuitStates()==null) runtimeStates.remove(input.nodeId());
         else runtimeStates.put(input.nodeId(),new RuntimeState(input.version(),input.checksum(),states.stream().map(Map::copyOf).toList()));
     }

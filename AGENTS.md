@@ -1,21 +1,19 @@
-# FlowGate｜本地Codex唯一当前任务（2026-11-07）
+# FlowGate｜V11-B复审小修已编码，后续转入V11-C0验证
 
-> 当前V11-A全部业务代码、产品页面及Codex定向测试**已真实提交远端**。PR #7 `feat/v11-a-business` → `docs/v1.1-openapi-platform`，仍是Draft；main不合并。**目前唯一开发工作是修复A的两项审核P0边界并补真实MySQL测试，不得开始B/C/D。**
+> 2026-11-08：V11-B主体与**两项复审小修源码/前端/只读SQL/Java与Node/B6测试脚本均已实际提交**，PR #8仍Draft。新补丁的真实Java17/MySQL/Redis/双Gateway回归**尚未执行**；下一步在下游`feat/v11-c-async-usage`按`CODEX_V11_C_EXEC_PROMPT.md`先完成C0真库验证，C0不通过不开发Kafka。不重新实施F1/F2，不合并main。
+> 最新源代码审核：`docs/reviews/v11-b-static-review-2026-11-08.md`。**历史修复提示：`CODEX_V11_B_REVIEW_FIX_PROMPT.md`；当前唯一执行入口：C分支`CODEX_V11_C_EXEC_PROMPT.md`的C0**。
 
-## 立即阅读
-1. `docs/reviews/v11-a-static-review-2026-11-07.md`：远端真实代码审查，确认历史17 JUnit/155条HTTP、P0-A01和P0-A02；
-2. `CODEX_V11_A_REVIEW_FIX_PROMPT.md`：本地唯一可执行修复任务F0～F4；
-3. `docs/progress/v11-a-business.md` 第A-08/A-09节：历史已交付与当前未解决项；`docs/design/openapi-platform-v1.1.md`第12节确保A不会越界；
-4. `CODEX_V11_A_EXEC_PROMPT.md`是之前A0～A6的历史开发合同，**不要重新编码全部A**。
+## 本轮只做的事
 
-## 本轮目标
-- **F1：同月套餐冻结**。`SubscriptionSchedule.validate`不允许同一app本月已过期的Free订阅后又新增本月Pro订阅，即使两个区间不重叠；下一UTC月首日正常衔接。补JUnit和MySQL真实HTTP反例。
-- **F2：连接池UTC保证**。`connectionTimeZone=UTC`不等于MySQL会话UTC。以受控连接初始化/等价正确方案保障全部业务SQL会话UTC，测试MySQL/JVM非UTC组合及月末`Instant`回读，保护旧V1数据格式。
-- **F3：如有精力改进产品日期选择**：本月/下月首日简洁选项；不得删旧`/console/`与`/test-console/`。
-- **F4：定向17+新增JUnit、Node、独立MySQL/Redis、155旧HTTP所涉范围重新验证**，新证据单独保存，旧历史原样保留。追加SHA/命令/通过数/失败数到A进度；只修改当前A分支，提交Conventional Commits。
-- **之后停止并报告**。V1负责人真实浏览器验收仍待完成；A修复完成后需复审，B/C/D另行安排。
+1. 先安全核对`git status -sb`、`git fetch origin`与`feat/v11-b-quota`当前远端HEAD；本地未提交工作与既有数据库/容器/IDE/`.env`均不能覆盖，禁止`reset --hard`、`clean -fd`、强推及合并main。
+2. 阅读 `docs/reviews/v11-b-static-review-2026-11-08.md` 和 `CODEX_V11_B_REVIEW_FIX_PROMPT.md`，对照 `docs/progress/v11-b-quota.md` 的B-16～B-18真实已实现记录。
+3. **F1：余额冻结与存量订阅一致性**。现B0锁住未来新建同月第二套餐，但A旧表可能已有历史同月分段。`QuotaChargeService`复用已有余额时要比较冻结订阅/套餐/版本/额度，不一致须失败关闭、不能修改余额或账本；加只读迁移预检和真实MySQL反例。
+4. **F2：紧急凭证撤销**。管理员在Quota激活开关关闭/节点失联时也应能够撤销此前已签发的APP Token，通过DB generation+1/disabled确保后续不能重新使用；签发与轮换依旧受完整门禁。若未迁移B表且无凭证，默认旧V1安全行为不回归。前端显示真实的可撤销状态。
+5. 受影响Java17/Maven、Node产品、真实隔离MySQL/Redis+双Gateway原B6最小回归；新证据独立新增、不得覆盖A历史155条/B原20组，更新README/阶段记录/产品指南，逐个Conventional Commit。未实际执行写“未执行”。
+6. 完成后**停下等待ChatGPT代码复审与负责人真人浏览器体验**，不开始V11-C Kafka、不自行合并任何PR/main，不重做B0～B6。
 
-## 安全和技术长期约束
-Java17/Spring Boot4/Control MVC + MyBatis-Plus/MySQL8.4/Redis7，产品前端原生HTML/CSS/ES Modules。新业务管理写仅ADMIN；A凭证接口保持`409 FEATURE_NOT_READY`，**任何APP有效Token、USAGE_QUOTA、Gateway改动、QuotaBalance/Ledger/Outbox/Kafka均不能提前出现**。原Caller权限/旧快照完全兼容。全部业务关键代码中文注释，长逻辑按1/2/3分条。
+## 技术与安全固定约束
 
-保护用户的未提交内容、IDE进程、Docker持久卷及`.env`；不`reset --hard`、不`git clean -fd`、不全局Docker清理、不强推、不合并任何PR/main。不把Codex的历史push403当成目前远端没有源码，也不把本轮文档提交当成两项P0实际已修。
+Java17/Spring Boot4、Control MVC+MyBatis/MySQL8.4、Gateway WebFlux/Redis7、原生`/console/` JS ES modules；配额MySQL Balance/Ledger/Outbox权威同事务，Redis只处理Token和速率，App Token不进入旧Caller namespace，成功grant不按业务HTTP2xx退款。本轮不增Kafka/Seata/Nacos/Vue/React/npm。中文注释，关键长流程按1/2/3分点；保护原有用户容器/个人DB/密钥和全部旧PR。
+
+**当前真实状态：B技术主体已交付、Codex集成测试有证据，静态复审新增2项小范围修复尚未编码，V11.1最终验收未完成。**

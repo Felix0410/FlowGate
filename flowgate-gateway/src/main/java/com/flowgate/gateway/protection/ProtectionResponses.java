@@ -22,6 +22,7 @@ public class ProtectionResponses implements WebExceptionHandler {
     public ProtectionResponses(CircuitBreakerConfigRegistry registry) { this.registry=registry; }
     @Override public Mono<Void> handle(ServerWebExchange exchange,Throwable error) {
         if(exchange.getResponse().isCommitted()) return Mono.error(error);
+        if(error instanceof com.flowgate.gateway.quota.QuotaDenied denied)return denied.write(exchange);
         if(error instanceof ResponseStatusException status && status.getStatusCode().value()==504) {
             return write(exchange,504,"UPSTREAM_TIMEOUT","上游响应超时","TIMEOUT","timeout",false);
         }
@@ -43,6 +44,7 @@ public class ProtectionResponses implements WebExceptionHandler {
             exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND); return exchange.getResponse().setComplete();
         }
         Object failure=exchange.getAttribute(CIRCUITBREAKER_EXECUTION_EXCEPTION_ATTR);
+        if(failure instanceof com.flowgate.gateway.quota.QuotaDenied denied)return denied.write(exchange);
         if(failure instanceof ResponseStatusException status && status.getStatusCode().value()==504) {
             Route route=exchange.getAttribute(GATEWAY_ROUTE_ATTR);if(route!=null) registry.event(route.getId(),"TIMEOUT","timeout");
         }

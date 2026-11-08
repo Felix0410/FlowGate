@@ -2,6 +2,7 @@ import {h, badge, notice, permissionButton, searchableTable, formFields, openDia
 import {canWrite} from './api.js';
 import {apiName} from './catalog.js';
 export const policyTypes = {
+  USAGE_QUOTA: {name: '月度计量准入', scopes: ['API', 'ROUTE'], description: '仅私有启用API/路由。成功Grant即消耗单位，下游失败也不退款；默认开关关闭，完整接流名单及能力检查通过才允许发布。', parameters: [['unitsPerCall', '每次准入消耗单位', 1, 1, 100, '1–100整数，不是速率或并发。']]},
   RATE_LIMIT: {name: '速率限制', scopes: ['ROUTE', 'SERVICE', 'API', 'GLOBAL', 'CALLER'], description: '控制短时额度和持续每秒速率。跨网关共享Redis预算，超额请求返回429。', parameters: [
     ['capacity', '短时容量（次）', 5, 1, 1000000, '令牌桶最多保留多少次额度。'], ['refillPerSecond', '每秒补充（次）', 2, 1, 1000000, '持续允许的每秒速率，不是同时处理数量。']]},
   CONCURRENCY: {name: '并发保护', scopes: ['ROUTE', 'SERVICE'], description: '限制单个网关同时处理的请求数，满载立即503。两个网关的许可独立，不是全局总并发。', parameters: [['maxConcurrent', '每台网关在途上限', 1, 1, 1000000, '从请求进入到终止期间占用许可。']]},
@@ -81,8 +82,8 @@ export function editPolicy(ctx, type, original = null, bindings = []) {
   });
 }
 export async function renderGovernance(ctx, mode) {
-  const types = mode === 'rate' ? ['RATE_LIMIT'] : mode === 'concurrency' ? ['CONCURRENCY'] : ['TIMEOUT', 'CIRCUIT_BREAKER'];
-  ctx.heading(mode === 'rate' ? '速率限制' : mode === 'concurrency' ? '并发保护' : '故障保护', '先选择业务目标，再设置保护参数。所有规则以发布版本与网关实际应用为准。', types.length === 1 ? permissionButton('新建规则', () => editPolicy(ctx, types[0]), ctx.role, false, true) : null);
+  const types = mode === 'quota-policy' ? ['USAGE_QUOTA'] : mode === 'rate' ? ['RATE_LIMIT'] : mode === 'concurrency' ? ['CONCURRENCY'] : ['TIMEOUT', 'CIRCUIT_BREAKER'];
+  ctx.heading(mode === 'quota-policy' ? '计量规则' : mode === 'rate' ? '速率限制' : mode === 'concurrency' ? '并发保护' : '故障保护', '先选择业务目标，再设置保护参数。所有规则以发布版本与网关实际应用为准。', types.length === 1 ? permissionButton('新建规则', () => editPolicy(ctx, types[0]), ctx.role, false, true) : null);
   if (ctx.data.policies === null) return ctx.unavailable('规则未读取，请重试。');
   const records = (ctx.data.policies || []).filter(p => types.includes(p.type));
   const bindings = new Map();

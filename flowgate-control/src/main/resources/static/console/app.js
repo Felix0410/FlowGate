@@ -3,11 +3,12 @@ import {h, button, badge, notice, permissionButton, openDialog} from './ui.js';
 import {renderCatalog, editCatalog} from './catalog.js';
 import {renderGovernance} from './governance.js';
 import {renderReleases, renderCallers, renderMonitoring, renderAudits, nodesTable} from './operations.js';
+import {renderQuota} from './quota.js';
 import {renderBusiness, businessKinds} from './openapi-business.js';
 export const views = [
   ['dashboard', '工作台', '总览'], ['services', '服务管理', '接入管理'], ['apis', 'API管理', ''], ['routes', '路由管理', ''],
-  ['developers', '客户管理', '客户与应用'], ['apps', '应用管理', ''], ['plans', '套餐管理', '套餐与订阅'], ['subscriptions', '订阅记录', ''],
-  ['rate', '速率限制', '流量治理'], ['concurrency', '并发保护', ''], ['protection', '故障保护', ''],
+  ['developers', '客户管理', '客户与应用'], ['apps', '应用管理', ''], ['plans', '套餐管理', '套餐与订阅'], ['subscriptions', '订阅记录', ''], ['quota', '配额与账本', ''],
+  ['rate', '速率限制', '流量治理'], ['concurrency', '并发保护', ''], ['protection', '故障保护', ''], ['quota-policy', '计量规则', ''],
   ['releases', '发布中心', '配置交付'], ['callers', '调用方管理', ''], ['monitoring', '运行监控', '运行与审计'], ['audits', '操作审计', '']
 ];
 /** 相互独立的读取失败各自显示未知，不用旧数值或空数组冒充当前真实状态。 */
@@ -43,7 +44,7 @@ export function start(documentRef = document) {
   // 1. 会话结束同时清空数据、回执与模态内容，旧请求用序号隔离。
   const el = id => documentRef.getElementById(id); let renderNumber = 0, refreshing = false;
   function sessionEnded(message = '') {
-    renderNumber++; api.clear(); ctx.role = ''; ctx.data = {}; ctx.callers = []; ctx.issued = null;
+    renderNumber++; api.clear(); ctx.role = ''; ctx.data = {}; ctx.callers = []; ctx.issued = null; ctx.appIssued = null; ctx.secretEpoch = (ctx.secretEpoch || 0) + 1;
     if (el('entity-dialog').open) el('entity-dialog').close();
     el('page-content').replaceChildren(); el('page-notice').replaceChildren(); el('password').value = '';
     el('app-view').hidden = true; el('login-view').hidden = false; documentRef.body.classList.remove('menu-open');
@@ -62,7 +63,8 @@ export function start(documentRef = document) {
     details(title, value) { openDialog(title, h('div', {}, notice('只读技术摘要，不是编辑入口。'), h('pre', {}, JSON.stringify(redact(value), null, 2))), null); },
     async saved(text) { await ctx.refresh(); ctx.flash(text, 'good'); },
     async navigate(view) {
-      ctx.issued = null; // 一次性凭证离开领取页即清除，不留在隐藏DOM或其他页面。
+      ctx.issued = null; ctx.appIssued = null; ctx.secretEpoch = (ctx.secretEpoch || 0) + 1; // 一次性凭证离开领取页即清除，不留在隐藏DOM或其他页面。
+      if (el('entity-dialog').open) el('entity-dialog').close();
       ctx.view = views.some(row => row[0] === view) ? view : 'dashboard';
       documentRef.body.classList.remove('menu-open'); el('menu-backdrop').hidden = true; el('menu-toggle').setAttribute('aria-expanded', 'false');
       el('page-notice').replaceChildren(); await ctx.render(); el('main').focus();
@@ -83,7 +85,7 @@ export function start(documentRef = document) {
       el('page-content').replaceChildren(notice('正在读取页面…'));
       try {
         // 2. 页面切换与会话退出后，迟到响应不得覆盖新页面或重新展示敏感回执。
-        const content = businessKinds[view] ? await renderBusiness(ctx, view) : ['services', 'apis', 'routes'].includes(view) ? renderCatalog(ctx, view) : ['rate', 'concurrency', 'protection'].includes(view) ? await renderGovernance(ctx, view) : view === 'releases' ? await renderReleases(ctx) : view === 'callers' ? renderCallers(ctx) : view === 'monitoring' ? await renderMonitoring(ctx) : view === 'audits' ? await renderAudits(ctx) : dashboard(ctx);
+        const content = view === 'quota' ? await renderQuota(ctx) : businessKinds[view] ? await renderBusiness(ctx, view) : ['services', 'apis', 'routes'].includes(view) ? renderCatalog(ctx, view) : ['rate', 'concurrency', 'protection', 'quota-policy'].includes(view) ? await renderGovernance(ctx, view) : view === 'releases' ? await renderReleases(ctx) : view === 'callers' ? renderCallers(ctx) : view === 'monitoring' ? await renderMonitoring(ctx) : view === 'audits' ? await renderAudits(ctx) : dashboard(ctx);
         if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(content);
       } catch (error) { if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(ctx.unavailable(error.message)); }
     }

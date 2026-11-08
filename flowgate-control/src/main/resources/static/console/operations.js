@@ -8,9 +8,9 @@ export function nodeState(node, version) {
 }
 export function nodesTable(nodes, version) {
   if (nodes === null) return notice('节点信息未取得，请重新读取。', 'error');
-  return table(['节点', '已应用版本', '同步状态', '最近心跳'], (nodes || []).map(node => {
+  return table(['节点', '已应用版本', '同步状态', '计量能力', '最近心跳'], (nodes || []).map(node => {
     const state = nodeState(node, version);
-    return [node.nodeId, 'V' + node.appliedVersion, badge(state.label, state.tone), node.lastSeenAt || '未取得'];
+    return [node.nodeId, 'V' + node.appliedVersion, badge(state.label, state.tone), node.supportedFeatures?.includes('USAGE_QUOTA_V1') ? '支持月度计量' : '未确认支持（不可接计量流量）', node.lastSeenAt || '未取得'];
   }), '尚未有网关上报。请启动Gateway，首次发布后等待节点真实应用。');
 }
 export async function publishConfiguration(api, role, current, rollbackVersion = null) {
@@ -33,7 +33,9 @@ export async function renderReleases(ctx) {
   ctx.heading('发布中心', '保存草稿 → 发布版本 → 网关实际应用。回滚生成新版本，不更改草稿。', permissionButton('发布全部草稿', () => confirmPublish(ctx), ctx.role, false, true));
   let history = null; try { history = await ctx.api.request('/admin/releases'); } catch { /* 页面内明确标记历史未取得。 */ }
   const current = ctx.data.current;
-  return h('div', {}, h('div', {class: 'grid-two'}, h('section', {class: 'card'}, h('h2', {}, '当前发布版本'), h('h1', {}, current ? 'V' + current.version : '未取得'), h('p', {class: 'muted'}, current?.status === 'EMPTY' ? '尚未发布。请先建立服务、API和路由草稿。' : '已持久化不代表节点已应用。'), notice('没有草稿差异预览接口。发布范围为完整草稿，请核对目录和规则；不展示推测的变更数量。')),
+  let quota = null; try { quota = await ctx.api.request('/admin/quota/status'); } catch { /* 状态未知时不推测开关。 */ }
+  const activation = quota ? notice('计量激活开关：' + (quota.activationEnabled ? '已显式开启' : '关闭（默认）') + '；配置的完整接流名单：' + (quota.trafficNodes?.join('、') || '空，禁止激活') + '。发布/回滚时服务端会复验所有节点能力、心跳、版本及校验和。') : notice('计量激活状态未取得，不能确认计量发布是否可用。');
+  return h('div', {}, activation, h('div', {class: 'grid-two'}, h('section', {class: 'card'}, h('h2', {}, '当前发布版本'), h('h1', {}, current ? 'V' + current.version : '未取得'), h('p', {class: 'muted'}, current?.status === 'EMPTY' ? '尚未发布。请先建立服务、API和路由草稿。' : '已持久化不代表节点已应用。'), notice('没有草稿差异预览接口。发布范围为完整草稿，请核对目录和规则；不展示推测的变更数量。')),
     h('section', {class: 'card'}, h('h2', {}, '节点应用情况'), nodesTable(ctx.data.nodes, current?.version))),
     h('section', {class: 'card'}, h('h2', {}, '发布历史（最近100条）'), history === null ? notice('历史未取得，请重新读取', 'error') : table(['版本', '发布时间', '来源', '操作'], history.map(row => ['V' + row.version, row.createdAt || '未取得', row.rollbackFrom ? '回滚自V' + row.rollbackFrom : '草稿发布', h('div', {class: 'actions'}, button('查看摘要', () => ctx.details('历史V' + row.version + '（只读摘要）', row)), permissionButton('回滚', () => confirmPublish(ctx, row.version), ctx.role))]), '尚无发布记录。')));
 }

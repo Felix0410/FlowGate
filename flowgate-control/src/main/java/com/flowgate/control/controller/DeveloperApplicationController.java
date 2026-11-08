@@ -22,5 +22,4 @@ public class DeveloperApplicationController {
     @PostMapping("/admin/apps") @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     public Object createApp(@RequestBody Map<String,Object> input,HttpServletRequest req){return business.saveApp(null,input,actor(req));}
     @PatchMapping("/admin/apps/{id}") public Object updateApp(@PathVariable long id,@RequestBody Map<String,Object> input,HttpServletRequest req){return business.saveApp(id,input,actor(req));}
-    @PostMapping("/admin/apps/{id}/credentials") public void credentials(@PathVariable long id){business.credentials(id);}
 }
