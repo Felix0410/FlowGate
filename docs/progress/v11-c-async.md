@@ -96,7 +96,7 @@
 
 ### C4～C6：运营和真实证据
 
-- AdminAuthInterceptor.v11Path新增C路径：ADMIN才能POST FAILED重试，OPERATOR/VIEWER只读，Caller不可登录；返回不含Outbox payload原文。日期<=UTC昨天，查询最多31天、稳定游标limit1..100，PENDING不等于错账。
+- AdminAuthInterceptor.v11Path新增C路径：ADMIN才能POST FAILED重试，OPERATOR/VIEWER只读，Caller不可登录；返回不含Outbox payload原文。日期<=UTC昨天，查询最多31天、按(dayUtc,applicationId,apiId)复合主键稳定游标limit1..100（不能仅afterDay）；PENDING不等于错账。
 - UI沿用`static/console`原生ES Modules，真实应用/API下拉、空/错/待处理显示；同步`docs/guides/product-console-guide.md`和`/console/guide.html`。真人375px/1280px仍留负责人。
 - 新`scripts/v11-c-console-test.mjs`与`scripts/v11-c-smoke.py`最少证明：Broker down仍Quota授权并Outbox积压；恢复→aggregate追平；重投/DB提交未ack不重复；两个Worker lease互斥；封账日先PENDING后MATCH，故意更改隔离读模型后MISMATCH；安全重放不改Ledger/Balance；无Kafka旧V1/旧Caller不回归。
 - 真实命令、退出码、通过/失败/跳过、Git SHA、版本、隔离容器信息回填本文件新增C-09（实施证据节，避免和本节冲突），仓库只留脱敏`docs/progress/evidence/v11-c-*.json`；未执行标未执行。完成后等待ChatGPT复审和负责人浏览器验收，**不自动进入D或合并main**。
