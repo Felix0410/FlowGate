@@ -38,6 +38,9 @@ services:
   kafka:
     image: apache/kafka:4.1.1
     profiles: [mq]
+    restart: unless-stopped
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     ports:
       - "127.0.0.1:${FLOWGATE_KAFKA_PORT:-19092}:9094"
     environment:
@@ -53,8 +56,9 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
-      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
 
 volumes:
   mysql-data:
   redis-data:
+  kafka-data:

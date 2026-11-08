@@ -1,14 +1,14 @@
-# FlowGate｜当前本地Codex唯一任务：V11-C源码复审定向修复（2026-11-08）
+# FlowGate｜当前阶段：V11-C三项复审修复完成，等待复审（2026-11-08）
 
 > **V11-C的C0～C6 Java/Kafka/SQL/前端与实际测试证据已经真实提交GitHub**，PR #9仍Draft。Codex记录JDK17 **67 JUnit**、**26组真实Kafka/HTTP故障场景**及109 Ledger=Outbox=Consumed=每日授权数，ChatGPT已审读远端源码与证据但**未独立运行本机Java/Kafka/MySQL或真人浏览器**。目前不是从头开发C，也不是开始D。
 >
 > **当前唯一执行合同：`CODEX_V11_C_REVIEW_FIX_PROMPT.md`**；源码审核报告`docs/reviews/v11-c-static-review-2026-11-08.md`；真实历史实施`docs/progress/v11-c-async.md`的C-09/C-10。旧`CODEX_V11_C_EXEC_PROMPT.md`为已完成C0～C6历史阶段合同，不再按原路线从头重写。
 
-## 本轮必须依次完成的三个边界
+## 本轮已完成的三个边界
 
-1. **P1-C01：Kafka容器日志持久性 + 已SENT未消费的恢复**。现Compose Kafka日志无volume，容器重建/保留期清除会让已Broker ACK、Outbox=SENT而尚未Consumed的事件失去自动重发路径。新增独立Kafka命名卷，并实现有安全时间门槛、ADMIN审计、CAS的原eventId补投；在隔离Compose/隔离Broker丢失场景真实测不多扣/不双计。
-2. **P1-C02：区分MySQL瞬时故障和永久毒消息**。当前`UsageKafkaConfiguration`所有异常都暂停分区。数据库断开又恢复时需自动有界退避、同offset重试、最终追平，不需要重启Control；真正invalid/event冲突仍暂停、不ACK、其他分区继续。
-3. **P1-C03：Ledger与Outbox完整性对账**。`AsyncUsageReadMapper.Sql.reconciliation`的INNER JOIN会忽略缺失Outbox的权威Ledger。增加有界只读不完整事件诊断，孤儿Ledger/重复Outbox必须显示完整性异常而不是0/MATCH；真实MySQL反例、中文前端提示。
+1. **P1-C01已修**：官方镜像UID1000可写的/var/lib/kafka/data独立Kafka命名卷，真Compose down/up持卷保留消息与offset；ADMIN审计/CAS/300秒等待期的原SENT未消费补投，DB权威不重复扣。
+2. **P1-C02已修**：包装异常分类、标准DefaultErrorHandler 1～30秒封顶自动重试，实际MySQL pause/unpause后不重启Control/Listener追平；永久毒消息仅暂停问题分区不ACK，其他分区继续。
+3. **P1-C03已修**：只读RR有界完整性诊断，孤儿Ledger/反向孤儿/重复Outbox明确INTEGRITY_GAP，不伪造日归属或放大expected，业务页/指南同步。
 
 ## 实测、Git、安全
 
@@ -18,4 +18,4 @@
 - 按修复合同扩展JUnit、Node旧新产品和两Gateway真实Kafka/MySQL故障测试；**保留原C0～C6 26组与67JUnit的历史证据**，新`docs/progress/evidence/v11-c-review-fix-smoke.json`只有实测后才生成。进度记录完整SHA、命令/退出码、通过失败跳过数以及原C测试回归。
 - 完成后停在PR #9 Draft并交ChatGPT复审与负责人真人1280px/375px/键盘测试。**不开始V11-D、不合并main或所有Stacked PR**。
 
-**当前真实状态：C0～C6已实现有历史测试证据，本轮3项静态审查边界待Codex编码与新故障实测，整个V1.1未最终交付。**
+**当前真实状态：三项复审修复与定向验证已完成（Java70、7套Node、新增13组、独立卷重建、原C6 26组）；见进度C-10与v11-c-review-fix-smoke.json。源码通过不等于常驻部署；启动新Kafka卷需明确负责人授权，.env及用户数据库未自动修改。到此等待复审和真人浏览器验收，不自行进入D或合并。远端交付以实际推送结果为准。**

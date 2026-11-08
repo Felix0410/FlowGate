@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shutil
 import socket
 import subprocess
 import tempfile
@@ -51,10 +52,16 @@ class Lab:
         return command(['docker','exec','-i','-e','MYSQL_PWD='+self.password,self.mysql,'mysql','-uroot','-N','-B','flowgate'],input=statement)
     def redis(self,*args):
         return command(['docker','exec',self.redis_name,'redis-cli','--raw',*map(str,args)])
+    def artifact(self,module):
+        # 运行中的Boot Jar必须不可变，避免另一轮Maven重打包破坏嵌套类延迟加载。
+        directory=self.temp/'artifacts'; directory.mkdir(exist_ok=True)
+        target=directory/(module+'.jar')
+        if not target.exists(): shutil.copy2(ROOT/module/'target'/f'{module}-0.0.1-SNAPSHOT.jar',target)
+        return target
     def app(self,module,extra=None):
         env=dict(self.env,**(extra or {}))
         handle=open(self.temp/(module+'-'+str(len(self.processes))+'.log'),'w'); self.handles.append(handle)
-        process=subprocess.Popen([JAVA,'-jar',str(ROOT/module/'target'/f'{module}-0.0.1-SNAPSHOT.jar')],env=env,stdout=handle,stderr=subprocess.STDOUT)
+        process=subprocess.Popen([JAVA,'-jar',str(self.artifact(module))],env=env,stdout=handle,stderr=subprocess.STDOUT)
         self.processes.append(process); return process
     def request(self,path,body=None,base=None,token=None,method=None):
         headers={}

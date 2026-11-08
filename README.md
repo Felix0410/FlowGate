@@ -1,6 +1,6 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **2026-11-08 ChatGPT远端复审更新**：V11-C完整Kafka/Outbox Worker/Consumer/用量/对账和C0～C6脚本已远端真实交付；Codex记录**67项JUnit + 26组真实Kafka故障场景**、109条Ledger/Outbox/Consumed/日授权次数守恒（ChatGPT未重新独立运行）。静态审核发现**本地Kafka日志缺持久卷且SENT未消费无法补投**、**瞬时数据库错误永久暂停消费分区**、**Ledger缺Outbox的对账盲区**三项需定向修复；详见[源码审核](docs/reviews/v11-c-static-review-2026-11-08.md)、[Codex最小修复任务](CODEX_V11_C_REVIEW_FIX_PROMPT.md)。这些问题尚未编码修复，C不能以原26组已通过就宣称所有恢复场景安全；不进入D，不合并main。
+> **V11-C三项复审修复已在功能分支完成，待复审**：Kafka命名卷与受控SENT补投、数据库瞬时故障自动恢复、Ledger/Outbox完整性诊断均已实测。Java70项、7套Node、新增13组故障验证、持卷容器重建和原C6 26组回归通过；旧历史证据保留，结果见[C-10整改记录](docs/progress/v11-c-async.md)及[新证据](docs/progress/evidence/v11-c-review-fix-smoke.json)。真实环境部署/新卷启动与源码通过分开记录，不进入D、不合并main。
 
 
 > **V11-C已在功能分支实现，等待复审**：Control可选Kafka、Outbox租约投递、数据库幂等消费/日汇总、运营查询与UTC封账对账，以及三组正式业务页面。Async默认OFF，Kafka不进入B准入热路径；两项B小修已先在C0独立实测通过。实际命令、故障证据与远端交付状态见[C实施记录](docs/progress/v11-c-async.md#c-09-本地实际实施2026-11-08)。不自动迁移用户数据库、激活异步、进入D或合并PR。
@@ -436,7 +436,7 @@ export FLOWGATE_USAGE_TOPIC=flowgate.usage.v1
 export FLOWGATE_USAGE_GROUP=flowgate-usage-aggregate-v1
 ```
 
-IDEA使用原Control运行配置并加载这些环境变量；默认仍用Java17。Topic由启用异步的Control声明创建，首次Broker不在线时定时有界重试初始化；生产者最多100在途/单批20，30秒租约和10秒发送deadline。单KRaft开发Broker副本1，未增加用户持久数据卷，不属于生产多Broker高可用。
+IDEA使用原Control运行配置并加载这些环境变量；默认仍用Java17。Topic由启用异步的Control声明创建，首次Broker不在线时定时有界重试初始化；生产者最多100在途/单批20，30秒租约和10秒发送deadline。单KRaft开发Broker副本1，使用独立kafka-data命名卷挂载镜像可写的/var/lib/kafka/data；源码配置不代表用户环境已经启动或迁移，不属于生产多Broker高可用。
 
 浏览器打开`http://127.0.0.1:8081/console/`：
 
@@ -444,6 +444,23 @@ IDEA使用原Control运行配置并加载这些环境变量；默认仍用Java17
 - “异步事件”：区分SENT（Broker确认）和已消费；ADMIN可确认重投FAILED，保留原eventId，不重新扣额。进程暂停/冲突计数重启归零。
 - “对账中心”：仅昨天及更早的UTC日，PENDING表示未追平，MATCH表示账本与读模型一致，MISMATCH需诊断，不自动改余额。完整步骤见[中文指南](docs/guides/product-console-guide.md)。
 
-毒消息/消费者数据库故障采用保守方案：暂停问题分区并保留offset；首版不提供未经确认的DLT，也不自动跳过问题消息。先诊断修复，再重启消费者。严重协议毒消息可能需负责人另行制定处置，不能通过反复业务调用“补统计”。
+消费者数据库故障按1/2/4/8/16/30秒封顶自动退避，DB恢复后无需重启消费者。永久毒消息仍暂停问题分区、不ACK、无未确认DLT或自动跳offset。SENT未消费的正确原事件可由ADMIN在默认300秒等待期后补投，节点重启也有完整冷却。Ledger/Outbox缺失或多事件会显示INTEGRITY_GAP，不能盲目补投或重复业务调用“补统计”。
 
 定向验证：`source .env`后运行`mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`、`node scripts/v11-c-console-test.mjs`、`python3 scripts/v11-c-smoke.py`。C6脚本在独占随机端口MySQL8.4/Redis7/Kafka4.1.1/双Gateway验证真实ACK/COMMIT后进程崩溃、重放及故障恢复；只清理自己创建的资源。旧身份和默认OFF兼容可运行`python3 scripts/v11-c-off-smoke.py`。真人浏览器1280px/375px/键盘体验、长期压测及主线最终验收留后续授权。
+
+
+### C复审修复：Kafka常驻启动与运维
+
+持久卷实际重建验证在独立随机Compose项目通过，用户现有MySQL/Redis/卷未改。常驻启动涉及创建`flowgate-local_kafka-data`，按修复合同由负责人单独授权后再执行；不会自动迁移旧无卷Kafka日志。已获授权且本机无旧Kafka时只启动该服务，不重建数据库：
+
+```bash
+source .env
+docker compose -f compose.local.yml --profile mq up -d --no-deps kafka
+docker compose -f compose.local.yml --profile mq ps kafka
+```
+
+外部Bootstrap为`127.0.0.1:19092`，内部监听localhost:9092。默认Async仍关闭，启动Broker不会自动激活C或修改.env。需要Control消费时加载明确开关并重启自己的Control实例。若有旧无卷Broker，先备份和安排迁移，不直接替换其数据。不要对用户项目执行`down -v`。
+
+新增SENT补投与FAILED重试区分、数据库自动恢复/毒消息诊断及INTEGRITY_GAP处理，见[中文操作指南](docs/guides/product-console-guide.md)末节。只读角色不能补投，正常已消费或刚ACK的SENT会被409保护。完整性扫描是带日期/应用/API条件和样本上限的只读诊断，不把未知日期归入日报、不自动写权威余额。JSON关联在大表的执行计划与索引工作仍待D，不以小样本通过承诺性能。
+
+复审新增脚本：`node scripts/v11-c-review-console-test.mjs`、`python3 scripts/v11-c-volume-smoke.py`、`python3 scripts/v11-c-review-smoke.py`；只用隔离资源。原C6 `python3 scripts/v11-c-smoke.py`保留并已重新通过，旧证据不覆盖。后续Lab均复制不可变Jar，避免并行构建污染正在运行的嵌套Jar。真人1280/375px/键盘验收仍待负责人。

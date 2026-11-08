@@ -181,7 +181,7 @@ C完整代码/证据提交`90d4d5ca51d9b5e022a4ccc8a4f50980f91f0243`，当前分
 本地审查补丁将导出`.local/acceptance/flowgate-v11-c-review.patch`（仅当前C相对远端设计的提交，无用户.env），可用于先审查。修复GitHub写权限后仍只能推当前功能分支。最终Docker检查只剩原`flowgate-local-mysql-1`和`flowgate-local-redis-1`，所有本轮Kafka/Lab容器已清理。当前等待ChatGPT和项目负责人复审。
 
 
-## C-10 2026-11-08 ChatGPT远端源码复审与定向收口（待编码）
+## C-10 2026-11-08 ChatGPT远端源码复审与定向收口（三项已修，待复审）
 
 > **实际审核起始C实现HEAD**：`08c48d015d320d7714fb8c9e70d09f8a5814de04`。截至此时GitHub已经真实包含C0～C6的Kafka、Outbox Worker、Consumer、MySQL日汇总、运营API、正式前端和Codex的Java67项/C6 26组真实故障验证。上述源代码和脱敏证据可远端读取；本节保留C-09中Codex`git push` HTTP403作为**当时**历史，不再声称“当前远端只有设计”。**ChatGPT未重新运行本机Kafka/MySQL/Java或真人浏览器**。
 
@@ -191,9 +191,60 @@ C完整代码/证据提交`90d4d5ca51d9b5e022a4ccc8a4f50980f91f0243`，当前分
 
 | 优先级 | 新发现的未覆盖边界 | 通过条件 | 当前 |
 |---|---|---|---|
-| P1-C01 | Compose Kafka`KAFKA_LOG_DIRS=/tmp/kraft-combined-logs`无数据卷，容器重建日志丢失；Outbox`SENT`但未Consumed无法经现有只允许FAILED的重投恢复 | 独立Kafka命名卷保留KRaft数据；ADMIN审计+CAS可补投超过grace且确实未消费的SENT原eventId；隔离容器重建/人为丢消息后Daily追平、不多扣授权 | **待Codex修复与实测** |
-| P1-C02 | `UsageKafkaConfiguration`对MySQL短暂异常与永久毒消息一律暂停分区，DB恢复却需要人工重启Consumer | 暂时DB/网络故障自动有界退避/恢复同offset、不先ACK、不双计；永久非法事件仍暂停、保留offset，其他分区继续 | **待Codex修复与实测** |
-| P1-C03 | `AsyncUsageReadMapper.Sql.reconciliation()`以Ledger INNER JOIN Outbox作权威expected源，若Ledger缺Outbox直接漏报/可能空列表；多Outbox同charge可放大expected | 有界只读Ledger/Outbox完整性诊断、状态非MATCH/不伪造日期；真库孤儿Ledger和重复Outbox反例与前端中文提示 | **待Codex修复与实测** |
+| P1-C01 | Compose Kafka`KAFKA_LOG_DIRS=/tmp/kraft-combined-logs`无数据卷，容器重建日志丢失；Outbox`SENT`但未Consumed无法经现有只允许FAILED的重投恢复 | 独立Kafka命名卷保留KRaft数据；ADMIN审计+CAS可补投超过grace且确实未消费的SENT原eventId；隔离容器重建/人为丢消息后Daily追平、不多扣授权 | **已修，独立实测通过** |
+| P1-C02 | `UsageKafkaConfiguration`对MySQL短暂异常与永久毒消息一律暂停分区，DB恢复却需要人工重启Consumer | 暂时DB/网络故障自动有界退避/恢复同offset、不先ACK、不双计；永久非法事件仍暂停、保留offset，其他分区继续 | **已修，独立实测通过** |
+| P1-C03 | `AsyncUsageReadMapper.Sql.reconciliation()`以Ledger INNER JOIN Outbox作权威expected源，若Ledger缺Outbox直接漏报/可能空列表；多Outbox同charge可放大expected | 有界只读Ledger/Outbox完整性诊断、状态非MATCH/不伪造日期；真库孤儿Ledger和重复Outbox反例与前端中文提示 | **已修，独立实测通过** |
 | P2 | 单Broker不具生产HA；不可恢复毒消息采用保守暂停，10万级SQL与公平压测、真人375/1280浏览器体验仍待 | 明确运维边界，性能归D，真实产品手测归负责人 | 历史限制 |
 
-**当前阶段真实状态**：C核心实现有较充分隔离故障和幂等证据，**没有发现现有109笔守恒场景实际失败**。三项是新增的业务恢复/审计异常边界，审查文档提交不等于源码已修；Codex完成后新增单独`docs/progress/evidence/v11-c-review-fix-smoke.json`，原`v11-c-smoke.json`及所有旧B/C历史证据保持不变。
+**当前阶段真实状态**：三项新增边界已完成源码、前端、指南及独立实测；最终Java70项、新增13组真实故障、独立持卷重建和原C6 26组回归均通过，详见下方实施节。新证据独立保存，旧C/B/A历史未覆盖；仍待ChatGPT复审与负责人真人浏览器，不进入D。
+
+### C-10.1 F1 本地修复与真实验证
+
+Compose新增独立kafka-data卷，实际日志目录改为镜像预置UID1000可写的`/var/lib/kafka/data`，无root初始化服务/无改用户卷。`scripts/v11-c-volume-smoke.py`从仓库Compose仅提取Kafka到随机项目，实际down（无-v）删除容器再up：消息offset0及已提交组offset1保留，最终只删本次新卷；20261108T124634本机证据通过。
+
+新增ADMIN `POST /admin/async-events/{id}/replay`，SENT且未消费、超过默认300秒等待期才能CAS排NEW，保留payload/eventId，审计同事务，不访问余额/Ledger。新Broker ACK回写时将SENT的next_attempt_at更新为ACK等待期基点；应用启动也需经过完整grace，保护旧SENT时间含义不同的存量行。升级须全部Control Worker使用新版本后再补投，不混用旧版ACK写法。可配置1..86400秒，仅独占Lab设置2秒，用户默认300未改。FAILED retry含义保留；安全摘要/页面新增超期SENT未消费数、等待期与独立确认按钮。
+
+`mvn -B -ntp -pl flowgate-control -am test package`退出0；新旧Node通过。`scripts/v11-c-review-smoke.py`F1阶段真实新Broker完全丢原记录（topic size=0），MySQL仍1Ledger/1SENT/0Consumed；最近SENT409、双管理员仅200/409、一次审计、原payload/eventId不变，补投后1Consumed/1Daily且余额不变、已消费不可补投、OPERATOR/VIEWER403。20261108T124854本机证据通过；最终三项汇总证据待F4，不覆盖任何旧C证据。用户持久Kafka未启动/迁移。
+
+### C-10.2 F2 本地修复与真实验证
+
+新增UsageConsumerErrorHandler，框架包装cause链分类DataAccess/SQL连接/事务超时，委托官方DefaultErrorHandler自动同offset重试。指数1/2/4/8/16/30秒封顶，长期故障低频周期再试，绝不ACK恢复成成功；协议/权威内容冲突仍seek同poll未处理记录并仅暂停问题分区。固定诊断区分transientRetry与poisonPause（保留旧pausedPartition兼容，均为进程计数）。不引新依赖。
+
+新增两项Java分类/分区边界用例，定向Maven test package退出0。20261108T125916真实Lab：消费已进入fg_consumed_event SQL锁等待后实际docker pause MySQL 5秒再unpause，释放测试锁，不重启Control/Listener，PID不变，原offset自动追平2Ledger/2Consumed/2Daily，transientRetry>=1、poisonPause=0。再发永久非法和内容冲突分别暂停，分区2提交位点不前进，其他分区合法重复仍被消费，不双计。无原始payload/异常消息记录，无假DLT。F4再合并F3及原C6回归。
+
+### C-10.3 F3 本地修复与真实验证
+
+新增LedgerIntegrityMapper，在同一只读REPEATABLE_READ快照内，按日期/应用/API过滤、每类及总样本上限101（返回100）诊断Ledger缺Outbox、Outbox缺Ledger、同charge多Outbox及事件时间缺失。事件日期未知时只用写入时间及相邻UTC日窗口作候选筛选，不将其归入日报；响应明确integrityScan范围及INTEGRITY_GAP、是否截断。正常日归属仍Outbox.eventTime；expected同charge只取最早事件防放大，多事件另行报警。本次范围有异常时不能宣称MATCH，包括日报行为空的情况。无权威数据自动写修复。
+
+新增Java只读RR/空日报不掩盖异常用例，受影响Java test/package通过；前端空日报仍显示“Ledger存在但事件日期未知”，新旧Node通过。首次DOM验证发现直接replaceChildren传null会在浏览器显示字样/模拟DOM报错，已改为空参数展开并通过。
+
+20261108T131109完整真实复审Lab已通过12组：基线旧INNER JOIN在缺Outbox时实际为0；新API仍返回INTEGRITY_GAP且不伪造日期；恢复原事件后真实Kafka消费PENDING→MATCH；重复Outbox时expectedCount仍1/关联数2并报警；反向孤儿也被发现，移除坏测试行后MATCH，余额/Ledger未改。新增三项集成曾被并行重打包共享target Jar污染，出现延迟类加载NoClassDefFoundError，失败不算通过；现Lab使用独立不可变Jar副本，重跑全部新例通过。F4整体验收与原C6回归单独记录，不覆盖历史证据。
+
+### C-10.4 F4 最终定向验收与证据
+
+代码分步提交：F1 `7849497`、F2 `71b4f6a`、F3 `49bf548`。本节测试提交还包含运行Jar隔离和诊断候选边界收尾：Outbox后来恢复/写入较晚但事件时间缺失时，按关联Ledger的候选写入窗口仍能诊断，绝不将其写入时间直接当日报日期。SENT超期告警仅扫描最近1000条事件候选，API/页面明确显示范围，不冒充全历史数量；真MySQL运营probe补查通过。
+
+实际命令（均先source .env，Maven/Java子进程JAVA_HOME为17.0.18）：
+
+- `mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`最终退出0：Contract10+Control30+Gateway26+Demo4=**70项，失败0/错误0/跳过0**。较原67新增数据库异常分类/分区seek边界2项、空日报完整性与只读RR1项。无全项目统一回归/长期压测。
+- `node scripts/v11-c-review-console-test.mjs`、`node scripts/v11-c-console-test.mjs`、`node scripts/v11-b-console-test.mjs`、`node scripts/v11-a-console-test.mjs`、`node scripts/product-console-test.mjs`、`node scripts/block2-console-test.js`、`node scripts/block3-console-test.js`全部退出0。新测试实际执行模块/模拟DOM，覆盖SENT独立补投确认与ADMIN、等待期禁用提示、超期告警、空日报仍显示INTEGRITY_GAP。非真人浏览器验收。
+- `python3 scripts/build-console-guide.py --product --check`退出0，指南/离线HTML同步。资源更新后曾执行package -DskipTests仅打包，不计作测试通过；最终上述70项完整test/package已实际重跑。
+- `python3 scripts/v11-c-volume-smoke.py`退出0：独立随机Compose仅Kafka/独立新卷，真实down（无-v）后up容器ID改变，offset0消息和已提交组位点1保留，UID1000目录可写，最终只删本次卷。
+- `python3 scripts/v11-c-review-smoke.py`最终退出0，**13组新故障/HTTP场景**。实际Broker ACK且SENT未消费后丢弃独占Broker重建空记录、等待期拒绝、双管理员补投200/409+一次审计、原payload/eventId保留、无新Ledger/额度消耗、已消费拒绝、OPERATOR/VIEWER403；实际MySQL消费SQL途中pause/unpause且无Control/Listener重启自动追平；永久毒消息/内容冲突暂停而其他分区继续；孤儿Ledger/重复Outbox/反向孤儿/事件日期缺失显式GAP，恢复正确测试数据后MATCH，不动权威余额/旧Ledger。最终新Lab为3条真实Grant/3消费/3Daily次数。测试等待期仅2秒，生产默认300未改。
+- 原`python3 scripts/v11-c-smoke.py`重新实际执行退出0，**26组原C6回归**，最后109Ledger=109Outbox=109Consumed=109Daily次数。原C6/B/A全部历史JSON未改；本次原回归raw另存`.local/acceptance/v11-c-20261108T131016.json`。最终修复数据raw `.local/acceptance/v11-c-review-20261108T133020.json`，12组中间通过/失败尝试保留但不冒充最终。
+- 受限告警SQL收尾又运行`python3 scripts/v11-c4-smoke.py`退出0，真MySQL运营查询/三元组游标/三态对账/审计脱敏通过；不是以源码字符串自我检查替代SQL运行。
+
+唯一新增汇总证据`docs/progress/evidence/v11-c-review-fix-smoke.json`，包含新13组、卷重建和原26组回归、Java/Node结果。`git diff --check`及中文关键分点检查通过，未新增依赖/框架/微服务/DDL，不改B扣额数据面。原MySQL/Redis Compose服务定义逐字对比保持原样。没有读模型自动改写余额/历史Ledger，没有未经ACK的DLT或跳offset。
+
+失败历史：新增整体第一次后半段曾受共享target Jar并行重打包污染，出现延迟加载NoClassDefFoundError，最终passed=false未算通过。Lab现在把运行Jar复制到独占临时目录（Control/双Gateway/Demo及probe均一致），新13组重新通过；原C6也完成回归。前端直接replaceChildren(null)的空分支已改为不传该参数，Node重跑通过。没有隐藏这些失败。
+
+当前限制：完整性诊断是明确日期/应用/API候选窗口和100样本，不是全历史审计；JSON关联/索引/10万级EXPLAIN与正式压测仍待D；Kafka单Broker不属HA；永久毒消息仍需负责人诊断处置。真人1280px/375px/键盘/角色体验未执行。用户.env/既有JVM/数据库持久卷未改；常驻Kafka新卷启动单独征询负责人，不能把配置和独占卷测试当作用户环境已部署。所有技术修复至此完成，等待复审，不进入D/不合并PR。
+
+
+### C-10.5 本地技术交付汇总
+
+本轮功能分支`feat/v11-c-async-usage`，三项主修复提交`7849497`、`71b4f6a`、`49bf548`，测试/收尾代码提交`1b53fb6`。最终独立证据为`evidence/v11-c-review-fix-smoke.json`，没有覆盖原C的67/26历史或B/A证据。默认Async仍OFF，补投默认等待300秒；仅测试进程显式缩短到2秒。
+
+README/AGENTS/中文指南及离线HTML同步，未新增Java/npm依赖、Kafka Streams/CDC/微服务，不引入任何数据库DDL/自动修复权威余额。SENT补投和完整性异常均有产品按钮/中文解释及真实权限；常驻启动涉及新Kafka命名卷，已给负责人单独确认选项，当前未收到该项授权，未擅自启动用户Kafka或迁移任何原数据。源码测试通过与实际常驻部署分开记录。
+
+已到本轮修复停止门槛，后续只等待复审、负责人真实1280px/375px/键盘体验及明确授权部署；不自行进入D、不合并main/PR #8/#9。远端交付状态以随后实际push/ls-remote结果记录，不用历史403推断当前远端没有C代码。

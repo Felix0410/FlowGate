@@ -37,6 +37,7 @@ flowgate.async:
   enabled: ${FLOWGATE_ASYNC_ENABLED:false}
   topic: ${FLOWGATE_USAGE_TOPIC:flowgate.usage.v1}
   poll-ms: ${FLOWGATE_ASYNC_POLL_MS:1000}
+  replay-grace-seconds: ${FLOWGATE_ASYNC_REPLAY_GRACE_SECONDS:300}
 spring.kafka:
   bootstrap-servers: ${FLOWGATE_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:19092}
   admin:

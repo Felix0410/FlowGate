@@ -13,7 +13,7 @@ public interface OutboxEventEntryMapper extends BaseMapper<OutboxEventEntry> {
  int lease(@Param("id") long id,@Param("owner") String owner);
  @Update("UPDATE fg_outbox_event SET status='FAILED',lease_owner=NULL,lease_until=NULL,last_error_code='LEASE_RETRY_EXHAUSTED' WHERE status='LEASED' AND lease_until<UTC_TIMESTAMP(3) AND attempt_count>=8")
  int expireExhausted();
- @Update("UPDATE fg_outbox_event SET status='SENT',lease_owner=NULL,lease_until=NULL,last_error_code=NULL WHERE id=#{id} AND status='LEASED' AND lease_owner=#{owner} AND lease_until>=UTC_TIMESTAMP(3)")
+ @Update("UPDATE fg_outbox_event SET status='SENT',next_attempt_at=UTC_TIMESTAMP(3),lease_owner=NULL,lease_until=NULL,last_error_code=NULL WHERE id=#{id} AND status='LEASED' AND lease_owner=#{owner} AND lease_until>=UTC_TIMESTAMP(3)")
  int sent(@Param("id") long id,@Param("owner") String owner);
  @Update("UPDATE fg_outbox_event SET status=IF(attempt_count>=8,'FAILED','NEW'),next_attempt_at=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL #{backoff} SECOND),last_error_code=#{code},lease_owner=NULL,lease_until=NULL WHERE id=#{id} AND status='LEASED' AND lease_owner=#{owner} AND lease_until>=UTC_TIMESTAMP(3)")
  int failed(@Param("id") long id,@Param("owner") String owner,@Param("backoff") int backoff,@Param("code") String code);
