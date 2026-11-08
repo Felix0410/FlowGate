@@ -1,6 +1,6 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **V1.1-B已在功能分支实现（待复审）**：B0两项P0、独立App Token与代次、USAGE_QUOTA节点门禁、MySQL权威余额/Ledger/Outbox、非阻塞Gateway计量及业务控制台已实现。计量开关默认OFF，不自动迁移本机持久数据库、不启用Kafka。实际测试、提交和未完成的人工验收以[B实施记录](docs/progress/v11-b-quota.md)为准。设计合同见[完整B设计](docs/design/v11-b-quota-execution.md)。V11-C/D未开始，旧Draft PR和main不动。
+> **V11-B（2026-11-08）**：B0～B6的Java/SQL/Gateway计量、MySQL余额/Ledger/Outbox、独立APP Token、正式产品页与Codex隔离测试**均已远端交付**；Codex记录57项JUnit及20组双Gateway真实HTTP场景（Free5/100并发恰好5Grant/95拒绝）。ChatGPT源码复审建议补齐**存量A同月订阅预检与冻结余额核验**、**计量功能OFF时允许紧急撤销已签发凭证**。详见[审核报告](docs/reviews/v11-b-static-review-2026-11-08.md)和[Codex定向修复](CODEX_V11_B_REVIEW_FIX_PROMPT.md)。上述小修尚未编码/重测，V1/V11真人浏览器验收与主线合并未完成；Kafka属于V11-C，不在B中。
 
 
 > **V1.1-A管理域已在功能分支实现并完成定向验证，复审缺口已迁入B0**：客户、应用、不可变额度套餐、UTC串行订阅及正式产品页面。A历史交付不启用应用Token、额度扣减或Kafka；B在独立分支增量实现，C/D未编码。**V1仍待负责人最终人工验收，main未合并，不能将A称为V1.1全版本完成。**
