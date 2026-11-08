@@ -71,7 +71,7 @@ B已存在`fg_outbox_event.payload_json`，C不改写历史Outbox，也不伪造
 }
 ```
 
-必须验证：字段恰好7个、version=1、UUID规范、app/api正数、units为1..100、period=YYYYMM、eventTime是UTC Instant且年月与period一致、JSON长度上限4KB、不得有Authorization/Token/Header/Body/IP/用户名。超过版本/结构不合法**不可写UsageDaily**。
+必须验证：字段恰好8个、version=1、UUID规范、app/api正数、units为1..100、period=YYYYMM、eventTime是UTC Instant且年月与period一致、JSON长度上限4KB、不得有Authorization/Token/Header/Body/IP/用户名。超过版本/结构不合法**不可写UsageDaily**。
 
 ### 3.2 特别容易错的日边界
 
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS fg_usage_daily (
 在Control进程新增`OutboxClaimService`（MyBatis+TransactionTemplate）、`OutboxPublisher`（Scheduled+KafkaTemplate）与Mapper；**不把数据库事务包住异步Kafka发送**。
 
 1. **短事务领取**：MySQL连接UTC；从`fg_outbox_event`按`id`选最多20条`NEW`到期或`LEASED`但租约已过期的`USAGE_GRANTED`记录，查询使用`FOR UPDATE SKIP LOCKED`。同一短事务写`status=LEASED,lease_owner=<实例UUID>,lease_until=UTC_TIMESTAMP(3)+30s,attempt_count=attempt_count+1`，提交即释放行锁。两Worker并发不能同时持有同一有效lease。重试与领取均只操作Outbox，不访问Balance更新。
-2. **事务外投递**：对领取的`id`按appId为Kafka key调用`KafkaTemplate<String,String>.send`，只传标准化7字段JSON；异步结果有10s deadline，每实例最多100个在途send，超上限**暂停领取**而不是无限排队；本地定时调度单实例仅1个claim cycle进行中。
+2. **事务外投递**：对领取的`id`按appId为Kafka key调用`KafkaTemplate<String,String>.send`，只传标准化8字段JSON；异步结果有10s deadline，每实例最多100个在途send，超上限**暂停领取**而不是无限排队；本地定时调度单实例仅1个claim cycle进行中。
 3. Broker明确ACK成功后执行**新短事务**：
    `UPDATE fg_outbox_event SET status='SENT',lease_owner=NULL,lease_until=NULL,last_error_code=NULL WHERE id=? AND status='LEASED' AND lease_owner=? AND lease_until>=UTC_TIMESTAMP(3)`；
    更新0行说明租约被其他Worker抢回/已超时，**不得晚到Worker覆盖新owner**，Broker可能已收到事件，后续重复发送由消费者去重。
@@ -141,8 +141,8 @@ CREATE TABLE IF NOT EXISTS fg_usage_daily (
 Listener条件启用，使用Spring Kafka `@KafkaListener` + String JSON解码，consumer group固定，`enable-auto-commit=false`，`AckMode.MANUAL_IMMEDIATE`、单批次record模式，`Acknowledgment.acknowledge()`**必须在外层`@Transactional`服务调用正常返回（已提交DB）之后**。不能在事务方法内部提前ack。
 
 处理`processEvent`是一个MySQL `@Transactional`方法：
-1. 校验事件7字段、版本、UUID/UTC和长度；读取本地`fg_outbox_event`的eventId及其完整不可变payload并逐字段比对，读取`fg_quota_ledger`验证chargeId以及app/api/period/units；**不要相信仅来自Kafka的数字**。找不到Outbox/Ledger时留在可诊断消费失败路径，不假造成功消费。
-2. 将标准7字段规范化SHA256存于`fg_consumed_event`。先`INSERT(event_id,charge_id,payload_sha256)`（PK+UNIQUE双保护）；成功才按eventTime的UTC日期`INSERT ... ON DUPLICATE KEY UPDATE authorized_units=authorized_units+VALUES(authorized_units),grant_count=grant_count+1`，同一MySQL事务完成。
+1. 校验事件8字段、版本、UUID/UTC和长度；读取本地`fg_outbox_event`的eventId及其完整不可变payload并逐字段比对，读取`fg_quota_ledger`验证chargeId以及app/api/period/units；**不要相信仅来自Kafka的数字**。找不到Outbox/Ledger时留在可诊断消费失败路径，不假造成功消费。
+2. 将标准8字段规范化SHA256存于`fg_consumed_event`。先`INSERT(event_id,charge_id,payload_sha256)`（PK+UNIQUE双保护）；成功才按eventTime的UTC日期`INSERT ... ON DUPLICATE KEY UPDATE authorized_units=authorized_units+VALUES(authorized_units),grant_count=grant_count+1`，同一MySQL事务完成。
 3. 已存在相同eventId/chargeId时读取原payload指纹验证一致，一致则只返回`DUPLICATE`并在DB提交后ack；不同内容为`EVENT_CONFLICT`不加总并走人工诊断，**绝不能当作正常重复直接吞掉**。
 4. UPSERT/commit失败则整事务回滚，没有`consumed_event`孤立成功；Kafka offset不提前提交，重放后再试。消费者在Control MVC线程池/Listener线程内可使用JDBC，但不能共享到Gateway Reactor事件循环。
 5. Broker向消费者至少一次投递，数据库`fg_consumed_event`只保证本Control读模型的**幂等效果**；不宣称跨Kafka/MySQL的exactly-once。
