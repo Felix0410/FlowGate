@@ -261,6 +261,15 @@ try:
  finally:lab.redis('ACL','SETUSER','default','+eval','+evalsha')
  lab.expect(403,'/api/private/fast/1',base=gw,token=recovered['token']);assert lab.count()==before
  lab.check('Redis Lua撤销清理真实失败仍DB enabled=false，旧会话403不扣额')
+ # B复审F1：旧月Balance冻结版本不一致时，即使额度充足也不能继续扣原计划，Ledger/Outbox不变。
+ old_spent=lab.count(crossapp['id']);old_total=lab.sql("SELECT COUNT(*) FROM fg_outbox_event")
+ lab.sql(f"UPDATE fg_quota_balance SET plan_version=99 WHERE application_id={crossapp['id']}")
+ mismatch=dict(crossq,chargeId=str(uuid.uuid4()))
+ status,data=lab.internal(mismatch)
+ assert status==409 and data['code']=='QUOTA_SUBSCRIPTION_MISMATCH'
+ assert lab.count(crossapp['id'])==old_spent and lab.sql("SELECT COUNT(*) FROM fg_outbox_event")==old_total
+ lab.sql(f"UPDATE fg_quota_balance SET plan_version=1 WHERE application_id={crossapp['id']}")
+ lab.check('B复审：已有余额冻结套餐版本不匹配，真实内部Quota HTTP 409，未产生新Ledger/Outbox')
 
  # 默认OFF旧V1回滚兼容：关计量前先回滚到原非计量快照，旧Caller可用且APP被拒绝。
  r=lab.admin_call(200,'/admin/releases/1/rollback',body={'expectedVersion':lab.version});lab.version=r['version'];lab.applied()
