@@ -261,6 +261,17 @@ try:
  finally:lab.redis('ACL','SETUSER','default','+eval','+evalsha')
  lab.expect(403,'/api/private/fast/1',base=gw,token=recovered['token']);assert lab.count()==before
  lab.check('Redis Lua撤销清理真实失败仍DB enabled=false，旧会话403不扣额')
+ # C0：真实只读预检与旧A同月非重叠历史场景，任何风险不得静默换套餐。
+ preflight=(ROOT/'sql/v11-b-upgrade-preflight.sql').read_text()
+ assert all(line.split('\t')[-1]=='0' for line in lab.sql(preflight).splitlines())
+ legacy_app,legacy_cred=lab.new_app('legacy-month',large);legacy_q=lab.grant_payload(legacy_cred)
+ sub=lab.sql(f"SELECT id FROM fg_subscription WHERE application_id={legacy_app['id']}")
+ lab.sql(f"INSERT INTO fg_subscription(application_id,plan_id,plan_version_snapshot,effective_at,expires_at,status) SELECT application_id,plan_id,plan_version_snapshot,effective_at,DATE_ADD(effective_at,INTERVAL 1 SECOND),'EXPIRED' FROM fg_subscription WHERE id={sub}; UPDATE fg_subscription SET effective_at=DATE_ADD(effective_at,INTERVAL 1 SECOND) WHERE id={sub}")
+ assert any(int(line.split('\t')[-1])>0 for line in lab.sql(preflight).splitlines())
+ before=lab.count();outbox=lab.sql('SELECT COUNT(*) FROM fg_outbox_event');status,data=lab.internal(legacy_q)
+ assert status==409 and data['code']=='QUOTA_SUBSCRIPTION_MISMATCH' and lab.count()==before and lab.sql('SELECT COUNT(*) FROM fg_outbox_event')==outbox
+ assert lab.sql(f"SELECT COUNT(*) FROM fg_quota_balance WHERE application_id={legacy_app['id']}")=='0'
+ lab.check('C0：只读预检先零风险，旧A非重叠同月双订阅风险非零/新Grant409且无余额LedgerOutbox')
  # B复审F1：旧月Balance冻结版本不一致时，即使额度充足也不能继续扣原计划，Ledger/Outbox不变。
  old_spent=lab.count(crossapp['id']);old_total=lab.sql("SELECT COUNT(*) FROM fg_outbox_event")
  lab.sql(f"UPDATE fg_quota_balance SET plan_version=99 WHERE application_id={crossapp['id']}")
@@ -283,6 +294,10 @@ try:
  assert lab.sql(f"SELECT enabled FROM fg_app_credential_state WHERE principal_id={crosscred['principalId']}")=='0'
  disabled=lab.admin_call(200,f"/admin/apps/{crossapp['id']}/credentials/status")
  assert disabled['status']=='REVOKED' and disabled['issuanceEnabled'] is False
+ lab.restart_control();lab.applied();lab.publish()
+ before=lab.count();lab.expect(401,'/api/private/fast/1',base=gw,token=crosscred['token']);assert lab.count()==before
+ r=lab.admin_call(200,'/admin/releases/1/rollback',body={'expectedVersion':lab.version});lab.version=r['version'];lab.applied()
+ lab.restart_control({'FLOWGATE_QUOTA_ACTIVATION_ENABLED':'false'})
  lab.check('真实HTTP：计量OFF时现存凭证允许ADMIN紧急撤销；签发/轮换仍被门禁拒绝')
  lab.expect(200,'/api/private/fast/1',base=gw,token=old_caller);lab.expect(401,'/api/private/fast/1',base=gw,token=testtoken)
  lab.check('回滚旧快照后默认OFF凭证409，旧Caller正常/APP不可跨域')

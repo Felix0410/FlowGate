@@ -102,3 +102,9 @@
 - 真实命令、退出码、通过/失败/跳过、Git SHA、版本、隔离容器信息回填本文件新增C-09（实施证据节，避免和本节冲突），仓库只留脱敏`docs/progress/evidence/v11-c-*.json`；未执行标未执行。完成后等待ChatGPT复审和负责人浏览器验收，**不自动进入D或合并main**。
 
 **当前真实状态**：B小修代码已写、真实复测待Codex；C只有设计文档、任务书和开发指令，Worker/Consumer/UsageDaily/对账尚未编码。旧PR均Draft。
+
+## C-09 本地实际实施（2026-11-08）
+
+### C0 已通过，允许C1
+
+基线675de47，继承B复审修复。Java17（Maven JAVA_HOME实际17.0.18；系统PATH裸java为21，不用于Lab）定向test/package退出0；5套Node通过。首次B Node旧文案断言失败，按紧急撤销新版提示修正后通过。真实双Gateway/MySQL8.4/Redis7脚本退出0，新增只读预检先零风险、注入旧A非重叠同月两订阅后风险非零、下一新Grant409且不建余额/Ledger/Outbox；余额冻结版本错配409无新写；OFF撤销成功，恢复发布后旧Token401。完整旧B并发/故障/身份链路也通过。新证据`evidence/v11-c0-b-fix-smoke.json`，不覆盖任何旧B/A证据。未触碰用户环境。

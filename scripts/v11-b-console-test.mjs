@@ -23,7 +23,7 @@ assert.equal(calls.at(-1).path,'/admin/apps/2/credentials/rotate');assert.deepEq
 const ctx={api,role:'ADMIN',heading(){},flash(text){feedback=text;},saved:async text=>{feedback=text;},render(){}};
 const app={id:2,name:'业务应用'};
 const dialog=document.getElementById('entity-dialog');
-status='FEATURE_NOT_READY';await manageCredentials(ctx,app);assert.match(feedback,/尚未启用/);assert.equal(ctx.appIssued,undefined);
+status='FEATURE_NOT_READY';await manageCredentials(ctx,app);assert.match(feedback,/尚无可撤销/);assert.equal(ctx.appIssued,undefined);
 status='NOT_ISSUED';await manageCredentials(ctx,app);dialog.descendants().find(e=>e.attrs?.name==='scopes').value='demo:read';
 await dialog.descendants().find(e=>e.tagName==='button'&&e.textContent==='首次签发').fire('click');
 assert.match(dialog.textContent,/确认首次签发/);await dialog.children[0].fire('submit');assert.equal(ctx.appIssued.token.length,49);
