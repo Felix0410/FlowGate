@@ -1,6 +1,6 @@
 # FlowGate｜本地Codex当前唯一阶段入口：V11-C（2026-11-08）
 
-> 负责人已授权“设计C，并同步完成B小修”。C详细设计与分阶段任务已写入GitHub，但**C的Kafka/Outbox Worker/Consumer/用量统计/对账源码尚未开发，C真实测试也未运行**。B的两项复审小修已实际提交Java/前端/SQL/测试源码，**仍待本地真实JDK17/MySQL8.4/Redis7验证**，这一验证是C0第一个工作任务。
+> 2026-11-08：C0先验证B小修后，C1～C6已在当前功能分支完成本地实现与定向验证：Java67项、6套Node、真实Kafka/MySQL/Redis/双Gateway26组故障验收及默认OFF旧V1兼容。以`docs/progress/v11-c-async.md` C-09和新证据为准；本地通过不等于远端交付、最终验收或可合并。
 > 目标分支`feat/v11-c-async-usage`，来自`feat/v11-b-quota`完整B实现与复审修复；C独立Draft PR→B，原#1～#8和main不自动合并/改base。
 
 ## 必须按顺序阅读
@@ -23,4 +23,4 @@
 
 Java17、Spring Boot4、Control MVC/MyBatis/MySQL，Gateway WebFlux/Redis/Lua，前端原生ES modules；**Kafka不能放到Gateway或MySQL扣额热路径**。不得引Kafka Streams/Debezium/Nacos/Seata/Redis Stream/新Java微服务/新JS框架。Java/JS关键长逻辑使用充足中文注释，按`// 1.`、`// 2.`、`// 3.`分点。所有程序和证据不能泄露Token、内部密钥、HTTP Body、用户原始日志；保护用户未提交工作树、IDE、.env、已有Docker持久卷。禁止`git reset --hard`/`git clean -fd`/`docker prune`/强推或未经授权合并PR。
 
-**当前真实状态：B小修已编码待实测；C只设计/派工，尚无C业务实现和C测试证据。**
+**当前停在C复审：B小修C0已独立通过、C业务实现及定向验收已完成。只处理明确授权审核修复；不进入D、不做长期压测、不合并。用户真实库未迁移、Async与Quota未自动激活，1280px/375px/键盘真人浏览器验收仍待负责人。**

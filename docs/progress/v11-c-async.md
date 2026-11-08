@@ -1,6 +1,6 @@
 # FlowGate V1.1-C：Kafka、Outbox、异步用量、对账补偿（Codex 编码合同）
 
-> 状态：未开始，必须在 A/B 真实已实现后开始。本块是 **MySQL 账本 → Outbox → Kafka → 用量读模型**，绝不可将 Kafka 改成配额扣减的唯一事实来源。每条命令和实际测试证据按本块进度末尾回填。
+> 当前状态（2026-11-08）：C0～C6本地实现与定向验证已完成，等待ChatGPT复审与负责人浏览器验收；远端交付状态另记。C-00～C-08为历史设计合同，实际证据见C-09。本块是 **MySQL 账本 → Outbox → Kafka → 用量读模型**，绝不可将 Kafka 改成配额扣减的唯一事实来源。每条命令和实际测试证据按本块进度末尾回填。
 
 ## C-00 业务定义
 
@@ -132,3 +132,42 @@ Java构建与2项Listener ACK顺序/失败不ACK测试退出0；`python3 scripts
 ### C5 业务页面已实现
 
 新增原生usage.js及“用量统计/异步事件/对账中心”导航，应用/API名称筛选、UTC日期、服务器复合游标、实际Broker/积压状态、SENT与已消费分离、ADMIN二次确认FAILED重排。读失败显示未知，空读模型不声称0消耗。B配额页同步异步语义，中文指南及同源离线HTML已生成。`node scripts/v11-c-console-test.mjs`、原product/B控制台测试退出0；新测试执行真实模块与模拟DOM，覆盖日期/游标/延迟/PENDING/只读/确认重投/断网。真实1280/375px及键盘体验未执行，留负责人。
+
+### C6 最终真实验收（2026-11-08）
+
+| 阶段 | 本地提交 | 实际门槛 |
+| --- | --- | --- |
+| C0 | cf8f22e | B修复先独立Java17/Node/旧数据预检/真HTTP通过 |
+| C1 | 29cf09a | 唯一Kafka starter/严格事件/两表重复DDL、默认OFF无Broker B事务通过 |
+| C2 | 8b64710 | 短事务、ACK与租约CAS；真MySQL双Worker互斥及旧owner0 |
+| C3 | 1ee1730 | 100重复单聚合、SQL回滚无孤立标记、UTC事件日、提交后ACK |
+| C4 | 1a54f16 | 真库复合游标、三态对账、审计重排、安全只读API |
+| C5 | da1929f | 三组原生业务页面、真实API、角色/未知/延迟/指南 |
+| C6 | 本节所在提交 | 真实Kafka崩溃、偏移、Broker/SQL故障、首次Topic恢复及安全兼容 |
+
+**真实命令与结果**：
+
+- `source .env`后`mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`退出0。Maven与Lab使用JAVA_HOME指向Microsoft JDK17.0.18，未使用系统PATH上的Java21。Contract10/Control27/Gateway26/Demo4=**67项，失败0/错误0/跳过0**，仅直接受影响模块。最终配置修正后同一命令复查。
+- `node scripts/v11-c-console-test.mjs`、`node scripts/v11-b-console-test.mjs`、`node scripts/v11-a-console-test.mjs`、`node scripts/product-console-test.mjs`、`node scripts/block2-console-test.js`、`node scripts/block3-console-test.js`退出0；新C测试使用真实ES模块/模拟DOM，包含查询、复合游标、统计延迟、PENDING、ADMIN二次确认重排和只读/断网。`python3 scripts/build-console-guide.py --product --check`退出0。
+- `python3 scripts/v11-c-smoke.py`最终退出0，**26组真实故障/HTTP断言**。Kafka镜像4.1.1、Boot BOM客户端4.1.2/Spring Kafka4.0.8、MySQL8.4/Redis7、两个实际Gateway、Control及实际崩溃子JVM；全部随机回环端口/独占容器，证据`evidence/v11-c-smoke.json`。消费者明确使用`flowgate-usage-aggregate-v1`；毒消息分区实际提交offset在Broker断联前后保持103，不以不存在的-1 offset冒充保护。
+- `python3 scripts/v11-c-off-smoke.py`退出0，证据`evidence/v11-c-off-smoke.json`：最终C版本无Kafka且OFF，旧OPERATOR可建服务/发布、VIEWER不可写，旧Caller授权/撤销，新增C只读API与资源均正常。C0～C4每步真库证据另存，旧B/A历史证据均未覆盖。
+- `docker compose -f compose.local.yml --profile mq config --services`通过。Compose Kafka已同步C6验证的内外双监听方式；未用用户Compose启动/修改持久环境。
+
+**26组主要运行事实**：
+
+1. 无Kafka/OFF双Gateway100并发Free5精确5授权/95耗尽，5Ledger/5Outbox；App与旧Caller身份域仍隔离。
+2. Async显式ON而Broker不存在时Control可启动、B授权200，Outbox积压6，运营探测BROKER_UNAVAILABLE。关闭UTC日HTTP对账PENDING，同一天多App limit1复合游标不丢页。
+3. 实际Broker ACK后验收子JVM `halt(23)`，尚未回写SENT，原LEASED保留；实际消费者DB提交后`halt(24)`且未提交Kafka offset。生产Control恢复后等待真实30秒租约重领/同组offset重放，只有6条消费标记和6次聚合，不变成7。
+4. Kafka重复发送原eventId100次，Daily和Consumed仍6；实际停Broker时新B授权继续200，恢复后追平7，未依赖Kafka扣额。
+5. 两Worker在真实MySQL领取100条Outbox，租约不重叠，旧owner迟到回写0；实际到期后生产Worker追平107条，无额外Ledger。
+6. 两管理员同时重排FAILED仅一个200另一个409、一次审计，eventId不变；读模型不双计。新C API ADMIN写、OPERATOR/VIEWER可读但POST/未知PUT/DELETE均403。
+7. 对账PENDING→MATCH；隔离库人为增加Daily后真实HTTP显示MISMATCH，不自动改Ledger/余额。消费者日表SQL实际失效后第108个消费标记未提交，修复重启后原offset重放恰好108。
+8. 协议毒消息暂停分区2、冲突payload暂停分区1；不累加、不ACK源offset、没有虚假DLT。Broker实际断联再恢复后原offset仍103。首版采用设计允许的保守分区暂停，严重不可恢复毒消息需负责人另行诊断处置，未开放跳offset/未确认DLT功能。
+9. 首次配置新Topic且Broker离线时仍允许第109笔B授权；Broker恢复后定时有界重试创建显式声明Topic并投递。最终**109 Ledger=109 Outbox=109 ConsumedEvent=109 Daily准入次数**。Kafka未进入Gateway或B数据库授权事务。
+10. 实际HTTP拒绝当天未封账对账/超31天，产品新资源与指南可达，运营API不含payload/凭证；消息日归属另由C3真MySQL边界probe证明取Outbox而非Ledger插入日。
+
+**发现与修正**：C0旧文案断言失败已按新紧急撤销界面修正；C3冲突夹具初次未真正改MySQL规范JSON，改结构化事件后通过，并修正多阶段probe只能全部成功才设置passed。C6审查发现KafkaListener默认id会覆盖消费组，已显式groupId/idIsGroup=false，中断该次脚本并重新运行，最终证明同组offset而非跨组重放。补首次Broker离线的Topic重试恢复，实际新Topic用例通过。中断/失败的本机证据保留，不能当作通过；仓库只存最终脱敏通过摘要。
+
+**依赖、中文注释与交付边界**：唯一新增Maven依赖为Control的Boot4 Kafka starter（BOM管理）；无Kafka Streams、CDC、DLT框架、Redis Stream、分布式锁、新微服务或JS框架。复用既有MyBatis-Plus/事务、官方KafkaTemplate/Listener、原生ES模块，无整块复制Plus业务。核心事件、领取、发布、聚合、对账和前端长流程有中文说明与`// 1.`/`// 2.`/`// 3.`；`git diff --check`通过。C两张新表仅CREATE IF NOT EXISTS，权威B表未改，唯一必要模型补充nextAttemptAt读取。
+
+用户`.env`/IDE/既有JVM、MySQL/Redis持久卷未改或停止。测试只创建/清理自己的容器和进程；Kafka镜像缓存保留，无用户数据迁移。默认Async OFF，不替负责人激活。用户需备份确认后迁移C两表、选择性启动mq并给Control配置开关，再按中文指南体验。真实1280px/375px/键盘验收、ChatGPT源码复审、生产多BrokerHA、长期稳定性/10万级SQL和四组公平压测均**未执行**；本轮只作功能可靠性断言，不给吞吐/P95或生产exactly-once承诺。C到此停止，不进入D、不合并main/旧PR。

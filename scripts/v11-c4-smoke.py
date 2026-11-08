@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""C1默认OFF无Kafka真启动/B授权与C两表重复DDL验证。"""
+"""C4真MySQL：运营查询、复合游标、三态对账和重排审计。"""
 import importlib.util,subprocess,os,json,zipfile
 from datetime import datetime,timezone
 from pathlib import Path

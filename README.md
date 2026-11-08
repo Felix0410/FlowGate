@@ -1,12 +1,12 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **2026-11-08 V11-C（设计完成、尚未开始编码）**：已完成[Kafka/Outbox可靠投递和用量对账详细设计](docs/design/v11-c-async-execution.md)、[C0～C6任务](docs/progress/v11-c-async.md)、[本地Codex提示](CODEX_V11_C_EXEC_PROMPT.md)，计划只在Control中加入可选Kafka，默认`FLOWGATE_ASYNC_ENABLED=false`，新增ConsumedEvent/UsageDaily并以MySQL权威Ledger对账。**Kafka Worker/Consumer/用量页面尚未实施，不能说异步能力已完成**。B两项小修（旧订阅与冻结余额失败关闭、计量OFF紧急撤销APP Token）已经实际提交源码/前端/SQL/JUnit/B6脚本，但新补丁的真实Java/MySQL回归尚未执行；Codex必须先完成C0再编码C1～C6。旧PR/main不自动合并。
+> **V11-C已在功能分支实现，等待复审**：Control可选Kafka、Outbox租约投递、数据库幂等消费/日汇总、运营查询与UTC封账对账，以及三组正式业务页面。Async默认OFF，Kafka不进入B准入热路径；两项B小修已先在C0独立实测通过。实际命令、故障证据与远端交付状态见[C实施记录](docs/progress/v11-c-async.md#c-09-本地实际实施2026-11-08)。不自动迁移用户数据库、激活异步、进入D或合并PR。
 
 
-> **V11-B（2026-11-08）**：B0～B6的Java/SQL/Gateway计量、MySQL余额/Ledger/Outbox、独立APP Token、正式产品页与Codex隔离测试**均已远端交付**；Codex记录57项JUnit及20组双Gateway真实HTTP场景（Free5/100并发恰好5Grant/95拒绝）。ChatGPT源码复审建议补齐**存量A同月订阅预检与冻结余额核验**、**计量功能OFF时允许紧急撤销已签发凭证**。详见[审核报告](docs/reviews/v11-b-static-review-2026-11-08.md)和[Codex定向修复](CODEX_V11_B_REVIEW_FIX_PROMPT.md)。上述两项小修已编码但尚未实测通过，V1/V11真人浏览器验收与主线合并未完成；Kafka属于V11-C，不在B中。
+> **V11-B（2026-11-08）**：B0～B6的Java/SQL/Gateway计量、MySQL余额/Ledger/Outbox、独立APP Token、正式产品页与Codex隔离测试**均已远端交付**；Codex记录57项JUnit及20组双Gateway真实HTTP场景（Free5/100并发恰好5Grant/95拒绝）。ChatGPT源码复审建议补齐**存量A同月订阅预检与冻结余额核验**、**计量功能OFF时允许紧急撤销已签发凭证**。详见[审核报告](docs/reviews/v11-b-static-review-2026-11-08.md)和[Codex定向修复](CODEX_V11_B_REVIEW_FIX_PROMPT.md)。上述两项小修已由C0隔离Java17/Node/双Gateway/MySQL实际复测通过，V1/V11真人浏览器验收与主线合并未完成；Kafka属于V11-C，不在B中。
 
 
-> **V1.1-A管理域已在功能分支实现并完成定向验证，复审缺口已迁入B0**：客户、应用、不可变额度套餐、UTC串行订阅及正式产品页面。A历史交付不启用应用Token、额度扣减或Kafka；B在独立分支增量实现，C/D未编码。**V1仍待负责人最终人工验收，main未合并，不能将A称为V1.1全版本完成。**
+> **V1.1-A管理域已在功能分支实现并完成定向验证，复审缺口已迁入B0**：客户、应用、不可变额度套餐、UTC串行订阅及正式产品页面。A历史交付不启用应用Token、额度扣减或Kafka；B/C在独立分支增量实现，D未编码。**V1仍待负责人最终人工验收，main未合并，不能将A称为V1.1全版本完成。**
 >
 > 入口：[V11-A真实实施与验证](docs/progress/v11-a-business.md#a-08-2026-11-07-codex真实实施与定向结果) · [产品使用指南第8节](docs/guides/product-console-guide.md#openapi) · [阶段路线](docs/progress/v11-roadmap.md)。本机已有数据库尚未迁移，首次使用需按指南执行增量SQL，再重启Control，打开 `/console/` 的“客户与应用”“套餐与订阅”。
 
@@ -412,3 +412,35 @@ python3 scripts/v11-b-smoke.py
 ```
 
 历史夹具的`-DskipTests`只是生成旧版本网关二进制，不代表重测A。脚本只创建/清理独立随机端口容器及进程，不操作原持久卷；原始脱敏结果在`.local/acceptance/`，仓库证据在`docs/progress/evidence/`。负责人真实浏览器1280px/375px/键盘验收仍待执行。
+
+
+### V11-C 本地运行与业务抽查
+
+先完成B的SQL/完整网关升级和计量配置。由负责人备份并确认目标库后，在根目录执行C两张读模型表迁移（本轮Codex未操作用户持久库）：
+
+```bash
+source .env
+docker compose -f compose.local.yml exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u "$MYSQL_USER" "$MYSQL_DATABASE"' < sql/flowgate-v11-c.sql
+```
+
+保持`FLOWGATE_ASYNC_ENABLED=false`时，无Kafka也可继续原V1/B，Outbox积压且运营页明确显示关闭。需要单机演示异步时先启动可选Broker，再为**Control**加载以下变量并重启；Gateway不配置Kafka：
+
+```bash
+docker compose -f compose.local.yml --profile mq up -d kafka
+export FLOWGATE_ASYNC_ENABLED=true
+export FLOWGATE_KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
+export FLOWGATE_USAGE_TOPIC=flowgate.usage.v1
+export FLOWGATE_USAGE_GROUP=flowgate-usage-aggregate-v1
+```
+
+IDEA使用原Control运行配置并加载这些环境变量；默认仍用Java17。Topic由启用异步的Control声明创建，首次Broker不在线时定时有界重试初始化；生产者最多100在途/单批20，30秒租约和10秒发送deadline。单KRaft开发Broker副本1，未增加用户持久数据卷，不属于生产多Broker高可用。
+
+浏览器打开`http://127.0.0.1:8081/console/`：
+
+- “用量统计”：选择应用/API/UTC日期，查看授权单位与次数及最后聚合时间；可能延迟，不等于2xx成功量或费用。
+- “异步事件”：区分SENT（Broker确认）和已消费；ADMIN可确认重投FAILED，保留原eventId，不重新扣额。进程暂停/冲突计数重启归零。
+- “对账中心”：仅昨天及更早的UTC日，PENDING表示未追平，MATCH表示账本与读模型一致，MISMATCH需诊断，不自动改余额。完整步骤见[中文指南](docs/guides/product-console-guide.md)。
+
+毒消息/消费者数据库故障采用保守方案：暂停问题分区并保留offset；首版不提供未经确认的DLT，也不自动跳过问题消息。先诊断修复，再重启消费者。严重协议毒消息可能需负责人另行制定处置，不能通过反复业务调用“补统计”。
+
+定向验证：`source .env`后运行`mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`、`node scripts/v11-c-console-test.mjs`、`python3 scripts/v11-c-smoke.py`。C6脚本在独占随机端口MySQL8.4/Redis7/Kafka4.1.1/双Gateway验证真实ACK/COMMIT后进程崩溃、重放及故障恢复；只清理自己创建的资源。旧身份和默认OFF兼容可运行`python3 scripts/v11-c-off-smoke.py`。真人浏览器1280px/375px/键盘体验、长期压测及主线最终验收留后续授权。

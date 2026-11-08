@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "checks": [
+    "无Kafka/Async OFF双Gateway100并发Free5精确5Grant95耗尽",
+    "App/旧Caller身份隔离且OFF不虚构消费",
+    "Async ON但Broker未启动：B授权200、Outbox积压6、真实探测不可用",
+    "真实封账HTTP：积压PENDING且同日多App复合游标不漏页",
+    "专用单KRaft Broker及3分区真实启动",
+    "真实Broker ACK后halt23，SENT未写且原租约保留",
+    "真实消费DB提交后halt24未ACK，幂等标记和汇总已落库",
+    "实际30秒租约到期重发/offset重放后仅6消费6汇总，无第7笔",
+    "积压追平后真实封账对账MATCH",
+    "真实Kafka重发同eventId100次，读模型仍6次",
+    "实际停Broker后B授权继续200/新Outbox积压",
+    "Broker恢复重排追平7笔，未重复扣量",
+    "两Worker真实领取100个不重叠租约，迟到owner更新0",
+    "100个租约真实到期后恢复发送，107Ledger/Consumed/汇总守恒",
+    "两管理员真实并发重投仅一次审计，原eventId/Grant总数不变",
+    "新运营HTTP只读角色可读、POST/未知PUT/DELETE均403",
+    "真实HTTP读模型差异MISMATCH，Ledger/余额不自动改写",
+    "实际消费日表SQL故障不留下第108个消费标记、不提前确认",
+    "修复DB并重启消费者后原offset重放，恰好108汇总",
+    "毒消息实际暂停分区2，未确认原offset，未假发送DLT",
+    "同eventId不同payload实际诊断，不累计读模型",
+    "无DLT且Broker断联/恢复，毒消息offset仍未前进",
+    "实际日期边界拒绝未封账日和超31天范围",
+    "实际产品新资源可达且运营事件无原始payload",
+    "首次Topic初始化时Broker离线，恢复后自动创建声明Topic并幂等追平109笔",
+    "最终109权威Grant/Outbox/消费标记/汇总一致；毒消息没有制造Grant"
+  ],
+  "evidenceType": "real Kafka4.1.1/MySQL8.4/Redis7/two Gateway/abrupt JVM halt",
+  "ownerBrowserAcceptance": "not executed",
+  "committedOffsetPartition2BeforeAndAfterBrokerRecovery": [
+    103,
+    103
+  ],
+  "finalConservation": {
+    "ledger": 109,
+    "outbox": 109,
+    "consumedEvent": 109,
+    "grantCount": 109
+  },
+  "consumerGroup": "flowgate-usage-aggregate-v1"
+}

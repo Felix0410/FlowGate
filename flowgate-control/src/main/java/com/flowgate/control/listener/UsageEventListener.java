@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class UsageEventListener {
  private final UsageAggregationService aggregation;private final AsyncDiagnostics diagnostics;
  public UsageEventListener(UsageAggregationService aggregation,AsyncDiagnostics diagnostics){this.aggregation=aggregation;this.diagnostics=diagnostics;}
- @KafkaListener(id="flowgateUsage",topics="${flowgate.async.topic}",containerFactory="usageKafkaFactory")
+ @KafkaListener(id="flowgateUsage",groupId="${spring.kafka.consumer.group-id}",idIsGroup=false,topics="${flowgate.async.topic}",containerFactory="usageKafkaFactory")
  public void receive(String payload,Acknowledgment ack){
   String outcome=aggregation.process(payload);
   diagnostics.count(outcome.equals("CONSUMED")?"consumed":"duplicate");

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""C1默认OFF无Kafka真启动/B授权与C两表重复DDL验证。"""
+"""C3真MySQL：并发去重、事务回滚、Outbox UTC日边界和charge冲突。"""
 import importlib.util,subprocess,os,json,zipfile
 from datetime import datetime,timezone
 from pathlib import Path
