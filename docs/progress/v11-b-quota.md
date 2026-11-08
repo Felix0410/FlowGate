@@ -200,3 +200,9 @@ Gateway增加配额私有路由APP解析及代次属性，但只有B4真实Quota
 新增非阻塞Quota Filter（order=10、单机64个hop、每次2秒/总5秒、仅网络错误同chargeId重试一次），成功Grant才转发；配额拒绝独立异常不算CB失败样本，不进入假降级。Request ID入口删除外部AppId/ChargeId，Route冻结策略和身份属性构成内部请求；指标仅routeId/固定outcome。只有真实QuotaSupport组件存在才上报能力；公开凭证还受默认OFF及全接流名单门禁保护，用户环境未激活。
 
 新增`V11QuotaFilterTest`，使用当前5.0.4官方`SpringCloudCircuitBreakerResilience4JFilterFactory`与实际Resilience4j注册表，按真实Route CB order=1组合Quota order=10。已执行：未计量零Control hop、429无下游且不算CB样本、不假降级、OPEN零新增hop/下游。最终真实双Gateway HTTP组合与故障注入仍在B6验证，不能以此代替B6。定向Maven test/package Contract10+Control15+Gateway24=49通过，失败/跳过0；首次沙箱运行Mockito attach不可用，沙箱外同命令退出0。未运行全项目回归。
+
+### B5 业务控制台与指南（2026-11-08）
+
+新增配额与账本页面，应用名称选择、UTC月、MySQL余额和安全流水游标分页；不存在余额行显示尚未冻结，不冒充0。应用页接真实凭证status、确认签发/轮换/撤销、一次性密码输入回执/复制/清空；离页/退出同时销毁回执与模态DOM，迟到响应按epoch丢弃。新增计量规则表单及发布中心实际开关/完整接流名单/节点能力提示，订阅增本月/下月UTC选项；中文指南生成完成，无Kafka图表或新JS框架。
+
+已执行Node：`v11-a-console-test.mjs`、`product-console-test.mjs`、`block2-console-test.js`、`block3-console-test.js`、`v11-b-console-test.mjs`全部退出0。B新增测试执行真实模块与模拟DOM，覆盖UTC跨年月份、units边界、只读权限、确认签发、一次性回执清空、空余额和读取失败不显示旧事实。曾误用两个旧测试的.mjs后缀，命令MODULE_NOT_FOUND；按实际.js文件名执行通过。1280/375px与键盘真人浏览器验收未执行，留负责人。
