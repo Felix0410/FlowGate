@@ -179,3 +179,21 @@ C完整代码/证据提交`90d4d5ca51d9b5e022a4ccc8a4f50980f91f0243`，当前分
 实际`git push origin HEAD:refs/heads/feat/v11-c-async-usage`退出128，GitHub返回`Permission to Felix0410/FlowGate.git denied to Felix0410`、HTTP403。随后只读`git ls-remote --heads origin feat/v11-c-async-usage main`：远端C仍`675de477112d680a3695ba2cce114d63054b85a9`（设计），main仍`84a25d5a7b9545dff3556299efec3c310fc321cf`。**本地C已完成实现和定向验收，远端代码交付尚未完成**；没有改推main、强推、改base或重写历史。已知分支地址<https://github.com/Felix0410/FlowGate/tree/feat/v11-c-async-usage>当前仍是旧设计。gh未安装，公开GitHub PR API又返回rate limit403，未独立确认具体C PR URL，不编造PR更新状态。
 
 本地审查补丁将导出`.local/acceptance/flowgate-v11-c-review.patch`（仅当前C相对远端设计的提交，无用户.env），可用于先审查。修复GitHub写权限后仍只能推当前功能分支。最终Docker检查只剩原`flowgate-local-mysql-1`和`flowgate-local-redis-1`，所有本轮Kafka/Lab容器已清理。当前等待ChatGPT和项目负责人复审。
+
+
+## C-10 2026-11-08 ChatGPT远端源码复审与定向收口（待编码）
+
+> **实际审核起始C实现HEAD**：`08c48d015d320d7714fb8c9e70d09f8a5814de04`。截至此时GitHub已经真实包含C0～C6的Kafka、Outbox Worker、Consumer、MySQL日汇总、运营API、正式前端和Codex的Java67项/C6 26组真实故障验证。上述源代码和脱敏证据可远端读取；本节保留C-09中Codex`git push` HTTP403作为**当时**历史，不再声称“当前远端只有设计”。**ChatGPT未重新运行本机Kafka/MySQL/Java或真人浏览器**。
+
+**最新审核报告**：`docs/reviews/v11-c-static-review-2026-11-08.md`。
+**当前本地Codex唯一代码交接**：`CODEX_V11_C_REVIEW_FIX_PROMPT.md`。
+**本轮停止条件**：不重做C0～C6、不提前开发V11-D、不合并PR #8/#9/main；三项P1定向实测后再复审。
+
+| 优先级 | 新发现的未覆盖边界 | 通过条件 | 当前 |
+|---|---|---|---|
+| P1-C01 | Compose Kafka`KAFKA_LOG_DIRS=/tmp/kraft-combined-logs`无数据卷，容器重建日志丢失；Outbox`SENT`但未Consumed无法经现有只允许FAILED的重投恢复 | 独立Kafka命名卷保留KRaft数据；ADMIN审计+CAS可补投超过grace且确实未消费的SENT原eventId；隔离容器重建/人为丢消息后Daily追平、不多扣授权 | **待Codex修复与实测** |
+| P1-C02 | `UsageKafkaConfiguration`对MySQL短暂异常与永久毒消息一律暂停分区，DB恢复却需要人工重启Consumer | 暂时DB/网络故障自动有界退避/恢复同offset、不先ACK、不双计；永久非法事件仍暂停、保留offset，其他分区继续 | **待Codex修复与实测** |
+| P1-C03 | `AsyncUsageReadMapper.Sql.reconciliation()`以Ledger INNER JOIN Outbox作权威expected源，若Ledger缺Outbox直接漏报/可能空列表；多Outbox同charge可放大expected | 有界只读Ledger/Outbox完整性诊断、状态非MATCH/不伪造日期；真库孤儿Ledger和重复Outbox反例与前端中文提示 | **待Codex修复与实测** |
+| P2 | 单Broker不具生产HA；不可恢复毒消息采用保守暂停，10万级SQL与公平压测、真人375/1280浏览器体验仍待 | 明确运维边界，性能归D，真实产品手测归负责人 | 历史限制 |
+
+**当前阶段真实状态**：C核心实现有较充分隔离故障和幂等证据，**没有发现现有109笔守恒场景实际失败**。三项是新增的业务恢复/审计异常边界，审查文档提交不等于源码已修；Codex完成后新增单独`docs/progress/evidence/v11-c-review-fix-smoke.json`，原`v11-c-smoke.json`及所有旧B/C历史证据保持不变。
