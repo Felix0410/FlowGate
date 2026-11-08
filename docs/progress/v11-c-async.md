@@ -171,3 +171,11 @@ Java构建与2项Listener ACK顺序/失败不ACK测试退出0；`python3 scripts
 **依赖、中文注释与交付边界**：唯一新增Maven依赖为Control的Boot4 Kafka starter（BOM管理）；无Kafka Streams、CDC、DLT框架、Redis Stream、分布式锁、新微服务或JS框架。复用既有MyBatis-Plus/事务、官方KafkaTemplate/Listener、原生ES模块，无整块复制Plus业务。核心事件、领取、发布、聚合、对账和前端长流程有中文说明与`// 1.`/`// 2.`/`// 3.`；`git diff --check`通过。C两张新表仅CREATE IF NOT EXISTS，权威B表未改，唯一必要模型补充nextAttemptAt读取。
 
 用户`.env`/IDE/既有JVM、MySQL/Redis持久卷未改或停止。测试只创建/清理自己的容器和进程；Kafka镜像缓存保留，无用户数据迁移。默认Async OFF，不替负责人激活。用户需备份确认后迁移C两表、选择性启动mq并给Control配置开关，再按中文指南体验。真实1280px/375px/键盘验收、ChatGPT源码复审、生产多BrokerHA、长期稳定性/10万级SQL和四组公平压测均**未执行**；本轮只作功能可靠性断言，不给吞吐/P95或生产exactly-once承诺。C到此停止，不进入D、不合并main/旧PR。
+
+### Git远端交付结果（2026-11-08）
+
+C完整代码/证据提交`90d4d5ca51d9b5e022a4ccc8a4f50980f91f0243`，当前分支`feat/v11-c-async-usage`。每步提交前检查分支/工作区/变更范围，仅显式暂存本阶段文件，无无检查`git add .`。工作未进入D，未合并任何PR。
+
+实际`git push origin HEAD:refs/heads/feat/v11-c-async-usage`退出128，GitHub返回`Permission to Felix0410/FlowGate.git denied to Felix0410`、HTTP403。随后只读`git ls-remote --heads origin feat/v11-c-async-usage main`：远端C仍`675de477112d680a3695ba2cce114d63054b85a9`（设计），main仍`84a25d5a7b9545dff3556299efec3c310fc321cf`。**本地C已完成实现和定向验收，远端代码交付尚未完成**；没有改推main、强推、改base或重写历史。已知分支地址<https://github.com/Felix0410/FlowGate/tree/feat/v11-c-async-usage>当前仍是旧设计。gh未安装，公开GitHub PR API又返回rate limit403，未独立确认具体C PR URL，不编造PR更新状态。
+
+本地审查补丁将导出`.local/acceptance/flowgate-v11-c-review.patch`（仅当前C相对远端设计的提交，无用户.env），可用于先审查。修复GitHub写权限后仍只能推当前功能分支。最终Docker检查只剩原`flowgate-local-mysql-1`和`flowgate-local-redis-1`，所有本轮Kafka/Lab容器已清理。当前等待ChatGPT和项目负责人复审。
