@@ -1,5 +1,8 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
+> **2026-11-08 ChatGPT远端复审更新**：V11-C完整Kafka/Outbox Worker/Consumer/用量/对账和C0～C6脚本已远端真实交付；Codex记录**67项JUnit + 26组真实Kafka故障场景**、109条Ledger/Outbox/Consumed/日授权次数守恒（ChatGPT未重新独立运行）。静态审核发现**本地Kafka日志缺持久卷且SENT未消费无法补投**、**瞬时数据库错误永久暂停消费分区**、**Ledger缺Outbox的对账盲区**三项需定向修复；详见[源码审核](docs/reviews/v11-c-static-review-2026-11-08.md)、[Codex最小修复任务](CODEX_V11_C_REVIEW_FIX_PROMPT.md)。这些问题尚未编码修复，C不能以原26组已通过就宣称所有恢复场景安全；不进入D，不合并main。
+
+
 > **V11-C已在功能分支实现，等待复审**：Control可选Kafka、Outbox租约投递、数据库幂等消费/日汇总、运营查询与UTC封账对账，以及三组正式业务页面。Async默认OFF，Kafka不进入B准入热路径；两项B小修已先在C0独立实测通过。实际命令、故障证据与远端交付状态见[C实施记录](docs/progress/v11-c-async.md#c-09-本地实际实施2026-11-08)。不自动迁移用户数据库、激活异步、进入D或合并PR。
 
 
