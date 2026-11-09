@@ -40,3 +40,9 @@ E0已完成代码/配置审阅，git diff --check通过；未运行E新脚本/Ja
 应用凭证界面需要本次后端门禁READY才提供签发/轮换；未知或受阻显示原因，ADMIN紧急撤销仍不受新签发门禁阻挡。离页清密和角色/后端复验不变。新增本地离线交付手册与生成器--delivery支持，不新增第八个菜单或敏感探针。
 
 `mvn -B -ntp -pl flowgate-control -am test package` Java17退出0：Contract10+Control35=45，新增5项检查OFF不碰表/V0不发证/缺可信节点/缺证据UNKNOWN/Worker心跳不等历史计数。E就绪Node及原B Node通过，--delivery --check和git diff --check通过。B旧测试补入真正的就绪API夹具，没有删除原权限/撤销/回执清理预期。全三模块、真实B/C/浏览器在E4/E5执行。
+
+## E4 B/C真实闭环
+
+`JAVA_HOME=<Java17> python3 scripts/v11-e-smoke.py`退出0；实际证据.local/v11-e-acceptance/20261109t125623-347a/result.json。使用E正式up入口、新随机端口/项目/卷，V0签发409、非计量初版及可信节点后才签发，真实5次200+第6次429，余额5/0、Ledger5、Outbox5、日报5；401/Scope403/旧Caller隔离/同月409/VIEWER写403/撤销旧代次拒绝/旧V1两路200。自有Kafka暂停期间1条新Grant积压，恢复只消费原事件；重复Kafka事件未双计。今日查询400。仅对自有Control的MySQL连接注入昨天会话时钟产生新Grant，恢复真实时钟后历史MATCH；没有修改历史Ledger/Outbox或全局数据库时钟。最终doctor READY，重复doctor前后账本计数与根.env相同。finally停机并保留三卷。
+
+首轮20261109t125235-7818失败：时钟注入环境字段绑定导致Control启动失败，整轮未通过，已停自有实例且保留卷。改为SPRING_APPLICATION_JSON精确属性后整轮重跑通过，未删除失败记录。Chromium/旧B/C回归留到E5，不冒充已运行。
