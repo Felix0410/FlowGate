@@ -1,3 +1,4 @@
+import {reportSelection, rememberReport} from './report-context.js';
 import {h, button, notice, table, formFields, permissionButton, openDialog} from './ui.js';
 import {reference} from './openapi-business.js';
 export function usageQuery(values, cursor = '') {
@@ -9,10 +10,10 @@ export function usageQuery(values, cursor = '') {
 }
 /** 稳定复合游标由服务器提供，不从日期自行推测下一页。 */
 export async function renderUsage(ctx, reconciliation = false) {
-  ctx.heading(reconciliation ? '对账中心' : '用量统计', reconciliation ? '只核对已关闭UTC日。PENDING表示尚未追平，MATCH表示账本与读模型一致，MISMATCH需诊断；不会自动改余额。' : '每日授权单位与准入次数来自异步读模型，可能延迟；不是成功响应次数或收费金额。');
-  const app = await reference(ctx.api, 'apps', '按应用名称查询', '', true);
-  const end = new Date(); if (reconciliation) end.setUTCDate(end.getUTCDate() - 1); const start = new Date(end); start.setUTCDate(start.getUTCDate() - 6);
-  const fields = formFields([{name: 'apiId', label: 'API接口', value: '', options: [{value: '', label: '全部接口'}, ...(ctx.data.apis || []).map(a => ({value: a.id, label: a.method + ' ' + a.publicPath}))]}, {name: 'from', label: '开始UTC日期（含）', type: 'date', value: start.toISOString().slice(0, 10)}, {name: 'to', label: '结束UTC日期（含）', type: 'date', value: end.toISOString().slice(0, 10), help: reconciliation ? '必须是昨天或更早；后端以数据库UTC时间复验。' : '最多31天；统计可能落后于配额账本。'}]);
+  ctx.heading(reconciliation ? '对账中心' : '用量统计', reconciliation ? '仅核对已结束UTC日，不自动修改余额' : '异步统计可能延迟，不等于业务成功次数或收费金额');
+  const selection = reportSelection(ctx, reconciliation);
+  const app = await reference(ctx.api, 'apps', '按应用名称查询', selection.applicationId, true);
+  const fields = formFields([{name: 'apiId', label: 'API接口', value: selection.apiId, options: [{value: '', label: '全部接口'}, ...(ctx.data.apis || []).map(a => ({value: a.id, label: a.method + ' ' + a.publicPath}))]}, {name: 'from', label: '开始UTC日期（含）', type: 'date', value: selection.from}, {name: 'to', label: '结束UTC日期（含）', type: 'date', value: selection.to, help: reconciliation ? '必须是昨天或更早；后端以数据库UTC时间复验。' : '最多31天；统计可能落后于配额账本。'}]);
   const integrity = h('div', {'aria-live': 'assertive'}), body = h('section', {class: 'card'}, notice('尚未读取，请选择条件并查询。')), info = h('div', {'aria-live': 'polite'});
   let cursor = null, rows = [], busy = false, active = '';
   const more = button('读取下一页', () => load(false)); more.hidden = true;
@@ -22,7 +23,7 @@ export async function renderUsage(ctx, reconciliation = false) {
     if (busy) return; busy = true; query.disabled = more.disabled = true;
     try {
       // 1. 查询变更后必须重读，不拼接不同应用/日期的页。
-      const key = usageQuery(values()); if (!reset && active !== key) throw new Error('条件已改变，请重新查询');
+      const key = usageQuery(values()); rememberReport(ctx, values()); if (!reset && active !== key) throw new Error('条件已改变，请重新查询');
       if (reset) { rows = []; cursor = null; more.hidden = true; integrity.replaceChildren(); body.replaceChildren(notice('正在读取…')); }
       const result = await ctx.api.request((reconciliation ? '/admin/reconciliation?' : '/admin/usage?') + usageQuery(values(), reset ? '' : cursor));
       if (usageQuery(values()) !== key) { integrity.replaceChildren(); body.replaceChildren(notice('查询条件已改变，请重新查询。')); more.hidden = true; return; }
@@ -42,7 +43,13 @@ export async function renderUsage(ctx, reconciliation = false) {
     const labels = {LEDGER_WITHOUT_OUTBOX: '权威Ledger存在，但缺少Outbox，事件日期未知', OUTBOX_WITHOUT_LEDGER: 'Outbox找不到对应权威Ledger', DUPLICATE_OUTBOX: '同一Grant关联多条Outbox，未放大权威授权量', EVENT_TIME_MISSING: '事件UTC时间缺失或格式不合法'};
     integrity.replaceChildren(notice('INTEGRITY_GAP：账本/事件完整性异常，本次不能判为MATCH，也不代表用户配额超扣。请人工核查，页面不会自动改余额或旧Ledger。', 'error'), table(['异常', '安全记录编号', '关联数量'], warnings.map(w => [labels[w.code] || '未分类异常，请联系负责人', w.recordId, w.relatedCount])), notice(result.integrityScan?.note || '日期未知时不伪造日报归属。'), ...(result.integrityTruncated ? [notice('异常样本超过100条，请缩小日期/应用/API条件继续核查。')] : []));
   }
-  return h('div', {}, h('section', {class: 'card query-panel', 'aria-label': '用量查询条件'}, h('h2', {}, '查询条件'), app.node, fields.node, h('div', {class: 'query-actions'}, query)), info, integrity, body, more);
+  const changed = () => {
+    rememberReport(ctx, values()); more.hidden = true; integrity.replaceChildren();
+    body.replaceChildren(notice('查询条件已改变，请重新查询')); info.replaceChildren();
+  };
+  app.input.addEventListener('change', changed); Object.values(fields.controls).forEach(control => control.addEventListener('change', changed));
+  if (selection.applicationId) await load(true);
+  return h('div', {}, h('section', {class: 'card query-panel', 'aria-label': '用量查询条件'}, h('h2', {}, '查询条件'), ...(selection.clamped ? [notice('对账仅包含已结束UTC日，本页已将结束日调整为昨日')] : []), app.node, fields.node, h('div', {class: 'query-actions'}, query)), info, integrity, body, more);
 }
 export async function retryAsyncEvent(api, role, id) {
   if (role !== 'ADMIN') throw new Error('只有ADMIN可重投失败事件');

@@ -1,0 +1,559 @@
+{
+  "scope": "UX-0 to UX-5 business workbench rework; owner usability acceptance pending",
+  "baseline": "3f5ea8d",
+  "testedWorkingTree": true,
+  "commits": {
+    "UX-0": "d958312",
+    "UX-1": "64b5f46",
+    "UX-2": "24c22f6",
+    "UX-3": "9b7c872",
+    "UX-4": "a478f78"
+  },
+  "java": {
+    "flowgate-contract": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "flowgate-control": {
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "node": {
+    "programs": 8,
+    "passed": true
+  },
+  "guideCheck": true,
+  "diffCheck": true,
+  "packagedResources": [
+    "api.js",
+    "app.js",
+    "catalog.js",
+    "governance.js",
+    "guide.html",
+    "index.html",
+    "navigation.js",
+    "openapi-business.js",
+    "operations.js",
+    "quota.js",
+    "report-context.js",
+    "style.css",
+    "ui.js",
+    "usage.js"
+  ],
+  "realHttp": {
+    "passed": true,
+    "script": "scripts/product-console-smoke.py",
+    "requests": 33,
+    "moduleRequests": 33,
+    "asyncEnabled": false,
+    "isolated": true
+  },
+  "browser": {
+    "backend": "isolated real MySQL Redis Control Demo and two Gateways; Async OFF",
+    "dashboard": {
+      "onboarding": false,
+      "navCount": 7,
+      "overflow": false
+    },
+    "dialogReplacement": {
+      "open": true,
+      "fieldPresent": true
+    },
+    "desktop": [
+      {
+        "key": "dashboard",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1
+      },
+      {
+        "key": "services",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "apis",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "routes",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "callers",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "developers",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "apps",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "plans",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "subscriptions",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "rate",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "concurrency",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "protection",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "quota-policy",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "quota",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "usage",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "reconciliation",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "releases",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1
+      },
+      {
+        "key": "monitoring",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "async-events",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "audits",
+        "width": 1280,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      }
+    ],
+    "workflow": {
+      "customerPrefill": "1",
+      "subscriptionPrefill": "1",
+      "quota": {
+        "app": "1",
+        "noBalance": true,
+        "hash": "#usage/quota?applicationId=1&period=202611&from=2026-11-03&to=2026-11-09"
+      },
+      "usage": {
+        "app": "1",
+        "from": "2026-11-03",
+        "to": "2026-11-09"
+      },
+      "reconciliation": {
+        "app": "1",
+        "to": "2026-11-08",
+        "clamped": true
+      },
+      "back": "#usage/usage?applicationId=1&period=202611&from=2026-11-03&to=2026-11-09",
+      "forward": "#usage/reconciliation?applicationId=1&period=202611&from=2026-11-03&to=2026-11-08"
+    },
+    "pagination": {
+      "before": "分页测试应用19",
+      "after": {
+        "name": "分页测试应用19",
+        "rows": 1
+      }
+    },
+    "failureRecovery": {
+      "showsFailure": true,
+      "fakeEmpty": false,
+      "recovered": true,
+      "injection": "browser fetch 503 only; real database untouched"
+    },
+    "realSubscription": {
+      "created": {
+        "rows": 1,
+        "success": true
+      },
+      "conflict": {
+        "dialogOpen": true,
+        "preselection": "1",
+        "noRetry": true
+      }
+    },
+    "appCredentialOff": {
+      "notIssued": true,
+      "passwordValues": 0
+    },
+    "reload": {
+      "hash": "#business/apps?id=1&tab=credentials",
+      "passwordEmpty": true,
+      "loginVisible": true,
+      "previousHash": "#business/apps?id=1&tab=credentials"
+    },
+    "mobile": [
+      {
+        "key": "dashboard",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "services",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "apis",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "routes",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "callers",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "developers",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "apps",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "plans",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "subscriptions",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "rate",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "concurrency",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "protection",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "quota-policy",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "quota",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "usage",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "reconciliation",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "releases",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "monitoring",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "async-events",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      },
+      {
+        "key": "audits",
+        "width": 375,
+        "overflow": false,
+        "headings": 1,
+        "error": false
+      }
+    ],
+    "keyboard": {
+      "opened": {
+        "inert": true,
+        "firstFocus": "dashboard"
+      },
+      "wrapped": "logout",
+      "closed": {
+        "inert": false,
+        "focus": "menu-toggle"
+      }
+    },
+    "wideTable": {
+      "region": "region",
+      "scrollsInside": true
+    },
+    "roles": {
+      "viewer": {
+        "editDisabled": true,
+        "role": "只读用户 · 会话仅限本页",
+        "localStorage": 4,
+        "sessionStorage": 1
+      },
+      "operatorAppEditDisabled": true,
+      "operatorCallerWriteDisabled": true
+    },
+    "unknownAndLegacy": {
+      "fallback": "#dashboard",
+      "legacy": "#access/apis"
+    },
+    "mobileScrollFix": {
+      "scrollTop": 0,
+      "titleTop": 119.1953125,
+      "headerBottom": 64
+    },
+    "storage": {
+      "observed": true,
+      "matched": false,
+      "note": "Existing keys belonged to browser SDK metadata; authentication value was compared in-page and not printed"
+    },
+    "assets": [
+      {
+        "file": "",
+        "status": 200
+      },
+      {
+        "file": "index.html",
+        "status": 200
+      },
+      {
+        "file": "app.js",
+        "status": 200
+      },
+      {
+        "file": "navigation.js",
+        "status": 200
+      },
+      {
+        "file": "report-context.js",
+        "status": 200
+      },
+      {
+        "file": "ui.js",
+        "status": 200
+      },
+      {
+        "file": "api.js",
+        "status": 200
+      },
+      {
+        "file": "catalog.js",
+        "status": 200
+      },
+      {
+        "file": "governance.js",
+        "status": 200
+      },
+      {
+        "file": "openapi-business.js",
+        "status": 200
+      },
+      {
+        "file": "operations.js",
+        "status": 200
+      },
+      {
+        "file": "quota.js",
+        "status": 200
+      },
+      {
+        "file": "usage.js",
+        "status": 200
+      },
+      {
+        "file": "style.css",
+        "status": 200
+      },
+      {
+        "file": "guide.html",
+        "status": 200
+      },
+      {
+        "file": "/test-console/",
+        "status": 200
+      }
+    ],
+    "guide": {
+      "hasSevenDomains": true,
+      "hasQuota": true,
+      "hasAsync": true,
+      "obsoleteSearch": false
+    },
+    "finalDesktop": {
+      "width": 1280,
+      "source": "final static source served by isolated real Control"
+    }
+  },
+  "contrast": {
+    "navigationText": 12.39,
+    "selectedText": 10.09,
+    "secondarySidebarText": 8.86,
+    "minimum": 4.5
+  },
+  "screenshots": [
+    "console-workbench-1280.png",
+    "console-workbench-375.png"
+  ],
+  "failureHistory": [
+    "Real Chromium reproduced queued native dialog close clearing replacement form; fixed by replacing content without closing, regression tested with queued close and real browser.",
+    "Mobile independent workspace retained scroll offset on navigation and clipped title; reset own scroll and prevent focus scrolling, actual mobile title visibility rechecked.",
+    "Existing Node assertions expected removed list edit placement or obsolete fixed text; moved assertions to actual detail actions and retained backend RBAC checks."
+  ],
+  "notExecuted": [
+    "owner real-browser usability acceptance",
+    "full-project Java regression",
+    "V11-D performance and SQL acceptance",
+    "Kafka failure-chain regression"
+  ],
+  "userInfrastructureChanged": false,
+  "frontendSha256": {
+    "api.js": "fe3073fa788d23cfa57bcae8560701eb783670dc8cca5aacba6ca51760554444",
+    "app.js": "d2b63217e06ee5e42abe7f3f02852c674f72311560509f035942c771cd93673e",
+    "catalog.js": "bdc5e944308e3239cb8674fe3712204677fb2d24c3212341e840311f1af36352",
+    "governance.js": "7a869d25365136996427c33e5fad805709730e9c2cde5eec6b718945264b1c51",
+    "guide.html": "e9307fcd82956f0d726af7cb5b782a47c04b2ee4ee162659823866fe1966c157",
+    "index.html": "f0f5898fe0ae1de9c35129bad3433ea4e654f87ad0d25241ec4c03e2a27ae2e4",
+    "navigation.js": "72102b02c728e678326dba800d11a374f44648d11b481541d4d402d3231d8e93",
+    "openapi-business.js": "dcfe2431d5974470ff349cfaff9848b4d24a6916559ea66c6721c2a718b0d468",
+    "operations.js": "298b22b161cc046613ef1a86f09999c0d3674badd04fcea342b1d0ee3e28947a",
+    "quota.js": "99a0b5bdd9e79dd2dca2ca5b652943846ddd318087751dc67122697bc89e0b6c",
+    "report-context.js": "88766a94435a06b719debd10dc770a1cd953ed589454ca3b240ad049bec1039f",
+    "style.css": "c49a0232549bfe98b62e0a83235a7a68900f28ed23737a1bc7fa514abb05bb76",
+    "ui.js": "b6b36bf8f74e5e6dfc227890716b46191d59bb04f6257d5e4d6aff3a83482799",
+    "usage.js": "0afbb56ecb6a39e90766c77a4cd9c6003a08e83d4e9e03529420d844c0dd363c"
+  },
+  "finalGuardVerification": "Node delayed-detail test verifies old edit actions removed, aria-busy and own scroll reset; final Java17 test/package and exact Jar resource comparison passed"
+}

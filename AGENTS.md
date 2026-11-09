@@ -1,3 +1,9 @@
+# 当前补充任务：V1.1业务工作台UX重构已实施，等待复审与真人验收
+
+用户2026-11-09明确授权执行 `CODEX_CONSOLE_WORKBENCH_UX_PROMPT.md`，详细设计 `docs/design/v11-console-workbench-ux-rework.md`。功能分支 `feat/v11-console-workbench` 基于独立设计分支；UX-0～UX-5实施及定向自动检查见 `docs/progress/console-workbench-ux-rework.md`。7业务域完整保留20能力，不新增后端语义/框架/迁移。40 Java、8 Node、独立真实HTTP与1280/375真实浏览器已执行；真人体验未验收。不继续扩展、不进入D、不合并main/旧PR；用户.env、IDE与常驻数据保持原样。
+
+以下C阶段记录保留为历史上下文，新工作台任务不重跑历史C修复合同。
+
 # FlowGate｜当前阶段：V11-C技术复审通过，等待V11-D设计/验收授权（2026-11-09）
 
 > 2026-11-09 ChatGPT已核对PR #9实际修复源码和Codex提交的Java70项/7套Node/新13组故障/原C6 26组/独立Kafka持卷测试证据，P1-C01～C03三项均**通过源码+证据复审**；完整报告`docs/reviews/v11-c-review-fix-verification-2026-11-09.md`。**不是本轮独立重跑，也不等于用户真实Kafka已部署、V1/V1.1真人浏览器验收或main已合并。**

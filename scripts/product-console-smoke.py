@@ -66,7 +66,7 @@ def main():
         lab.start()
         lab.expect(200,'/')
         lab.sql("INSERT INTO fg_principal(principal_type,username,password_hash,role,scopes_json,enabled) SELECT 'ADMIN',LOWER(r.role),p.password_hash,r.role,'[]',1 FROM fg_principal p JOIN (SELECT 'VIEWER' role UNION ALL SELECT 'OPERATOR') r WHERE p.username='block2-admin'")
-        for asset in ('','style.css','api.js','ui.js','app.js','catalog.js','governance.js','operations.js','guide.html'):
+        for asset in ('','style.css','api.js','ui.js','navigation.js','report-context.js','app.js','catalog.js','governance.js','operations.js','guide.html'):
             lab.expect(200,'/console/'+asset)
         lab.expect(200,'/test-console/');lab.expect(200,'/test-console/guide.html')
         lab.expect(401,'/admin/policies/1/bindings');lab.admin_call(404,'/admin/policies/99999/bindings')
@@ -75,7 +75,7 @@ def main():
         if child.returncode:
             print(child.stderr);raise AssertionError('产品真实JS模块HTTP验证失败，退出码'+str(child.returncode))
         result=json.loads(child.stdout);assert result['passed'];passed=True
-        print('PASS /console/九项页面资源/旧开发入口；真实产品JS登录/完整创建编辑/绑定只读/RBAC/发布双节点/Caller吊销/409/回滚',flush=True)
+        print('PASS /console/业务页面资源/旧开发入口；真实产品JS登录/完整创建编辑/绑定只读/RBAC/发布双节点/Caller吊销/409/回滚',flush=True)
     finally:
         lab.close();target.parent.mkdir(parents=True,exist_ok=True)
         with target.open('x') as stream:

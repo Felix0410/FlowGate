@@ -1,4 +1,4 @@
-import {h, badge, notice, permissionButton, searchableTable, formFields, openDialog} from './ui.js';
+import {h, badge, notice, permissionButton, searchableTable, formFields, openDialog, button} from './ui.js';
 import {canWrite} from './api.js';
 import {apiName} from './catalog.js';
 export const policyTypes = {
@@ -51,7 +51,7 @@ export function editPolicy(ctx, type, original = null, bindings = []) {
   try { parameters = JSON.parse(original?.parametersJson || '{}'); } catch { ctx.flash('规则参数无法读取，请检查技术详情', 'error'); return; }
   const base = formFields([
     {name: 'code', label: '规则名称（唯一）', value: original?.code || '', placeholder: '例如：查询接口超时', maxlength: 200},
-    {name: 'scope', label: '保护对象类型', value: original?.scope || definition.scopes[0], options: definition.scopes.map(value => ({value, label: scopes[value]})), disabled: Boolean(original), help: original ? '既有规则的类型和作用域固定。需要另一作用域请新建规则。' : '先选择对象类型，再选择具体业务对象。'},
+    {name: 'scope', label: '保护对象类型', value: original?.scope || (definition.scopes.includes(ctx.params?.targetType) ? ctx.params.targetType : definition.scopes[0]), options: definition.scopes.map(value => ({value, label: scopes[value]})), disabled: Boolean(original), help: original ? '既有规则的类型和作用域固定。需要另一作用域请新建规则。' : '先选择对象类型，再选择具体业务对象。'},
     {name: 'enabled', label: '草稿状态', value: original?.enabled ?? true, options: [{value: 'true', label: '启用'}, {value: 'false', label: '停用'}]}
   ]);
   const target = formFields([{name: 'targetId', label: '具体保护对象', value: '', options: [], help: '没有可选对象？先创建相应目录。Caller只提供本次登录签发记录，不假装全量列表。'}]);
@@ -61,12 +61,14 @@ export function editPolicy(ctx, type, original = null, bindings = []) {
     input.replaceChildren(...optionsFor(ctx, base.controls.scope.value).map(option => h('option', {value: option.value}, option.label)));
     input.value = input.options?.[0]?.value || '';
   };
-  refreshTargets(); base.controls.scope.addEventListener('change', refreshTargets);
+  refreshTargets();
+  if (!original && base.controls.scope.value === ctx.params?.targetType && optionsFor(ctx, base.controls.scope.value).some(option => String(option.value) === String(ctx.params.targetId))) target.controls.targetId.value = String(ctx.params.targetId);
+  base.controls.scope.addEventListener('change', refreshTargets);
   const fields = formFields(definition.parameters.map(([name, label, initial, min, max, help]) => ({name, label, value: parameters[name] ?? initial, type: 'number', step: 1, min, max, help})));
   const fallback = type === 'CIRCUIT_BREAKER' ? formFields([{name: 'fallbackMode', label: '不可用时的响应', value: parameters.fallbackMode || 'NONE', options: [{value: 'NONE', label: '返回真实错误（不降级）'}, {value: 'STATIC_JSON', label: 'GET静态不可用提示（仍返回503）'}], help: '仅GET路由允许静态降级，绝不返回假成功。'}]) : null;
-  const content = h('div', {}, notice(definition.description), base.node,
+  const content = h('div', {}, base.node,
     locked ? notice('已绑定：' + bindings.map(b => b.targetLabel).join('、') + '。本次仅修改参数/启停；当前后端不支持移动或删除绑定。') : target.node,
-    fields.node, fallback?.node, notice('规则保存为草稿，前往发布中心发布，等待真实节点应用后才执行。'));
+    fields.node, fallback?.node, h('details', {}, h('summary', {}, '规则说明与生效条件'), notice(definition.description)), notice('保存为草稿，发布并确认节点应用后生效'));
   openDialog((original ? '编辑' : '新建') + definition.name, content, async () => {
     // 2. GET-only在表单边界提前解释，后端发布仍会独立复验。
     const values = {...base.values(), ...target.values(), ...fields.values(), ...fallback?.values(), type};
@@ -83,7 +85,8 @@ export function editPolicy(ctx, type, original = null, bindings = []) {
 }
 export async function renderGovernance(ctx, mode) {
   const types = mode === 'quota-policy' ? ['USAGE_QUOTA'] : mode === 'rate' ? ['RATE_LIMIT'] : mode === 'concurrency' ? ['CONCURRENCY'] : ['TIMEOUT', 'CIRCUIT_BREAKER'];
-  ctx.heading(mode === 'quota-policy' ? '计量规则' : mode === 'rate' ? '速率限制' : mode === 'concurrency' ? '并发保护' : '故障保护', '先选择业务目标，再设置保护参数。所有规则以发布版本与网关实际应用为准。', types.length === 1 ? permissionButton('新建规则', () => editPolicy(ctx, types[0]), ctx.role, false, true) : null);
+  const create = () => types.length === 1 ? editPolicy(ctx, types[0]) : openDialog('选择故障保护规则', h('div', {class: 'actions'}, types.map(type => button(policyTypes[type].name, () => editPolicy(ctx, type)))), null);
+  ctx.heading(mode === 'quota-policy' ? '计量规则' : mode === 'rate' ? '速率限制' : mode === 'concurrency' ? '并发保护' : '故障保护', '', permissionButton('新建规则', create, ctx.role, false, true));
   if (ctx.data.policies === null) return ctx.unavailable('规则未读取，请重试。');
   const records = (ctx.data.policies || []).filter(p => types.includes(p.type));
   const bindings = new Map();
@@ -95,6 +98,15 @@ export async function renderGovernance(ctx, mode) {
     return [record.code, policyTypes[record.type].name, scopes[record.scope], bound === null ? '绑定未取得（请重读）' : bound.length ? bound.map(b => b.targetLabel).join('、') : '未绑定', parameters, badge(record.enabled ? '草稿启用' : '草稿停用', record.enabled ? 'good' : ''),
       permissionButton('编辑', () => editPolicy(ctx, record.type, record, bound), bound === null ? 'VIEWER' : ctx.role)];
   };
-  return h('div', {}, types.length > 1 ? h('div', {class: 'actions card'}, types.map(type => permissionButton('新建' + policyTypes[type].name, () => editPolicy(ctx, type), ctx.role))) : null,
-    notice(types.map(type => policyTypes[type].description).join(' ')), searchableTable(['规则名称', '类型', '范围', '真实绑定目标', '参数摘要', '草稿状态', '操作'], records, rows, '尚无此类规则。可按业务需要新建；无规则不表示依赖故障。'));
+  const state = ctx.state?.(mode) || {}, filter = formFields([{name: 'status', label: '草稿状态', value: state.status || '', required: false, options: [{value: '', label: '全部状态'}, {value: 'true', label: '启用'}, {value: 'false', label: '停用'}]}]);
+  const body = h('div'), target = ctx.params?.targetType ? {type: ctx.params.targetType, id: Number(ctx.params.targetId)} : null;
+  function draw() {
+    state.status = filter.controls.status.value;
+    const byStatus = records.filter(record => !state.status || String(record.enabled) === state.status);
+    const selected = target ? byStatus.filter(record => bindings.get(record.id)?.some(binding => binding.targetType === target.type && binding.targetId === target.id)) : byStatus;
+    const unknown = target ? byStatus.filter(record => bindings.get(record.id) === null).length : 0;
+    body.replaceChildren(...(unknown ? [notice('有' + unknown + '条规则绑定未取得，关联关系未知，请重新读取', 'error')] : []), searchableTable(['规则名称', '类型', '范围', '真实绑定目标', '参数摘要', '草稿状态', '操作'], selected, rows, '暂无已确认匹配的规则', state));
+  }
+  filter.controls.status.addEventListener('change', draw); draw();
+  return h('div', {}, target ? notice('正在查看指定' + scopes[target.type] + '的规则；新建时预选可支持的目标') : null, h('section', {class: 'card query-panel'}, filter.node), body);
 }
