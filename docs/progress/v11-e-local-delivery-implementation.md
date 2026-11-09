@@ -79,3 +79,18 @@ E0已完成代码/配置审阅，git diff --check通过；未运行E新脚本/Ja
 ## E6 停止点与风险
 
 E0～E5自动实施完成，E6任务书所有负责人勾选仍未填写。未运行D正式性能、10万SQL、全故障矩阵；未激活或迁移用户已有环境；未合并main或旧Draft PR。不把本次隔离测试等同用户常驻部署或正式交付验收。Mac上实际验证，Linux路径有实现但本轮未在独立Linux主机执行。卷有意保留会占磁盘，删除需另行明确授权。Ego Lite提示可更新，本轮未升级。
+
+## 远端交付对照
+
+原生`git push -u origin feat/v11-e-local-delivery`实际退出128/HTTP403，未推送main或强推。改用已连接GitHub工具逐阶段创建Git对象；每个远端tree SHA与本地实测tree完全一致，保留阶段父链。因服务端作者/提交时间不同，commit SHA不同，下表同时保留。新的Draft PR只以docs/v11-e-local-delivery-closeout为base，旧PR不修改。
+
+| 阶段 | 本地实测提交 | GitHub提交 | 相同tree |
+| --- | --- | --- | --- |
+| E0 | 967f1d6606f9854dff2c230070b70d3c5bb0e738 | 9adeabcaa0b18cb609bf8baa4dc5d584834fef72 | 8ededeb773cf0747c79be84fbf8ea348789d801f |
+| E1 | 392d890168577af97c6370cd3841f4010142b415 | 4a35ac860cd1fe3cd355779c052f919a212f6422 | 49f57d7215414cff5e221f4b4ca71dd85d09912e |
+| E2 | b7e97293925c970827d4905d5545e71572cd18f3 | b8f37e3aeef974d17f49fe5db015fd200bc4784a | 32bf091f8e0eec56343347681683379cf86dad1e |
+| E3 | 46859ed21311e8442b6330e29212d27984d71429 | 152195bf11f2766dfce5d8bd02c716522cd4a5cf | 4990a3aadeb46f383cf51f20652abd12d77bc2a7 |
+| E4 | 1fae31fa17554bf7689fa4c66d39c6e31015a962 | 7c97f887f03203f9e4f8018295116f07f207c7dc | 61f0ee1c70f5a28e48752b7a3f6d0584c7960f2a |
+| E5 | 38b67f8dae7866a581ca02ebb07148a61377037f | 1f27a394ba71df0e2721c682e5d95320a0d8472d | 670990c8e8d56eed5574c996f25c84721530bb88 |
+
+本地原生历史保留为独立local-history分支，规范E分支跟踪远端；没有reset/rebase/force或重写共享历史。此交付记录自身另作docs提交，其源码树同样核对。PR链接及最终head以实际GitHub结果汇报，不预填合并或E6通过。
