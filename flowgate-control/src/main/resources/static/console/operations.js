@@ -13,6 +13,22 @@ export function nodesTable(nodes, version) {
     return [node.nodeId, 'V' + node.appliedVersion, badge(state.label, state.tone), node.supportedFeatures?.includes('USAGE_QUOTA_V1') ? '支持月度计量' : '未确认支持（不可接计量流量）', node.lastSeenAt || '未取得'];
   }), '尚未有网关上报。请启动Gateway，首次发布后等待节点真实应用。');
 }
+/** 配置交付的三个阶段分别呈现；缺少版本或节点数据时不能推断成功。 */
+export function deliveryProgress(current, nodes) {
+  // 1. 只依据当前发布版本与最近节点上报计算，草稿没有差异接口，不标记为已发布。
+  const published = Number.isSafeInteger(current?.version) && current.version > 0;
+  const applied = published && Array.isArray(nodes) ? nodes.filter(node => nodeState(node, current.version).tone === 'good').length : 0;
+  const allApplied = published && nodes?.length > 0 && applied === nodes.length;
+  // 2. 未读取、尚未发布和未确认是不同状态，文本与颜色同时说明结果。
+  const stages = [
+    ['草稿目录', '保存仅更新候选配置', 'neutral'],
+    ['发布版本', !current ? '版本未取得' : published ? '已持久化 · V' + current.version : '尚未发布', published ? 'complete' : 'unknown'],
+    ['节点应用', !published ? '等待发布后核对' : nodes === null || nodes === undefined ? '节点信息未取得' : !nodes.length ? '暂无节点确认' : applied + '/' + nodes.length + ' 节点已应用 V' + current.version, allApplied ? 'complete' : 'waiting']
+  ];
+  // 3. 使用有序列表保留阅读顺序；颜色只辅助，不替代明确的状态文字。
+  return h('ol', {class: 'delivery-flow', 'aria-label': '配置交付状态'}, stages.map(([title, text, state], index) =>
+    h('li', {'data-state': state}, h('span', {class: 'delivery-marker', 'aria-hidden': 'true'}, index + 1), h('div', {}, h('strong', {}, title), h('p', {}, text)))));
+}
 export async function publishConfiguration(api, role, current, rollbackVersion = null) {
   if (!canWrite(role)) throw new Error('只读角色不能发布');
   if (!Number.isSafeInteger(current?.version)) throw new Error('请先重新读取当前发布版本');
@@ -35,7 +51,7 @@ export async function renderReleases(ctx) {
   const current = ctx.data.current;
   let quota = null; try { quota = await ctx.api.request('/admin/quota/status'); } catch { /* 状态未知时不推测开关。 */ }
   const activation = quota ? notice('计量激活开关：' + (quota.activationEnabled ? '已显式开启' : '关闭（默认）') + '；配置的完整接流名单：' + (quota.trafficNodes?.join('、') || '空，禁止激活') + '。发布/回滚时服务端会复验所有节点能力、心跳、版本及校验和。') : notice('计量激活状态未取得，不能确认计量发布是否可用。');
-  return h('div', {}, activation, h('div', {class: 'grid-two'}, h('section', {class: 'card'}, h('h2', {}, '当前发布版本'), h('h1', {}, current ? 'V' + current.version : '未取得'), h('p', {class: 'muted'}, current?.status === 'EMPTY' ? '尚未发布。请先建立服务、API和路由草稿。' : '已持久化不代表节点已应用。'), notice('没有草稿差异预览接口。发布范围为完整草稿，请核对目录和规则；不展示推测的变更数量。')),
+  return h('div', {}, deliveryProgress(current, ctx.data.nodes), activation, h('div', {class: 'grid-two'}, h('section', {class: 'card'}, h('h2', {}, '当前发布版本'), h('p', {class: 'version-value'}, current ? 'V' + current.version : '未取得'), h('p', {class: 'muted'}, current?.status === 'EMPTY' ? '尚未发布。请先建立服务、API和路由草稿。' : '已持久化不代表节点已应用。'), notice('没有草稿差异预览接口。发布范围为完整草稿，请核对目录和规则；不展示推测的变更数量。')),
     h('section', {class: 'card'}, h('h2', {}, '节点应用情况'), nodesTable(ctx.data.nodes, current?.version))),
     h('section', {class: 'card'}, h('h2', {}, '发布历史（最近100条）'), history === null ? notice('历史未取得，请重新读取', 'error') : table(['版本', '发布时间', '来源', '操作'], history.map(row => ['V' + row.version, row.createdAt || '未取得', row.rollbackFrom ? '回滚自V' + row.rollbackFrom : '草稿发布', h('div', {class: 'actions'}, button('查看摘要', () => ctx.details('历史V' + row.version + '（只读摘要）', row)), permissionButton('回滚', () => confirmPublish(ctx, row.version), ctx.role))]), '尚无发布记录。')));
 }

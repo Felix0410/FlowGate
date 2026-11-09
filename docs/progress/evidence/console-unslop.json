@@ -1,0 +1,246 @@
+{
+  "scope": "FlowGate business console frontend refactor; no backend contracts, dependencies or infrastructure changed",
+  "baseline": "f904e33",
+  "testedWorkingTree": true,
+  "reference": {
+    "repository": "https://github.com/heydamir/unslop",
+    "author": "Damir Sokolovsky",
+    "license": "CC BY 4.0",
+    "application": "design audit and design tokens; no downloaded runtime dependencies"
+  },
+  "node": {
+    "programs": 7,
+    "passed": true,
+    "newChecks": "navigation filter/no request/session reset, six delivery states, numeric alignment, keyboard table region, filtered count, one page h1"
+  },
+  "java": {
+    "jdk": "17.0.18",
+    "command": "mvn -B -ntp -pl flowgate-control -am test package",
+    "tests": 40,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "http": {
+    "script": "scripts/product-console-smoke.py",
+    "passed": true,
+    "requests": 31,
+    "productModuleRequests": 33,
+    "isolated": true,
+    "asyncEnabled": false
+  },
+  "browser": {
+    "engine": "Chromium via ego-browser",
+    "data": "isolated synthetic UI fixtures, not live backend data",
+    "desktop": {
+      "width": 1280,
+      "pages": 20,
+      "horizontalOverflow": false,
+      "headingsPerPage": 1
+    },
+    "evidence": "Real Chromium with isolated UI fixtures; no real backend writes or owner acceptance",
+    "mobile": [
+      {
+        "key": "dashboard",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "services",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "apis",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "routes",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "developers",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "apps",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "plans",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "subscriptions",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "quota",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "usage",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "async-events",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "reconciliation",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "rate",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "concurrency",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "protection",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "quota-policy",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "releases",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "callers",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "monitoring",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      },
+      {
+        "key": "audits",
+        "width": 375,
+        "overflow": false,
+        "headingCount": 1,
+        "menuClosed": true
+      }
+    ],
+    "viewer": {
+      "createDisabled": true,
+      "role": "只读用户 · 会话仅限本页",
+      "passwordCleared": true
+    },
+    "guide": {
+      "width": 375,
+      "overflow": false,
+      "anchors": true
+    },
+    "keyboard": {
+      "drawerInert": true,
+      "initialFocus": "nav-search",
+      "reverseTabWrap": "logout",
+      "escapeReturnsTo": "menu-toggle",
+      "dialogFocusContained": true,
+      "dialogEscapeReturnsTo": "新建服务",
+      "wideTableScrollsInsideRegion": true
+    },
+    "scopeNote": "Browser checks performed during UI iteration. Final source formatting and technical text treatment also covered by Node and exact packaged-resource checks."
+  },
+  "guideCheck": true,
+  "packagedResources": [
+    "api.js",
+    "app.js",
+    "catalog.js",
+    "governance.js",
+    "guide.html",
+    "index.html",
+    "openapi-business.js",
+    "operations.js",
+    "quota.js",
+    "style.css",
+    "ui.js",
+    "usage.js"
+  ],
+  "diffCheck": true,
+  "failureHistory": [
+    "Initial localhost:8081 browser navigation refused because owner Control was not running; isolated fixture server used instead.",
+    "Initial sandboxed Maven attempt blocked Mockito agent attachment (20 Control errors); rerun with permitted native execution passed all 40 tests.",
+    "New numeric-alignment test initially inspected mock attrs.class instead of className; corrected assertion and reran successfully."
+  ],
+  "notExecuted": [
+    "owner real-browser acceptance",
+    "full Java project regression",
+    "C Kafka fault regression",
+    "long-running performance tests"
+  ],
+  "frontendSha256": {
+    "api.js": "fe3073fa788d23cfa57bcae8560701eb783670dc8cca5aacba6ca51760554444",
+    "app.js": "72652cfd4775d337effdf9dcad412652cf08ceebda1320d88479d218ea0ed4aa",
+    "catalog.js": "2121494bdecb96f3b5e02fc9c3224833ef88aeb69a4034dde244f6d20762f6d6",
+    "governance.js": "340e4623ffa0d1e35779a456b7887119cf6b9d928a4ecd5925e484de5b644b26",
+    "guide.html": "841df70e065f2028aaee4f3e6ea963eb0d909540862ccf192d74277973a4ab99",
+    "index.html": "9fc5e457b70d660261c8844f87f52d51f2dfbbdc8ef8a23bed3e4f4780b0ec73",
+    "openapi-business.js": "a6dce0cdfa2281d9129d5d584d1f49c51bd3e6b095ecc487cb573fcd4b89304b",
+    "operations.js": "6185e72023f8cd8f4c156a7d967d069f04a1bd9caebd7912cc46e5ed8ada6df4",
+    "quota.js": "3d7e1d1e0b4e985796f3047599b4d79d2db1a0fa1a7c89ba5b56ff5459e84df6",
+    "style.css": "b1d1cafa670c37781a83aa13307c942d8ffebee757b0c6854259d4f83a62cf77",
+    "ui.js": "17a0c4d276d74d6981bf69d84397de5f494e16aaa2f4f3c3cf804dcd11fd05bf",
+    "usage.js": "f639b84399c006b7e29b59ed5993e34b9d57d0848dfa4e683d92f2917b699bca"
+  }
+}

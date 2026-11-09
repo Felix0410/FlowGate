@@ -42,7 +42,7 @@ export async function renderUsage(ctx, reconciliation = false) {
     const labels = {LEDGER_WITHOUT_OUTBOX: '权威Ledger存在，但缺少Outbox，事件日期未知', OUTBOX_WITHOUT_LEDGER: 'Outbox找不到对应权威Ledger', DUPLICATE_OUTBOX: '同一Grant关联多条Outbox，未放大权威授权量', EVENT_TIME_MISSING: '事件UTC时间缺失或格式不合法'};
     integrity.replaceChildren(notice('INTEGRITY_GAP：账本/事件完整性异常，本次不能判为MATCH，也不代表用户配额超扣。请人工核查，页面不会自动改余额或旧Ledger。', 'error'), table(['异常', '安全记录编号', '关联数量'], warnings.map(w => [labels[w.code] || '未分类异常，请联系负责人', w.recordId, w.relatedCount])), notice(result.integrityScan?.note || '日期未知时不伪造日报归属。'), ...(result.integrityTruncated ? [notice('异常样本超过100条，请缩小日期/应用/API条件继续核查。')] : []));
   }
-  return h('div', {}, app.node, fields.node, query, info, integrity, body, more);
+  return h('div', {}, h('section', {class: 'card query-panel', 'aria-label': '用量查询条件'}, h('h2', {}, '查询条件'), app.node, fields.node, h('div', {class: 'query-actions'}, query)), info, integrity, body, more);
 }
 export async function retryAsyncEvent(api, role, id) {
   if (role !== 'ADMIN') throw new Error('只有ADMIN可重投失败事件');
@@ -77,5 +77,5 @@ export async function renderAsyncEvents(ctx) {
     } catch (e) { summary.replaceChildren(notice('状态未取得')); if (reset) body.replaceChildren(); error.replaceChildren(notice(e.message, 'error')); more.hidden = true; }
     finally { busy = false; reload.disabled = more.disabled = false; }
   }
-  await load(true); return h('div', {}, fields.node, reload, error, summary, body, more);
+  await load(true); return h('div', {}, h('section', {class: 'card query-panel', 'aria-label': '异步事件查询条件'}, h('h2', {}, '筛选事件'), fields.node, h('div', {class: 'query-actions'}, reload)), error, summary, body, more);
 }

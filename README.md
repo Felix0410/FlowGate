@@ -313,6 +313,7 @@ Python 脚本使用标准库，另需本机 mysql/redis-server/redis-cli 程序�
 - [功能块 2 可执行设计](docs/progress/block-2-traffic.md)：直接对齐现有 Control 的 `capacity/refillPerSecond`、`maxConcurrent` 策略及 `Snapshot` 实际协议，不新造数据表与中间件。
 - [测试台易用性改造规范](docs/standards/test-console-ux-v2.md)：首屏五步引导、独立结果卡、版本状态、错误码帮助、可读配置表单和原生 JS 保留全部旧功能。
 - [当前测试台中文使用指南](docs/guides/test-console-guide.md)：对应新版分区导航、策略向导、发布和回滚，附IDEA环境文件路径与预期状态码。
+- [业务前端规范与本次验证](docs/progress/console-unslop.md)：参考unslop的界面规范，含20页导航、移动端、中文帮助与验证边界。
 - [Block2 Codex 预备提示词](CODEX_BLOCK2_PROMPT.md)：记录授权门槛与固定实施顺序，不自动进入块3。
 
 从 Block2 开始，前端可用性不是附属外观，而是每次功能块的**强制验收项**：普通使用者应能在中文帮助下独立完成 Demo，并能分辨“草稿”“PERSISTED”“节点已应用”“策略真正执行”。

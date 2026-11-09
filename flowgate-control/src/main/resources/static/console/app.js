@@ -2,7 +2,7 @@ import {createApi, redact} from './api.js';
 import {h, button, badge, notice, permissionButton, openDialog} from './ui.js';
 import {renderCatalog, editCatalog} from './catalog.js';
 import {renderGovernance} from './governance.js';
-import {renderReleases, renderCallers, renderMonitoring, renderAudits, nodesTable} from './operations.js';
+import {renderReleases, renderCallers, renderMonitoring, renderAudits, nodesTable, deliveryProgress} from './operations.js';
 import {renderUsage, renderAsyncEvents} from './usage.js';
 import {renderQuota} from './quota.js';
 import {renderBusiness, businessKinds} from './openapi-business.js';
@@ -39,17 +39,22 @@ function dashboard(ctx) {
   if (ctx.data.nodes === null) issues.push('节点信息未取得，不能确认网关应用状态。');
   else if (!ctx.data.nodes.length) issues.push('尚无网关确认记录，请检查Gateway运行情况。');
   else if (ctx.data.nodes.some(n => n.freshness !== 'ONLINE' || n.appliedVersion !== ctx.data.current?.version)) issues.push('有节点心跳过期或版本未同步，请前往运行监控核对。');
-  return h('div', {}, stats, ...issues.map(text => notice(text)), h('div', {class: 'grid-two'}, healthCard, steps), h('section', {class: 'card'}, h('h2', {}, versionLabel(ctx.data.current, ctx.data.nodes)), nodesTable(ctx.data.nodes, ctx.data.current?.version)));
+  return h('div', {}, stats, ...issues.map(text => notice(text)), h('div', {class: 'grid-two dashboard-panels'}, healthCard, steps), h('section', {class: 'card'}, h('h2', {}, '配置交付与节点'), deliveryProgress(ctx.data.current, ctx.data.nodes), nodesTable(ctx.data.nodes, ctx.data.current?.version)));
 }
 export function start(documentRef = document) {
   // 1. 会话结束同时清空数据、回执与模态内容，旧请求用序号隔离。
-  const el = id => documentRef.getElementById(id); let renderNumber = 0, refreshing = false;
+  const el = id => documentRef.getElementById(id); let renderNumber = 0, refreshing = false, menuOpen = false;
+  const closeMenu = (restoreFocus = false) => {
+    menuOpen = false; documentRef.body.classList.remove('menu-open'); el('menu-backdrop').hidden = true;
+    el('menu-toggle').setAttribute('aria-expanded', 'false'); el('workspace').inert = false;
+    if (restoreFocus) el('menu-toggle').focus();
+  };
   function sessionEnded(message = '') {
     renderNumber++; api.clear(); ctx.role = ''; ctx.data = {}; ctx.callers = []; ctx.issued = null; ctx.appIssued = null; ctx.secretEpoch = (ctx.secretEpoch || 0) + 1;
     if (el('entity-dialog').open) el('entity-dialog').close();
     el('page-content').replaceChildren(); el('page-notice').replaceChildren(); el('password').value = '';
-    el('app-view').hidden = true; el('login-view').hidden = false; documentRef.body.classList.remove('menu-open');
-    el('menu-backdrop').hidden = true; el('menu-toggle').setAttribute('aria-expanded', 'false');
+    el('app-view').hidden = true; el('login-view').hidden = false; closeMenu();
+    el('nav-search').value = ''; filterNavigation();
     el('login-error').replaceChildren(message ? notice(message, 'error') : h('span'));
     el('username').focus();
   }
@@ -57,7 +62,8 @@ export function start(documentRef = document) {
   const ctx = {
     api, role: '', data: Object.fromEntries(['services', 'apis', 'routes', 'policies', 'current', 'nodes', 'health'].map(key => [key, null])), view: 'dashboard', callers: [], issued: null, readAt: '',
     heading(title, description, action) {
-      el('page-head').replaceChildren(h('div', {}, h('p', {class: 'breadcrumb'}, 'FlowGate / ' + title), h('h1', {}, title), h('p', {}, description)), action || h('span'));
+      const anchors = {dashboard: 'start', services: 'connect', apis: 'connect', routes: 'connect', developers: 'openapi', apps: 'openapi', plans: 'openapi', subscriptions: 'openapi', quota: 'quota', 'quota-policy': 'quota', usage: 'async-usage', 'async-events': 'async-usage', reconciliation: 'async-usage', rate: 'protect', concurrency: 'protect', protection: 'protect', releases: 'release', callers: 'callers', monitoring: 'monitor', audits: 'monitor'};
+      el('page-head').replaceChildren(h('div', {class: 'page-heading'}, h('p', {class: 'breadcrumb'}, 'FlowGate / ' + title), h('h1', {}, title), h('p', {}, description)), h('div', {class: 'page-actions'}, h('a', {class: 'page-help', href: 'guide.html#' + (anchors[ctx.view] || 'start'), target: '_blank', rel: 'noopener'}, '使用说明', h('span', {class: 'sr-only'}, '（新窗口）')), action));
     },
     unavailable(text) { return h('div', {class: 'card'}, notice(text, 'error'), button('重新读取', () => ctx.refresh())); },
     flash(text, tone = '') { el('page-notice').replaceChildren(notice(text, tone), text.includes('草稿') ? button('前往发布中心', () => ctx.navigate('releases')) : h('span')); },
@@ -67,7 +73,7 @@ export function start(documentRef = document) {
       ctx.issued = null; ctx.appIssued = null; ctx.secretEpoch = (ctx.secretEpoch || 0) + 1; // 一次性凭证离开领取页即清除，不留在隐藏DOM或其他页面。
       if (el('entity-dialog').open) el('entity-dialog').close();
       ctx.view = views.some(row => row[0] === view) ? view : 'dashboard';
-      documentRef.body.classList.remove('menu-open'); el('menu-backdrop').hidden = true; el('menu-toggle').setAttribute('aria-expanded', 'false');
+      closeMenu();
       el('page-notice').replaceChildren(); await ctx.render(); el('main').focus();
     },
     async refresh() {
@@ -81,7 +87,7 @@ export function start(documentRef = document) {
       if (!ctx.role) return;
       const ticket = ++renderNumber, view = ctx.view;
       el('top-title').textContent = views.find(row => row[0] === view)[1]; el('version-state').textContent = versionLabel(ctx.data.current, ctx.data.nodes);
-      el('session-role').textContent = '当前角色 · ' + ctx.role + '（会话仅本页）';
+      el('session-role').textContent = ({ADMIN: '管理员', OPERATOR: '操作员', VIEWER: '只读用户'})[ctx.role] + ' · 会话仅限本页';
       for (const a of el('navigation').querySelectorAll('a')) { if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); }
       el('page-content').replaceChildren(notice('正在读取页面…'));
       try {
@@ -91,19 +97,36 @@ export function start(documentRef = document) {
       } catch (error) { if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(ctx.unavailable(error.message)); }
     }
   };
+  const sections = []; let section;
   for (const [key, label, group] of views) {
-    if (group) el('navigation').append(h('span', {class: 'nav-group'}, group));
-    const link = h('a', {href: '#' + key, 'data-view': key, onclick: event => { event.preventDefault(); ctx.navigate(key); }}, label); el('navigation').append(link);
+    if (group) {
+      const items = h('div', {class: 'nav-items'}), heading = h('h2', {class: 'nav-group', id: 'nav-group-' + key}, group);
+      section = {node: h('section', {class: 'nav-section', 'aria-labelledby': 'nav-group-' + key}, heading, items), items, group, links: []};
+      sections.push(section); el('navigation').append(section.node);
+    }
+    const link = h('a', {href: '#' + key, 'data-view': key, onclick: event => { event.preventDefault(); ctx.navigate(key); }}, label);
+    section.items.append(link); section.links.push({link, label});
   }
+  /** 功能筛选只改变导航可见性，不发送请求或修改当前业务页。 */
+  function filterNavigation() {
+    const term = el('nav-search').value.trim().toLowerCase(); let matches = 0;
+    for (const section of sections) {
+      let count = 0;
+      for (const {link, label} of section.links) { link.hidden = !((section.group + label).toLowerCase().includes(term)); if (!link.hidden) count++; }
+      section.node.hidden = count === 0; matches += count;
+    }
+    el('nav-empty').hidden = matches > 0;
+  }
+  el('nav-search').addEventListener('input', filterNavigation);
   el('home-link').addEventListener('click', event => { event.preventDefault(); ctx.navigate('dashboard'); });
   // 3. 绑定显式的登录/退出/刷新动作，不定时造状态，不在前端持久化会话。
   el('login-form').addEventListener('submit', async event => {
     event.preventDefault(); if (el('login-submit').disabled) return;
-    el('login-submit').disabled = true; el('login-error').replaceChildren();
+    el('login-submit').disabled = true; el('login-submit').textContent = '正在登录…'; el('login-error').replaceChildren();
     const username = el('username').value, password = el('password').value; el('password').value = '';
     try { const session = await api.login(username, password); ctx.role = session.role; el('login-view').hidden = true; el('app-view').hidden = false; await ctx.refresh(); }
     catch (error) { sessionEnded(error.message); }
-    finally { el('login-submit').disabled = false; }
+    finally { el('login-submit').disabled = false; el('login-submit').textContent = '登录 FlowGate'; }
   });
   el('logout').addEventListener('click', async () => { try { await api.logout(); } catch { /* 即使服务不可达，也先清空本页会话。 */ } finally { sessionEnded(); } });
   el('refresh').addEventListener('click', () => ctx.refresh());
@@ -113,10 +136,24 @@ export function start(documentRef = document) {
     catch (error) { el('login-dependencies').replaceChildren(notice(error.message, 'error')); }
     finally { el('login-health').disabled = false; }
   });
-  const closeMenu = () => { documentRef.body.classList.remove('menu-open'); el('menu-backdrop').hidden = true; el('menu-toggle').setAttribute('aria-expanded', 'false'); };
-  el('menu-toggle').addEventListener('click', () => { const open = documentRef.body.classList.toggle('menu-open'); el('menu-backdrop').hidden = !open; el('menu-toggle').setAttribute('aria-expanded', String(open)); if (open) el('navigation').querySelector('a')?.focus(); });
-  el('menu-backdrop').addEventListener('click', closeMenu);
-  documentRef.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+  el('menu-toggle').addEventListener('click', () => {
+    if (menuOpen) { closeMenu(true); return; }
+    menuOpen = true; documentRef.body.classList.add('menu-open'); el('menu-backdrop').hidden = false;
+    el('menu-toggle').setAttribute('aria-expanded', 'true'); el('workspace').inert = true; el('nav-search').focus();
+  });
+  el('menu-backdrop').addEventListener('click', () => closeMenu(true));
+  documentRef.addEventListener('keydown', event => {
+    // 抽屉开启时将键盘焦点留在导航内；Escape关闭后返回触发按钮。
+    if (!menuOpen) return;
+    if (event.key === 'Escape') { event.preventDefault(); closeMenu(true); }
+    if (event.key === 'Tab') {
+      const targets = [...el('sidebar').querySelectorAll('a[href], button:not([disabled]), input:not([disabled])')].filter(node => node.getClientRects().length > 0);
+      const first = targets[0], last = targets.at(-1);
+      if (event.shiftKey && documentRef.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && documentRef.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }
+  });
+  if (typeof matchMedia === 'function') matchMedia('(min-width: 1101px)').addEventListener('change', () => closeMenu());
   return ctx;
 }
 if (typeof document !== 'undefined' && document.getElementById('login-form')) start();
