@@ -1,3 +1,4 @@
+import {routeHash} from './navigation.js';
 /** 只用textContent与DOM节点构建界面，服务端名称、路径与错误不能注入HTML。 */
 export function h(tag, attributes = {}, ...children) {
   const element = document.createElement(tag);
@@ -12,6 +13,11 @@ export function h(tag, attributes = {}, ...children) {
 }
 export const button = (text, action, options = {}) => h('button', {type: 'button', onclick: action, ...options}, text);
 export const badge = (text, tone = '') => h('span', {class: 'badge ' + tone}, text);
+export const viewLink = (ctx, view, text, params = {}) => h('a', {href: routeHash(view, params), onclick: event => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault(); ctx.navigate(view, params);
+}}, text);
+export const facts = entries => h('dl', {class: 'fact-list'}, entries.flatMap(([label, value]) => [h('dt', {}, label), h('dd', {}, value ?? '未取得')]));
 export function notice(text, tone = '') { return h('div', {class: 'notice ' + tone, role: tone === 'error' ? 'alert' : 'status'}, text); }
 export function permissionButton(text, action, role, adminOnly = false, primary = false) {
   const allowed = adminOnly ? role === 'ADMIN' : ['ADMIN', 'OPERATOR'].includes(role);
@@ -62,10 +68,11 @@ export function openDialog(title, content, save, {submitLabel = '保存草稿', 
   (form.querySelector('input:not([disabled]), select:not([disabled])') || cancel).focus();
   return dialog;
 }
-export function searchableTable(headers, records, cells, empty) {
+export function searchableTable(headers, records, cells, empty, state = {}) {
   const search = h('input', {type: 'search', placeholder: '搜索当前列表', 'aria-label': '搜索当前列表'}), body = h('div'), count = h('span', {class: 'muted', role: 'status'});
+  search.value = state.search || '';
   const render = () => {
-    const term = search.value.trim().toLowerCase();
+    state.search = search.value; const term = search.value.trim().toLowerCase();
     const filtered = records.filter(record => JSON.stringify(record).toLowerCase().includes(term));
     count.textContent = (term ? '匹配 ' + filtered.length + ' / ' : '共 ') + records.length + ' 条 · 仅筛选已读取记录';
     body.replaceChildren(table(headers, filtered.map(cells), term ? '没有匹配项，请修改关键词。' : empty));

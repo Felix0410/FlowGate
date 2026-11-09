@@ -32,3 +32,9 @@
 7个一级业务域及20个页内入口已接入；旧Caller只在API接入，APP凭证仍在应用业务。深色高对比侧栏、独立滚动正文、小屏抽屉和横向二级导航沿用原生控件；登录缩减为账号与操作区。`navigation.js`集中维护映射及后续路由字段白名单，不增加后端。
 
 修改app/index/style/navigation及产品Node适配。`node scripts/product-console-test.mjs`退出0，`git diff --check`通过。Java/真HTTP/1280与375浏览器留UX-5，尚未运行本阶段浏览器，不标体验通过。
+
+## UX-2：对象详情与业务上下文
+
+服务详情使用完整目录确认API，API详情确认关联路由；从详情新建时预选服务/API。客户详情按正式API分页读取客户应用，应用详情含独立APP凭证/订阅/配额与用量分区，新增应用/订阅预选来源对象。旧Caller仍在API接入。列表名称/查看进入详情，编辑移到详情；套餐额度/订阅区间限制不变。业务列表保存实际游标与筛选，返回后重新读取同页，不用旧行冒充当前结果。
+
+修改catalog/openapi-business/ui、对应旧产品/A测试，并新增workbench-console-test。`node scripts/workbench-console-test.mjs`、`product-console-test.mjs`、`v11-b-console-test.mjs`、`v11-c-review-console-test.mjs`退出0；`git diff --check`通过。旧A断言从不再准确的固定“尚未启用”改为实际保存反馈，权限断言移到真实详情编辑按钮，没有取消RBAC检查。Java/真实HTTP/浏览器留UX-5；尚未负责人验收。

@@ -39,12 +39,13 @@ for(const kind of Object.keys(fixtures)){
    if(name==='name')control.value='新记录';if(name==='code')control.value='new';
    if(name==='developers')control.value='1';if(name==='apps')control.value='2';if(name==='plans')control.value='3';
  }
- await form.fire('submit');assert.equal(dialog.open,false);assert.match(feedback,/尚未启用/);assert.equal(requests.at(-1).method,'POST');
+ await form.fire('submit');assert.equal(dialog.open,false);assert.match(feedback,/已保存|已创建/);assert.equal(requests.at(-1).method,'POST');
 }
 await editBusiness(ctx,'apps',fixtures.apps[0]);
 const owner=dialog.descendants().find(e=>e.attrs?.name==='developers');assert.equal(owner.value,'1');assert.equal(owner.disabled,true);dialog.close();
 await editBusiness(ctx,'plans',fixtures.plans[0]);assert.equal(dialog.descendants().find(e=>e.attrs?.name==='monthlyUnits').disabled,true);dialog.close();
-ctx.role='VIEWER';const view=await renderBusiness(ctx,'developers');assert.equal(view.descendants().find(e=>e.tagName==='button'&&e.textContent==='编辑').disabled,true);
+ctx.role='VIEWER';ctx.params={id:1};let editAction;ctx.heading=(title,description,action)=>{editAction=action;};
+await renderBusiness(ctx,'developers');assert.equal(editAction.disabled,true);ctx.params={};
 ctx.role='ADMIN';await credentialsPlaceholder(ctx,fixtures.apps[0]);assert.match(feedback,/A阶段尚未启用/);assert.equal(requests.at(-1).path,'/admin/apps/2/credentials');
 fail=true;const unavailable=await renderBusiness(ctx,'developers');assert.match(unavailable.textContent,/读取失败/);assert.doesNotMatch(unavailable.textContent,/暂无记录/);
 console.log('PASS V11-A真实模块/四类创建表单/名称关联/套餐不可变PATCH/分页过滤/ADMIN写限制/失败未知/凭证409不造Token');
