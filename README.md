@@ -1,5 +1,7 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
+> **2026-11-09 复审结论**：FlowGate V11-C三项P1整改（Kafka持久卷/SENT原事件补投、DB临时故障自动重试、Ledger-Outbox完整性诊断）已通过ChatGPT远端**源码与Codex提交的真实隔离测试证据复核**。最新[审核闭环报告](docs/reviews/v11-c-review-fix-verification-2026-11-09.md)。这不是ChatGPT重新执行Kafka/Java/MySQL，也不是常驻用户环境部署；Async默认OFF。可进入V11-D**设计与验收规划**，但D代码/四组公平压测、真人375/1280浏览器检查、旧PR合并仍待单独授权。
+
 > **V11-C三项复审修复已在功能分支完成，待复审**：Kafka命名卷与受控SENT补投、数据库瞬时故障自动恢复、Ledger/Outbox完整性诊断均已实测。Java70项、7套Node、新增13组故障验证、持卷容器重建和原C6 26组回归通过；旧历史证据保留，结果见[C-10整改记录](docs/progress/v11-c-async.md)及[新证据](docs/progress/evidence/v11-c-review-fix-smoke.json)。真实环境部署/新卷启动与源码通过分开记录，不进入D、不合并main。
 
 
