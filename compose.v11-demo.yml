@@ -1,0 +1,56 @@
+# 仅v11-local.py的显式隔离模式；项目名、owner和新卷均由持久身份清单确定。
+services:
+  mysql:
+    image: mysql:8.4
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}
+    environment:
+      MYSQL_DATABASE: flowgate_v11_demo
+      MYSQL_USER: flowgate
+      MYSQL_PASSWORD: ${FG_MYSQL_PASSWORD:?}
+      MYSQL_ROOT_PASSWORD: ${FG_MYSQL_ROOT_PASSWORD:?}
+    ports: ['127.0.0.1:${FG_MYSQL_PORT:?}:3306']
+    volumes: ['mysql-data:/var/lib/mysql']
+    healthcheck:
+      test: [CMD-SHELL, 'MYSQL_PWD="$$MYSQL_PASSWORD" mysql -u "$$MYSQL_USER" -D "$$MYSQL_DATABASE" -Nse "SELECT 1"']
+      interval: 3s
+      timeout: 3s
+      retries: 40
+      start_period: 15s
+  redis:
+    image: redis:7-alpine
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}
+    environment: {REDIS_PASSWORD: '${FG_REDIS_PASSWORD:?}'}
+    command: [sh, -c, 'exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
+    ports: ['127.0.0.1:${FG_REDIS_PORT:?}:6379']
+    volumes: ['redis-data:/data']
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  kafka:
+    image: apache/kafka:4.1.1
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}
+    ports: ['127.0.0.1:${FLOWGATE_KAFKA_PORT:?}:9094']
+    volumes: ['kafka-data:/var/lib/kafka/data']
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://localhost:9092,EXTERNAL://127.0.0.1:${FLOWGATE_KAFKA_PORT:?}
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+volumes:
+  mysql-data:
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}
+  redis-data:
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}
+  kafka-data:
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}

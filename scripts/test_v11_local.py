@@ -73,4 +73,35 @@ class DoctorTest(unittest.TestCase):
         with self.assertRaises(core.LocalFailure): core.jdbc_target({'FG_MYSQL_URL': 'jdbc:mysql://user:password@127.0.0.1:3306/flowgate'})
 
 
+
+class RuntimeSafetyTest(unittest.TestCase):
+    def test_ports_and_instance_are_strict(self):
+        import v11_local_runtime as runtime
+        with self.assertRaises(core.LocalFailure): runtime.validate_ports(dict.fromkeys(runtime.DEFAULT_PORTS, 8080))
+        with self.assertRaises(core.LocalFailure): runtime.instance_home('../../user')
+
+    def test_reused_pid_never_signalled(self):
+        import v11_local_runtime as runtime
+        state = {'owner': 'a' * 32, 'processes': {'flowgate-demo': {'pid': 1234, 'start': 'old'}}}
+        with patch.object(runtime, 'load', return_value=(state, {})), patch.object(runtime, 'identity', return_value=('unrelated-IDE', 'new')), patch.object(runtime.os, 'kill') as kill:
+            with self.assertRaises(core.LocalFailure): runtime.stop(core.ROOT / '.local' / 'fixture')
+            kill.assert_not_called()
+
+    def test_foreign_volume_refused(self):
+        import v11_local_runtime as runtime
+        state = {'owner': 'a' * 32, 'project': 'flowgate-v11-demo-' + 'a' * 12}
+        fake = type('R', (), {'returncode': 0, 'stdout': '{"io.flowgate.v11-demo.owner":"other"}'})()
+        with patch.object(runtime.subprocess, 'run', return_value=fake):
+            with self.assertRaises(core.LocalFailure): runtime.volume_identities(state)
+
+    def test_closed_socket_can_restart_without_killing_anyone(self):
+        import socket
+        import v11_local_runtime as runtime
+        with socket.socket() as server:
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server.bind(('127.0.0.1', 0)); server.listen(); port = server.getsockname()[1]
+            with socket.create_connection(('127.0.0.1', port)) as client:
+                connection, _ = server.accept(); connection.close(); client.recv(1)
+        self.assertTrue(runtime.port_free(port), 'TIME_WAIT不是仍在监听的用户进程')
+
 if __name__ == '__main__': unittest.main()

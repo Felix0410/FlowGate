@@ -1,5 +1,9 @@
+import {gatewayOrigin as configuredGatewayOrigin} from './runtime-config.js';
 /** 管理会话只在闭包内存中；网络失败与HTTP拒绝分别呈现，不持久化任何凭证。 */
-export function createApi(transport = (...args) => fetch(...args), expired = () => {}) {
+export function createApi(transport = (...args) => fetch(...args), expired = () => {}, gatewayOrigin = configuredGatewayOrigin) {
+  const origin = new URL(gatewayOrigin);
+  if (origin.protocol !== 'http:' || origin.hostname !== '127.0.0.1' || origin.username || origin.password || origin.pathname !== '/' || origin.search || origin.hash) throw new Error('Gateway指标来源必须是明确的本机回环地址');
+  gatewayOrigin = origin.origin;
   let token = '', role = '', generation = 0;
   const clear = () => { token = ''; role = ''; generation++; };
   async function request(path, {method = 'GET', body, publicRequest = false, gateway = false} = {}) {
@@ -11,7 +15,7 @@ export function createApi(transport = (...args) => fetch(...args), expired = () 
     const timer = setTimeout(() => controller.abort(), 10000);
     try {
       // 1. 管理请求只走同源；Gateway指标固定回环，绝不向外域附加管理Token。
-      const response = await transport((gateway ? 'http://127.0.0.1:8080' : '') + path,
+      const response = await transport((gateway ? gatewayOrigin : '') + path,
         {method, headers, credentials: 'omit', signal: controller.signal, body: body === undefined ? undefined : JSON.stringify(body)});
       const raw = await response.text(); let data;
       try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
@@ -31,7 +35,7 @@ export function createApi(transport = (...args) => fetch(...args), expired = () 
     } finally { clearTimeout(timer); }
   }
   return {
-    request, clear, role: () => role,
+    request, clear, role: () => role, gatewayOrigin: () => gatewayOrigin,
     async login(username, password) {
       clear(); const result = await request('/admin/auth/login', {method: 'POST', body: {username, password}, publicRequest: true});
       if (!result?.token || !['ADMIN', 'OPERATOR', 'VIEWER'].includes(result.role)) throw new Error('登录响应无有效角色');

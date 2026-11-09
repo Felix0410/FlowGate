@@ -101,7 +101,7 @@ export async function renderMonitoring(ctx) {
   const circuitRows = (ctx.data.nodes || []).flatMap(node => (node.circuitStates || []).map(c => [node.nodeId, c.routeId, badge(c.state, c.state === 'CLOSED' ? 'good' : 'warn'), c.stateChangedAt, c.revision]));
   return h('div', {}, h('section', {class: 'card'}, h('h2', {}, '网关节点'), nodesTable(ctx.data.nodes, ctx.data.current?.version)),
     h('section', {class: 'card'}, h('h2', {}, '最近上报的熔断状态'), notice('节点过期时下面的状态也可能过期。Control/Gateway重启后可能显示未知；未取得不等于CLOSED。'), table(['节点', '路由', '最近状态', '状态变化时间', '修订'], circuitRows, '无熔断摘要。可能尚无绑定规则、节点未上报或Control重启后尚未取得。')),
-    h('section', {class: 'card'}, h('h2', {}, 'Gateway基础指标 · 127.0.0.1:8080'), metrics.map((result, index) => {
+    h('section', {class: 'card'}, h('h2', {}, 'Gateway基础指标 · ' + (ctx.api.gatewayOrigin?.() || 'http://127.0.0.1:8080')), metrics.map((result, index) => {
       const name = ['网关请求', '流量准入', '故障保护事件'][index];
       if (result.status !== 'fulfilled') return notice(name + '：暂无样本或接口不可达。可先产生业务调用再重新读取。');
       const value = result.value;

@@ -24,3 +24,11 @@ E0已完成代码/配置审阅，git diff --check通过；未运行E新脚本/Ja
 新增v11-local.py doctor [--profile v1|v11] [--json]与标准库共用探测。静态解析export配置，不source、不执行命令；数据库会话READ ONLY事务、四项风险预检；仅exec与配置端口/Compose服务/镜像身份一致的容器。Kafka以协议元数据和实际消费组状态检查，不以TCP开放冒充READY。外部IDE归属和无法认证的运行开关保持UNKNOWN，不登录写Redis会话。输出schemaVersion=1，状态与原因/下一动作，返回0/2/1；原始异常/URL凭证不输出。
 
 `python3 scripts/test_v11_local.py`退出0，8项夹具测试覆盖V1不依赖Kafka、缺B/C表、无可信节点、Kafka不可用、全部事实齐备、UNKNOWN、脱敏及配置不执行。初次导入发现括号语法错误，修正后才运行通过。实际`python3 scripts/v11-local.py doctor --json`退出2（当前常驻环境未被认证为完整V11），脱敏JSON保存在.local/v11-e-doctor-baseline.json；根.env摘要比较未变。没有运行迁移、启动或写业务记录。git diff --check通过。
+
+## E2 隔离启动与安全停机
+
+新增compose.v11-demo.yml、v11_local_runtime.py，扩展up/status/stop --isolated及六端口/实例覆盖。独立project/owner标签、0600身份/环境、0700目录、PID起始身份与实际监听者、命名卷归属、串行文件锁；只初始化工具首次创建且有连续凭据的新库，四项风险全零后启动；协议和实际Stable消费组校验，不伪造V0节点能力。stop不删容器卷；失败仅停本次新启的自有进程/依赖。动态runtime-config.js覆盖只在隔离目录，Gateway指标/CORS/Control URI/Demo白名单一致，不改根.env或run-local.py。
+
+实际e2-check项目flowgate-v11-demo-c2d1d8236a0b，六端口55955/55956/55957/55958/55959/55960。三个命名卷同project前缀，mysql-data/redis-data/kafka-data。首次up退出0但业务门禁BLOCKED（V0）；重复up PID不变；stop0→up0后管理员数量与Ledger数量不变，V0仍不能当计量就绪；占用端口返回2且未生成state/数据库/卷；最后stop0并保留三卷。原始脱敏证据.local/v11-e-e2-smoke.json。
+
+第一轮重启验收失败，随后用真实自有TCP连接复现TIME_WAIT造成误拒绝；SO_REUSEADDR兼容已关闭连接，同时LISTEN/PID/Docker身份校验仍在。新增回归先真实失败后修复通过。`python3 scripts/test_v11_local.py`现12项退出0；临时py_compile曾因macOS外部缓存目录受限失败，改用内存编译/实际导入，不算测试通过。E2仅执行package -DskipTests准备Jar，不计Java测试结果。git diff --check通过。用户原三容器/卷未动；没有删除演示卷命令。
