@@ -1,3 +1,14 @@
+# 当前唯一编码任务：V1.1-E 本地交付收尾（等待 Codex 执行）
+
+> 负责人 2026-11-09 要求提交“收尾任务”，本分支已提交**文档合同**，尚未编码/跑E测试，不能说E已完成。
+> 任务基线为 `feat/v11-console-workbench`；本轮**唯一执行入口**为 `CODEX_V11_E_LOCAL_DELIVERY_PROMPT.md`，唯一验收任务书为 `docs/progress/v11-e-local-delivery.md`。
+> 先 E0基线与资产审计 → E1只读doctor → E2隔离V11全链路演示 → E3真实后台就绪诊断 → E4 B/C权威账本/消息闭环 → E5实测和指南 → E6负责人手测。此轮不开展D的10万条SQL/四组性能实验，不重做已完成的A/B/C或UX。
+> **安全门槛**：根 `.env`、用户已有MySQL/Redis/Kafka/卷、IDE进程、旧Ledger均不可动；不使用 `down -v`、DROP/TRUNCATE、hard reset/clean。只对新隔离数据库迁移、启动/停止由E脚本自己管理的进程；所有真实启用条件必须来自后端可信事实，绝不假设ready。
+> 基于当前docs分支另建 `feat/v11-e-local-delivery` 交给本地Codex编码，阶段commit与真实测试证据入新Draft PR，**不改main、不合并、不自动进入D**。当前PR #1～#11仍Draft。
+> 以下UX/C各阶段记录是历史交付说明，请勿再当作当前执行任务。
+
+---
+
 # 当前补充任务：V1.1业务工作台UX重构已实施，等待复审与真人验收
 
 用户2026-11-09明确授权执行 `CODEX_CONSOLE_WORKBENCH_UX_PROMPT.md`，详细设计 `docs/design/v11-console-workbench-ux-rework.md`。功能分支 `feat/v11-console-workbench` 基于独立设计分支；UX-0～UX-5实施及定向自动检查见 `docs/progress/console-workbench-ux-rework.md`。7业务域完整保留20能力，不新增后端语义/框架/迁移。40 Java、8 Node、独立真实HTTP与1280/375真实浏览器已执行；真人体验未验收。不继续扩展、不进入D、不合并main/旧PR；用户.env、IDE与常驻数据保持原样。
