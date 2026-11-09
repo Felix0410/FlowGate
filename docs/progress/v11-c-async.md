@@ -257,3 +257,17 @@ README/AGENTS/中文指南及离线HTML同步，未新增Java/npm依赖、Kafka 
 更新引用使用expected_sha核验原HEAD且force=false，只推进同一C分支；main及旧PR base未改，PR #9保持Draft。原本地分步提交全部保留于本地feat/v11-c-review-local-history-de8aa28归档分支（不推送）；当前交付说明另作后续文档提交，再将本地同名功能分支跟踪远端，不reset/rebase或重写共享历史。
 
 上述成功是修复源码与证据的远端交付，不是用户环境常驻Kafka部署。常驻Kafka新卷启动授权仍未收到，用户.env/MySQL/Redis原持久资源未改，Async默认OFF。等待ChatGPT复审和负责人真人浏览器验收，不进入D、不合并。
+
+
+## C-11 2026-11-09 ChatGPT复审闭环：三项P1源码与证据审核通过
+
+**远端最新提交**：最初C复审基线`ed5a312...`，本次实际修复代码`0240936728cea7dc5eae1736d4acac062edbce57`，后续实际交付说明`23f33bd9f73303276cd08ecf737396b795adcc64`。ChatGPT本轮已经从GitHub读取修复后的源码、`scripts/v11-c-review-smoke.py`、`scripts/v11-c-volume-smoke.py`和新增`docs/progress/evidence/v11-c-review-fix-smoke.json`。**本轮没有重新在用户机器执行JDK17/MySQL/Redis/Kafka，也没有真人浏览器验收**。
+
+**正式复审结果**：`docs/reviews/v11-c-review-fix-verification-2026-11-09.md`。
+- P1-C01 **通过**：Kafka数据卷（仅新Kafka）真容器删除重建topic/offset保留；受控SENT未消费ADMIN补投沿用原eventId/payload，grace/CAS/审计/角色门禁，完整隔离故障证据。
+- P1-C02 **通过**：数据库临时故障通过Spring Kafka DefaultErrorHandler有界间隔同offset自动重试；真MySQL pause/unpause后不重启Control自动追平，永久毒事件仍暂停不ACK。
+- P1-C03 **通过**：Ledger缺Outbox、反向孤儿、重复Outbox及事件时间缺失被只读RR有界查询判`INTEGRITY_GAP`，不误显示0/MATCH或重复计算Grant。真MySQL损坏夹具/恢复与前端证据齐全。
+- Codex新脱敏摘要：Java70项、7套Node、新13组故障、独立Kafka持卷重建、原C6 26组+109笔守恒回归通过。ChatGPT仅复核远端源码与该证据**一致**，不宣称自己的二次运行。
+- **技术审核结论：C已具备转入D设计/验收规划的条件，没有遗留本次三项P1阻断项**。但C未得到用户常驻部署或数据迁移授权；Async仍默认OFF，Kafka单Broker非生产HA，10万级SQL/公平性能/真人产品浏览器/PR主线收口尚未完成。
+
+**后续停止条件仍有效**：本次只完成C复审和文档/PR状态更新。未经负责人单独许可不自动开发D、不开启用户Kafka新卷、不合并#1～#9/main。
