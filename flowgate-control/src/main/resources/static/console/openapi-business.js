@@ -1,6 +1,7 @@
 import {h, button, badge, notice, permissionButton, table, formFields, openDialog, viewLink, facts} from './ui.js';
 export const businessKinds = {developers: '客户', apps: '应用', plans: '套餐', subscriptions: '订阅'};
 const states = [{value: 'ACTIVE', label: '启用'}, {value: 'SUSPENDED', label: '暂停'}];
+const statusLabel = value => ({ACTIVE: '启用', SUSPENDED: '暂停', EXPIRED: '已到期', CURRENT: '当前期间', SCHEDULED: '待生效'})[value] || '状态未取得';
 export function businessBody(kind, values, editing = false) {
   const body = {};
   const fields = kind === 'subscriptions' ? ['applicationId', 'planId', 'effectiveAt', 'expiresAt'] : kind === 'plans' && editing ? ['name', 'status'] : kind === 'apps' && !editing ? ['developerId', 'code', 'name', 'status'] : ['code', 'name', 'status'];
@@ -130,7 +131,7 @@ async function relatedBusiness(ctx, kind, filter) {
     try {
       const rows = await businessPage(ctx.api, kind, after, filter);
       if (rows.length) after = rows.at(-1).id;
-      body.append(table(kind === 'apps' ? ['应用', '代码', '状态'] : ['套餐', 'UTC期间', '期间状态'], rows.map(row => kind === 'apps' ? [viewLink(ctx, 'apps', row.name, {id: row.id}), row.code, row.status] : [row.planName + ' / V' + row.planVersionSnapshot, row.effectiveAt + ' 至 ' + row.expiresAt, row.periodState]), '当前页暂无关联记录'));
+      body.append(table(kind === 'apps' ? ['应用', '代码', '状态'] : ['套餐', 'UTC期间', '期间状态'], rows.map(row => kind === 'apps' ? [viewLink(ctx, 'apps', row.name, {id: row.id}), row.code, statusLabel(row.status)] : [row.planName + ' / V' + row.planVersionSnapshot, row.effectiveAt + ' 至 ' + row.expiresAt, statusLabel(row.periodState)]), '当前页暂无关联记录'));
       more.hidden = rows.length < 20; error.replaceChildren();
     } catch (failure) { error.replaceChildren(notice('关联数据未取得：' + failure.message, 'error')); }
     finally { busy = false; more.disabled = false; }
@@ -143,10 +144,12 @@ async function relatedBusiness(ctx, kind, filter) {
 
 async function businessDetail(ctx, kind) {
   // 1. 深链接始终重新查询正式详情，不用列表缓存冒充当前对象。
+  const epoch = ctx.secretEpoch;
   const row = await ctx.api.request('/admin/' + kind + '/' + Number(ctx.params.id));
+  if (epoch !== ctx.secretEpoch) return h('div');
   ctx.heading(row.name, businessKinds[kind] + '详情', permissionButton('编辑' + businessKinds[kind], () => editBusiness(ctx, kind, row), ctx.role, true, true));
   const back = h('div', {class: 'object-actions'}, viewLink(ctx, kind, '返回' + businessKinds[kind] + '列表'));
-  const info = h('section', {class: 'card'}, h('h2', {}, '基本信息'), facts([['名称', row.name], ['代码', row.code], ['状态', row.status], ...(kind === 'apps' ? [['所属客户', row.developerName || '未取得']] : []), ...(kind === 'plans' ? [['每月准入单位', row.monthlyUnits], ['固定版本', 'V' + row.planVersion]] : [])]), h('details', {}, h('summary', {}, '技术字段'), button('查看技术摘要', () => ctx.details(businessKinds[kind] + '技术摘要', row))));
+  const info = h('section', {class: 'card'}, h('h2', {}, '基本信息'), facts([['名称', row.name], ['代码', row.code], ['状态', statusLabel(row.status)], ...(kind === 'apps' ? [['所属客户', row.developerName || '未取得']] : []), ...(kind === 'plans' ? [['每月准入单位', row.monthlyUnits], ['固定版本', 'V' + row.planVersion]] : [])]), h('details', {}, h('summary', {}, '技术字段'), button('查看技术摘要', () => ctx.details(businessKinds[kind] + '技术摘要', row))));
   const sections = [info];
   // 2. 客户到应用、应用到订阅通过服务端过滤；不要求管理员重填关联ID。
   if (kind === 'developers') {

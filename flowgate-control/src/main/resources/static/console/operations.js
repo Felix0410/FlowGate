@@ -1,5 +1,7 @@
 import {h, badge, notice, button, permissionButton, table, searchableTable, formFields, openDialog} from './ui.js';
 import {canWrite, canManageCallers, redact} from './api.js';
+/** 审计列表优先业务中文，未知动作保留在可展开的真实技术字段中。 */
+export const auditLabel = action => ({CREATE_SERVICE: '新建服务', UPDATE_SERVICE: '编辑服务', CREATE_API: '新建API', UPDATE_API: '编辑API', CREATE_ROUTE: '新建路由', UPDATE_ROUTE: '编辑路由', CREATE_POLICY: '新建规则', UPDATE_POLICY: '编辑规则', CREATE_DEVELOPER: '新建客户', UPDATE_DEVELOPER: '编辑客户', CREATE_APPLICATION: '新建应用', UPDATE_APPLICATION: '编辑应用', CREATE_PLAN: '新建套餐', UPDATE_PLAN: '编辑套餐', CREATE_SUBSCRIPTION: '新增订阅', PUBLISH: '发布配置', ROLLBACK: '回滚配置', CREATE_CALLER: '签发旧调用方凭证', REVOKE_CALLER: '撤销旧调用方凭证', RETRY_ASYNC_EVENT: '重试失败事件', REPLAY_ASYNC_EVENT: '补投原事件'})[action] || '其他管理操作';
 export function nodeState(node, version) {
   if (!node || version === undefined || version === null) return {label: '未取得', tone: ''};
   if (node.freshness !== 'ONLINE') return {label: '心跳过期', tone: 'warn'};
@@ -114,7 +116,7 @@ export async function renderAudits(ctx) {
     if (loading) return; loading = true; more.disabled = true;
     try {
       const last = rows.at(-1); const page = await ctx.api.request('/admin/audits?limit=50' + (last ? '&beforeId=' + last.id : ''));
-      rows.push(...page); container.replaceChildren(table(['时间', '动作', '对象', '版本', '摘要'], rows.map(row => [row.createdAt || '未取得', row.action, row.targetType + ' · ' + row.targetId, row.releaseVersion ?? '—', row.summary]), '尚无审计记录。'));
+      rows.push(...page); container.replaceChildren(table(['时间', '动作', '版本', '摘要', '技术详情'], rows.map(row => [row.createdAt || '未取得', auditLabel(row.action), row.releaseVersion ?? '—', row.summary, h('details', {}, h('summary', {}, '审计字段'), h('pre', {}, JSON.stringify(redact(row), null, 2)))]), '尚无审计记录。'));
       more.hidden = page.length < 50;
     } catch (error) { container.append(notice(error.message, 'error')); }
     finally { loading = false; more.disabled = false; }

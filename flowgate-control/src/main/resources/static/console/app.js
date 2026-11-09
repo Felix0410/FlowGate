@@ -2,7 +2,7 @@ import {createApi, redact} from './api.js';
 import {h, button, badge, notice, permissionButton, openDialog, viewLink, table} from './ui.js';
 import {renderCatalog, editCatalog} from './catalog.js';
 import {renderGovernance} from './governance.js';
-import {renderReleases, renderCallers, renderMonitoring, renderAudits, nodesTable, deliveryProgress} from './operations.js';
+import {renderReleases, renderCallers, renderMonitoring, renderAudits, nodesTable, deliveryProgress, auditLabel} from './operations.js';
 import {renderUsage, renderAsyncEvents} from './usage.js';
 import {renderQuota} from './quota.js';
 import {renderBusiness, businessKinds} from './openapi-business.js';
@@ -43,7 +43,7 @@ function dashboard(ctx) {
   const quick = h('section', {class: 'card'}, h('h2', {}, '业务入口'), h('div', {class: 'object-actions'}, viewLink(ctx, 'apis', '管理API'), viewLink(ctx, 'apps', '管理应用'), viewLink(ctx, 'rate', '配置策略'), viewLink(ctx, 'releases', '发布与节点确认')));
   const empty = ['services', 'apis', 'routes', 'policies'].every(key => Array.isArray(ctx.data[key]) && ctx.data[key].length === 0) && ctx.data.current !== null && ctx.data.nodes !== null && ctx.data.health !== null;
   const onboarding = empty ? h('section', {class: 'card'}, h('h2', {}, '开始接入一个API'), h('ol', {}, [['登记服务', 'services'], ['创建API与路由', 'apis'], ['按需配置规则', 'rate'], ['发布并确认节点', 'releases']].map(([label, view]) => h('li', {}, viewLink(ctx, view, label))))) : null;
-  const recent = ctx.data.audits ? h('section', {class: 'card'}, h('h2', {}, '近期操作'), table(['时间', '动作', '摘要'], ctx.data.audits.map(row => [row.createdAt || '未取得', row.action, row.summary]), '暂无近期操作')) : null;
+  const recent = ctx.data.audits ? h('section', {class: 'card'}, h('h2', {}, '近期操作'), table(['时间', '动作', '摘要'], ctx.data.audits.map(row => [row.createdAt || '未取得', auditLabel(row.action), row.summary]), '暂无近期操作')) : null;
   const health = h('details', {class: 'card'}, h('summary', {}, '依赖连接'), ctx.data.health ? h('div', {class: 'health-list'}, Object.entries(ctx.data.health).map(([key, value]) => h('div', {class: 'health-item'}, ({control: '管理服务', mysql: '数据库', redis: '会话服务', demo: '演示下游'})[key] || key, badge(value === 'UP' ? '正常' : String(value), value === 'UP' ? 'good' : 'warn')))) : notice('依赖状态未取得'));
   return h('div', {}, h('section', {class: 'card'}, h('h2', {}, '配置交付'), deliveryProgress(ctx.data.current, ctx.data.nodes)), stats, h('div', {class: 'grid-two'}, attention, recent || quick), recent ? quick : null, onboarding, health);
 }
@@ -86,9 +86,14 @@ export function start(documentRef = document, browser = typeof window === 'undef
       if (history) writeLocation(ctx.view, ctx.params);
       if (!ctx.role) return;
       closeMenu();
-      el('page-notice').replaceChildren(); await ctx.render(); el('main').focus();
+      const epoch = ctx.secretEpoch;
+      el('page-notice').replaceChildren(); await ctx.render();
+      if (epoch === ctx.secretEpoch && ctx.role) { el('workspace').scrollTop = 0; el('main').focus({preventScroll: true}); }
     },
-    updateParams(patch) { ctx.params = safeParams(ctx.view, {...ctx.params, ...patch}); writeLocation(ctx.view, ctx.params, true); },
+    updateParams(patch) {
+      ctx.params = safeParams(ctx.view, {...ctx.params, ...patch}); writeLocation(ctx.view, ctx.params, true);
+      if (domainFor(ctx.view).key === 'usage') for (const link of el('page-tabs').querySelectorAll('a')) link.setAttribute('href', routeHash(link.dataset.view, ctx.reportContext));
+    },
     async refresh() {
       if (refreshing || !ctx.role) return;
       refreshing = true; el('refresh').disabled = true;
@@ -99,6 +104,9 @@ export function start(documentRef = document, browser = typeof window === 'undef
     async render() {
       if (!ctx.role) return;
       const ticket = ++renderNumber, view = ctx.view;
+      // 异步详情返回前移除旧页操作，避免加载期间误编辑上一对象。
+      ctx.heading(views.find(row => row[0] === view)[1], '');
+      el('page-content').setAttribute('aria-busy', 'true');
       el('top-title').textContent = views.find(row => row[0] === view)[1]; el('version-state').textContent = versionLabel(ctx.data.current, ctx.data.nodes);
       el('session-role').textContent = ({ADMIN: '管理员', OPERATOR: '操作员', VIEWER: '只读用户'})[ctx.role] + ' · 会话仅限本页';
       const domain = domainFor(view); ctx.lastViews[domain.key] = view;
@@ -111,6 +119,7 @@ export function start(documentRef = document, browser = typeof window === 'undef
         const content = view === 'usage' || view === 'reconciliation' ? await renderUsage(ctx, view === 'reconciliation') : view === 'async-events' ? await renderAsyncEvents(ctx) : view === 'quota' ? await renderQuota(ctx) : businessKinds[view] ? await renderBusiness(ctx, view) : ['services', 'apis', 'routes'].includes(view) ? renderCatalog(ctx, view) : ['rate', 'concurrency', 'protection', 'quota-policy'].includes(view) ? await renderGovernance(ctx, view) : view === 'releases' ? await renderReleases(ctx) : view === 'callers' ? renderCallers(ctx) : view === 'monitoring' ? await renderMonitoring(ctx) : view === 'audits' ? await renderAudits(ctx) : dashboard(ctx);
         if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(content);
       } catch (error) { if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(ctx.unavailable(error.message)); }
+      finally { if (ticket === renderNumber) el('page-content').setAttribute('aria-busy', 'false'); }
     }
   };
   for (const domain of domains) {

@@ -25,7 +25,7 @@
 ## 阶段进度
 
 - UX-0：契约与映射完成；提交SHA见本文件Git历史。
-- UX-1～UX-5：待实施，禁止将设计或旧测试当成本次通过。
+- UX-1～UX-5：开发与本轮定向自动验证完成，负责人真人体验待验收。
 
 ## UX-1：业务外壳
 
@@ -54,3 +54,45 @@
 首页改为真实发布/节点、目录记录、待核查问题、近期实际审计及业务入口；健康折叠。仅完整核心目录读取成功且全空才展示接入引导；已有服务/API不重复教学。登录无口号和介绍流程，页脚重复宣传已去除，日常标题缩短；异步延迟、不可逆操作、权限和错误事实保留。
 
 修改app/catalog/quota/usage/operations及工作台测试。`node scripts/workbench-console-test.mjs`退出0，真实入口注入浏览器适配器验证地址直达/登录恢复/回退前进/刷新空会话/敏感参数清理；产品及C复审Node通过。`git diff --check`通过；Java、真实HTTP和真实浏览器将于UX-5执行，不冒充真人验收。
+
+
+## UX-5：最终定向验证与交付
+
+阶段本地提交：UX-0 `d958312`，UX-1 `64b5f46`，UX-2 `24c22f6`，UX-3 `9b7c872`，UX-4 `a478f78`；UX-5提交SHA见本文件Git历史。若原生Git推送403而通过GitHub应用交付，应用可能生成不同SHA但必须逐阶段核对同一源码树；原本地提交保留，不重写共享历史。最终远端交付另行实证，不以“已提交本地”冒充已推送。
+
+### 实际命令和结果
+
+- Java17.0.18：`mvn -B -ntp -pl flowgate-control -am test package`，最终退出0；Contract10+Control30=40项，失败0、错误0、跳过0。只运行直接受影响模块。途中仅为更新资源运行过`package -DskipTests`，不计测试通过；最后已重新实际执行40项test/package。
+- 8个Node入口全部退出0：`node scripts/product-console-test.mjs`、`workbench-console-test.mjs`、`v11-a-console-test.mjs`、`v11-b-console-test.mjs`、`v11-c-console-test.mjs`、`v11-c-review-console-test.mjs`、`block2-console-test.js`、`block3-console-test.js`（后7项同样在scripts目录）。新增七域/20能力映射、详情关联与预选、UTC共享筛选、深链接/历史/刷新、安全参数、回执清除、真实close队列时序、迟到详情和加载期间移除旧操作断言。旧权限/CAS/计量/重投边界未移除。
+- `python3 scripts/build-console-guide.py --product --check`退出0，完整指南及同源HTML同步，旧20项平铺导航与侧栏查找说明已改成7域/分区及详情流程。
+- Java17下`FLOWGATE_ASYNC_ENABLED=false FLOWGATE_QUOTA_ACTIVATION_ENABLED=false python3 scripts/product-console-smoke.py`退出0。独立MySQL8.4/Redis7、Demo/Control/双Gateway；33个Lab HTTP记录+33个真实产品模块请求，创建/完整编辑PUT/真实绑定只读/RBAC/发布双节点/Caller吊销/409不重试/回滚通过。旧/test-console/和产品资源保持200，新增navigation/report-context资源纳入检查。原始本机证据`.local/acceptance/product-console-20261109T085853058994.json`。
+- 真实浏览器Lab：`JAVA_HOME=<Java17> python3 scripts/workbench-browser-lab.py`；使用随机端口、自有MySQL/Redis/JVM，计量/异步明确OFF，不读取.env、不接用户Kafka。此Lab以Spring MVC file资源位置读取本次静态源码，独立正式API/SQL真实执行；另外上述HTTP脚本验证打包Jar资源。
+- ego-browser真实Chromium：1280px和375px各逐页打开全部20项能力，单页一个h1、无整页横向溢出；手机宽表格在区域内滚动。抽屉工作区inert、首次焦点、Shift+Tab回环、Escape回焦点通过。真实客户→应用→订阅预选、应用→配额/用量/对账自动查询、日期与UTC封账截止、前进后退、刷新重新登录恢复、无效/旧地址规范化均实际通过。
+- 真实浏览器在独立库创建1条订阅成功，再提交相同UTC月真实409，表单保留且无自动重试；计量OFF时APP凭证未签发、不展示假Token。21条应用验证分页后进详情、返回仍同页；仅浏览器fetch注入503，显示读取失败而非空/0，恢复后重新查询成功。没有向用户数据库注入故障。
+- 真实VIEWER/OPERATOR登录：客户应用编辑、旧Caller签发等按钮按权限禁用。浏览器存储存在工具SDK元数据键，不能把数量非零当作应用凭证泄露；在页面内部比较实际认证值，未发现写入localStorage/sessionStorage，未输出认证值或存储值。原有真实HTTP另验证后端403。
+- 深色导航普通字/选中/次级字对比度分别12.39/10.09/8.86，均大于4.5。最终Jar的14项console资源与源码逐字一致；`git diff --check`通过。无新增框架/依赖/DDL/后端语义，关键逻辑保留中文编号注释。
+
+### 实际缺陷与收尾
+
+真实Chromium复现了原生dialog先close再show时，排队旧close事件清空新表单，模拟DOM未揭示；改为同一模态内替换内容、不发close，保留初始焦点，新增队列回归并在真实规则类型选择复验。手机正文独立滚动时保留旧偏移会遮住新标题，已在导航完成后归零自身滚动并防止焦点再次滚动，真实375px标题位置复验通过。详情读取增加离页序号保护；最终又以Node受控慢响应检查加载阶段移除旧编辑操作和aria-busy，未将该最后的Node检查冒称额外浏览器故障复现。
+
+旧Node曾依赖列表内编辑按钮或固定“尚未启用”/教学文案，按新合同改为详情编辑、真实保存反馈和有数据无新手引导断言；权限和真实路径断言仍在，不是删除失败测试。浏览器数据全部为本轮独立真实Lab创建的数据，未使用静态成功夹具。
+
+证据：`docs/progress/evidence/console-workbench.json`；真实截图：
+
+![1280px真实隔离工作台](evidence/console-workbench-1280.png)
+
+![375px真实隔离业务列表](evidence/console-workbench-375.png)
+
+浏览器检查覆盖迭代中的20项界面及最终关键路径；最后详情加载保护另有Node慢响应和最终Jar检查。浏览器任务、临时认证配置、测试容器/JVM均已结束，用户原MySQL/Redis/Kafka、.env及IDE未改。
+
+### 负责人手测清单（未执行）
+
+- [ ] 1280px，不读帮助找到API接入→服务/API/路由详情→策略→发布→节点确认。
+- [ ] 客户业务→客户详情→应用→订阅预选与APP凭证；确认旧Caller只在API接入，不能混用。
+- [ ] 从应用详情进入配额、用量、对账，不重填ID；改日期/月份后核对月度与日报口径。
+- [ ] 列表第二页进详情再返回，筛选与页保留；前进/后退、刷新登录恢复、无效地址回退。
+- [ ] 375px菜单/分区/宽表格、Tab/Shift+Tab/Escape/Enter、确认框及输入错误可理解可操作。
+- [ ] 使用自己的ADMIN/OPERATOR/VIEWER检查真实权限、空/失败恢复及不可逆操作提示。
+
+未运行：负责人真人验收、全项目Java回归、Kafka故障链路重跑、V11-D压测/10万级SQL优化。不能标“工作台体验通过”；本次开发和定向自动验证完成，等待ChatGPT复审及负责人手测。不合并main或旧PR，不进入D。

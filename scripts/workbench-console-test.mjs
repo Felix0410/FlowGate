@@ -93,3 +93,31 @@ routed.updateParams({password: 'bad', response: 'raw', id: 2}); assert.equal(bro
 const reloadedBrowser = historyBrowser(browser.location.hash); globalThis.document = freshDocument();
 const reloaded = start(document, reloadedBrowser); assert.equal(reloaded.role, ''); assert.equal(reloaded.view, 'apis'); assert.equal(reloaded.params.id, '2');
 console.log('PASS 真实入口hash直达/敏感参数移除/登录后恢复/前进后退/一次性回执清理/刷新空会话');
+
+// 原生close事件会排队；替换模态内容不能先close再打开，否则迟到事件清空新表单。
+const {openDialog, h, formFields} = await import('../flowgate-control/src/main/resources/static/console/ui.js');
+const replacementDialog = document.getElementById('entity-dialog'), originalClose = replacementDialog.close;
+replacementDialog.close = function () { this.open = false; queueMicrotask(() => this.onclose?.()); };
+openDialog('规则类型', h('p', {}, '选择类型'), null);
+const ruleFields = formFields([{name: 'timeoutMs', label: '超时', value: '200'}]);
+openDialog('规则表单', ruleFields.node, async () => {});
+await new Promise(resolve => setImmediate(resolve));
+assert.equal(replacementDialog.open, true); assert.ok(replacementDialog.descendants().some(node => node.attrs?.name === 'timeoutMs'));
+replacementDialog.close = originalClose; replacementDialog.close();
+let resolveDetail, changedHeading = false;
+const lateContext = {role: 'ADMIN', params: {id: 2}, secretEpoch: 1, api: {request: () => new Promise(resolve => {resolveDetail = resolve;})}, heading() {changedHeading = true;}};
+const lateDetail = renderBusiness(lateContext, 'apps'); lateContext.secretEpoch++; resolveDetail(app); await lateDetail;
+assert.equal(changedHeading, false, '离页后的迟到详情不得覆盖新页标题');
+console.log('PASS 原生close事件排队时模态替换保留表单/迟到详情不覆盖新页');
+const originalFetch = globalThis.fetch; let finishSlowDetail;
+globalThis.fetch = (path, options) => path === '/admin/apps/2' ? new Promise(resolve => {finishSlowDetail = resolve;}) : originalFetch(path, options);
+document.getElementById('username').value = 'admin'; document.getElementById('password').value = 'fixture';
+await document.getElementById('login-form').fire('submit');
+const slowNavigation = reloaded.navigate('apps', {id: 2});
+assert.equal(document.getElementById('page-head').querySelectorAll('button').length, 0, '加载详情时旧对象编辑操作必须消失');
+assert.equal(document.getElementById('page-content').attrs['aria-busy'], 'true');
+finishSlowDetail({status: 200, ok: true, headers: {get: () => null}, text: async () => JSON.stringify(app)});
+await slowNavigation; globalThis.fetch = originalFetch;
+assert.equal(document.getElementById('page-content').attrs['aria-busy'], 'false');
+assert.equal(document.getElementById('workspace').scrollTop, 0);
+console.log('PASS 详情加载期间移除旧编辑操作/aria-busy/切页滚动归零');

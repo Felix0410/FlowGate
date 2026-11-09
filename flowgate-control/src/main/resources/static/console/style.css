@@ -304,3 +304,7 @@ summary { cursor: pointer; color: var(--secondary); font-size: 13px; }
 .fact-list dt { color: var(--muted); }
 .fact-list dd { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 767px) { .fact-list { grid-template-columns: minmax(0, 1fr); gap: 4px; } .fact-list dd { margin-bottom: 12px; } }
+/* 登录只承担认证，不保留营销式大面板与大面积留白。 */
+.login-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; }
+.brand-panel { flex: none; padding: 0; gap: 12px; margin-bottom: 32px; text-align: center; }
+.login-main { display: block; width: 384px; max-width: 100%; padding: 0; }

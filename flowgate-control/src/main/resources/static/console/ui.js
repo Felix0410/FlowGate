@@ -42,10 +42,12 @@ export function formFields(definitions) {
   return {controls, node: h('div', {class: 'form-grid'}, nodes), values: () => Object.fromEntries(Object.entries(controls).map(([key, input]) => [key, input.value]))};
 }
 /** 原生dialog提供焦点约束和Escape；提交中禁止关闭，避免请求完成后写入另一个表单。 */
+let dialogTrigger = null;
 export function openDialog(title, content, save, {submitLabel = '保存草稿', danger = false, onClose = () => {}} = {}) {
   // 1. 记录触发焦点并构造原生模态表单，不复用上一次的输入或凭证。
-  const dialog = document.getElementById('entity-dialog'), previous = document.activeElement;
-  if (dialog.open) dialog.close();
+  const dialog = document.getElementById('entity-dialog');
+  // 同一个模态内从类型选择进入表单时只换内容；close事件异步到达会误清新表单。
+  if (!dialog.open) dialogTrigger = document.activeElement;
   let busy = false;
   const errors = h('div', {'aria-live': 'assertive', tabindex: '-1'});
   const cancel = button('取消', () => dialog.close());
@@ -54,7 +56,7 @@ export function openDialog(title, content, save, {submitLabel = '保存草稿', 
     h('div', {class: 'dialog-actions'}, cancel, save ? submit : null));
   dialog.replaceChildren(form);
   dialog.oncancel = event => { if (busy) event.preventDefault(); };
-  dialog.onclose = () => { onClose(); dialog.replaceChildren(); if (previous?.isConnected) previous.focus(); else document.getElementById('main')?.focus(); };
+  dialog.onclose = () => { onClose(); dialog.replaceChildren(); if (dialogTrigger?.isConnected) dialogTrigger.focus(); else document.getElementById('main')?.focus(); dialogTrigger = null; };
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!save || busy || !form.reportValidity()) return;
     // 2. 保持表单和错误在原位置，失败不关闭，不自动重试发布或创建。
@@ -64,7 +66,7 @@ export function openDialog(title, content, save, {submitLabel = '保存草稿', 
     finally { busy = false; buttons.forEach(b => b.disabled = false); submit.textContent = submitLabel; }
   });
   // 3. 进入时定位首个输入，关闭时由onclose恢复焦点；提交中Escape不能意外关闭。
-  dialog.showModal();
+  if (!dialog.open) dialog.showModal();
   (form.querySelector('input:not([disabled]), select:not([disabled])') || cancel).focus();
   return dialog;
 }
