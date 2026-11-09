@@ -1,6 +1,11 @@
 # FlowGate V1.1 开发路线与真实状态
 
-更新：2026-11-08。**V11-A已交付；V11-B B0～B6已实际编码并提交远端，Codex记录57项JUnit/20组真实双Gateway场景通过。ChatGPT静态复审补充两项B上线前P1收口问题，尚未修改代码。V11-C Kafka和V11-D正式最终验收未开始。** V1负责人最终验收尚未收口，不宣称V1.1全版本完成。
+> **2026-11-09 最新状态**：V11-C全部核心功能及三项静态复审整改已远端交付，Codex的Java70项、7套Node、新13组故障、Kafka持卷重建、原C6 26组/109笔守恒证据与实际源码相符；ChatGPT已完成远端源码+证据复审，**未在本机独立跑Java/Kafka/MySQL**。C三项P1已收口；可开始D**设计/验收规划**但D尚未编码、未做10万级SQL/四组压测，负责人真人浏览器/旧V1与Stacked PR合并仍待。审核`docs/reviews/v11-c-review-fix-verification-2026-11-09.md`。
+
+
+> 2026-11-08 最新进度：**C0～C6已经实际远端交付**、Codex记录Java67项及26组真实故障通过；ChatGPT新增3项恢复/账本完整性边界（Kafka重建/SENT补投、DB瞬断自动恢复、孤儿Ledger对账）待修。最新状态和任务以`docs/reviews/v11-c-static-review-2026-11-08.md`、`CODEX_V11_C_REVIEW_FIX_PROMPT.md`、`docs/progress/v11-c-async.md`C-09/C-10为准。后面部分为历史阶段计划，不能把“设计未实现”当成当前事实。
+
+更新：2026-11-08。**V11-A已交付；V11-B B0～B6已实际编码并提交远端，Codex记录57项JUnit/20组真实双Gateway场景通过。ChatGPT已将两项复审P1修复写入实际B Java/前端/SQL/测试源码，真实JVM/MySQL回归尚未执行。V11-C详细设计与开发任务已交付，Kafka功能代码未实现；D未开始。** V1负责人最终验收尚未收口，不宣称V1.1全版本完成。
 
 ## 为什么要做这次业务调整？
 
@@ -12,12 +17,12 @@
 |---|---|---|---|
 | 前置 | docs/progress/block-4-acceptance.md | V1 后台手测、完整回归、PR 审核 | 待负责人收口 |
 | A | docs/progress/v11-a-business.md | 客户、应用、套餐、订阅、凭证入口占位、产品 UI | 管理代码与17JUnit/155HTTP已交付；两项P0明确并入B0，A凭证仍未激活 |
-| B | docs/progress/v11-b-quota.md | B0修A遗留，APP凭证、MySQL权威Quota/Ledger/Outbox、Gateway非阻塞计量 | **B0～B6实装与定向验收已交付；2项静态复审P1待小修** |
-| C | docs/progress/v11-c-async.md | Kafka、可靠投递、幂等消费、用量查询与对账 | 未开始 |
+| B | docs/progress/v11-b-quota.md | B0修A遗留，APP凭证、MySQL权威Quota/Ledger/Outbox、Gateway非阻塞计量 | **B主体已实装；两项复审小修源码已提交、实测待C0** |
+| C | docs/progress/v11-c-async.md | Kafka、可靠投递、幂等消费、用量查询与对账 | **C0～C6及三项P1整改源码/证据复审通过；D待启动** |
 | D | docs/progress/v11-d-acceptance.md | SQL 大数据实验、四组性能、双节点故障、产品验收与发布 | 未开始 |
 
 - 业务与技术总设计：docs/design/openapi-platform-v1.1.md。
-- Codex当前唯一开发入口：`CODEX_V11_B_REVIEW_FIX_PROMPT.md`，审核`docs/reviews/v11-b-static-review-2026-11-08.md`。**B0～B6已完成，不重新实现；先处理存量A订阅/Balance匹配与激活OFF撤销，复测后等待V11-C后续授权**。
+- Codex当前唯一开发入口：`CODEX_V11_C_REVIEW_FIX_PROMPT.md`，审核`docs/reviews/v11-c-static-review-2026-11-08.md`。**C0已实测通过、C0～C6已交付，不重做旧阶段；仅完善三项恢复/完整性缺口并重新联调**。
 - 原有 /console/ 作为正式后台继续迭代、/test-console/ 只作为技术验证入口。每阶段同步 UI、指南与进度。
 - 每阶段的真实执行日志和 Git SHA 以后按节追加，不提前勾选。完成 D 之后才申请审核是否合并，新功能绝不自动合并 main。
 
@@ -51,3 +56,9 @@ V11-A当前远端PR #7包含真实五表/API/前端、17JUnit和155条Codex HTTP
 ## 2026-11-08 B阶段远端复审补充
 
 GitHub目前能读到B0～B6全部实现和历史定向证据，旧Codex曾push403是它当时的记录，非当前源码缺失。B的5Grant/95拒绝与Ledger/Outbox守恒证据已核对脚本，尚无ChatGPT本机独立运行/人工浏览器验收。最新审核P1：用户存量A同月多订阅/余额冻结一致性检查、计量关闭时允许ADMIN紧急撤销已签发凭证。细节见当前B专属审核报告与Codex修复提示；C/D仍未编码。
+
+## 2026-11-08 V11-C设计与B小修同步进展
+
+- B复审小修已真实写入`QuotaChargeService`、`AppCredentialController`、`/console/`和JUnit/Node/SQL/B6脚本；ChatGPT未执行Java/MySQL，不能标记实测完成。B测试历史证据仍属之前的版本。
+- C独立分支`feat/v11-c-async-usage`基于B小修源码，详细设计`docs/design/v11-c-async-execution.md`；任务`docs/progress/v11-c-async.md` C-08之后；Codex入口`CODEX_V11_C_EXEC_PROMPT.md`。C只设计未编码，C0先检验B修复。
+- C只在Control引入可选Kafka/两张读模型表、Outbox租约、MySQL幂等Consumer、后台用量/异步事件/对账，默认关闭；D负责长压测/人工验收。所有PR保持Draft、main不合并。

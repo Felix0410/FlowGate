@@ -1,0 +1,115 @@
+{
+  "passed": true,
+  "baseline": "ed5a312da82de0d1bfbfae00878fb8d42a4ade82",
+  "scope": "P1-C01/C02/C03 review fixes; isolated new containers and new Kafka volume",
+  "newScenarios": {
+    "passed": true,
+    "checks": [
+      "F1前置：实际Broker ACK/SENT但未消费，原Worker不再领取SENT",
+      "F1反例：独占Broker容器彻底重建，新topic记录0，MySQL仍1Ledger/1SENT/0Consumed",
+      "F1最近SENT等待期内拒绝补投",
+      "F1双管理员补投仅一200/一409、一次审计，原eventId/payload不变",
+      "F1补投后仅1消费/1聚合，Ledger/余额不改，已消费SENT不可再补投",
+      "F1 OPERATOR/VIEWER补投403",
+      "F2消费SQL途中实际pause/unpause MySQL，不重启Control或Listener自动同offset追平2笔",
+      "F3真实Ledger缺Outbox且无Daily：旧inner join为0，新API明确INTEGRITY_GAP且不伪造日期",
+      "F3原事件恢复后真实Kafka消费，对账PENDING到MATCH，真实日仍按Outbox时间",
+      "F3事件时间缺失且Outbox写入较晚，仍由关联Ledger候选明确诊断，不挪用其日期",
+      "F3同charge重复Outbox明确异常，1个Grant的expected仍1而非2",
+      "F3反向孤儿也被诊断，移除测试坏行后MATCH，余额Ledger未改",
+      "F2永久非法及内容冲突暂停不ACK，其他分区继续，毒offset不前进且不双计"
+    ],
+    "details": {
+      "sentReplay": {
+        "adminResults": [
+          200,
+          409
+        ],
+        "ledger": 1,
+        "consumed": 1,
+        "dailyGrantCount": 1,
+        "balanceUnchanged": true,
+        "payloadUnchanged": true,
+        "brokerRecordsAfterLoss": 0
+      },
+      "transientRecovery": {
+        "sameControlPid": true,
+        "consumerNotRestarted": true,
+        "transientRetries": 1,
+        "ledger": 2,
+        "consumed": 2,
+        "dailyGrantCount": 2
+      },
+      "integrity": {
+        "legacyInnerJoinWithMissingOutbox": 0,
+        "missingOutbox": "INTEGRITY_GAP",
+        "duplicateOutbox": "INTEGRITY_GAP",
+        "singleGrantExpectedCount": 1,
+        "orphanOutbox": "INTEGRITY_GAP",
+        "restored": "MATCH",
+        "balanceAndLedgerUnchanged": true,
+        "missingEventTime": "INTEGRITY_GAP"
+      },
+      "poisonIsolation": {
+        "partition2OffsetBefore": 2,
+        "partition2OffsetAfter": 2,
+        "otherPartitionProcessed": true,
+        "poisonAndConflictPaused": true
+      }
+    },
+    "isolated": true,
+    "ownerBrowserAcceptance": "not executed"
+  },
+  "persistentVolumeRecreation": {
+    "passed": true,
+    "proofs": [
+      {
+        "passed": true,
+        "messageOffset": 0,
+        "committedOffset": 1
+      },
+      {
+        "passed": true,
+        "messageOffset": 0,
+        "committedOffset": 1
+      }
+    ],
+    "isolatedCompose": true,
+    "newVolumeOnly": true
+  },
+  "originalC6Regression": {
+    "passed": true,
+    "groupCount": 26,
+    "finalLedger": 109,
+    "finalOutbox": 109,
+    "finalConsumed": 109,
+    "finalDailyGrantCount": 109
+  },
+  "java": {
+    "jdk": "17.0.18",
+    "contract": 10,
+    "control": 30,
+    "gateway": 26,
+    "demo": 4,
+    "total": 70,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "ownerBrowserAcceptance": "not executed",
+  "userDataMigrated": false,
+  "boundedSentDiagnostic": {
+    "scope": "latest 1000 outbox candidates, explicitly labelled in API/UI",
+    "nativeOperationsProbePassed": true
+  },
+  "nodePrograms": [
+    "v11-c-review-console-test.mjs",
+    "v11-c-console-test.mjs",
+    "v11-b-console-test.mjs",
+    "v11-a-console-test.mjs",
+    "product-console-test.mjs",
+    "block2-console-test.js",
+    "block3-console-test.js"
+  ],
+  "guideCheck": "passed"
+}

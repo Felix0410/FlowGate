@@ -1,0 +1,4 @@
+{
+  "passed": true,
+  "scope": "default OFF without Kafka, V1 operator publish, viewer read-only, caller authorize/revoke, C read APIs and assets"
+}

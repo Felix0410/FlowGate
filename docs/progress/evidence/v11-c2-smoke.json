@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "result": {
+    "passed": true,
+    "workers": 2,
+    "uniqueLeases": 6,
+    "oldOwnerUpdate": 0,
+    "newOwnerUpdate": 1
+  }
+}

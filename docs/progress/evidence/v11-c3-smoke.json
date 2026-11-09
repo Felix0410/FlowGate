@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "result": {
+    "passed": true,
+    "duplicateConcurrency": 100,
+    "newAggregates": 1,
+    "rollbackWithoutOrphan": true,
+    "dayFromOutbox": true,
+    "chargeConflictDenied": true
+  }
+}

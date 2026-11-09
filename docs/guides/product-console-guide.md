@@ -130,7 +130,7 @@ mvn -B -ntp -pl flowgate-control -am package -DskipTests
 
 错误处理：401检查Token格式、有效期和是否用对身份域；403检查客户/应用启停、当前订阅、Scope和凭证代次；429 QUOTA_EXHAUSTED表示本月额度耗尽，不能通过重新订阅换套餐绕开；503 QUOTA_UNAVAILABLE表示依赖不可达、在途已满或授权结果不确定，先查账本，不假设未扣。内部重试使用同chargeId幂等，浏览器重新发送业务请求是新的尝试，可能产生新消耗。
 
-余额以MySQL为权威，Redis只服务会话及既有速率限制。Outbox本阶段仅为NEW待投递；未接入Kafka，不展示虚假的投递成功或聚合用量。负责人仍须在真实浏览器1280px、375px及键盘操作中抽查表单、凭证领取、分页和错误提示；Node模拟DOM通过不能替代这项验收。
+余额以MySQL为权威，Redis只服务会话及既有速率限制。仅部署B或未开启异步时，Outbox保持待投递；部署C并显式开启后按下一节查看真实投递与聚合状态。负责人仍须在真实浏览器1280px、375px及键盘操作中抽查表单、凭证领取、分页和错误提示；Node模拟DOM通过不能替代这项验收。
 
 
 <a id="b-review"></a>
@@ -142,4 +142,31 @@ mvn -B -ntp -pl flowgate-control -am package -DskipTests
 
 **紧急撤销**：即使`FLOWGATE_QUOTA_ACTIVATION_ENABLED=false`，先前签发的应用凭证仍可以由ADMIN在“应用管理→管理凭证”查看实际状态并点击“撤销凭证”。这项操作推进MySQL凭证代次、停用旧凭证；签发和轮换仍需激活完整配额链路和节点能力，不会因撤销入口开放而绕过。停用期间余额服务本来就失败关闭；若Redis清理失败，数据库代次仍阻止旧Token在恢复后使用。OPERATOR和VIEWER不能撤销。
 
-**实现与测试区别**：上述小修Java、前端、JUnit、Node和隔离HTTP测试脚本已经提交，真实Java17/MySQL/Redis补测尚待V11-C的C0门槛；不能把“代码已修”当成“正式库已迁移、浏览器已验收”。
+**实现与测试区别**：上述小修Java、前端、JUnit、Node和隔离HTTP测试脚本已经提交，已在V11-C的C0通过独立Java17/MySQL/Redis补测；不能把“代码已修”当成“正式库已迁移、浏览器已验收”。
+
+## V11-C：异步用量、失败事件与封账对账
+
+先完成B部署。C只在Control增加Kafka异步处理，不改变Gateway扣额链路。部署负责人在正确目标库执行`sql/flowgate-v11-c.sql`新增两张读模型表，重启新版Control；默认`FLOWGATE_ASYNC_ENABLED=false`，不启动Kafka也能继续B配额业务，Outbox会积压。单机演示可运行`docker compose -f compose.local.yml --profile mq up -d kafka`，然后为Control设置`FLOWGATE_ASYNC_ENABLED=true`和`FLOWGATE_KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092`再重启。Gateway不配置Kafka。不要将单Broker演示当作生产高可用。
+
+1. “用量统计”：按应用名称、API和UTC日期查询，最多31天。显示每日授权单位、准入次数及最后聚合时间；这不是成功响应次数，也不是收费金额。没有记录时可能尚未调用、异步关闭或消费延迟，不能理解为消费为0。“读取下一页”使用完整日/应用/API游标，同一天多应用也不会漏页。
+2. “异步事件”：查看实际开关、Broker探测状态及检查时间、NEW/LEASED/SENT/FAILED数量和未消费数。NEW待投递；LEASED正在有界发送；SENT仅表示Broker确认，**不代表已统计**；FAILED需要诊断。事件列表不提供原始payload、用户Header或Token。
+3. FAILED处理：ADMIN先核对错误码、Broker/数据库状态，点击该事件“重投”并二次确认。它只将原事件重新排队，保留原eventId，不再扣额度；两个管理员同时点仅一人成功，另一人409后重新读取。OPERATOR/VIEWER可读，不可重投。
+4. “对账中心”：选择昨天及更早的UTC封账日，最多31天。比较权威Ledger授权单位/次数、已消费单位/次数和Daily聚合值。PENDING表示仍有事件未消费，先排查异步关闭、Broker故障、租约、FAILED或暂停分区；追平后应MATCH。MISMATCH表示事件已消费齐全但读模型不同，需负责人诊断；页面不自动改余额、流水或日表。
+5. Kafka停机：MySQL有效且额度足够时，B授权继续成功并积压Outbox；恢复后逐步投递、幂等汇总。不要反复发送业务请求来“修统计”，每次新业务尝试可能再次消耗额度。消费重复不会再次加总；重投、重启也不会生成新Grant。
+6. 消费数据库故障会按1、2、4、8、16、30秒封顶自动退避重试；MySQL恢复后不必重启Control或Listener，同offset会追平。永久非法事件/权威内容冲突仍暂停问题分区、不ACK、不假发DLT，其他分区继续。查看“数据库自动重试/毒消息暂停”进程计数，重启会归零。严重毒消息需负责人先诊断处置，单纯重启不能修正错误记录，不要自行跳offset或删除Outbox/ConsumedEvent。
+
+若API读取失败，页面显示状态未知，不用旧数或0冒充当前数据。Broker状态是带检查时间的短缓存真实探测，SENT、consumer lag、节点健康都不能单独证明对账一致。用量与对账日归属按Outbox不可变UTC事件时间，不能用Ledger插入日期替代。负责人仍需在1280px/375px和键盘操作中验收这三页；自动测试不能代替。
+
+
+## C复审修复：Kafka持久卷、SENT补投与完整性异常
+
+本地Compose的Kafka使用`kafka-data:/var/lib/kafka/data`，该目录是官方4.1.1镜像中UID1000预置可写的数据目录，KRaft日志、Topic和消费组位点均保存在卷。删除/重建容器时保留卷可继续读取；`down -v`会删除卷，请勿对用户项目执行。若原来已有无卷Kafka，新增卷不会自动迁移原日志，须负责人核对备份后单独处理。本轮只在独立随机项目的新卷上验证重建；常驻启动/用户数据迁移不与测试混为一谈。
+
+1. “异步事件”中的SENT仅表示Broker已确认。若消息因保留期或Broker数据丢失而未聚合，页面会显示最近1000条事件候选内的超时SENT未消费数量（不是全历史总数，旧事件可继续分页核查）。先检查“对账中心”是否存在完整性缺口，确认是正确原事件再补投。
+2. ADMIN使用独立“补投原事件”按钮（与FAILED“重投”区分），二次确认后只将原eventId/payload排回NEW，写审计，不再次扣额度或新增Grant。只有SENT、尚未Consumed、超过等待期才允许；两个管理员同时操作只一人成功，另一人409后重新读取。已消费不可补投。
+3. 默认等待期300秒（`FLOWGATE_ASYNC_REPLAY_GRACE_SECONDS`），节点启动后也需等待完整300秒。新版本SENT的调度字段记录Broker确认的等待期起点；旧版本可能是历史调度时间，启动冷却额外保护。升级时先完成所有Control Worker更新，避免混用旧ACK写法。按钮灰色时看提示，等待后点“查询与刷新”；不要误以为ADMIN权限丢失。隔离测试使用2秒不代表日常推荐值。
+4. MySQL短暂故障自动退避重试同offset，恢复后无需重启消费者。持续数据库故障会每最多30秒间隔再试并保留消息，不能视为已统计。永久无效协议、eventId/chargeId内容冲突仍暂停问题分区；不要通过补投来绕过毒消息。
+5. “对账中心”新增INTEGRITY_GAP：权威Ledger缺Outbox、Outbox无Ledger、同Grant多Outbox、事件时间缺失。即使日报行为空也会显示异常；重复事件不会把1笔Grant放大成2。日期未知的Ledger不强行按写入日期归入日报，也不把缺口说成用户配额超扣。
+6. 完整性诊断与日报共享只读RR快照，按应用/API与日期候选范围过滤，每次最多100异常样本；候选写入窗口包含相邻UTC日，范围/截断状态会显示。写入时间只筛选候选，不代表事件UTC日，也不是全历史审计。异常过多请缩小范围，由负责人核查原始权威关系后安排恢复；页面不会自动修改余额、旧Ledger或虚构Outbox。
+
+Kafka仍是单Broker本地演示。持久卷不是生产HA，SENT补投不是跨系统exactly-once；需保留备份、监控积压并完成负责人真实浏览器抽查。
