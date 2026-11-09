@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlowGate 完整使用说明</title><link rel="stylesheet" href="style.css"></head><body class="manual"><header><h1>FlowGate 完整使用说明</h1><p>按实际页面逐项说明：先完成最小闭环，再按需抽查。无需访问GitHub。</p><a class="manual-link" href="./">返回业务页面</a></header><nav class="manual-toc" aria-label="手册目录"><a href="#start">1. 先只读检查</a></nav><main><article><h1>FlowGate V1.1 本地完整交付手册</h1>
+<p>本手册只管理明确隔离的新演示库，不表示用户原环境已激活B/C。常规V1启动方式保留，不修改根.env、用户库卷或IDE。</p>
+<h2 id="start">1. 先只读检查</h2>
+<p>运行 <code>python3 scripts/v11-local.py doctor</code>，或加 <code>--json</code>。0表示所选配置就绪，2表示BLOCKED/UNKNOWN，1表示工具错误。<code>--profile v1</code>不要求Kafka；未验证/无权限绝不标READY。</p>
+<h2>2. 显式隔离启动</h2>
+<p>运行 <code>python3 scripts/v11-local.py up --isolated</code>。从已有.env只读取得Java17、管理员账号/BCrypt和内部密钥，不生成管理员默认明文密码。先使用Java17构建三模块Jar。</p>
+<p>默认应用8081/8080/8085；冲突会停止且不杀占用进程。可传 <code>--control-port</code>、<code>--gateway-port</code>、<code>--demo-port</code>、<code>--mysql-port</code>、<code>--redis-port</code>、<code>--kafka-port</code> 全链路一致性覆盖。依赖默认13407/16480/19192。<code>--instance</code>可建立独立命名实例，后续status/stop必须使用相同实例名。</p>
+<p>服务启动成功的up退出0不代表B门禁就绪。初始V0应BLOCKED，先在发布中心创建并发布公开非计量Demo API，再等网关可信能力。工作台“本地功能就绪”逐项说明V1/B/C和下一步，数据库迁移仍需doctor只读确认。</p>
+<h2>3. 业务顺序与停机</h2>
+<p>客户→应用→Free5套餐→当前UTC月订阅；先发布非计量版本并确认节点，再在应用详情签发APP凭证，建立计量私有API/路由及每次1单位的规则，发布并等待节点应用。前5次授权、第6次429，余额和Ledger以MySQL为准。日报异步、SENT不代表已消费；今天未封账不能假称MATCH。</p>
+<p>运行 <code>python3 scripts/v11-local.py status --isolated</code> 查看脱敏状态；<code>python3 scripts/v11-local.py stop --isolated</code> 只停自有JVM/容器，保留命名卷和账本。重复up不重置密码、订阅或余额；没有删除卷入口。已有库需要迁移时由负责人另行备份并授权。</p></article></main><footer><a href="#start">回到启动说明</a> · 本机业务手册</footer></body></html>

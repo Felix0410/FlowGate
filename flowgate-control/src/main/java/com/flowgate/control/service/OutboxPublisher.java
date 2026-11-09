@@ -33,7 +33,8 @@ public class OutboxPublisher {
      });
     }catch(RuntimeException unavailable){try{fail(row);}finally{inflight.decrementAndGet();}}
    }
-  }catch(RuntimeException unavailable){diagnostics.count("workerUnavailable");}
+   diagnostics.publisherTick(true);
+  }catch(RuntimeException unavailable){diagnostics.publisherTick(false);diagnostics.count("workerUnavailable");}
   // 3. DB回写失败不伪装成功；租约到期后由任意Worker重领，消费幂等负责重复。
   finally{busy.set(false);}
  }

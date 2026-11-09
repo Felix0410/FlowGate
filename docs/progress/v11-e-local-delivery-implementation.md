@@ -32,3 +32,11 @@ E0已完成代码/配置审阅，git diff --check通过；未运行E新脚本/Ja
 实际e2-check项目flowgate-v11-demo-c2d1d8236a0b，六端口55955/55956/55957/55958/55959/55960。三个命名卷同project前缀，mysql-data/redis-data/kafka-data。首次up退出0但业务门禁BLOCKED（V0）；重复up PID不变；stop0→up0后管理员数量与Ledger数量不变，V0仍不能当计量就绪；占用端口返回2且未生成state/数据库/卷；最后stop0并保留三卷。原始脱敏证据.local/v11-e-e2-smoke.json。
 
 第一轮重启验收失败，随后用真实自有TCP连接复现TIME_WAIT造成误拒绝；SO_REUSEADDR兼容已关闭连接，同时LISTEN/PID/Docker身份校验仍在。新增回归先真实失败后修复通过。`python3 scripts/test_v11_local.py`现12项退出0；临时py_compile曾因macOS外部缓存目录受限失败，改用内存编译/实际导入，不算测试通过。E2仅执行package -DskipTests准备Jar，不计Java测试结果。git diff --check通过。用户原三容器/卷未动；没有删除演示卷命令。
+
+## E3 真实后台就绪诊断
+
+工作台/发布中心复用小型四行就绪区，仍7域20能力。V1核对版本/checksum/节点；B的既有认证GET /admin/quota/status新增只读资格字段，复用requireReady同一完整门禁，无新端点/写语义。C既有summary新增框架Listener实际运行/分配/暂停事实及Worker最近完成轮询事实，Broker协议/Worker/Consumer/积压分别判断，不用历史计数或SENT冒充已统计。数据库迁移明确UNKNOWN并指向只读doctor。
+
+应用凭证界面需要本次后端门禁READY才提供签发/轮换；未知或受阻显示原因，ADMIN紧急撤销仍不受新签发门禁阻挡。离页清密和角色/后端复验不变。新增本地离线交付手册与生成器--delivery支持，不新增第八个菜单或敏感探针。
+
+`mvn -B -ntp -pl flowgate-control -am test package` Java17退出0：Contract10+Control35=45，新增5项检查OFF不碰表/V0不发证/缺可信节点/缺证据UNKNOWN/Worker心跳不等历史计数。E就绪Node及原B Node通过，--delivery --check和git diff --check通过。B旧测试补入真正的就绪API夹具，没有删除原权限/撤销/回执清理预期。全三模块、真实B/C/浏览器在E4/E5执行。

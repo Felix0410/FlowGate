@@ -201,7 +201,9 @@ export async function manageCredentials(ctx, app) {
     const state = await ctx.api.request('/admin/apps/' + app.id + '/credentials/status');
     if (ticket !== (ctx.secretEpoch || 0) || role !== ctx.role) return;
     if (state.status === 'FEATURE_NOT_READY') { ctx.flash('尚无可撤销的应用凭证；新签发需开启完整配额链路并确认节点就绪。'); return; }
-    const issueAllowed = state.issuanceEnabled !== false;
+    let gate = null; try { gate = await ctx.api.request('/admin/quota/status'); } catch { /* 无可信状态不允许前端发证，紧急撤销仍保留。 */ }
+    if (ticket !== (ctx.secretEpoch || 0) || role !== ctx.role) return;
+    const issueAllowed = state.issuanceEnabled !== false && gate?.readiness === 'READY';
     const fields = formFields([{name: 'scopes', label: '授权范围', value: '', required: false, help: '例如 demo:read，以逗号或空格分隔，必须包含计量私有API的requiredScope。轮换需要重新输入完整范围。', disabled: !issueAllowed}]);
     const actions = h('div', {class: 'actions'});
     const labels = {NOT_ISSUED: '尚未签发', ACTIVE: '凭证代次已启用（不代表Redis会话可用或未过期）', REVOKED: '已撤销'};
@@ -222,7 +224,7 @@ export async function manageCredentials(ctx, app) {
       }, ctx.role, true));
     }
     openDialog(app.name + ' · 凭证管理', h('div', {}, notice('真实状态：' + (labels[state.status] || '未知') + '；代次：' + (state.generation ?? '未建立')),
-      !issueAllowed ? notice('计量功能已关闭：签发、轮换暂不可用；已有凭证仍可由ADMIN紧急撤销。') : null,
+      !issueAllowed ? notice((gate?.reason || '计量门禁未验证：先运行doctor并在发布中心确认非计量版本、完整名单和可信能力') + '；签发、轮换暂不可用，已有凭证仍可由ADMIN紧急撤销') : null,
       fields.node, actions, notice('余额与流水在“配额与账本”查看。凭证签发不会自动建立或发布计量规则。')), null);
   } catch (error) { ctx.flash('凭证状态未取得：' + error.message, 'error'); }
 }

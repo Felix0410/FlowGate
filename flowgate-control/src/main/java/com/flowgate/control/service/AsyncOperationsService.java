@@ -14,6 +14,20 @@ public class AsyncOperationsService {
  private final LedgerIntegrityMapper integrity;
  private final AsyncUsageReadMapper reads;private final ApplicationEntryMapper clock;private final AuditService audit;private final TransactionTemplate snapshot,write;private final AsyncBrokerProbe broker;private final AsyncDiagnostics diagnostics;
  public AsyncOperationsService(AsyncUsageReadMapper reads,ApplicationEntryMapper clock,AuditService audit,PlatformTransactionManager manager,AsyncBrokerProbe broker,AsyncDiagnostics diagnostics,LedgerIntegrityMapper integrity,@org.springframework.beans.factory.annotation.Value("${flowgate.async.replay-grace-seconds:300}")int grace){if(grace<1||grace>86400)throw new IllegalArgumentException("补投等待期须1..86400秒，生产建议至少300秒");replayGraceSeconds=grace;this.integrity=integrity;this.reads=reads;this.clock=clock;this.audit=audit;this.broker=broker;this.diagnostics=diagnostics;snapshot=new TransactionTemplate(manager);snapshot.setReadOnly(true);snapshot.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);snapshot.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);snapshot.setTimeout(8);write=new TransactionTemplate(manager);}
+ private org.springframework.kafka.config.KafkaListenerEndpointRegistry listeners;
+ @org.springframework.beans.factory.annotation.Autowired(required=false) public void setListeners(org.springframework.kafka.config.KafkaListenerEndpointRegistry registry){listeners=registry;}
+ /** 框架容器的运行/分配/暂停事实，不以历史消费计数推测Listener在线。 */
+ private Object consumerStatus(){
+  if(!broker.enabled())return Map.of("state","BLOCKED","reason","异步开关关闭");
+  if(listeners==null||listeners.getListenerContainers().isEmpty())return Map.of("state","UNKNOWN","reason","尚未取得Consumer容器");
+  for(var container:listeners.getListenerContainers()){
+   if(!container.isRunning())return Map.of("state","BLOCKED","reason","Consumer未运行");
+   var partitions=container.getAssignedPartitions();
+   if(partitions==null||partitions.isEmpty())return Map.of("state","UNKNOWN","reason","Consumer尚未取得分区");
+   if(container.isContainerPaused()||container.isPauseRequested()||partitions.stream().anyMatch(p->container.isPartitionPaused(p)||container.isPartitionPauseRequested(p)))return Map.of("state","BLOCKED","reason","Consumer有暂停分区，请先诊断毒消息，禁止跳offset");
+  }
+  return Map.of("state","READY","reason","Consumer实际运行且已分配分区；不代表日报已追平");
+ }
  private long number(Map<String,Object> row,String key){return ((Number)row.get(key)).longValue();}
  public Object query(boolean reconcile,String from,String to,Long app,Long api,String cursor,int limit){
   BusinessInputs.page(0,limit);if(app!=null)BusinessInputs.id(app);if(api!=null)BusinessInputs.id(api);var position=UsageCursor.parse(cursor);
@@ -40,7 +54,7 @@ public class AsyncOperationsService {
   });
  }
  public Object events(String status,long after,int limit){BusinessInputs.page(after,limit);if(status!=null&&!Set.of("NEW","LEASED","SENT","FAILED").contains(status))throw new IllegalArgumentException("状态非法");var rows=reads.events(status,after,limit,replayGraceSeconds);if(!replayWarm())rows.forEach(row->row.put("replayEligible",false));return rows;}
- public Object summary(){var result=new LinkedHashMap<>(reads.summary());result.put("overdueUnconsumedSent",reads.overdueSent(replayGraceSeconds));result.put("sentReplayScanLimit",1000);result.put("replayGraceSeconds",replayGraceSeconds);result.put("replayGuardReady",replayWarm());result.put("asyncEnabled",broker.enabled());result.put("broker",broker.status());result.put("processCounters",diagnostics.snapshot());result.put("poisonPolicy","数据库故障自动退避重试；永久毒消息暂停问题分区且不提交offset，不使用未确认DLT");return result;}
+ public Object summary(){var result=new LinkedHashMap<>(reads.summary());result.put("overdueUnconsumedSent",reads.overdueSent(replayGraceSeconds));result.put("sentReplayScanLimit",1000);result.put("replayGraceSeconds",replayGraceSeconds);result.put("replayGuardReady",replayWarm());result.put("asyncEnabled",broker.enabled());result.put("broker",broker.status());result.put("processCounters",diagnostics.snapshot());result.put("runtime",Map.of("publisher",diagnostics.publisherStatus(),"consumer",consumerStatus()));result.put("poisonPolicy","数据库故障自动退避重试；永久毒消息暂停问题分区且不提交offset，不使用未确认DLT");return result;}
  public Object retry(long id,long actor){BusinessInputs.id(id);return write.execute(s->{if(reads.retry(id)!=1)throw new ApiFailure(409,"EVENT_STATE_CONFLICT","仅FAILED可重排，可能已被其他管理员处理");audit.record(actor,"RETRY_ASYNC_EVENT","outbox",Long.toString(id),null,"保留原eventId重新排队，不修改权威Ledger或余额");return Map.of("status","NEW");});}
  /** 新ACK写入next_attempt_at作为SENT等待期基点；启动冷却还保护旧版本时间含义不同的存量行。 */
  private boolean replayWarm(){return java.util.concurrent.TimeUnit.NANOSECONDS.toSeconds(System.nanoTime()-started)>=replayGraceSeconds;}
