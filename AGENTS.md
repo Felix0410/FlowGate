@@ -1,4 +1,9 @@
-# FlowGate｜当前阶段：V11-C三项复审修复完成，等待复审（2026-11-08）
+# FlowGate｜当前阶段：V11-C技术复审通过，等待V11-D设计/验收授权（2026-11-09）
+
+> 2026-11-09 ChatGPT已核对PR #9实际修复源码和Codex提交的Java70项/7套Node/新13组故障/原C6 26组/独立Kafka持卷测试证据，P1-C01～C03三项均**通过源码+证据复审**；完整报告`docs/reviews/v11-c-review-fix-verification-2026-11-09.md`。**不是本轮独立重跑，也不等于用户真实Kafka已部署、V1/V1.1真人浏览器验收或main已合并。**
+>
+> **当前没有新增C编码任务**。停止执行历史`CODEX_V11_C_REVIEW_FIX_PROMPT.md`（仅作为旧修复合同保留）；等待负责人明确指令再编写V11-D设计/编码任务。不可自动开始D、Kafka常驻新卷/真实数据库迁移、合并main/旧Draft PR。仍保护用户未提交文件、IDE、.env、MySQL/Redis/Kafka卷。
+
 
 > **V11-C的C0～C6 Java/Kafka/SQL/前端与实际测试证据已经真实提交GitHub**，PR #9仍Draft。Codex记录JDK17 **67 JUnit**、**26组真实Kafka/HTTP故障场景**及109 Ledger=Outbox=Consumed=每日授权数，ChatGPT已审读远端源码与证据但**未独立运行本机Java/Kafka/MySQL或真人浏览器**。目前不是从头开发C，也不是开始D。
 >
