@@ -308,3 +308,9 @@ summary { cursor: pointer; color: var(--secondary); font-size: 13px; }
 .login-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; }
 .brand-panel { flex: none; padding: 0; gap: 12px; margin-bottom: 32px; text-align: center; }
 .login-main { display: block; width: 384px; max-width: 100%; padding: 0; }
+
+.readiness-list { display: grid; gap: 16px; margin-bottom: 20px; }
+.readiness-row { display: grid; grid-template-columns: 176px minmax(0, 1fr) 40px; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.readiness-row strong { display: block; margin-bottom: 8px; }
+.readiness-row p { margin-bottom: 0; overflow-wrap: anywhere; }
+@media (max-width: 767px) { .readiness-row { grid-template-columns: minmax(0, 1fr); gap: 8px; } }

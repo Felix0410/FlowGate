@@ -1,6 +1,6 @@
-# 当前唯一编码任务：V1.1-E 本地交付收尾（等待 Codex 执行）
+# 当前状态：V1.1-E 自动实施完成，等待复审与E6负责人手测
 
-> 负责人 2026-11-09 要求提交“收尾任务”，本分支已提交**文档合同**，尚未编码/跑E测试，不能说E已完成。
+> E0～E5已在独立功能分支完成编码和定向实测：Java75、Node9入口、Python14、原B23项/C26组、新E真实5/6+Kafka+历史MATCH和1280/375Chromium。详见`docs/progress/v11-e-local-delivery-implementation.md`及证据JSON。**E6负责人手测未执行，不能称正式交付验收通过。**
 > 任务基线为 `feat/v11-console-workbench`；本轮**唯一执行入口**为 `CODEX_V11_E_LOCAL_DELIVERY_PROMPT.md`，唯一验收任务书为 `docs/progress/v11-e-local-delivery.md`。
 > 先 E0基线与资产审计 → E1只读doctor → E2隔离V11全链路演示 → E3真实后台就绪诊断 → E4 B/C权威账本/消息闭环 → E5实测和指南 → E6负责人手测。此轮不开展D的10万条SQL/四组性能实验，不重做已完成的A/B/C或UX。
 > **安全门槛**：根 `.env`、用户已有MySQL/Redis/Kafka/卷、IDE进程、旧Ledger均不可动；不使用 `down -v`、DROP/TRUNCATE、hard reset/clean。只对新隔离数据库迁移、启动/停止由E脚本自己管理的进程；所有真实启用条件必须来自后端可信事实，绝不假设ready。

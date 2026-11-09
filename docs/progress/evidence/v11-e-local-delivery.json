@@ -1,0 +1,658 @@
+{
+  "schemaVersion": 1,
+  "phase": "V1.1-E",
+  "automatedPassed": true,
+  "ownerAcceptance": "NOT_EXECUTED_PENDING_E6",
+  "java": {
+    "command": "JAVA_HOME=<JDK17> mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package",
+    "exitCode": 0,
+    "tests": 75,
+    "failed": 0,
+    "skipped": 0,
+    "modules": {
+      "contract": 10,
+      "control": 35,
+      "gateway": 26,
+      "demo": 4
+    }
+  },
+  "node": [
+    {
+      "command": "node scripts/block2-console-test.js",
+      "exit": 0,
+      "output": "PASS 控制台导航/登录与清密/角色按钮/当前版本/真实目标路径/429与400渲染/409不重试/摘要脱敏\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/block3-console-test.js",
+      "exit": 0,
+      "output": "PASS 控制台导航/登录与清密/角色按钮/当前版本/真实目标路径/429与400渲染/409不重试/摘要脱敏\nPASS 业务保护表单/原API绑定/草稿提示/实际504与降级渲染/真实节点状态/已有绑定锁定\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/product-console-test.mjs",
+      "exit": 0,
+      "output": "PASS 产品真实模块：请求/完整PUT/规则绑定/权限/CAS409不重试/回滚/Caller/未知与断网/会话清密\nPASS 产品模拟DOM：登录/列表/表单回填与真实提交路径/草稿反馈/只读按钮/导航/退出清空；非浏览器验收\nPASS 前端规范：七个业务域/二十项页内入口/发布六类真实状态/数字对齐/键盘表格/筛选计数/单页h1\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/v11-a-console-test.mjs",
+      "exit": 0,
+      "output": "PASS V11-A真实模块/四类创建表单/名称关联/套餐不可变PATCH/分页过滤/ADMIN写限制/失败未知/凭证409不造Token\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/v11-b-console-test.mjs",
+      "exit": 0,
+      "output": "PASS V11-A真实模块/四类创建表单/名称关联/套餐不可变PATCH/分页过滤/ADMIN写限制/失败未知/凭证409不造Token\nPASS V11-B UTC月份/Quota规则/凭证确认与ADMIN权限/一次性密码回执清理/余额未知与流水/故障不显示旧余额\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/v11-c-console-test.mjs",
+      "exit": 0,
+      "output": "PASS V11-A真实模块/四类创建表单/名称关联/套餐不可变PATCH/分页过滤/ADMIN写限制/失败未知/凭证409不造Token\nPASS C 日期/复合游标/真实读模型与延迟提示/PENDING不冒充错账/ADMIN确认重投/只读/失败未知\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/v11-c-review-console-test.mjs",
+      "exit": 0,
+      "output": "PASS V11-A真实模块/四类创建表单/名称关联/套餐不可变PATCH/分页过滤/ADMIN写限制/失败未知/凭证409不造Token\nPASS C 日期/复合游标/真实读模型与延迟提示/PENDING不冒充错账/ADMIN确认重投/只读/失败未知\nPASS 复审SENT补投独立确认/ADMIN/等待期禁用/超时告警/空日报仍显示完整性异常\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/v11-e-console-test.mjs",
+      "exit": 0,
+      "output": "PASS E三态/真实后端门禁证明/Worker与Consumer缺证据不绿/积压不假成功/数据库未验证/隔离指标端口及不发管理Token\n",
+      "error": ""
+    },
+    {
+      "command": "node scripts/workbench-console-test.mjs",
+      "exit": 0,
+      "output": "链接/客户详情真实分页/应用与订阅预选/配额携带应用/服务API预选\nPASS 报表共享应用/跨月余额契约/同月读取不覆盖日期/显式改月/对账截止封账UTC日\nPASS 真实入口hash直达/敏感参数移除/登录后恢复/前进后退/一次性回执清理/刷新空会话\nPASS 原生close事件排队时模态替换保留表单/迟到详情不覆盖新页\nPASS 详情加载期间移除旧编辑操作/aria-busy/切页滚动归零\n",
+      "error": ""
+    }
+  ],
+  "python": {
+    "command": "python3 scripts/test_v11_local.py",
+    "exitCode": 0,
+    "tests": 14,
+    "failed": 0,
+    "scope": "fixtures: tri-state, read-only, JSON/exit0/2/1, permission UNKNOWN, foreign PID/volume, ports/TIME_WAIT"
+  },
+  "e2": {
+    "passed": true,
+    "project": "flowgate-v11-demo-c2d1d8236a0b",
+    "ports": {
+      "control": 55955,
+      "gateway": 55956,
+      "demo": 55957,
+      "mysql": 55958,
+      "redis": 55959,
+      "kafka": 55960
+    },
+    "volumes": {
+      "mysql": "flowgate-v11-demo-c2d1d8236a0b_mysql-data",
+      "redis": "flowgate-v11-demo-c2d1d8236a0b_redis-data",
+      "kafka": "flowgate-v11-demo-c2d1d8236a0b_kafka-data"
+    },
+    "idempotentPids": true,
+    "restartPreservedCounts": true,
+    "stoppedVolumesRetained": true,
+    "wrongPortRefused": true,
+    "v0NotReady": true
+  },
+  "e4": {
+    "passed": true,
+    "instance": "e4-20261109t131204-18e5",
+    "checks": [
+      "V0发证409；真实非计量V1发布和节点能力后才可签发",
+      "B真实5个200+第6个429，余额5/0、Ledger/Outbox/日报各5；401/Scope403/旧Caller隔离/同月409",
+      "自有Broker暂停时B授权不丢、Outbox积压；恢复后原事件追平1，未重做业务扣额",
+      "重复Kafka事件未双计；真实今日未封账查询400，不伪造今日MATCH",
+      "只对新Grant注入过往会话时钟，恢复真实时钟后MATCH；撤销旧代次拒绝，VIEWER写403，旧V1仍200"
+    ],
+    "main": {
+      "http": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        429
+      ],
+      "total": 5,
+      "remaining": 0,
+      "ledger": 5,
+      "outbox": 5,
+      "daily": 5,
+      "v1": 1,
+      "v2": 2
+    },
+    "historical": {
+      "day": "2026-11-08",
+      "status": "MATCH",
+      "ledger": 1,
+      "daily": 1,
+      "method": "new Grant under isolated Control MySQL session clock; restored real clock before reconciliation; no Ledger/Outbox history rewritten"
+    },
+    "requests": [
+      {
+        "path": "/admin/auth/login",
+        "status": 200
+      },
+      {
+        "path": "/admin/quota/status",
+        "status": 401
+      },
+      {
+        "path": "/admin/developers",
+        "status": 201
+      },
+      {
+        "path": "/admin/plans",
+        "status": 201
+      },
+      {
+        "path": "/admin/apps",
+        "status": 201
+      },
+      {
+        "path": "/admin/subscriptions",
+        "status": 201
+      },
+      {
+        "path": "/admin/apps/1/credentials",
+        "status": 409
+      },
+      {
+        "path": "/admin/services",
+        "status": 201
+      },
+      {
+        "path": "/admin/apis",
+        "status": 201
+      },
+      {
+        "path": "/admin/routes",
+        "status": 201
+      },
+      {
+        "path": "/admin/apis",
+        "status": 201
+      },
+      {
+        "path": "/admin/routes",
+        "status": 201
+      },
+      {
+        "path": "/admin/callers",
+        "status": 201
+      },
+      {
+        "path": "/admin/releases/current",
+        "status": 200
+      },
+      {
+        "path": "/admin/releases/publish",
+        "status": 200
+      },
+      {
+        "path": "/api/e/public/1",
+        "status": 200
+      },
+      {
+        "path": "/api/e/legacy/1",
+        "status": 200
+      },
+      {
+        "path": "/admin/apps/1/credentials",
+        "status": 200
+      },
+      {
+        "path": "/admin/apis",
+        "status": 201
+      },
+      {
+        "path": "/admin/routes",
+        "status": 201
+      },
+      {
+        "path": "/admin/policies",
+        "status": 201
+      },
+      {
+        "path": "/admin/policies/1/bindings",
+        "status": 201
+      },
+      {
+        "path": "/admin/releases/current",
+        "status": 200
+      },
+      {
+        "path": "/admin/releases/publish",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 401
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 403
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 401
+      },
+      {
+        "path": "/admin/apps/1/credentials/rotate",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 429
+      },
+      {
+        "path": "/admin/subscriptions",
+        "status": 409
+      },
+      {
+        "path": "/admin/apps",
+        "status": 201
+      },
+      {
+        "path": "/admin/subscriptions",
+        "status": 201
+      },
+      {
+        "path": "/admin/apps/2/credentials",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 200
+      },
+      {
+        "path": "/admin/reconciliation?from=2026-11-09&to=2026-11-09",
+        "status": 400
+      },
+      {
+        "path": "/admin/apps",
+        "status": 201
+      },
+      {
+        "path": "/admin/subscriptions",
+        "status": 201
+      },
+      {
+        "path": "/admin/apps/3/credentials",
+        "status": 200
+      },
+      {
+        "path": "/api/e/metered/1",
+        "status": 200
+      },
+      {
+        "path": "/admin/reconciliation?from=2026-11-08&to=2026-11-08&applicationId=3",
+        "status": 200
+      },
+      {
+        "path": "/admin/apps/1/credentials/revoke",
+        "status": 200
+      },
+      {
+        "path": "/api/e/legacy/1",
+        "status": 200
+      },
+      {
+        "path": "/api/e/public/1",
+        "status": 200
+      },
+      {
+        "path": "/admin/auth/login",
+        "status": 200
+      },
+      {
+        "path": "/admin/developers",
+        "status": 403
+      }
+    ],
+    "doctor": {
+      "schemaVersion": 1,
+      "profile": "v11",
+      "isolated": true,
+      "state": "READY",
+      "checks": [
+        {
+          "id": "java17",
+          "state": "READY",
+          "reason": "Java17版本检查",
+          "action": "使用JDK17"
+        },
+        {
+          "id": "docker",
+          "state": "READY",
+          "reason": "Docker可访问",
+          "action": ""
+        },
+        {
+          "id": "compose",
+          "state": "READY",
+          "reason": "Compose可用",
+          "action": ""
+        },
+        {
+          "id": "jars",
+          "state": "READY",
+          "reason": "三模块Jar与工作台源码可用",
+          "action": ""
+        },
+        {
+          "id": "mysql",
+          "state": "READY",
+          "reason": "已用当前配置执行只读查询",
+          "action": ""
+        },
+        {
+          "id": "redis",
+          "state": "READY",
+          "reason": "会话服务只读PING",
+          "action": "核对Redis认证/数据库配置"
+        },
+        {
+          "id": "control",
+          "state": "READY",
+          "reason": "control实际HTTP与依赖检查",
+          "action": ""
+        },
+        {
+          "id": "gateway",
+          "state": "READY",
+          "reason": "gateway实际HTTP与依赖检查",
+          "action": ""
+        },
+        {
+          "id": "demo",
+          "state": "READY",
+          "reason": "demo实际HTTP与依赖检查",
+          "action": ""
+        },
+        {
+          "id": "processOwnership",
+          "state": "READY",
+          "reason": "已核对隔离进程身份",
+          "action": "外部进程由负责人管理；可使用up --isolated"
+        },
+        {
+          "id": "schema.v1",
+          "state": "READY",
+          "reason": "所需表存在",
+          "action": ""
+        },
+        {
+          "id": "schema.b",
+          "state": "READY",
+          "reason": "所需表存在",
+          "action": ""
+        },
+        {
+          "id": "schema.c",
+          "state": "READY",
+          "reason": "所需表存在",
+          "action": ""
+        },
+        {
+          "id": "preflight",
+          "state": "READY",
+          "reason": "四项历史风险必须全零",
+          "action": ""
+        },
+        {
+          "id": "quotaActivation",
+          "state": "READY",
+          "reason": "隔离受管进程已配置计量",
+          "action": "登录工作台读取实际就绪原因；不要全局修改.env开关"
+        },
+        {
+          "id": "nodes",
+          "state": "READY",
+          "reason": "完整名单通过当前数据库只读门禁核对",
+          "action": ""
+        },
+        {
+          "id": "kafkaProtocol",
+          "state": "READY",
+          "reason": "Kafka协议元数据响应",
+          "action": ""
+        },
+        {
+          "id": "asyncActivation",
+          "state": "READY",
+          "reason": "隔离Control配置异步开启",
+          "action": "登录工作台读取C状态；关闭时余额可用、日报暂不聚合"
+        },
+        {
+          "id": "consumer",
+          "state": "READY",
+          "reason": "实际消费组须Stable且有成员，不代表所有SENT已统计",
+          "action": ""
+        }
+      ],
+      "project": "flowgate-v11-demo-86e83e1b712d",
+      "ports": {
+        "control": 59101,
+        "gateway": 59102,
+        "demo": 59103,
+        "mysql": 59104,
+        "redis": 59105,
+        "kafka": 59106
+      },
+      "volumes": {
+        "mysql": "flowgate-v11-demo-86e83e1b712d_mysql-data",
+        "redis": "flowgate-v11-demo-86e83e1b712d_redis-data",
+        "kafka": "flowgate-v11-demo-86e83e1b712d_kafka-data"
+      },
+      "console": "http://127.0.0.1:59101/console/"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        "1280 seven domains",
+        "1280 no overflow",
+        "1280 truthful readiness",
+        "375 seven domains",
+        "375 no overflow",
+        "375 truthful readiness",
+        "drawer Escape restores focus",
+        "one-time credential stays masked and memory only",
+        "leaving clears receipt",
+        "back does not restore secret",
+        "admin authorization never forwarded to Gateway",
+        "viewer cannot write"
+      ],
+      "viewports": [
+        1280,
+        375
+      ]
+    },
+    "volumesRetained": {
+      "mysql": "flowgate-v11-demo-86e83e1b712d_mysql-data",
+      "redis": "flowgate-v11-demo-86e83e1b712d_redis-data",
+      "kafka": "flowgate-v11-demo-86e83e1b712d_kafka-data"
+    },
+    "userEnvUnchanged": true,
+    "ownerAcceptance": "not executed"
+  },
+  "legacyB": {
+    "passed": true,
+    "checks": [
+      "双新Gateway真HTTP100并发Free5：5通过/95耗尽，Ledger5=Outbox5/余额0；身份域隔离",
+      "内部HTTP同chargeId100并发仅1流水；历史版本可重试，checksum/API/units/版本错误和payload冲突409",
+      "轮换/撤销后即使Redis残留旧Token仍403；应用/客户暂停不扣额",
+      "双管理员并发首次签发仅1主体/1成功/1冲突",
+      "真实官方Route CB先于Quota：OPEN零扣额/零下游；Quota429不降级不触发CB，双节点状态独立",
+      "Grant后真实500/超时仍扣；Rate429/并发503先拒绝不扣；完成后许可复用",
+      "真实客户端取消不退款，本机并发许可可再次使用",
+      "Control成功提交后丢回包：实际WebClient同chargeId重试，1扣额/1下游POST；Header/Body/201/RequestId透传且伪造身份被清理",
+      "实际FilteringWebHandler排序日志：Auth → Rate/Concurrency → 官方CB → Quota → Netty",
+      "无订阅/Scope不足不扣；内部配额不接受管理凭证",
+      "新增凭证API真实HTTP：OPERATOR/VIEWER可读，签发/轮换/撤销全部403",
+      "实际Quota指标可读且无身份/charge高基数标签",
+      "实际A旧Gateway+新Gateway：App格式401/旧Caller200，含Quota发布及历史回滚409",
+      "Control停机仅计量503，非计量公开路径200，不新增流水",
+      "MySQL失联计量503，旧非计量公开路径200",
+      "真实Control HTTP跨UTC月重复返回原月，不要求新月订阅且无第二余额",
+      "Redis Lua发布失败返回503但DB代次已前进，旧Redis Token不可复活",
+      "Redis Lua撤销清理真实失败仍DB enabled=false，旧会话403不扣额",
+      "C0：只读预检先零风险，旧A非重叠同月双订阅风险非零/新Grant409且无余额LedgerOutbox",
+      "B复审：已有余额冻结套餐版本不匹配，真实内部Quota HTTP 409，未产生新Ledger/Outbox",
+      "真实HTTP：计量OFF时现存凭证允许ADMIN紧急撤销；签发/轮换仍被门禁拒绝",
+      "回滚旧快照后默认OFF凭证409，旧Caller正常/APP不可跨域",
+      "真实HTTP产品入口/新资源/指南可达；全部Ledger与Outbox守恒且仅NEW"
+    ],
+    "evidenceType": "real HTTP + isolated MySQL8.4/Redis7/two Gateway",
+    "ownerBrowserAcceptance": "not executed"
+  },
+  "legacyC": {
+    "passed": true,
+    "checks": [
+      "无Kafka/Async OFF双Gateway100并发Free5精确5Grant95耗尽",
+      "App/旧Caller身份隔离且OFF不虚构消费",
+      "Async ON但Broker未启动：B授权200、Outbox积压6、真实探测不可用",
+      "真实封账HTTP：积压PENDING且同日多App复合游标不漏页",
+      "专用单KRaft Broker及3分区真实启动",
+      "真实Broker ACK后halt23，SENT未写且原租约保留",
+      "真实消费DB提交后halt24未ACK，幂等标记和汇总已落库",
+      "实际30秒租约到期重发/offset重放后仅6消费6汇总，无第7笔",
+      "积压追平后真实封账对账MATCH",
+      "真实Kafka重发同eventId100次，读模型仍6次",
+      "实际停Broker后B授权继续200/新Outbox积压",
+      "Broker恢复重排追平7笔，未重复扣量",
+      "两Worker真实领取100个不重叠租约，迟到owner更新0",
+      "100个租约真实到期后恢复发送，107Ledger/Consumed/汇总守恒",
+      "两管理员真实并发重投仅一次审计，原eventId/Grant总数不变",
+      "新运营HTTP只读角色可读、POST/未知PUT/DELETE均403",
+      "真实HTTP读模型差异MISMATCH，Ledger/余额不自动改写",
+      "实际消费日表SQL故障不留下第108个消费标记、不提前确认",
+      "修复DB并重启消费者后原offset重放，恰好108汇总",
+      "毒消息实际暂停分区2，未确认原offset，未假发送DLT",
+      "同eventId不同payload实际诊断，不累计读模型",
+      "无DLT且Broker断联/恢复，毒消息offset仍未前进",
+      "实际日期边界拒绝未封账日和超31天范围",
+      "实际产品新资源可达且运营事件无原始payload",
+      "首次Topic初始化时Broker离线，恢复后自动创建声明Topic并幂等追平109笔",
+      "最终109权威Grant/Outbox/消费标记/汇总一致；毒消息没有制造Grant"
+    ],
+    "evidenceType": "real Kafka4.1.1/MySQL8.4/Redis7/two Gateway/abrupt JVM halt",
+    "ownerBrowserAcceptance": "not executed"
+  },
+  "browser": {
+    "command": "JAVA_HOME=<JDK17> python3 scripts/v11-e-smoke.py --browser",
+    "exitCode": 0,
+    "result": {
+      "passed": true,
+      "checks": [
+        "1280 seven domains",
+        "1280 no overflow",
+        "1280 truthful readiness",
+        "375 seven domains",
+        "375 no overflow",
+        "375 truthful readiness",
+        "drawer Escape restores focus",
+        "one-time credential stays masked and memory only",
+        "leaving clears receipt",
+        "back does not restore secret",
+        "admin authorization never forwarded to Gateway",
+        "viewer cannot write"
+      ],
+      "viewports": [
+        1280,
+        375
+      ]
+    },
+    "screenshots": [
+      {
+        "localPath": ".local/v11-e-acceptance/20261109t131204-18e5/console-1280.png",
+        "sha256": "cef1a6bc9f3c36324a991e36b95b32f4aeb89a176c5923dfe247faef52d3b62f"
+      },
+      {
+        "localPath": ".local/v11-e-acceptance/20261109t131204-18e5/console-375.png",
+        "sha256": "c19f9db054502942003a1318c03f11257d864424c967cbbde1e3d381f5bd4a76"
+      }
+    ]
+  },
+  "guides": {
+    "productCheckExit": 0,
+    "deliveryCheckExit": 0,
+    "diffCheckExit": 0
+  },
+  "protectedAssets": {
+    "envHashAndModeUnchanged": true,
+    "originalContainers": [
+      "991bea342391",
+      "97de4e0045c1",
+      "9f702bcb9815"
+    ],
+    "originalVolumes": [
+      "flowgate-local_mysql-data",
+      "flowgate-local_redis-data",
+      "flowgate-local_kafka-data"
+    ],
+    "originalInfrastructureStillRunning": true,
+    "eVolumesRetained": true
+  },
+  "failedAttempts": [
+    {
+      "run": "20261109t125235-7818",
+      "reason": "session clock property binding; own Control stopped; volumes retained"
+    },
+    {
+      "run": "20261109t130126-2420",
+      "reason": "browser title/button ambiguous selector"
+    },
+    {
+      "run": "20261109t130428-c95f",
+      "reason": "browser login waited dashboard while route correctly remained monitoring"
+    },
+    {
+      "run": "20261109t130650-8af1",
+      "reason": "doctor correctly rejected stale Jar after guide source update; repackaged"
+    },
+    {
+      "run": "20261109t130950-4aff",
+      "reason": "mobile logout test omitted opening navigation"
+    },
+    {
+      "command": "node --experimental-default-type=module ...",
+      "exitCode": 9,
+      "reason": "unsupported Node option; reran all nine with plain node exit0"
+    }
+  ],
+  "notExecuted": [
+    "E6 owner manual acceptance",
+    "D performance and 100000 row SQL",
+    "main/old PR merge",
+    "migration or activation of original user environment"
+  ],
+  "dependencies": "Python standard library, existing JVM/Spring/Kafka and native JS only; no new dependency; no new Plus source copied"
+}

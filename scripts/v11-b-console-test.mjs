@@ -11,6 +11,7 @@ assert.deepEqual(policyTypes.USAGE_QUOTA.scopes,['API','ROUTE']);
 assert.throws(()=>quotaQuery(0,'202611'),/应用/);assert.throws(()=>quotaQuery(2,'202613'),/月份/);
 const calls=[];let status='NOT_ISSUED', offline=false, feedback='', activationOff=false;
 const api={request:async(path, options={})=>{calls.push({path,...options});if(offline)throw new Error('不可达');
+ if(path==='/admin/quota/status')return {readiness:activationOff?'BLOCKED':'READY',reason:activationOff?'开关关闭':'真实门禁检查通过'};
  if(path.includes('/credentials/status'))return {status,generation:1,issuanceEnabled:!activationOff};
  if(path.includes('/credentials'))return {token:'fgapp_'+'a'.repeat(43),expiresInSeconds:3600,generation:1};
  if(path.startsWith('/admin/apps?'))return [{id:2,name:'业务应用',code:'app'}];

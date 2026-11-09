@@ -1,3 +1,4 @@
+import {readinessPanel} from './readiness.js';
 import {h, badge, notice, button, permissionButton, table, searchableTable, formFields, openDialog} from './ui.js';
 import {canWrite, canManageCallers, redact} from './api.js';
 /** 审计列表优先业务中文，未知动作保留在可展开的真实技术字段中。 */
@@ -53,7 +54,7 @@ export async function renderReleases(ctx) {
   const current = ctx.data.current;
   let quota = null; try { quota = await ctx.api.request('/admin/quota/status'); } catch { /* 状态未知时不推测开关。 */ }
   const activation = quota ? notice('计量激活开关：' + (quota.activationEnabled ? '已显式开启' : '关闭（默认）') + '；配置的完整接流名单：' + (quota.trafficNodes?.join('、') || '空，禁止激活') + '。发布/回滚时服务端会复验所有节点能力、心跳、版本及校验和。') : notice('计量激活状态未取得，不能确认计量发布是否可用。');
-  return h('div', {}, deliveryProgress(current, ctx.data.nodes), activation, h('div', {class: 'grid-two'}, h('section', {class: 'card'}, h('h2', {}, '当前发布版本'), h('p', {class: 'version-value'}, current ? 'V' + current.version : '未取得'), h('p', {class: 'muted'}, current?.status === 'EMPTY' ? '尚未发布。请先建立服务、API和路由草稿。' : '已持久化不代表节点已应用。'), notice('没有草稿差异预览接口。发布范围为完整草稿，请核对目录和规则；不展示推测的变更数量。')),
+  return h('div', {}, deliveryProgress(current, ctx.data.nodes), readinessPanel(ctx, {...ctx.data, quota}), activation, h('div', {class: 'grid-two'}, h('section', {class: 'card'}, h('h2', {}, '当前发布版本'), h('p', {class: 'version-value'}, current ? 'V' + current.version : '未取得'), h('p', {class: 'muted'}, current?.status === 'EMPTY' ? '尚未发布。请先建立服务、API和路由草稿。' : '已持久化不代表节点已应用。'), notice('没有草稿差异预览接口。发布范围为完整草稿，请核对目录和规则；不展示推测的变更数量。')),
     h('section', {class: 'card'}, h('h2', {}, '节点应用情况'), nodesTable(ctx.data.nodes, current?.version))),
     h('section', {class: 'card'}, h('h2', {}, '发布历史（最近100条）'), history === null ? notice('历史未取得，请重新读取', 'error') : table(['版本', '发布时间', '来源', '操作'], history.map(row => ['V' + row.version, row.createdAt || '未取得', row.rollbackFrom ? '回滚自V' + row.rollbackFrom : '草稿发布', h('div', {class: 'actions'}, button('查看摘要', () => ctx.details('历史V' + row.version + '（只读摘要）', row)), permissionButton('回滚', () => confirmPublish(ctx, row.version), ctx.role))]), '尚无发布记录。')));
 }
@@ -101,7 +102,7 @@ export async function renderMonitoring(ctx) {
   const circuitRows = (ctx.data.nodes || []).flatMap(node => (node.circuitStates || []).map(c => [node.nodeId, c.routeId, badge(c.state, c.state === 'CLOSED' ? 'good' : 'warn'), c.stateChangedAt, c.revision]));
   return h('div', {}, h('section', {class: 'card'}, h('h2', {}, '网关节点'), nodesTable(ctx.data.nodes, ctx.data.current?.version)),
     h('section', {class: 'card'}, h('h2', {}, '最近上报的熔断状态'), notice('节点过期时下面的状态也可能过期。Control/Gateway重启后可能显示未知；未取得不等于CLOSED。'), table(['节点', '路由', '最近状态', '状态变化时间', '修订'], circuitRows, '无熔断摘要。可能尚无绑定规则、节点未上报或Control重启后尚未取得。')),
-    h('section', {class: 'card'}, h('h2', {}, 'Gateway基础指标 · 127.0.0.1:8080'), metrics.map((result, index) => {
+    h('section', {class: 'card'}, h('h2', {}, 'Gateway基础指标 · ' + (ctx.api.gatewayOrigin?.() || 'http://127.0.0.1:8080')), metrics.map((result, index) => {
       const name = ['网关请求', '流量准入', '故障保护事件'][index];
       if (result.status !== 'fulfilled') return notice(name + '：暂无样本或接口不可达。可先产生业务调用再重新读取。');
       const value = result.value;

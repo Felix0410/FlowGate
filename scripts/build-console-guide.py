@@ -80,17 +80,22 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--product', action='store_true', help='同步独立产品后台的任务式使用指南')
+    parser.add_argument('--delivery', action='store_true', help='同步V11本地交付离线手册')
     args = parser.parse_args()
+    if args.product and args.delivery: parser.error('--product与--delivery互斥')
     source = ROOT / 'docs/guides/product-console-guide.md' if args.product else SOURCE
     target = ROOT / 'flowgate-control/src/main/resources/static/console/guide.html' if args.product else TARGET
+    if args.delivery:
+        source = ROOT / 'docs/guides/v11-local-delivery.md'
+        target = ROOT / 'flowgate-control/src/main/resources/static/console/local-delivery.html'
     rendered = render(source.read_text())
     if args.check:
         if not target.exists() or target.read_text() != rendered:
-            raise SystemExit('网页手册未同步，请运行 python3 scripts/build-console-guide.py' + (' --product' if args.product else ''))
+            raise SystemExit('网页手册未同步，请运行 python3 scripts/build-console-guide.py' + (' --delivery' if args.delivery else ' --product' if args.product else ''))
         print('PASS Markdown与同源HTML手册一致')
     else:
         target.write_text(rendered)
-        print('已生成 ' + ('/console/' if args.product else '/test-console/') + 'guide.html')
+        print('已生成 ' + str(target.relative_to(ROOT)))
 
 
 if __name__ == '__main__':

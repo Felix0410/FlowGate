@@ -1,3 +1,4 @@
+import {readinessPanel} from './readiness.js';
 import {createApi, redact} from './api.js';
 import {h, button, badge, notice, permissionButton, openDialog, viewLink, table} from './ui.js';
 import {renderCatalog, editCatalog} from './catalog.js';
@@ -10,7 +11,7 @@ import {domains, views, domainFor, parseRoute, routeHash, safeParams} from './na
 export {views};
 /** 相互独立的读取失败各自显示未知，不用旧数值或空数组冒充当前真实状态。 */
 export async function readCore(api) {
-  const paths = {audits: '/admin/audits?limit=5', asyncSummary: '/admin/async-events/summary', services: '/admin/services', apis: '/admin/apis', routes: '/admin/routes', policies: '/admin/policies', current: '/admin/releases/current', nodes: '/admin/nodes', health: '/status'};
+  const paths = {quota: '/admin/quota/status', audits: '/admin/audits?limit=5', asyncSummary: '/admin/async-events/summary', services: '/admin/services', apis: '/admin/apis', routes: '/admin/routes', policies: '/admin/policies', current: '/admin/releases/current', nodes: '/admin/nodes', health: '/status'};
   const keys = Object.keys(paths), result = await Promise.allSettled(keys.map(key => api.request(paths[key], {publicRequest: key === 'health'})));
   return Object.fromEntries(keys.map((key, index) => [key, result[index].status === 'fulfilled' ? result[index].value : null]));
 }
@@ -45,7 +46,7 @@ function dashboard(ctx) {
   const onboarding = empty ? h('section', {class: 'card'}, h('h2', {}, '开始接入一个API'), h('ol', {}, [['登记服务', 'services'], ['创建API与路由', 'apis'], ['按需配置规则', 'rate'], ['发布并确认节点', 'releases']].map(([label, view]) => h('li', {}, viewLink(ctx, view, label))))) : null;
   const recent = ctx.data.audits ? h('section', {class: 'card'}, h('h2', {}, '近期操作'), table(['时间', '动作', '摘要'], ctx.data.audits.map(row => [row.createdAt || '未取得', auditLabel(row.action), row.summary]), '暂无近期操作')) : null;
   const health = h('details', {class: 'card'}, h('summary', {}, '依赖连接'), ctx.data.health ? h('div', {class: 'health-list'}, Object.entries(ctx.data.health).map(([key, value]) => h('div', {class: 'health-item'}, ({control: '管理服务', mysql: '数据库', redis: '会话服务', demo: '演示下游'})[key] || key, badge(value === 'UP' ? '正常' : String(value), value === 'UP' ? 'good' : 'warn')))) : notice('依赖状态未取得'));
-  return h('div', {}, h('section', {class: 'card'}, h('h2', {}, '配置交付'), deliveryProgress(ctx.data.current, ctx.data.nodes)), stats, h('div', {class: 'grid-two'}, attention, recent || quick), recent ? quick : null, onboarding, health);
+  return h('div', {}, h('section', {class: 'card'}, h('h2', {}, '配置交付'), deliveryProgress(ctx.data.current, ctx.data.nodes)), stats, readinessPanel(ctx), h('div', {class: 'grid-two'}, attention, recent || quick), recent ? quick : null, onboarding, health);
 }
 export function start(documentRef = document, browser = typeof window === 'undefined' ? null : window) {
   // 1. 会话结束同时清空数据、回执与模态内容，旧请求用序号隔离。
