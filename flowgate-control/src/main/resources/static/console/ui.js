@@ -19,8 +19,8 @@ export function permissionButton(text, action, role, adminOnly = false, primary 
 }
 export function table(headers, rows, empty = '暂无记录。可以先创建一条草稿。') {
   if (!rows.length) return h('div', {class: 'empty'}, h('strong', {}, '暂无可显示的记录'), h('p', {}, empty));
-  return h('div', {class: 'table-wrap'}, h('table', {}, h('thead', {}, h('tr', {}, headers.map(title => h('th', {scope: 'col'}, title)))),
-    h('tbody', {}, rows.map(row => h('tr', {}, row.map(cell => h('td', {}, cell)))))));
+  return h('div', {class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': headers.join('、') + '列表，可横向滚动'}, h('table', {}, h('thead', {}, h('tr', {}, headers.map((title, index) => h('th', {scope: 'col', class: rows.every(row => typeof row[index] === 'number') ? 'numeric' : ''}, title)))),
+    h('tbody', {}, rows.map(row => h('tr', {}, row.map(cell => h('td', {class: typeof cell === 'number' ? 'numeric' : ''}, cell)))))));
 }
 let fieldNumber = 0;
 export function field({name, label, value = '', type = 'text', options, help = '', required = true, ...attributes}) {
@@ -63,12 +63,13 @@ export function openDialog(title, content, save, {submitLabel = '保存草稿', 
   return dialog;
 }
 export function searchableTable(headers, records, cells, empty) {
-  const search = h('input', {type: 'search', placeholder: '搜索当前已读取的记录…', 'aria-label': '搜索当前列表'}), body = h('div');
+  const search = h('input', {type: 'search', placeholder: '搜索当前列表', 'aria-label': '搜索当前列表'}), body = h('div'), count = h('span', {class: 'muted', role: 'status'});
   const render = () => {
     const term = search.value.trim().toLowerCase();
     const filtered = records.filter(record => JSON.stringify(record).toLowerCase().includes(term));
+    count.textContent = (term ? '匹配 ' + filtered.length + ' / ' : '共 ') + records.length + ' 条 · 仅筛选已读取记录';
     body.replaceChildren(table(headers, filtered.map(cells), term ? '没有匹配项，请修改关键词。' : empty));
   };
   search.addEventListener('input', render); render();
-  return h('div', {class: 'card'}, h('div', {class: 'table-toolbar'}, search, h('span', {class: 'muted'}, records.length + '条 · 当前列表本地筛选')), body);
+  return h('div', {class: 'card'}, h('div', {class: 'table-toolbar'}, search, count), body);
 }

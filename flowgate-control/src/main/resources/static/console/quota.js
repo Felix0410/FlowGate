@@ -32,5 +32,5 @@ export async function renderQuota(ctx) {
     } catch (e) { error.replaceChildren(notice('读取失败，状态未知：' + e.message, 'error')); if (reset) { balance.replaceChildren(); ledger.replaceChildren(); } more.hidden = true; }
     finally { busy = false; query.disabled = more.disabled = false; }
   }
-  return h('div', {}, app.node, fields.node, query, error, balance, ledger, more, notice('429 QUOTA_EXHAUSTED：本月已耗尽；403：应用/客户/订阅/Scope或代次不可用；503 QUOTA_UNAVAILABLE：依赖不可用或授权结果不确定。503时不要假设已退款，请查询账本。'));
+  return h('div', {}, h('section', {class: 'card query-panel', 'aria-label': '配额查询条件'}, h('h2', {}, '查询条件'), app.node, fields.node, h('div', {class: 'query-actions'}, query)), error, balance, ledger, more, notice('429 QUOTA_EXHAUSTED：本月已耗尽；403：应用/客户/订阅/Scope或代次不可用；503 QUOTA_UNAVAILABLE：依赖不可用或授权结果不确定。503时不要假设已退款，请查询账本。'));
 }

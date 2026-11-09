@@ -105,7 +105,7 @@ export async function renderBusiness(ctx, kind) {
   }
   if (filter) filter.input.addEventListener('change', () => load(true));
   await load(true);
-  return h('div', {}, appReceipt(ctx), notice('套餐定义不是已发放余额；只有已发布计量私有路由才使用应用凭证。旧Caller继续用于非计量私有路由。'), filter?.node, error, container, h('div', {class: 'actions'}, more, retry));
+  return h('div', {}, appReceipt(ctx), notice('套餐定义不是已发放余额；只有已发布计量私有路由才使用应用凭证。旧Caller继续用于非计量私有路由。'), filter ? h('section', {class: 'card query-panel'}, h('h2', {}, '筛选条件'), filter.node) : null, error, container, h('div', {class: 'actions'}, more, retry));
 }
 
 /** 使用UTC月份选项产生ISO区间，最终仍由数据库UTC和月度唯一规则复验。 */

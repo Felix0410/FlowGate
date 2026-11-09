@@ -55,9 +55,10 @@ export function renderCatalog(ctx, kind) {
   const rows = record => {
     const state = badge(record.enabled ? '草稿启用' : '草稿停用', record.enabled ? 'good' : '');
     const actions = h('div', {class: 'actions'}, button('详情', () => ctx.details(names[kind] + '草稿详情', record)), permissionButton('编辑', () => editCatalog(ctx, kind, record), ctx.role));
-    if (kind === 'services') return [record.name, record.code, record.upstreamUri, state, actions];
-    if (kind === 'apis') return [badge(record.method), record.publicPath, lookup(ctx.data.services, record.serviceId, 'name'), record.isPublic ? '公开' : '授权 · ' + record.requiredScope, state, actions];
-    return [record.routeId, apiName((ctx.data.apis || []).find(a => a.id === record.apiId)), record.priority, state, actions];
+    const technical = text => h('span', {class: 'mono technical'}, text);
+    if (kind === 'services') return [record.name, technical(record.code), technical(record.upstreamUri), state, actions];
+    if (kind === 'apis') return [badge(record.method), technical(record.publicPath), lookup(ctx.data.services, record.serviceId, 'name'), record.isPublic ? '公开' : '授权 · ' + record.requiredScope, state, actions];
+    return [technical(record.routeId), technical(apiName((ctx.data.apis || []).find(a => a.id === record.apiId))), record.priority, state, actions];
   };
   const headers = kind === 'services' ? ['服务名称', '服务代码', '上游地址', '草稿状态', '操作'] : kind === 'apis' ? ['方法', '入口路径', '所属服务', '访问权限', '草稿状态', '操作'] : ['路由名称', '关联API', '优先级', '草稿状态', '操作'];
   return h('div', {}, notice('这是当前草稿目录。后端没有逐对象发布差异接口，因此不把这张表标成“全部已上线”。发布版本和节点应用请查看发布中心。'), searchableTable(headers, records || [], rows, '尚未创建' + names[kind] + '。点击上方新建按钮开始；已有草稿时可直接编辑。'));
