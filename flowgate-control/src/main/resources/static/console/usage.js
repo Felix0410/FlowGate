@@ -10,7 +10,7 @@ export function usageQuery(values, cursor = '') {
 }
 /** 稳定复合游标由服务器提供，不从日期自行推测下一页。 */
 export async function renderUsage(ctx, reconciliation = false) {
-  ctx.heading(reconciliation ? '对账中心' : '用量统计', reconciliation ? '只核对已关闭UTC日。PENDING表示尚未追平，MATCH表示账本与读模型一致，MISMATCH需诊断；不会自动改余额。' : '每日授权单位与准入次数来自异步读模型，可能延迟；不是成功响应次数或收费金额。');
+  ctx.heading(reconciliation ? '对账中心' : '用量统计', reconciliation ? '仅核对已结束UTC日，不自动修改余额' : '异步统计可能延迟，不等于业务成功次数或收费金额');
   const selection = reportSelection(ctx, reconciliation);
   const app = await reference(ctx.api, 'apps', '按应用名称查询', selection.applicationId, true);
   const fields = formFields([{name: 'apiId', label: 'API接口', value: selection.apiId, options: [{value: '', label: '全部接口'}, ...(ctx.data.apis || []).map(a => ({value: a.id, label: a.method + ' ' + a.publicPath}))]}, {name: 'from', label: '开始UTC日期（含）', type: 'date', value: selection.from}, {name: 'to', label: '结束UTC日期（含）', type: 'date', value: selection.to, help: reconciliation ? '必须是昨天或更早；后端以数据库UTC时间复验。' : '最多31天；统计可能落后于配额账本。'}]);

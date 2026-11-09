@@ -58,3 +58,38 @@ assert.equal(reportSelection(reports).to, '2026-11-30');
 const closed = reportSelection(reports, true);
 assert.ok(closed.to <= new Date(Date.now() - 86400000).toISOString().slice(0, 10));
 console.log('PASS 报表共享应用/跨月余额契约/同月读取不覆盖日期/显式改月/对账截止封账UTC日');
+
+// 1. 可注入浏览器适配器，执行真实入口的前进/后退与刷新恢复，不写入任何浏览器缓存。
+const {start} = await import('../flowgate-control/src/main/resources/static/console/app.js');
+const fs = await import('node:fs');
+const Element = document.createElement('div').constructor;
+function freshDocument() {
+  const nodes = new Map();
+  for (const match of fs.readFileSync(new URL('../flowgate-control/src/main/resources/static/console/index.html', import.meta.url), 'utf8').matchAll(/<([a-z]+)[^>]*\bid="([^"]+)"[^>]*>/g)) nodes.set(match[2], new Element(match[1]));
+  return {body: new Element('body'), activeElement: null, getElementById: id => nodes.get(id), createElement: tag => new Element(tag), createTextNode: text => ({textContent: text}), addEventListener() {}};
+}
+function historyBrowser(initial) {
+  const entries = [initial], listeners = {}; let position = 0;
+  const browser = {location: {hash: initial}, addEventListener(type, handler) { (listeners[type] ||= []).push(handler); },
+    history: {pushState(data, title, hash) { entries.splice(++position); entries.push(hash); browser.location.hash = hash; }, replaceState(data, title, hash) { entries[position] = hash; browser.location.hash = hash; }},
+    async back() { position = Math.max(0, position - 1); browser.location.hash = entries[position]; for (const handler of listeners.popstate || []) handler(); for (const handler of listeners.hashchange || []) handler(); await new Promise(resolve => setImmediate(resolve)); },
+    async forward() { position = Math.min(entries.length - 1, position + 1); browser.location.hash = entries[position]; for (const handler of listeners.popstate || []) handler(); await new Promise(resolve => setImmediate(resolve)); }
+  }; return browser;
+}
+const browser = historyBrowser('#access/services?id=1&token=should-disappear');
+globalThis.document = freshDocument();
+const routed = start(document, browser);
+assert.equal(browser.location.hash, '#access/services?id=1');
+document.getElementById('username').value = 'admin'; document.getElementById('password').value = 'fixture';
+await document.getElementById('login-form').fire('submit');
+assert.equal(routed.view, 'services'); assert.equal(routed.params.id, '1');
+await routed.navigate('apis', {id: 2});
+// 2. 业务筛选只替换当前非敏感地址，返回/前进不得恢复旧Token或重复处理同一次事件。
+routed.issued = {token: 'once'}; routed.appIssued = {token: 'app-once'};
+await browser.back(); assert.equal(routed.view, 'services'); assert.equal(routed.issued, null); assert.equal(routed.appIssued, null);
+await browser.forward(); assert.equal(routed.view, 'apis'); assert.equal(routed.params.id, '2');
+routed.updateParams({password: 'bad', response: 'raw', id: 2}); assert.equal(browser.location.hash, '#access/apis?id=2');
+// 3. 模拟刷新后是空会话，登录后恢复安全详情链接，而非沿用旧会话或敏感回执。
+const reloadedBrowser = historyBrowser(browser.location.hash); globalThis.document = freshDocument();
+const reloaded = start(document, reloadedBrowser); assert.equal(reloaded.role, ''); assert.equal(reloaded.view, 'apis'); assert.equal(reloaded.params.id, '2');
+console.log('PASS 真实入口hash直达/敏感参数移除/登录后恢复/前进后退/一次性回执清理/刷新空会话');

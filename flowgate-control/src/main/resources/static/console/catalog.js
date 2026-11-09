@@ -50,7 +50,7 @@ export function editCatalog(ctx, kind, original = null, defaults = {}) {
 export function renderCatalog(ctx, kind) {
   const records = ctx.data[kind];
   if (ctx.params?.id) return catalogDetail(ctx, kind, records);
-  ctx.heading(names[kind] + '管理', '创建、编辑和启停接入草稿。发布作用于全部配置，保存草稿不代表网关已应用。', permissionButton('新建' + names[kind], () => editCatalog(ctx, kind), ctx.role, false, true));
+  ctx.heading(names[kind] + '管理', '', permissionButton('新建' + names[kind], () => editCatalog(ctx, kind), ctx.role, false, true));
   if (records === null) return ctx.unavailable('目录未取得，请重新读取。');
   const lookup = (rows, id, name) => (rows || []).find(r => r.id === id)?.[name] || '关联信息未取得';
   const rows = record => {

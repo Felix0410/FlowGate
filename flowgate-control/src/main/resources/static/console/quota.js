@@ -8,7 +8,7 @@ export function quotaQuery(applicationId, period, afterId = 0) {
 }
 /** MySQL只读余额与游标流水；空余额不等于0，不展示虚构Kafka送达量。 */
 export async function renderQuota(ctx) {
-  ctx.heading('配额与账本', '成功准入即消耗单位，授权次数不等于业务成功次数。余额与流水以MySQL为准。异步读模型在“用量统计”查看，可能延迟；余额不依赖Kafka。');
+  ctx.heading('配额与账本', '权威余额与流水 · 成功准入即消耗，下游失败不退款');
   const selection = reportSelection(ctx);
   const app = await reference(ctx.api, 'apps', '选择应用', selection.applicationId);
   const fields = formFields([{name: 'period', label: 'UTC计费月', value: selection.period, pattern: '[0-9]{6}', help: '余额按月查询；跨月日报切换到此页时，使用起始日期所在月。'}]);

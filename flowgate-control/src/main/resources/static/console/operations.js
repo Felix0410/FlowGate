@@ -46,7 +46,7 @@ function confirmPublish(ctx, rollback = null) {
   }, {submitLabel: rollback === null ? '确认发布' : '确认生成回滚版本', danger: rollback !== null});
 }
 export async function renderReleases(ctx) {
-  ctx.heading('发布中心', '保存草稿 → 发布版本 → 网关实际应用。回滚生成新版本，不更改草稿。', permissionButton('发布全部草稿', () => confirmPublish(ctx), ctx.role, false, true));
+  ctx.heading('发布中心', '', permissionButton('发布全部草稿', () => confirmPublish(ctx), ctx.role, false, true));
   let history = null; try { history = await ctx.api.request('/admin/releases'); } catch { /* 页面内明确标记历史未取得。 */ }
   const current = ctx.data.current;
   let quota = null; try { quota = await ctx.api.request('/admin/quota/status'); } catch { /* 状态未知时不推测开关。 */ }
@@ -74,7 +74,7 @@ function receipt(ctx) {
 }
 export function renderCallers(ctx) {
   // 1. 按真实角色禁用写操作，不伪造后端不存在的全量Caller列表。
-  ctx.heading('调用方管理', '签发访问私有API的凭证，授权范围必须与API要求匹配。仅管理员可签发或吊销。');
+  ctx.heading('旧调用方凭证', '用于V1非计量私有API，与客户应用的APP凭证分离');
   const allowed = canManageCallers(ctx.role);
   const create = formFields([{name: 'username', label: '调用方名称（唯一）', value: '', placeholder: '例如：报表系统', disabled: !allowed}, {name: 'scopes', label: '授权范围', value: '', placeholder: 'demo:read,orders:read', help: '以逗号或空格分隔，与私有API所需范围一致。', required: false, disabled: !allowed}]);
   const revoke = formFields([{name: 'id', label: '调用方编号', value: '', type: 'number', min: 1, step: 1, help: '后端暂无调用方查询接口。仅使用签发回执中的编号，不猜测他人的编号。', disabled: !allowed}]);
@@ -94,7 +94,7 @@ export function renderCallers(ctx) {
     h('section', {class: 'card'}, h('h2', {}, '本次登录签发记录'), table(['调用方名称', '签发编号'], ctx.callers.map(c => [c.username, c.id]), '无本次记录。后端没有全量调用方列表，此处不展示推测数据；刷新会清空本次记录。')));
 }
 export async function renderMonitoring(ctx) {
-  ctx.heading('运行监控', '节点和熔断状态来自最近一次真实上报，重新读取刷新；不是无延迟事件流。');
+  ctx.heading('运行监控', '最近一次节点上报，状态可能延迟');
   const metrics = await Promise.allSettled(['spring.cloud.gateway.requests', 'flowgate.admission.requests', 'flowgate.protection.events'].map(name => ctx.api.request('/actuator/metrics/' + name, {gateway: true})));
   const circuitRows = (ctx.data.nodes || []).flatMap(node => (node.circuitStates || []).map(c => [node.nodeId, c.routeId, badge(c.state, c.state === 'CLOSED' ? 'good' : 'warn'), c.stateChangedAt, c.revision]));
   return h('div', {}, h('section', {class: 'card'}, h('h2', {}, '网关节点'), nodesTable(ctx.data.nodes, ctx.data.current?.version)),
