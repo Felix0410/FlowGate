@@ -1,3 +1,4 @@
+import {reportSelection, rememberReport} from './report-context.js';
 import {h, button, notice, table, formFields} from './ui.js';
 import {reference} from './openapi-business.js';
 export function quotaQuery(applicationId, period, afterId = 0) {
@@ -8,8 +9,9 @@ export function quotaQuery(applicationId, period, afterId = 0) {
 /** MySQL只读余额与游标流水；空余额不等于0，不展示虚构Kafka送达量。 */
 export async function renderQuota(ctx) {
   ctx.heading('配额与账本', '成功准入即消耗单位，授权次数不等于业务成功次数。余额与流水以MySQL为准。异步读模型在“用量统计”查看，可能延迟；余额不依赖Kafka。');
-  const app = await reference(ctx.api, 'apps', '选择应用');
-  const now = new Date(), fields = formFields([{name: 'period', label: 'UTC计费月', value: String(now.getUTCFullYear()) + String(now.getUTCMonth() + 1).padStart(2, '0'), pattern: '[0-9]{6}', help: 'YYYYMM；可查询历史月份。'}]);
+  const selection = reportSelection(ctx);
+  const app = await reference(ctx.api, 'apps', '选择应用', selection.applicationId);
+  const fields = formFields([{name: 'period', label: 'UTC计费月', value: selection.period, pattern: '[0-9]{6}', help: '余额按月查询；跨月日报切换到此页时，使用起始日期所在月。'}]);
   const balance = h('section', {class: 'card'}, notice('请选择应用并点击查询；尚未取得余额。')), ledger = h('section', {class: 'card'}), error = h('div', {'aria-live': 'polite'});
   let cursor = 0, rows = [], busy = false, active = '';
   const more = button('读取下一页流水', () => load(false)); more.hidden = true;
@@ -18,6 +20,7 @@ export async function renderQuota(ctx) {
     if (busy) return; busy = true; query.disabled = more.disabled = true;
     try {
       const key = app.input.value + ':' + fields.values().period;
+      rememberReport(ctx, {applicationId: app.input.value, period: fields.values().period}, true);
       if (!reset && active !== key) throw new Error('查询条件已改变，请重新查询');
       const params = quotaQuery(app.input.value, fields.values().period, reset ? 0 : cursor);
       // 1. 变更查询条件先清空旧事实；读取失败不把上一应用余额当作本次结果。
@@ -32,5 +35,11 @@ export async function renderQuota(ctx) {
     } catch (e) { error.replaceChildren(notice('读取失败，状态未知：' + e.message, 'error')); if (reset) { balance.replaceChildren(); ledger.replaceChildren(); } more.hidden = true; }
     finally { busy = false; query.disabled = more.disabled = false; }
   }
+  const changed = () => {
+    rememberReport(ctx, {applicationId: app.input.value, period: fields.values().period}, true);
+    more.hidden = true; balance.replaceChildren(notice('查询条件已改变，请重新查询')); ledger.replaceChildren();
+  };
+  app.input.addEventListener('change', changed); fields.controls.period.addEventListener('change', changed);
+  if (selection.applicationId) await load(true);
   return h('div', {}, h('section', {class: 'card query-panel', 'aria-label': '配额查询条件'}, h('h2', {}, '查询条件'), app.node, fields.node, h('div', {class: 'query-actions'}, query)), error, balance, ledger, more, notice('429 QUOTA_EXHAUSTED：本月已耗尽；403：应用/客户/订阅/Scope或代次不可用；503 QUOTA_UNAVAILABLE：依赖不可用或授权结果不确定。503时不要假设已退款，请查询账本。'));
 }

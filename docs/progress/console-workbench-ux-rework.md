@@ -38,3 +38,11 @@
 服务详情使用完整目录确认API，API详情确认关联路由；从详情新建时预选服务/API。客户详情按正式API分页读取客户应用，应用详情含独立APP凭证/订阅/配额与用量分区，新增应用/订阅预选来源对象。旧Caller仍在API接入。列表名称/查看进入详情，编辑移到详情；套餐额度/订阅区间限制不变。业务列表保存实际游标与筛选，返回后重新读取同页，不用旧行冒充当前结果。
 
 修改catalog/openapi-business/ui、对应旧产品/A测试，并新增workbench-console-test。`node scripts/workbench-console-test.mjs`、`product-console-test.mjs`、`v11-b-console-test.mjs`、`v11-c-review-console-test.mjs`退出0；`git diff --check`通过。旧A断言从不再准确的固定“尚未启用”改为实际保存反馈，权限断言移到真实详情编辑按钮，没有取消RBAC检查。Java/真实HTTP/浏览器留UX-5；尚未负责人验收。
+
+## UX-3：策略与共享查询
+
+策略统一搜索/草稿状态筛选/单主操作；从目录详情携带目标后只按正式绑定筛选，读取失败明确未知，新建预选可支持的真实目标，既有绑定不可移动。故障保护通过规则类型选择保留超时与熔断。规则参数的实质帮助保留，高级原理折叠。
+
+余额/用量/对账共用内存中的应用与UTC日期选择：月余额按起始月，显式改月才调整日报范围；同月读取不覆盖既有范围。对账截止昨日并明确说明调整；应用来源上下文自动查询。条件改变立即清旧结果，不冒充0或旧应用结果。异步操作只在运行监控分区，FAILED重试与SENT补投和确认/RBAC原样保留。发布三阶段仍使用真实版本与节点状态。
+
+新增report-context并修改governance/quota/usage/navigation及测试。工作台、B、C复审Node退出0；新增跨月/月契约/共享选择断言通过；`git diff --check`通过。Java/真HTTP/浏览器在UX-5实际执行。

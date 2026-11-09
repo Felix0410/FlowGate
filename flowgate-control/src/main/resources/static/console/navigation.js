@@ -25,6 +25,7 @@ export function safeParams(view, source = {}) {
   // 2. 日期与月份独立保留，日报范围不能被误解成实时月度余额。
   if (['quota', 'usage', 'reconciliation'].includes(view)) {
     if (/^\d{4}(0[1-9]|1[0-2])$/.test(input.period || '')) result.period = input.period;
+    if (validId(String(input.apiId || ''))) result.apiId = String(input.apiId);
     for (const name of ['from', 'to']) if (/^\d{4}-\d{2}-\d{2}$/.test(input[name] || '') && Number.isFinite(Date.parse(input[name] + 'T00:00:00Z'))) result[name] = input[name];
   }
   if (view === 'apps' && ['info', 'credentials', 'subscriptions', 'usage'].includes(input.tab)) result.tab = input.tab;

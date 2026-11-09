@@ -129,7 +129,7 @@ assert.match(dialog.textContent, /重新读取/); dialog.close();
 ctx.role = 'VIEWER'; await ctx.navigate('apis');
 await ctx.navigate('apis', {id: 2});
 assert.equal(elements.get('page-head').descendants().find(e => e.tagName === 'button' && e.textContent === '编辑API').disabled, true);
-await ctx.navigate('protection'); assert.match(elements.get('page-content').textContent, /故障保护|熔断/);
+await ctx.navigate('protection'); assert.match(elements.get('page-head').textContent, /故障保护/);
 ctx.issued = {token: 'must-clear'}; await ctx.navigate('dashboard'); assert.equal(ctx.issued, null);
 // 2. 七个业务域收纳二十项能力，页内入口不再平铺侧栏。
 const nav = elements.get('navigation');
