@@ -96,3 +96,19 @@
 - [ ] 使用自己的ADMIN/OPERATOR/VIEWER检查真实权限、空/失败恢复及不可逆操作提示。
 
 未运行：负责人真人验收、全项目Java回归、Kafka故障链路重跑、V11-D压测/10万级SQL优化。不能标“工作台体验通过”；本次开发和定向自动验证完成，等待ChatGPT复审及负责人手测。不合并main或旧PR，不进入D。
+
+
+## 远端分段交付核验
+
+本次原生 `git push -u origin feat/v11-console-workbench` 实际返回HTTP403。随后通过已连接且具有写权限的GitHub应用创建下列六个分段提交，保持原设计分支为基线，不重写共享历史、不推main。每个远端提交的文件树均与对应本地已验证提交逐字一致，最后代码树为 `9f52b2259dbd08a59007c82157929dea6d72c47b`，包含两张真实PNG截图。原本地六段提交将保留于本地 `feat/v11-console-workbench-local-99088e1`，不推送归档分支。
+
+| 阶段 | 本地已验证SHA | GitHub同树SHA |
+| --- | --- | --- |
+| UX-0 | `d9583127df956661a2e466cae76ac18192a1e59c` | `a6d5b83bc1ac8f643c8f6ae5e842befbc725fc6f` |
+| UX-1 | `64b5f46444dbe5d5eb2f25be719a9c273cf8a41b` | `24216a5cd34ad36a8f19ed8427bb9afa9f62b876` |
+| UX-2 | `24c22f6ee791d8bdf7b4d73416627cbb92ee4d23` | `f90194273f720df01b0dafc90c49d7bb5c83ae9c` |
+| UX-3 | `9b7c872379d7b2b71f34e74d20ca6a40bbb6e807` | `773b2c9bdeb58136481958df4f48c7dccad1875b` |
+| UX-4 | `a478f7835aa264a7557dec5d3d9edfb227106ab5` | `b63865f66848e3f0f83e2299dbd64c54abc53f99` |
+| UX-5 | `99088e1a936b50f506a932b2bd65981c481b8230` | `3778e2c24d0a46a42e9c2b57dc10c599f3d99727` |
+
+本节另作交付说明提交，只有这一份进度文档不同于已测代码树；功能分支引用及Draft PR状态最终由create-branch返回、git ls-remote和PR信息核实。只创建当前新功能分支和新Draft PR，不更改旧PR base、不合并。开发及自动验证已完成，负责人真人体验仍待验收。
