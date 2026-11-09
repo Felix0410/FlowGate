@@ -1,5 +1,8 @@
 # FlowGate V1.1 开发路线与真实状态
 
+> **2026-11-09 最新状态**：V11-C全部核心功能及三项静态复审整改已远端交付，Codex的Java70项、7套Node、新13组故障、Kafka持卷重建、原C6 26组/109笔守恒证据与实际源码相符；ChatGPT已完成远端源码+证据复审，**未在本机独立跑Java/Kafka/MySQL**。C三项P1已收口；可开始D**设计/验收规划**但D尚未编码、未做10万级SQL/四组压测，负责人真人浏览器/旧V1与Stacked PR合并仍待。审核`docs/reviews/v11-c-review-fix-verification-2026-11-09.md`。
+
+
 > 2026-11-08 最新进度：**C0～C6已经实际远端交付**、Codex记录Java67项及26组真实故障通过；ChatGPT新增3项恢复/账本完整性边界（Kafka重建/SENT补投、DB瞬断自动恢复、孤儿Ledger对账）待修。最新状态和任务以`docs/reviews/v11-c-static-review-2026-11-08.md`、`CODEX_V11_C_REVIEW_FIX_PROMPT.md`、`docs/progress/v11-c-async.md`C-09/C-10为准。后面部分为历史阶段计划，不能把“设计未实现”当成当前事实。
 
 更新：2026-11-08。**V11-A已交付；V11-B B0～B6已实际编码并提交远端，Codex记录57项JUnit/20组真实双Gateway场景通过。ChatGPT已将两项复审P1修复写入实际B Java/前端/SQL/测试源码，真实JVM/MySQL回归尚未执行。V11-C详细设计与开发任务已交付，Kafka功能代码未实现；D未开始。** V1负责人最终验收尚未收口，不宣称V1.1全版本完成。
@@ -15,7 +18,7 @@
 | 前置 | docs/progress/block-4-acceptance.md | V1 后台手测、完整回归、PR 审核 | 待负责人收口 |
 | A | docs/progress/v11-a-business.md | 客户、应用、套餐、订阅、凭证入口占位、产品 UI | 管理代码与17JUnit/155HTTP已交付；两项P0明确并入B0，A凭证仍未激活 |
 | B | docs/progress/v11-b-quota.md | B0修A遗留，APP凭证、MySQL权威Quota/Ledger/Outbox、Gateway非阻塞计量 | **B主体已实装；两项复审小修源码已提交、实测待C0** |
-| C | docs/progress/v11-c-async.md | Kafka、可靠投递、幂等消费、用量查询与对账 | **C0～C6实装与定向测试已交付，三项静态复审P1待修** |
+| C | docs/progress/v11-c-async.md | Kafka、可靠投递、幂等消费、用量查询与对账 | **C0～C6及三项P1整改源码/证据复审通过；D待启动** |
 | D | docs/progress/v11-d-acceptance.md | SQL 大数据实验、四组性能、双节点故障、产品验收与发布 | 未开始 |
 
 - 业务与技术总设计：docs/design/openapi-platform-v1.1.md。
