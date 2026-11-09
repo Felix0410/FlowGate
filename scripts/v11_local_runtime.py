@@ -75,7 +75,10 @@ def compose(state, env, *args):
 
 
 def identity(pid):
-    value = subprocess.run(['ps', '-p', str(pid), '-o', 'command='], capture_output=True, text=True).stdout.strip()
+    result = subprocess.run(['ps', '-p', str(pid), '-o', 'command='], capture_output=True, text=True)
+    if result.returncode and result.stderr.strip():
+        raise PermissionError('无法读取进程身份，拒绝接管')
+    value = result.stdout.strip()
     if not value or '<defunct>' in value:
         return None
     start = subprocess.run(['ps', '-p', str(pid), '-o', 'lstart='], capture_output=True, text=True).stdout.strip()

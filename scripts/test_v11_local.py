@@ -69,12 +69,36 @@ class DoctorTest(unittest.TestCase):
         self.assertEqual(result['schemaVersion'], 1); self.assertEqual(result['state'], 'UNKNOWN')
         self.assertEqual(set(result['checks'][0]), {'id', 'state', 'reason', 'action'})
 
+    def test_cli_json_exit_contract(self):
+        import contextlib
+        import importlib.util
+        import io
+        spec = importlib.util.spec_from_file_location('v11_cli', core.ROOT / 'scripts/v11-local.py')
+        cli = importlib.util.module_from_spec(spec); spec.loader.exec_module(cli)
+        for state, code in [('READY', 0), ('BLOCKED', 2), ('UNKNOWN', 2), ('TOOL_ERROR', 1), ('NO_PERMISSION', 2)]:
+            output = io.StringIO()
+            effect = ValueError('never-print-this') if state == 'TOOL_ERROR' else PermissionError('never-print-this') if state == 'NO_PERMISSION' else None
+            with patch('sys.argv', ['v11-local.py', 'doctor', '--json']), patch.object(cli, 'read_environment', return_value={}), patch.object(cli, 'doctor', return_value=core.report([core.check('fixture', state, '夹具')], 'v11'), side_effect=effect), contextlib.redirect_stdout(output):
+                self.assertEqual(cli.main(), code)
+            data = json.loads(output.getvalue())
+            self.assertEqual(data['schemaVersion'], 1)
+            self.assertNotIn('never-print-this', output.getvalue())
+            if effect: self.assertEqual(data['state'], 'UNKNOWN')
+
     def test_jdbc_secret_url_rejected(self):
         with self.assertRaises(core.LocalFailure): core.jdbc_target({'FG_MYSQL_URL': 'jdbc:mysql://user:password@127.0.0.1:3306/flowgate'})
 
 
 
 class RuntimeSafetyTest(unittest.TestCase):
+    def test_unreadable_identity_never_signalled(self):
+        import v11_local_runtime as runtime
+        state = {'processes': {'flowgate-demo': {'pid': 1234}}}
+        fake = type('R', (), {'returncode': 1, 'stdout': '', 'stderr': 'permission denied'})()
+        with patch.object(runtime, 'load', return_value=(state, {})), patch.object(runtime.subprocess, 'run', return_value=fake), patch.object(runtime.os, 'kill') as kill:
+            with self.assertRaises(PermissionError): runtime.stop(core.ROOT / '.local' / 'fixture')
+            kill.assert_not_called()
+
     def test_ports_and_instance_are_strict(self):
         import v11_local_runtime as runtime
         with self.assertRaises(core.LocalFailure): runtime.validate_ports(dict.fromkeys(runtime.DEFAULT_PORTS, 8080))

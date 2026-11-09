@@ -46,3 +46,36 @@ E0已完成代码/配置审阅，git diff --check通过；未运行E新脚本/Ja
 `JAVA_HOME=<Java17> python3 scripts/v11-e-smoke.py`退出0；实际证据.local/v11-e-acceptance/20261109t125623-347a/result.json。使用E正式up入口、新随机端口/项目/卷，V0签发409、非计量初版及可信节点后才签发，真实5次200+第6次429，余额5/0、Ledger5、Outbox5、日报5；401/Scope403/旧Caller隔离/同月409/VIEWER写403/撤销旧代次拒绝/旧V1两路200。自有Kafka暂停期间1条新Grant积压，恢复只消费原事件；重复Kafka事件未双计。今日查询400。仅对自有Control的MySQL连接注入昨天会话时钟产生新Grant，恢复真实时钟后历史MATCH；没有修改历史Ledger/Outbox或全局数据库时钟。最终doctor READY，重复doctor前后账本计数与根.env相同。finally停机并保留三卷。
 
 首轮20261109t125235-7818失败：时钟注入环境字段绑定导致Control启动失败，整轮未通过，已停自有实例且保留卷。改为SPRING_APPLICATION_JSON精确属性后整轮重跑通过，未删除失败记录。Chromium/旧B/C回归留到E5，不冒充已运行。
+
+## E5 最终实测与指南（2026-11-09）
+
+| 阶段 | 已完成本地提交 | 状态 |
+| --- | --- | --- |
+| E0 | 967f1d6 | 审计完成 |
+| E1 | 392d890 | 只读doctor完成 |
+| E2 | b7e9729 | 隔离启动/保留卷完成 |
+| E3 | 46859ed | 真实认证就绪状态完成 |
+| E4 | 1fae31f | B/C真实闭环完成 |
+| E5 | 本节随阶段提交，完整SHA见git log与远端映射 | 定向自动验证完成 |
+| E6 | 无 | 待负责人手工验收，未代签 |
+
+实际命令与结果：
+
+- `JAVA_HOME=<本机JDK17> mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`退出0，75项、失败0、跳过0（Contract10/Control35/Gateway26/Demo4）。最终指南同步后额外`package -DskipTests`退出0只重打资源，未把跳过测试算作测试通过。
+- 原8个Node入口加`v11-e-console-test.mjs`共9个，逐项`node scripts/<入口>`退出0；完整命令见证据JSON。首次错误使用本机Node不支持的experimental-default-type参数，退出9；改为既有plain node命令后全通过，未更改旧断言。
+- `python3 scripts/test_v11_local.py`14项退出0。夹具覆盖JSON0/2/1、权限UNKNOWN、风险/表缺失/Kafka/节点缺证据、不执行.env表达式、不接管其他PID/卷、TIME_WAIT重启；真实E2另验证二次up PID不变、占用端口拒绝且未建业务资源、stop/up保留卷和账本。
+- `JAVA_HOME=<JDK17> FLOWGATE_ASYNC_ENABLED=false python3 scripts/v11-b-smoke.py`退出0，23项原B检查（含双Gateway、并发配额和旧二进制门禁），未改旧预期。
+- 同环境`python3 scripts/v11-c-smoke.py`退出0，原26组C真实Kafka/MySQL/双Gateway回归，最终109 Grant=Outbox=Consumed=日报单位；未改旧预期。
+- `JAVA_HOME=<JDK17> python3 scripts/v11-e-smoke.py --browser`最终退出0，run=20261109t131204-18e5。新项目flowgate-v11-demo-86e83e1b712d，六端口59101/59102/59103/59104/59105/59106，mysql-data/redis-data/kafka-data三卷停止后仍保留。新库V0发证409→非计量V1可信节点→APP→计量V2，5个200+429，余额5/0、Ledger5、Outbox5、日报5；Kafka停/恢复、重复幂等、今日400及受控真实历史MATCH均通过。最终两次doctor READY且账本计数未改。
+- 真实Chromium同一TaskSpace12，1280/375截图已查看，七域、无横向溢出、真实V1/B/C与schema UNKNOWN、键盘Enter/Escape焦点恢复、应用深链接、一次性凭证遮盖/不入存储、离页与前进后退清除、Gateway自定义指标来源且不发管理员Authorization、刷新丢弃会话、VIEWER写按钮禁用、手机导航退出均实测通过。截图仅脱敏业务数据，保存在.local/v11-e-acceptance/20261109t131204-18e5/，JSON内记录摘要。浏览器检查不是负责人真人验收。
+- `python3 scripts/build-console-guide.py --product --check`、`--delivery --check`、`git diff --check`退出0。扩展详细中文手册和同源HTML，README加入单一E入口。
+
+浏览器失败记录未抹除：130126标题/按钮重名选择器；130428刷新正确恢复监控深链接但测试等待首页；130650指南已更新导致doctor正确拒绝旧Jar；130950手机退出前测试未先展开侧栏。修正测试交互并打包后整轮重跑通过，没有放宽产品权限断言；VIEWER检查明确要求至少存在一个禁用写按钮。失败实例全部停止、卷保留。
+
+`docs/progress/evidence/v11-e-local-delivery.json`为实际运行后的脱敏汇总。无Token/密码/BCrypt、无原始异常响应。根.env SHA256与权限对比初始私有快照完全相同；原MySQL/Redis/Kafka三个容器ID、运行时长及原命名卷仍在，未执行其迁移/写API/重启。没有删除E失败或成功环境卷。PID不可读时UNKNOWN并拒绝接管，新增回归。
+
+关键Java类和新增复杂脚本/前端汇总逻辑已人工检查中文注释与1/2/3步骤；无新框架/表/依赖，无本轮Plus源码复制，复用现有Spring/Actuator/MyBatis/Kafka与原生ES modules。历史B/C smoke只读源码保持不变。
+
+## E6 停止点与风险
+
+E0～E5自动实施完成，E6任务书所有负责人勾选仍未填写。未运行D正式性能、10万SQL、全故障矩阵；未激活或迁移用户已有环境；未合并main或旧Draft PR。不把本次隔离测试等同用户常驻部署或正式交付验收。Mac上实际验证，Linux路径有实现但本轮未在独立Linux主机执行。卷有意保留会占磁盘，删除需另行明确授权。Ego Lite提示可更新，本轮未升级。

@@ -37,6 +37,9 @@ def main():
             code = 0 if result['state'] == 'READY' else 2
         else:
             raise LocalFailure('up/status/stop必须显式传--isolated，不能接管已有环境')
+    except PermissionError:
+        result = report([check('permission', 'UNKNOWN', '权限不足，无法验证运行身份；未接管进程', '检查当前用户的进程和Docker读取权限')], args.profile)
+        code = 2
     except LocalFailure as error:
         result = report([check('configuration', 'BLOCKED', str(error), '参考.env.example手工配置；不会覆盖文件')], args.profile)
         code = 2
