@@ -6,12 +6,8 @@ import {renderReleases, renderCallers, renderMonitoring, renderAudits, nodesTabl
 import {renderUsage, renderAsyncEvents} from './usage.js';
 import {renderQuota} from './quota.js';
 import {renderBusiness, businessKinds} from './openapi-business.js';
-export const views = [
-  ['dashboard', '工作台', '总览'], ['services', '服务管理', '接入管理'], ['apis', 'API管理', ''], ['routes', '路由管理', ''],
-  ['developers', '客户管理', '客户与应用'], ['apps', '应用管理', ''], ['plans', '套餐管理', '套餐与订阅'], ['subscriptions', '订阅记录', ''], ['quota', '配额与账本', ''], ['usage', '用量统计', '异步用量'], ['async-events', '异步事件', ''], ['reconciliation', '对账中心', ''],
-  ['rate', '速率限制', '流量治理'], ['concurrency', '并发保护', ''], ['protection', '故障保护', ''], ['quota-policy', '计量规则', ''],
-  ['releases', '发布中心', '配置交付'], ['callers', '调用方管理', ''], ['monitoring', '运行监控', '运行与审计'], ['audits', '操作审计', '']
-];
+import {domains, views, domainFor, parseRoute, routeHash, safeParams} from './navigation.js';
+export {views};
 /** 相互独立的读取失败各自显示未知，不用旧数值或空数组冒充当前真实状态。 */
 export async function readCore(api) {
   const paths = {services: '/admin/services', apis: '/admin/apis', routes: '/admin/routes', policies: '/admin/policies', current: '/admin/releases/current', nodes: '/admin/nodes', health: '/status'};
@@ -54,13 +50,12 @@ export function start(documentRef = document) {
     if (el('entity-dialog').open) el('entity-dialog').close();
     el('page-content').replaceChildren(); el('page-notice').replaceChildren(); el('password').value = '';
     el('app-view').hidden = true; el('login-view').hidden = false; closeMenu();
-    el('nav-search').value = ''; filterNavigation();
     el('login-error').replaceChildren(message ? notice(message, 'error') : h('span'));
     el('username').focus();
   }
   const api = createApi(undefined, () => sessionEnded('登录已过期，请重新登录。当前凭证已清空。'));
   const ctx = {
-    api, role: '', data: Object.fromEntries(['services', 'apis', 'routes', 'policies', 'current', 'nodes', 'health'].map(key => [key, null])), view: 'dashboard', callers: [], issued: null, readAt: '',
+    api, role: '', params: {}, pageState: {}, lastViews: {}, state(view = ctx.view) { return ctx.pageState[view] ||= {}; }, data: Object.fromEntries(['services', 'apis', 'routes', 'policies', 'current', 'nodes', 'health'].map(key => [key, null])), view: 'dashboard', callers: [], issued: null, readAt: '',
     heading(title, description, action) {
       const anchors = {dashboard: 'start', services: 'connect', apis: 'connect', routes: 'connect', developers: 'openapi', apps: 'openapi', plans: 'openapi', subscriptions: 'openapi', quota: 'quota', 'quota-policy': 'quota', usage: 'async-usage', 'async-events': 'async-usage', reconciliation: 'async-usage', rate: 'protect', concurrency: 'protect', protection: 'protect', releases: 'release', callers: 'callers', monitoring: 'monitor', audits: 'monitor'};
       el('page-head').replaceChildren(h('div', {class: 'page-heading'}, h('p', {class: 'breadcrumb'}, 'FlowGate / ' + title), h('h1', {}, title), h('p', {}, description)), h('div', {class: 'page-actions'}, h('a', {class: 'page-help', href: 'guide.html#' + (anchors[ctx.view] || 'start'), target: '_blank', rel: 'noopener'}, '使用说明', h('span', {class: 'sr-only'}, '（新窗口）')), action));
@@ -69,10 +64,10 @@ export function start(documentRef = document) {
     flash(text, tone = '') { el('page-notice').replaceChildren(notice(text, tone), text.includes('草稿') ? button('前往发布中心', () => ctx.navigate('releases')) : h('span')); },
     details(title, value) { openDialog(title, h('div', {}, notice('只读技术摘要，不是编辑入口。'), h('pre', {}, JSON.stringify(redact(value), null, 2))), null); },
     async saved(text) { await ctx.refresh(); ctx.flash(text, 'good'); },
-    async navigate(view) {
+    async navigate(view, params = {}, {history = true} = {}) {
       ctx.issued = null; ctx.appIssued = null; ctx.secretEpoch = (ctx.secretEpoch || 0) + 1; // 一次性凭证离开领取页即清除，不留在隐藏DOM或其他页面。
       if (el('entity-dialog').open) el('entity-dialog').close();
-      ctx.view = views.some(row => row[0] === view) ? view : 'dashboard';
+      ctx.view = views.some(row => row[0] === view) ? view : 'dashboard'; ctx.params = safeParams(ctx.view, params);
       closeMenu();
       el('page-notice').replaceChildren(); await ctx.render(); el('main').focus();
     },
@@ -88,7 +83,10 @@ export function start(documentRef = document) {
       const ticket = ++renderNumber, view = ctx.view;
       el('top-title').textContent = views.find(row => row[0] === view)[1]; el('version-state').textContent = versionLabel(ctx.data.current, ctx.data.nodes);
       el('session-role').textContent = ({ADMIN: '管理员', OPERATOR: '操作员', VIEWER: '只读用户'})[ctx.role] + ' · 会话仅限本页';
-      for (const a of el('navigation').querySelectorAll('a')) { if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); }
+      const domain = domainFor(view); ctx.lastViews[domain.key] = view;
+      for (const a of el('navigation').querySelectorAll('a')) { if (a.dataset.domain === domain.key) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); }
+      el('page-tabs').replaceChildren(...domain.tabs.map(([key, label]) => h('a', {href: routeHash(key), 'data-view': key, ...(view === key ? {'aria-current': 'page'} : {}), onclick: event => { event.preventDefault(); ctx.navigate(key); }}, label)));
+      el('page-tabs').hidden = domain.tabs.length === 1;
       el('page-content').replaceChildren(notice('正在读取页面…'));
       try {
         // 2. 页面切换与会话退出后，迟到响应不得覆盖新页面或重新展示敏感回执。
@@ -97,27 +95,11 @@ export function start(documentRef = document) {
       } catch (error) { if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(ctx.unavailable(error.message)); }
     }
   };
-  const sections = []; let section;
-  for (const [key, label, group] of views) {
-    if (group) {
-      const items = h('div', {class: 'nav-items'}), heading = h('h2', {class: 'nav-group', id: 'nav-group-' + key}, group);
-      section = {node: h('section', {class: 'nav-section', 'aria-labelledby': 'nav-group-' + key}, heading, items), items, group, links: []};
-      sections.push(section); el('navigation').append(section.node);
-    }
-    const link = h('a', {href: '#' + key, 'data-view': key, onclick: event => { event.preventDefault(); ctx.navigate(key); }}, label);
-    section.items.append(link); section.links.push({link, label});
+  for (const domain of domains) {
+    el('navigation').append(h('a', {href: routeHash(domain.tabs[0][0]), 'data-domain': domain.key, onclick: event => {
+      event.preventDefault(); const view = ctx.lastViews[domain.key] || domain.tabs[0][0]; ctx.navigate(view);
+    }}, domain.label));
   }
-  /** 功能筛选只改变导航可见性，不发送请求或修改当前业务页。 */
-  function filterNavigation() {
-    const term = el('nav-search').value.trim().toLowerCase(); let matches = 0;
-    for (const section of sections) {
-      let count = 0;
-      for (const {link, label} of section.links) { link.hidden = !((section.group + label).toLowerCase().includes(term)); if (!link.hidden) count++; }
-      section.node.hidden = count === 0; matches += count;
-    }
-    el('nav-empty').hidden = matches > 0;
-  }
-  el('nav-search').addEventListener('input', filterNavigation);
   el('home-link').addEventListener('click', event => { event.preventDefault(); ctx.navigate('dashboard'); });
   // 3. 绑定显式的登录/退出/刷新动作，不定时造状态，不在前端持久化会话。
   el('login-form').addEventListener('submit', async event => {
@@ -139,7 +121,7 @@ export function start(documentRef = document) {
   el('menu-toggle').addEventListener('click', () => {
     if (menuOpen) { closeMenu(true); return; }
     menuOpen = true; documentRef.body.classList.add('menu-open'); el('menu-backdrop').hidden = false;
-    el('menu-toggle').setAttribute('aria-expanded', 'true'); el('workspace').inert = true; el('nav-search').focus();
+    el('menu-toggle').setAttribute('aria-expanded', 'true'); el('workspace').inert = true; el('navigation').querySelector('a')?.focus();
   });
   el('menu-backdrop').addEventListener('click', () => closeMenu(true));
   documentRef.addEventListener('keydown', event => {

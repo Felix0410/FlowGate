@@ -129,16 +129,12 @@ ctx.role = 'VIEWER'; await ctx.navigate('apis');
 assert.equal(elements.get('page-content').descendants().find(e => e.tagName === 'button' && e.textContent === '编辑').disabled, true);
 await ctx.navigate('protection'); assert.match(elements.get('page-content').textContent, /故障保护|熔断/);
 ctx.issued = {token: 'must-clear'}; await ctx.navigate('dashboard'); assert.equal(ctx.issued, null);
-// 2. 重构后的导航筛选不得发请求、改当前页或遗失功能入口，退出后筛选清空。
-const nav = elements.get('navigation'), navSearch = elements.get('nav-search');
-assert.equal(nav.querySelectorAll('a').length, 20);
-const filterRequests = requests.length;
-navSearch.value = '对账'; await navSearch.fire('input');
-assert.deepEqual(nav.querySelectorAll('a').filter(link => !link.hidden).map(link => link.dataset.view), ['reconciliation']);
-assert.equal(elements.get('nav-empty').hidden, true);
-navSearch.value = '没有此功能'; await navSearch.fire('input'); assert.equal(elements.get('nav-empty').hidden, false);
-assert.equal(requests.length, filterRequests); assert.equal(ctx.view, 'dashboard');
-navSearch.value = ''; await navSearch.fire('input'); assert.equal(nav.querySelectorAll('a').filter(link => !link.hidden).length, 20);
+// 2. 七个业务域收纳二十项能力，页内入口不再平铺侧栏。
+const nav = elements.get('navigation');
+assert.equal(nav.querySelectorAll('a').length, 7);
+await ctx.navigate('services');
+assert.equal(elements.get('page-tabs').querySelectorAll('a').length, 4);
+assert.match(elements.get('page-tabs').textContent, /旧调用方凭证/);
 // 3. 发布完成不等于节点应用；版本0、离线节点和未读取均不得显示全量成功。
 const states = (current, nodes) => deliveryProgress(current, nodes).children.map(node => node.attrs['data-state']);
 assert.deepEqual(states(null, null), ['neutral', 'unknown', 'waiting']);
@@ -155,9 +151,9 @@ const localSearch = list.descendants().find(node => node.tagName === 'input'); l
 assert.match(list.textContent, /匹配 1 \/ 2 条/);
 await ctx.navigate('releases');
 assert.equal(elements.get('page-content').descendants().filter(node => node.tagName === 'h1').length, 0, '每页只有标题区一个h1');
-navSearch.value = 'API'; await navSearch.fire('input');
+
 await elements.get('logout').fire('click'); assert.equal(elements.get('app-view').hidden, true); assert.equal(elements.get('page-content').textContent, '');
-assert.equal(navSearch.value, ''); assert.equal(nav.querySelectorAll('a').filter(link => !link.hidden).length, 20);
+assert.equal(nav.querySelectorAll('a').length, 7);
 console.log('PASS 产品真实模块：请求/完整PUT/规则绑定/权限/CAS409不重试/回滚/Caller/未知与断网/会话清密');
 console.log('PASS 产品模拟DOM：登录/列表/表单回填与真实提交路径/草稿反馈/只读按钮/导航/退出清空；非浏览器验收');
-console.log('PASS 前端规范：20入口筛选无请求/退出复位/发布六类真实状态/数字对齐/键盘表格/筛选计数/单页h1');
+console.log('PASS 前端规范：七个业务域/二十项页内入口/发布六类真实状态/数字对齐/键盘表格/筛选计数/单页h1');

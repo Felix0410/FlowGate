@@ -6,7 +6,7 @@
   --brand: #2458d3;
   --brand-hover: #1d46ac;
   --brand-soft: #eef3ff;
-  --nav: #fff;
+  --nav: #17212f;
   --bg: #f7f8fa;
   --surface: #fff;
   --raised: #f3f4f6;
@@ -107,22 +107,27 @@ small, .meta { font-size: 12px; line-height: 20px; }
 /* 3. 固定外壳与独立滚动导航；小屏导航隐藏时不可被键盘误聚焦。 */
 #sidebar { position: fixed; inset: 0 auto 0 0; z-index: 20; display: flex; flex-direction: column; width: var(--sidebar-width); background: var(--nav); border-right: 1px solid var(--line); }
 .sidebar-head { padding: 24px 20px 16px; }
-.sidebar-caption { margin: 8px 0 24px 44px; color: var(--muted); font-size: 12px; }
+.sidebar-caption { margin: 8px 0 8px 44px; color: var(--muted); font-size: 12px; }
 .nav-search input { min-height: 36px; background: var(--bg); border-color: var(--line); font-size: 13px; }
 #navigation { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 12px 16px; scrollbar-width: thin; }
-.nav-section + .nav-section { margin-top: 20px; }
-.nav-group { display: block; margin: 0 12px 8px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 400; }
-.nav-items { display: grid; gap: 4px; }
-#navigation a { display: flex; align-items: center; min-height: 36px; padding: 6px 12px; border-radius: var(--control-radius); color: var(--secondary); font-size: 13px; }
-#navigation a:hover { background: var(--raised); color: var(--ink); text-decoration: none; }
-#navigation a[aria-current="page"] { background: var(--brand-soft); color: var(--brand); font-weight: 500; box-shadow: inset 2px 0 var(--brand); }
-.nav-empty { margin: 0; padding: 8px 20px 20px; color: var(--muted); font-size: 13px; }
+#navigation a { display: flex; align-items: center; min-height: 44px; margin: 4px 0; padding: 10px 16px; border-radius: 8px; color: #d9e2ec; font-size: 14px; font-weight: 500; }
+#navigation a:hover { background: #213247; color: #fff; text-decoration: none; }
+#navigation a[aria-current="page"] { background: #274366; color: #fff; box-shadow: inset 3px 0 #8db9ff; }
+#sidebar .brand { color: #fff; }
+#sidebar .logo { color: #fff; border-color: #8196b2; }
+#sidebar .sidebar-caption, #sidebar #session-role { color: #b3c1d2; }
+#sidebar .sidebar-links a { color: #d9e2ec; }
+#sidebar .sidebar-bottom { border-color: #334155; }
+#sidebar #logout { color: #d9e2ec; background: transparent; border-color: #64748b; }
+#sidebar #logout:hover { background: #274366; }
+#sidebar :focus-visible { outline-color: #b4d0ff; }
 .sidebar-bottom { display: grid; gap: 12px; flex-shrink: 0; padding: 16px 20px; border-top: 1px solid var(--line); }
 .sidebar-links { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
 .sidebar-links a { color: var(--secondary); }
 #session-role { color: var(--muted); font-size: 12px; line-height: 20px; }
 #logout { min-height: 32px; padding: 4px 12px; font-size: 12px; }
-.workspace { margin-left: var(--sidebar-width); min-width: 0; }
+.workspace { margin-left: var(--sidebar-width); min-width: 0; height: 100dvh; overflow-y: auto; }
+#app-view { height: 100dvh; overflow: hidden; }
 .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; padding: 12px 32px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .top-context, .top-right { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .top-context { font-size: 13px; }
@@ -284,3 +289,18 @@ summary { cursor: pointer; color: var(--secondary); font-size: 13px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* 业务域与叶子页面形成两级导航；不将页内导航伪装成表单Tab控件。 */
+.page-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+.page-tabs a { flex-shrink: 0; padding: 8px 16px; border-radius: 8px; color: var(--secondary); font-size: 14px; border: 1px solid transparent; }
+.page-tabs a:hover { background: var(--raised); text-decoration: none; }
+.page-tabs a[aria-current="page"] { color: var(--brand); background: var(--brand-soft); border-bottom: 2px solid var(--brand); font-weight: 600; }
+.login-layout { grid-template-columns: minmax(0, 1fr); }
+.brand-panel { padding: 32px 24px 0; align-items: center; gap: 12px; border: 0; background: var(--surface); }
+.login-context { color: var(--muted); margin: 0; font-size: 13px; }
+.login-main { place-items: start center; padding-top: 32px; }
+.object-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 24px; }
+.fact-list { display: grid; grid-template-columns: 144px minmax(0, 1fr); gap: 12px 24px; margin: 0; }
+.fact-list dt { color: var(--muted); }
+.fact-list dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 767px) { .fact-list { grid-template-columns: minmax(0, 1fr); gap: 4px; } .fact-list dd { margin-bottom: 12px; } }

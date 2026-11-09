@@ -26,3 +26,9 @@
 
 - UX-0：契约与映射完成；提交SHA见本文件Git历史。
 - UX-1～UX-5：待实施，禁止将设计或旧测试当成本次通过。
+
+## UX-1：业务外壳
+
+7个一级业务域及20个页内入口已接入；旧Caller只在API接入，APP凭证仍在应用业务。深色高对比侧栏、独立滚动正文、小屏抽屉和横向二级导航沿用原生控件；登录缩减为账号与操作区。`navigation.js`集中维护映射及后续路由字段白名单，不增加后端。
+
+修改app/index/style/navigation及产品Node适配。`node scripts/product-console-test.mjs`退出0，`git diff --check`通过。Java/真HTTP/1280与375浏览器留UX-5，尚未运行本阶段浏览器，不标体验通过。

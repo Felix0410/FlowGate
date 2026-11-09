@@ -21,69 +21,11 @@
           </span>
           FlowGate
         </a>
-        <div class="login-intro">
-          <span class="eyebrow">
-            API 治理工作台
-          </span>
-          <h1>
-            接入、治理、发布
-            <br>
-            每一步都有依据
-          </h1>
-          <p>
-            管理服务与接口、应用凭证及月度配额，核对配置版本和网关的实际应用状态。
-          </p>
-          <ol class="login-flow" aria-label="配置交付流程">
-            <li>
-              <span>
-                01
-              </span>
-              <div>
-                <strong>
-                  准备草稿
-                </strong>
-                <p>
-                  登记接口，配置路由与保护规则
-                </p>
-              </div>
-            </li>
-            <li>
-              <span>
-                02
-              </span>
-              <div>
-                <strong>
-                  发布版本
-                </strong>
-                <p>
-                  确认后将完整草稿持久化为新版本
-                </p>
-              </div>
-            </li>
-            <li>
-              <span>
-                03
-              </span>
-              <div>
-                <strong>
-                  核对节点
-                </strong>
-                <p>
-                  以网关上报的版本和心跳确认应用
-                </p>
-              </div>
-            </li>
-          </ol>
-        </div>
-        <small>
-          本机管理环境 · 保存草稿后仍需发布
-        </small>
-      </div>
-      <main class="login-main">
+        <p class="login-context">管理接口、客户与网关配置</p>
+    </div>
+    <main class="login-main">
         <div class="login-card">
-          <span class="eyebrow">
-            账号登录
-          </span>
+
           <h2>
             登录 FlowGate
           </h2>
@@ -133,19 +75,9 @@
           <p class="sidebar-caption">
             API 治理平台
           </p>
-          <label class="nav-search" for="nav-search">
-            <span class="sr-only">
-              查找功能
-            </span>
-            <input id="nav-search" type="search" placeholder="查找功能" autocomplete="off" aria-controls="navigation">
-          </label>
         </div>
-        <nav id="navigation" aria-label="管理导航">
-        </nav>
-        <p id="nav-empty" class="nav-empty" role="status" hidden>
-          没有匹配功能，请更换关键词
-        </p>
-        <div class="sidebar-bottom">
+      <nav id="navigation" aria-label="业务导航"></nav>
+      <div class="sidebar-bottom">
           <div class="sidebar-links">
             <a href="guide.html" target="_blank" rel="noopener">
               使用指南
@@ -179,12 +111,7 @@
                 切换导航
               </span>
             </button>
-            <span class="environment">
-              本机
-            </span>
-            <span class="top-divider" aria-hidden="true">
-              /
-            </span>
+
             <span id="top-title">
               工作台
             </span>
@@ -203,19 +130,10 @@
           </div>
           <div id="page-notice" aria-live="polite">
           </div>
-          <div id="page-content">
+          <nav id="page-tabs" class="page-tabs" aria-label="业务分区"></nav>
+      <div id="page-content">
           </div>
-          <footer>
-            <span>
-              FlowGate · API 治理工作台
-            </span>
-            <a href="guide.html" target="_blank" rel="noopener">
-              操作指南
-              <span class="sr-only">
-                （新窗口）
-              </span>
-            </a>
-          </footer>
+
         </main>
       </div>
     </div>
