@@ -18,3 +18,9 @@
 `up --isolated`、`status --isolated`、`stop --isolated`仅自己的演示环境；可显式覆盖六个端口。默认应用8081/8080/8085，冲突停止；默认依赖13407/16480/19192。不支持删除卷命令。根.env只读，必需管理员哈希/账号和内部密钥，不生成默认管理员明文。
 
 E0已完成代码/配置审阅，git diff --check通过；未运行E新脚本/Java/HTTP/浏览器，不预填通过。E1～E5待实现，E6仅负责人真人勾选；不进入D、不合并。
+
+## E1 只读doctor
+
+新增v11-local.py doctor [--profile v1|v11] [--json]与标准库共用探测。静态解析export配置，不source、不执行命令；数据库会话READ ONLY事务、四项风险预检；仅exec与配置端口/Compose服务/镜像身份一致的容器。Kafka以协议元数据和实际消费组状态检查，不以TCP开放冒充READY。外部IDE归属和无法认证的运行开关保持UNKNOWN，不登录写Redis会话。输出schemaVersion=1，状态与原因/下一动作，返回0/2/1；原始异常/URL凭证不输出。
+
+`python3 scripts/test_v11_local.py`退出0，8项夹具测试覆盖V1不依赖Kafka、缺B/C表、无可信节点、Kafka不可用、全部事实齐备、UNKNOWN、脱敏及配置不执行。初次导入发现括号语法错误，修正后才运行通过。实际`python3 scripts/v11-local.py doctor --json`退出2（当前常驻环境未被认证为完整V11），脱敏JSON保存在.local/v11-e-doctor-baseline.json；根.env摘要比较未变。没有运行迁移、启动或写业务记录。git diff --check通过。
