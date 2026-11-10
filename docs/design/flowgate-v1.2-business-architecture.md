@@ -70,7 +70,7 @@
 
 **增量权益**：`fg_entitlement_grant(id,source_type,source_id,application_id,api_id,period_yyyymm,units,kind)`的来源唯一键防订单重复开通。首个BASE创建新`fg_api_subscription`和新月余额；以后同API同月仅允许有明确SKU类型`TOPUP`的增加额度，并在`fg_entitlement_grant`留痕。**首版默认只开放BASE，不开放同月升级/顶格重购**；续订按下一UTC月排队，最初不做自动续费/跨月滚存。V12权益冻结`period`及`unit`，后续SKU改价/改额度不追溯。旧V11月冻结定义完全不动。
 
-**免费领取与付费统一**：V12-A仅允许每开发者/商品一次的`FREE_TRIAL`来源写入同一个`fg_entitlement_grant`/新API权益池，由MySQL事务确保唯一；V12-B付费后同一个`EntitlementGrantService`按`PAID_ORDER`来源开通。避免A写一套“临时免费订阅”而B重写所有赠送逻辑。免费不是模拟支付成功，标明来源。
+**免费领取与付费统一**：V12-A仅允许每个Portal用户对同一API终身一次的`FREE_TRIAL`来源（不能通过更换Developer或APP绕过）写入同一个`fg_entitlement_grant`/新API权益池，由MySQL事务确保唯一；V12-B付费后同一个`EntitlementGrantService`按`PAID_ORDER`来源开通。避免A写一套“临时免费订阅”而B重写所有赠送逻辑。免费不是模拟支付成功，标明来源。
 
 ## 6. 订单与模拟支付：不是点击购买即订阅
 
@@ -94,7 +94,8 @@
 2. Redis Lua用Redis TIME、冻结活动版本、库存可用量、用户唯一资格和预扣记录**同脚本执行**。失败时返回售罄/重复/活动未开始；**脚本成功只产生临时候选，不是订单成功**。资格有TTL和唯一claimId，跨请求返回同一候选状态。
 3. **仅Redis筛出的候选**进入一笔MySQL事务：先锁应用并预占同一APP/API/月BASE权益槽，再校验活动/应用归属/SKU/权益期间；`UPDATE fg_promo_stock SET reserved=reserved+1 WHERE reserved+sold<total`条件更新；插入持久`fg_promo_purchase_intent(status='ACCEPTED')`和业务Outbox`PROMO_INTENT_ACCEPTED`。只在该**事务提交后**返回HTTP **202 QUEUED + intentId**；Redis已预扣但DB未提交绝不返回“已受理”。DB冲突/不可达时只返回失败或待重试安全状态，执行按claimId比较的Redis释放/过期恢复，不返回假订单ID。
 4. 业务Outbox通过**现有Kafka Broker的新业务Topic/消费者组**投递，订单Consumer幂等创建`PENDING_PAYMENT`订单并把intent改为`ORDER_READY`。这里DB库存reserved已占位，消费者不二次扣库存；重复事件由业务唯一键和ConsumedEvent保护。UI轮询`GET /portal/api/purchase-intents/{id}`时明确区分“受理排队”和“待支付”。
-5. 订单超时关闭时在同一MySQL事务`reserved-1`+订单/intent终态更新+业务Outbox`STOCK_RELEASED`；支付成功时`reserved-1,sold+1`，经订单B的唯一权益开通流程。补偿事件同步Redis临时库存/资格，但**MySQL条件库存永远兜底防超卖**。重复支付/取消/补偿至多影响一次，消费端晚到的订单创建不能复活已关闭intent。
+5. **持久Intent创单超时**：新增IntentTimeoutCloser，对于到达创单截止却仍未被Kafka处理的ACCEPTED，以同一MySQL事务CAS转EXPIRED并释放reserved/HELD、写补偿Outbox；迟到Worker不能创建订单；用户202丢失后可用`GET /portal/api/promotions/{id}/my-claim`按本人查询持久受理事实。
+5.1. 订单超时关闭时在同一MySQL事务`reserved-1`+订单/intent终态更新+业务Outbox`STOCK_RELEASED`；支付成功时`reserved-1,sold+1`，经订单B的唯一权益开通流程。补偿事件同步Redis临时库存/资格，但**MySQL条件库存永远兜底防超卖**。重复支付/取消/补偿至多影响一次，消费端晚到的订单创建不能复活已关闭intent。
 6. Redis丢失、AOF回退、投递失败、Worker宕机：新抢购先**fail-closed**或标`REBUILDING`，由有界对账扫描MySQL的reserved/sold和尚未完成候选重建Redis库存视图；以活动epoch和Lua原子切换防止并发重建覆盖新预扣。Redis只做**高速预筛**，不拥有最终销售库存；DB已受理的intent与业务Outbox可恢复。若进程在Redis成功后、DB提交前崩溃，用户没有收到202，残留软预扣按TTL/版本重建恢复，容许短时少卖但绝不超卖；任何Redis临时候选不得声称已受理。
 
 此方案的数据库写入**只发生在Redis筛出的最多可售候选及有限重试**，不是对所有数十万抢购请求逐个落MySQL订单；比“纯Redis扣库存后直接发送Kafka并立即告诉用户成功”更诚实、可恢复。未来若真实压测证实该赢者事务是瓶颈，再评估更激进的异步受理协议，前提是有持久可靠的请求回执与补偿，不能先用无保障Stream/队列绕过去。
@@ -118,7 +119,7 @@
 
 Console添加`/admin/market/listings`、`/admin/market/skus`、`/admin/promotions`、`/admin/orders`及`/admin/commerce/reconciliation`，按现有ADMIN写权限并重新校验GET的敏感信息可见性。用户端GET默认不访问ADMIN业务API。
 
-**统一业务错误约定**：401未登录/Token无效，403跨租户/Scope，404不泄露存在性，409重复申请/订单终态或本月权益冲突，429限流/售罄按稳定code区分，503数据库/Kafka/Redis未就绪或关键结果不确定，202仅已持久受理且排队。所有响应有requestId、业务code，不附凭证/SQL/原始Kafka payload。支付状态和真实权益状态要分开查询。
+**统一业务错误约定**：401未登录/Token无效，403有效权限不足或Scope，404隐藏跨租户对象存在性，409重复申请/订单终态或本月权益冲突，429限流/售罄按稳定code区分，503数据库/Kafka/Redis未就绪或关键结果不确定，202仅已持久受理且排队。所有响应有requestId、业务code，不附凭证/SQL/原始Kafka payload。支付状态和真实权益状态要分开查询。
 
 ## 9. 管理端商业运营：服务治理与交易拆开职责
 
