@@ -34,7 +34,7 @@
 
 **B3｜真实订单与幂等槽位**
 - 实现`OrderApplicationService`/`OrderTransactionService`、`PortalOrderController`；`POST /portal/api/orders`只允许`{applicationId,skuId,clientRequestId}`，服务器推导用户、金额、ApiId、Period、Units、CNY、有效期。
-- 先查原幂等键，锁APP→slot→SKU报价→插订单PENDING_PAYMENT→slot HELD(holder=ORDER/orderId)、transition同事务。与A免费已有GRANTED冲突时409而不是收费；同请求重放同单、换SKU同键409；双Control下以MySQL唯一兜底。
+- 先查原幂等键，锁APP→slot→检查旧V11同APP目标月重叠订阅（冲突409）→SKU报价→插订单PENDING_PAYMENT→slot HELD(holder=ORDER/orderId)、transition同事务。与A免费已有GRANTED冲突时409而不是收费；同请求重放同单、换SKU同键409；双Control下以MySQL唯一兜底。
 
 **B4｜模拟付款与关闭**
 - 实现`SimulatedPaymentService`、`OrderTimeoutCloser`，相同APP→slot→order锁序；真正MySQL订单状态条件CAS；支付同事务写唯一SIM收据和`PAYMENT_CONFIRMED`业务Outbox，关闭同事务释放仅本order的HELD槽；不在事务同步发Rabbit。15分钟支付TTL、当月距月末15分钟售卖保护、DB UTC决定边界；NEXT月不得提前Gateway调用。
