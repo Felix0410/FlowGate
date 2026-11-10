@@ -2,7 +2,7 @@
 
 > **2026-11-10消息架构补充**：V12-B普通订单及V12-C抢购消息均按[ RabbitMQ修订合同 ](v12-rabbitmq-adaptation.md)采用独立Commerce Exchange、quorum主/TTL重试/Poison队列和业务Outbox；**本文件涉及V12新Kafka Topic/Group、offset ACK的旧措辞不再适用**。V11-C Kafka保留，不做全量迁移。
 
-> **状态：详细设计定稿，暂不生成V12-B/C Codex实施指令、不编码、不迁移、不宣称通过。** 适用前置`docs/design/v12-architecture-decisions.md`、`docs/design/v12-transaction-invariants.md`、`docs/progress/v12-a-portal-free-subscription.md`。如有实现冲突以最近ADR为准。此文档只是把后续阶段业务合同锁定，防止V12-A完成后临时重选订单方案。
+> **更新状态：早期B/C共用技术蓝图，仅保留C的未来设计参考。V12-B最新详细架构、数据库字典、订单状态机、Rabbit Commerce和B0修复、执行任务已经单独定稿**：见[订单架构](v12-b-order-architecture.md)、[事务与故障验收](v12-b-transactions-acceptance.md)、[B进度合同](../progress/v12-b-order-payment.md)、根目录[Codex B提示词](../../CODEX_V12_B_EXEC_PROMPT.md)。旧B表中任何Kafka/旧支付截止/可选退款语句以最新B文件为准；B新业务仍未编码。C只保留设计，不执行。** 适用前置`docs/design/v12-architecture-decisions.md`、`docs/design/v12-transaction-invariants.md`、`docs/progress/v12-a-portal-free-subscription.md`。如有实现冲突以最近ADR为准。此文档只是把后续阶段业务合同锁定，防止V12-A完成后临时重选订单方案。
 
 ## 1. 先定义商品/权益/订单/抢购到底是什么
 

@@ -57,3 +57,8 @@ RabbitMQ是按负责人明确决定修改的合同，见ADR-13。同步授权仍
 发现三项需轻量整改：P1-A01 Jackson3坏JSON可能误当暂时故障在Rabbit retry无限回炉，且坏Outbox可能反复重领；P1-A02 没有实际Rabbit断连/持卷重建/TTL重试与quorum Poison故障证据，Mockito+5笔正常消费不能替代；P1-A03 V12默认OFF/旧库缺14表时Console新市场页会读不存在表导致不友好5xx。次要工作：SENT补投进程启动冷却、万级对账查询性能、浮动Rabbit镜像版本。
 
 已给出**只针对本阶段的修补合同**：[CODEX_V12_A_RABBIT_REVIEW_FIX_PROMPT.md](../../CODEX_V12_A_RABBIT_REVIEW_FIX_PROMPT.md)，要求定向修复/隔离真实验证/旧Console正常提示，不要求重写A功能、100并发或旧D公平压测。负责人尚未完成Portal手测；旧E6/V11-D继续留欠。**本次只是审计与文档提交，三项P1仍未编码修复/实测**，不得标成已解决。
+
+
+## 2026-11-10 后续阶段处理约定（仅设计更新，不是修复）
+
+负责人要求将A的P1-A01/A02/A03并入V12-B设计与开发，不再单独运行旧A复审提示词。具体按[ V12-B0合同 ](v12-b-order-payment.md)先完成Jackson消息格式异常分类、真实Rabbit容器/TTL/Poison故障证明和旧Console未迁移空态，再继续B订单与模拟支付。**目前三项仍为待编码与待真实复核，A7及负责人真人验收未因此变成通过**。本说明只存在B的设计继承分支，旧A PR #15与其原证据不被篡改。

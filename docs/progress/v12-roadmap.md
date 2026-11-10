@@ -1,17 +1,17 @@
 # FlowGate V1.2｜业务化升级阶段路线与验收门槛（2026-11-10）
 
-> **状态：总体设计及关键ADR已定稿、V12-A详细实施合同和Codex单阶段提示词已备好；**无任何V12业务代码、迁移或运行结果，未启动Codex。 当前最新V11功能候选基线`feat/v11-e-local-delivery@b7f2a88794a6936d1e9854408e27d6f1f5387915`；新设计专属`docs/v12-platform-business-redesign`，不修改E/D/旧PR。主文档：[总体业务架构](../design/flowgate-v1.2-business-architecture.md)，权威规则：[V12 ADR](../design/v12-architecture-decisions.md)与[一致性合同](../design/v12-transaction-invariants.md)，事实依据：[仓库审计](../reviews/v12-current-state-audit-2026-11-10.md)。
+> **真实状态（2026-11-10）**：A0～A6已在`feat/v12-a-portal`编码并有定向联调证据，A7含Rabbit三项P1和负责人真人验收仍未完成；**这三项P1按本轮负责人要求纳入V12-B0开发，不等于已经修好**。B订单/模拟支付/Rabbit Commerce只有本设计与[可执行B合同](v12-b-order-payment.md)，代码/迁移/运行均NOT_STARTED；C/D仍为设计或旧债。源基线：`feat/v12-a-portal@f2026c59c7a7359e14e3ecd1d10f0c1a84cac8d8`，设计分支`docs/v12-b-order-design`，不修改旧PR。
 
 ## 0. 决策：先锁业务合同，再逐阶段编码
 
-首版商业闭环固定下列**设计规则（尚未开发）**；B/C的细化表结构、状态机与持久Intent回收见[订单与抢购蓝图](../design/v12-commerce-order-promotion-blueprint.md)，A的可执行设计见[V12-A合同](v12-a-portal-free-subscription.md)：
+首版商业闭环固定下列**设计规则（尚未开发）**；B/C的细化表结构、状态机与持久Intent回收见[订单与抢购蓝图](../design/v12-commerce-order-promotion-blueprint.md)，A的可执行设计见[V12-A合同](v12-a-portal-free-subscription.md)，本阶段B以[订单架构](../design/v12-b-order-architecture.md)、[事务故障矩阵](../design/v12-b-transactions-acceptance.md)、[分段任务](v12-b-order-payment.md)为准：
 1. Portal用户+个人Developer、上架真实API市场、创建APP与Key；
 2. **V12专属APP-API-UTC月权益池**，Legacy V11 App全局月池保留并存，路由显式只选一种扣量模式；
 3. A先只支持一份免费BASE真实权益；B支持付费订单/模拟结算/可靠开通；C支持活动库存100份示例与异步订单；
 4. 同月升级、加包、自动续费、退款/优惠券复杂组合不作为首版强制功能；下一月续订可以支持单个BASE排队；首版只做风险清楚的受控模拟退款或明确`NOT_SUPPORTED`，不假装自动扣回已使用额度；
 5. 保留V11-D未实施的SQL/四组公平压测和E6负责人真人手测，不把新V12阶段编号覆盖旧验收记录。
 
-建议PR堆叠：现有`feat/v11-e-local-delivery` → `docs/v12-platform-business-redesign`（本轮设计，Draft）→ 用户确认后`feat/v12-a-portal` → `feat/v12-b-orders` → `feat/v12-c-flash-sale` → `test/v12-d-final-acceptance`。新阶段Codex只读对应阶段详细合同，不跨阶段擅自实现。**目前未创建任何V12功能分支/业务SQL/源码；仅为A写出[完整实施合同](v12-a-portal-free-subscription.md)和根目录[Codex提示词](../../CODEX_V12_A_EXEC_PROMPT.md)，待单独执行与复审。**
+建议PR堆叠：现有`feat/v11-e-local-delivery` → `docs/v12-platform-business-redesign`（本轮设计，Draft）→ 已实现的`feat/v12-a-portal` → `docs/v12-b-order-design` → 待Codex`feat/v12-b-orders` → `feat/v12-c-flash-sale` → `test/v12-d-final-acceptance`。新阶段Codex只读对应阶段详细合同，不跨阶段擅自实现。**目前未创建任何V12功能分支/业务SQL/源码；仅为A写出[完整实施合同](v12-a-portal-free-subscription.md)和根目录[Codex提示词](../../CODEX_V12_A_EXEC_PROMPT.md)，待单独执行与复审。**
 
 ## V12-0：进入开发前的基线与选择题（不新加产品业务）
 
@@ -43,13 +43,16 @@
 
 ## V12-B：普通订单、模拟支付与可靠权益开通（商业闭环）
 
+**最新阶段合同优先级**：B0先完成A的P1-A01/A02/A03真实修复和故障证明，B1～B8再做订单/付款/独立Rabbit Commerce/权益/受控模拟退款、Portal/Console与复审。完整权威设计见[订单架构](../design/v12-b-order-architecture.md)、[事务矩阵](../design/v12-b-transactions-acceptance.md)和[Codex任务](../../CODEX_V12_B_EXEC_PROMPT.md)；下方旧B0/B1/B2/B3是早期粗分段，不再作为执行编号。
+
+
 **目标**：Portal用户选择真正付费SKU，在**唯一BASE权益槽位提前占用成功后**创建订单→模拟支付→异步可靠开通指定API下个/本UTC月权益；订单、权益和失败状态均可查。复用A权益服务，不通过`/admin/subscriptions`间接开通。详细字段/状态/竞态见[交易与抢购蓝图](../design/v12-commerce-order-promotion-blueprint.md)。
 
 | 子段 | 范围与关键文件/表 | 强制验收 |
 |---|---|---|
 | B0库存外订单 | `fg_order`、`fg_payment_record`、`fg_order_idempotency`（若订单唯一键不够则独立表），订单快照/价格整数分/可售时间/period，`OrderService` | 同requestId同参只一单、换参数409，跨租户不可见，后端不信任价格 |
 | B1支付与超时 | `OrderStateMachine`、`SimulatedPaymentService`、`OrderTimeoutCloser`；支付/取消基于同order行CAS、数据库UTC | 并发付款和取消只能一赢，无重复收据，无超时订单被付款 |
-| B2权益异步 | 新独立`fg_business_outbox`、业务Kafka Topic和`fg_business_event_consumed`；`OrderFulfillmentWorker`重用A的GrantService；事务提交后ACK | 进程停于DB提交前/后、Broker停机、100次重放，不重复开通；已付款未开通有明确PENDING和受控重试 |
+| B2权益异步 | 新独立`fg_business_outbox`、RabbitMQ Commerce独立quorum主/重试/Poison队列和`fg_business_event_consumed`；`OrderFulfillmentWorker`重用A的GrantService；事务提交后ACK | 进程停于DB提交前/后、Broker停机、100次重放，不重复开通；已付款未开通有明确PENDING和受控重试 |
 | B3前端/运营 | Portal购物/确认/订单列表/状态追踪/订阅结果；Console订单及失败事件只读/ADMIN重排/审计，中文帮助 | 空态/失败/超时/重试，1280/375真实浏览器两身份隔离，充值/付款不冒充配额立即生效 |
 
 **MVP缩减**：不接支付宝/微信，不做用户付款记录原文泄露、不自动续费、不支持已消耗权益退款、不做活动库存与优惠券；只模拟支付，明确UI文案。价格/购买日期不能在支付后改变。允许普通非活动SKU价为0时按`FREE_TRIAL`流程，不伪造第三方支付成功。
@@ -58,18 +61,18 @@
 
 ## V12-C：限时9.9元/100份抢购与可靠恢复（核心高并发）
 
-**目标**：真实MySQL 100份库存下，高并发入口先由Redis Lua挡绝大多数失败候选；被接受的请求先持唯一BASE槽并写持久purchaseIntent+reserved+Outbox才回**202**；业务Kafka异步创单，模拟支付后成交/开通；对永久未创单Intent有超时回收，对用户丢失202响应有本人可信查回能力，停止Broker/Control/Redis与消费者重复时可恢复、不可超卖。
+**目标**：真实MySQL 100份库存下，高并发入口先由Redis Lua挡绝大多数失败候选；被接受的请求先持唯一BASE槽并写持久purchaseIntent+reserved+Outbox才回**202**；业务RabbitMQ异步创单，模拟支付后成交/开通；对永久未创单Intent有超时回收，对用户丢失202响应有本人可信查回能力，停止Broker/Control/Redis与消费者重复时可恢复、不可超卖。
 
 | 子段 | 范围与实现位置 | 必须通过的门槛 |
 |---|---|---|
 | C0活动定义 | `fg_promotion`、`fg_promo_stock`，活动时间/版本/限购/退款与库存口径，Console管理页 | 活动SKU冻结、库存数约束、无资格不可下单 |
 | C1 Lua预筛+真实持久受理 | `static lua/claim.lua`（服务资源可改命名）、`PromotionAdmissionService`；Redis TIME+库存+一人一单；`UPDATE stock ... reserved+sold<total`、intent与Outbox同MySQL事务 | Redis成功DB失败不202、APP崩在Lua与DB之间TTL重建、双Control限购和DB库存条件更新、状态与活动epoch |
-| C2订单Worker | `PromotionOrderConsumer`订阅已有业务Topic、唯一持久intent和唯一order关联，消费后Ack；`IntentTimeoutCloser`回收超过创单截止仍未成单的已受理Intent | 202不是已买；Kafka停恢复/重复/乱序，过期受理只释放一次reserved/HELD，终态不复活 |
+| C2订单Worker | `PromotionOrderConsumer`订阅已有业务Topic、唯一持久intent和唯一order关联，消费后Ack；`IntentTimeoutCloser`回收超过创单截止仍未成单的已受理Intent | 202不是已买；RabbitMQ停恢复/重复/乱序，过期受理只释放一次reserved/HELD，终态不复活 |
 | C3支付/取消与Redis补偿 | 复用B的支付/CAS关闭，`reserved--,sold++`或`reserved--`唯一事务；`StockRebuildService`校验DB/Redis差异，带epoch重建 | MySQL sold+reserved不超过total；支付vs关闭仅一赢；补偿重复/Redis失忆不超卖；无坏账/孤儿intent |
 | C4运营/体验 | Portal特价详情、活动倒计时（显示用，后端时钟权威）、排队/待付/已开通状态；Console真实活动剩余/持久受理/订单/权益/失败重排与原因 | 交互不混淆四种结果，管理页不暴露Redis临时余额为权威 |
 | C5可选优惠券 | **只有C0～C4真实稳定后另行确认**。先单一固定价券/一次使用/到期，不做叠加复杂满减；券核销应绑定订单行状态且取消能回退 | 有真实促销需求再开发，否则延至V12-D之后 |
 
-**压测要求（不是预设成绩）**：隔离两Control/双Gateway/多消费者，目标100份至少一次2万并发模拟申请（逐步升压），核对Redis候选/DB受理/已付款/关闭/未开通和补偿关系；记录排队数、请求受理P95、最终成交、售罄误判、重复申请、Redis/Caps与数据库写入速率、Kafka延迟。不可将HTTP 202算成订单创建或支付成功的吞吐。故障注入要证明Redis丢状态后的DB重建收敛，允许有界少卖而绝不超卖。
+**压测要求（不是预设成绩）**：隔离两Control/双Gateway/多消费者，目标100份至少一次2万并发模拟申请（逐步升压），核对Redis候选/DB受理/已付款/关闭/未开通和补偿关系；记录排队数、请求受理P95、最终成交、售罄误判、重复申请、Redis/Caps与数据库写入速率、RabbitMQ Commerce延迟。不可将HTTP 202算成订单创建或支付成功的吞吐。故障注入要证明Redis丢状态后的DB重建收敛，允许有界少卖而绝不超卖。
 
 **阶段终点**：两种演示：普通SKU购买完整闭环和活动SKU抢购完整闭环并存；原V11 Gateway配额/限流与C统计回归通过。核心抢购完成前不做优惠券拓展。
 
@@ -103,7 +106,7 @@
 | 场景 | 交付证据 |
 |---|---|
 | 自助免费API | 真Portal注册/创建APP、免费权益唯一、APP Key经过真实Gateway授权、读到正确V12余额 |
-| 自助普通购买 | 真订单→模拟付款→Kafka消费→权益`FULFILLED`→新API配额准入，原同月V11余额完全不变 |
+| 自助普通购买 | 真订单→模拟付款→RabbitMQ Commerce消费→权益`FULFILLED`→新API配额准入，原同月V11余额完全不变 |
 | 抢购并发 | 真实Redis Lua/双Control/DB限制；MySQL`sold+reserved<=total`、一人一单、崩溃与重复消息后可恢复 |
 | 额度与安全 | 双Gateway无双扣、旧Caller/APP/Portal/Admin互不混用、每个ID所有权、Kafka异步统计不影响准入 |
 | 故障恢复 | Redis状态丢失、Kafka停恢复、DB短故障、付款/取消竞态、权益开通失败重试无重单/重复Grant |

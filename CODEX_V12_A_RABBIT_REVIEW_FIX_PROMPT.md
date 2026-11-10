@@ -1,3 +1,9 @@
+# 已合并入V12-B0（历史参考，请勿单独执行）
+
+> **2026-11-10新决定**：负责人要求原A三项P1随B设计一起实施。此历史任务不再单独派工，具体修复/实测与顺序以`CODEX_V12_B_EXEC_PROMPT.md`和`docs/progress/v12-b-order-payment.md`的**B0**为准。A功能已编码，三项P1未修，B0做完有真实证据后才能进入B1。
+
+---
+
 # 本地Codex｜V12-A RabbitMQ可靠性复审补丁（仅F0～F4，不进入订单/抢购）
 
 > **仅针对已经远端提交的PR #15 `feat/v12-a-portal`**。当前ChatGPT读取的基线 `472d9eb02a49c9a9384656bf1acd2b18ac9e30d9`；本复审只发现少量P1可靠性/旧环境友好性缺口，**不要求重做A业务与UI、不允许扩张为B/C**。请按`docs/reviews/v12-a-rabbitmq-static-review-2026-11-10.md`及`docs/design/v12-rabbitmq-adaptation.md`的源码合同执行；实际开发前`git fetch origin`并验证远端最新SHA、不清理本地未提交文件。
