@@ -111,3 +111,10 @@
 | 工程可复现 | D旧/新各自性能实验、10万级SQL、Java/Node/Python/浏览器实证、启动手册、已知限制、PR审核 |
 
 **此文档不得被解释为V12-A/B/C/D已完成；现有功能仓库尚无这些新Java/SQL/Portal代码。**
+
+
+## 2026-11-10 消息队列与V12-A远端实装状态同步
+
+V12-A独立功能分支`feat/v12-a-portal`已远端提交自助Portal、商品免费权益、V12 APP/API月配额、独立**RabbitMQ**用量链路与定向证据，见[实施记录](v12-a-implementation.md)和[首次复审](../reviews/v12-a-rabbitmq-static-review-2026-11-10.md)。A0～A6代码和部分真实测试已交付，A7有三项P1待修及负责人手测；**不能标成整阶段正式验收通过**，当前没开始B/C代码。
+
+**队列选择最终裁决**：V12新业务消息（A用量、B订单付款/权益、C抢购Intent/库存补偿）采用RabbitMQ独立exchange/quorum main/retry/poison队列，保留MySQL Outbox+幂等事务；**旧V11-C Kafka保留不迁移**。此前本路线及交易蓝图里提到未来V12 Kafka Consumer/Topic的文字以[消息适配设计](../design/v12-rabbitmq-adaptation.md)与ADR-13为准。B/C的阶段开发合同必须写Rabbit的publisher confirm、mandatory returns、COMMIT后basicAck、持久重试/隔离和实际容器故障测试。
