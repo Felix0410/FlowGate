@@ -1,12 +1,12 @@
 # FlowGate V1.2｜面向开发者的API市场、订阅交易与高并发流量治理总体设计
 
-> **状态：设计提案，未编码、未迁移、未测试、未上线；需负责人审定后逐阶段派发Codex。** 依据[2026-11-10现状审计](../reviews/v12-current-state-audit-2026-11-10.md)的最新E功能分支；以[一致性合同](v12-transaction-invariants.md)约束所有交易和抢购。本文与V11-D任务并行保留，不代替V11正式性能/人工验收，也不自动合并旧PR。
+> **状态：设计提案，未编码、未迁移、未测试、未上线；已完成总体设计与V12-A详细合同；尚未开始业务编码，后续逐阶段经审核才派发Codex。** 依据[2026-11-10现状审计](../reviews/v12-current-state-audit-2026-11-10.md)的最新E功能分支；以[最终ADR](v12-architecture-decisions.md)及[一致性合同](v12-transaction-invariants.md)共同约束所有交易和抢购（冲突时优先采用最新ADR）。本文与V11-D任务并行保留，不代替V11正式性能/人工验收，也不自动合并旧PR。
 
 ## 1. 产品定位与不做的事
 
 **定位**：统一开放第三方API，用户通过Portal自行发现API、创建应用、获得免费/付费月度权益、使用独立APP Key调用Gateway；管理员在Console配置API、SKU、活动和流量治理；平台用权威配额账本、可靠消息与对账保证业务可验证。
 
-**完整业务链**：管理员发布可调用的API → 上架API商品及可售SKU → 用户注册/选择个人开发者主体/创建应用 → 免费领取或创建购买订单 → 模拟支付成功 → 异步可靠开通**指定API的某UTC月份权益** → APP Key和Scope → Gateway按**指定API权益池**授权与扣减 → 旧C异步日用量 → Portal/Console可解释的额度/拒绝原因。
+**完整业务链**：管理员发布可调用的API → 上架API商品及可售SKU → 用户注册/选择个人开发者主体/创建应用 → 免费领取或创建购买订单 → 模拟支付成功 → 异步可靠开通**指定API的某UTC月份权益** → APP Key和Scope → Gateway按**指定API权益池**授权与扣减 → V12独立异步日用量 → Portal/Console可解释的额度/拒绝原因。
 
 **必须明确的非目标**：首版不接真支付/短信/邮件/税票/计费对账；不开放用户任意URL代理；不引入Nacos/Seata/Elasticsearch/Redis Streams新业务总线/分库分表/前端大框架；不把下游失败记退款、不让Kafka参与Gateway每个请求的同步授权。不宣称生产支付资质、跨Redis+MySQL+Kafka全局事务或exactly-once。
 
@@ -63,7 +63,7 @@
 | `fg_subscription`：应用整月定义，ADMIN操作 | 新`fg_api_subscription`：`application_id + api_id + period_yyyymm`的**唯一BASE权益**、source/order及SKU冻结 |
 | `fg_quota_balance`：`UNIQUE(app,month)`、一次冻结 | 新`fg_api_quota_balance`：`UNIQUE(app,api,month)`、total/remaining/version；只允许授权扣减及有审计的额外权益入账 |
 | `fg_quota_ledger`：旧chargeId/应用月流水 | 新`fg_api_quota_ledger`：V12 chargeId UNIQUE、持有权益池引用和路由版本 |
-| `fg_outbox_event`：旧Usage事件，C消费者验证旧Ledger | 新`USAGE_GRANTED_V12`类型/版本校验，异步聚合到既有`fg_usage_daily`之前先查新权威Ledger |
+| `fg_outbox_event`/`fg_consumed_event`/`fg_usage_daily`：旧V11独立用量链 | 新`fg_api_usage_outbox`/`fg_api_consumed_event`/`fg_api_usage_daily`，独立Kafka Topic/消费组，严格核对新Ledger；不混入旧Daily |
 | 旧配额策略`USAGE_QUOTA` | 新显式策略/元数据`USAGE_QUOTA_V12`与Gateway特性`USAGE_QUOTA_V12`；同一实际Route不能同时命中V11和V12配额 |
 
 **每次调用只扣一个权威池**：路由已发布的不可变计量模式决定V11_APP还是V12_APP_API；两者都不存在则严格拒绝计量API，不回退为不扣费；不得同时产生两笔Ledger；旧非计量Caller继续使用V1路径。V12安全部署要求所有接流Gateway具备新版本能力，沿用完整节点名单/版本/checksum/心跳门禁，防旧节点绕过。Gateway通过异步WebClient调用Control新内部授权，绝不把JDBC/Redis同步操作放进Netty线程。
@@ -76,7 +76,7 @@
 
 **冻结订单快照**：`fg_order(id,order_no UNIQUE,principal_id,developer_id,application_id,api_id,sku_id,offer_version,period_yyyymm,units_snapshot,amount_cents,source,activity_id,expires_at,status,version,...)`。金额使用整数分，价格来自受信商品SKU，不允许前端提交金额。按用户授权关系校验所选APP属于自己的Developer。
 
-- 普通付费`POST /portal/api/orders`创建`PENDING_PAYMENT`，`clientRequestId`作用域`(user_id,clientRequestId)`唯一并比较请求指纹；重试返回同一订单，不允许同键换SKU/APP/期间。
+- 普通付费`POST /portal/api/orders`在同一数据库事务先锁APP并预占`fg_api_entitlement_slot`唯一BASE权益槽，成功后才创建`PENDING_PAYMENT`，`clientRequestId`作用域`(user_id,clientRequestId)`唯一并比较请求指纹；重试返回同一订单，不允许同键换SKU/APP/期间。
 - 模拟支付`POST /portal/api/orders/{id}/simulate-pay`仅在受信用户确认、DB订单未超时/未关闭时执行业务状态CAS；同事务写唯一`fg_payment_record(provider='SIM',payment_ref UNIQUE)`及`fg_business_outbox(PAYMENT_CONFIRMED)`，更新订单为`PAID_PENDING_FULFILLMENT`。支付接口返回**模拟确认成功/待权益**，而不是立刻声称Gateway可用。
 - 专用Kafka业务Worker消费支付确认，在MySQL事务中唯一写`fg_entitlement_grant(source='PAID_ORDER',sourceId=orderId)`，创建对应`fg_api_subscription`、新余额和订单`FULFILLED`；真正提交后才ACK，重复消费不重开权益。失败可重试、超限隔离并可受控人工重排；操作审计和“待开通”页面说明。
 - 超时关闭只允许`PENDING_PAYMENT → CLOSED_TIMEOUT`，与支付使用同一订单行锁/CAS和DB时钟；支付先赢则不可取消，关闭先赢则支付不产生成功结果与权益；不用JVM系统时钟/前端倒计时当权威。首版不接真实资金，关闭不需要真实退款。
@@ -92,7 +92,7 @@
 
 1. 已登录且拥有APP的用户发起`POST /portal/api/promotions/{id}/claim`，带唯一clientRequestId；Gateway/Portal入口有界限速、活动发布时间权威。
 2. Redis Lua用Redis TIME、冻结活动版本、库存可用量、用户唯一资格和预扣记录**同脚本执行**。失败时返回售罄/重复/活动未开始；**脚本成功只产生临时候选，不是订单成功**。资格有TTL和唯一claimId，跨请求返回同一候选状态。
-3. **仅Redis筛出的候选**进入一笔MySQL事务：再次校验活动/应用归属/SKU/权益期间；`UPDATE fg_promo_stock SET reserved=reserved+1 WHERE reserved+sold<total`条件更新；插入持久`fg_promo_purchase_intent(status='ACCEPTED')`和业务Outbox`PROMO_INTENT_ACCEPTED`。只在该**事务提交后**返回HTTP **202 QUEUED + intentId**；Redis已预扣但DB未提交绝不返回“已受理”。DB冲突/不可达时只返回失败或待重试安全状态，执行按claimId比较的Redis释放/过期恢复，不返回假订单ID。
+3. **仅Redis筛出的候选**进入一笔MySQL事务：先锁应用并预占同一APP/API/月BASE权益槽，再校验活动/应用归属/SKU/权益期间；`UPDATE fg_promo_stock SET reserved=reserved+1 WHERE reserved+sold<total`条件更新；插入持久`fg_promo_purchase_intent(status='ACCEPTED')`和业务Outbox`PROMO_INTENT_ACCEPTED`。只在该**事务提交后**返回HTTP **202 QUEUED + intentId**；Redis已预扣但DB未提交绝不返回“已受理”。DB冲突/不可达时只返回失败或待重试安全状态，执行按claimId比较的Redis释放/过期恢复，不返回假订单ID。
 4. 业务Outbox通过**现有Kafka Broker的新业务Topic/消费者组**投递，订单Consumer幂等创建`PENDING_PAYMENT`订单并把intent改为`ORDER_READY`。这里DB库存reserved已占位，消费者不二次扣库存；重复事件由业务唯一键和ConsumedEvent保护。UI轮询`GET /portal/api/purchase-intents/{id}`时明确区分“受理排队”和“待支付”。
 5. 订单超时关闭时在同一MySQL事务`reserved-1`+订单/intent终态更新+业务Outbox`STOCK_RELEASED`；支付成功时`reserved-1,sold+1`，经订单B的唯一权益开通流程。补偿事件同步Redis临时库存/资格，但**MySQL条件库存永远兜底防超卖**。重复支付/取消/补偿至多影响一次，消费端晚到的订单创建不能复活已关闭intent。
 6. Redis丢失、AOF回退、投递失败、Worker宕机：新抢购先**fail-closed**或标`REBUILDING`，由有界对账扫描MySQL的reserved/sold和尚未完成候选重建Redis库存视图；以活动epoch和Lua原子切换防止并发重建覆盖新预扣。Redis只做**高速预筛**，不拥有最终销售库存；DB已受理的intent与业务Outbox可恢复。若进程在Redis成功后、DB提交前崩溃，用户没有收到202，残留软预扣按TTL/版本重建恢复，容许短时少卖但绝不超卖；任何Redis临时候选不得声称已受理。
