@@ -1,16 +1,16 @@
-# FlowGate V1.2｜订单、库存、权益、配额与Kafka跨系统一致性合同
+# FlowGate V1.2｜订单、库存、权益、配额与消息队列跨系统一致性合同
 
-> **设计状态：未实现、未测试、未迁移。** 本文件是后续V12-A/B/C必须遵守的**一致性验收依据**，最新[ADR](v12-architecture-decisions.md)对冲突规定拥有优先级，二者均优先于Codex临时实现建议；业务主文档`flowgate-v1.2-business-architecture.md`。所有示例数量仅为不变量或待测试期望，不是现有性能结果。
+> **阶段事实**：V12-A已实际编码并有部分隔离实测（Rabbit三项P1未修）；本文件中**B普通订单/C抢购仍纯设计，未实现/未迁移/未测试**。 本文件是后续V12-A/B/C必须遵守的**一致性验收依据**，最新[ADR](v12-architecture-decisions.md)对冲突规定拥有优先级，二者均优先于Codex临时实现建议；业务主文档`flowgate-v1.2-business-architecture.md`。所有示例数量仅为不变量或待测试期望，不是现有性能结果。
 
 ## 1. 先锁定五个相互独立的事实与真相来源
 
 | 事实 | 权威数据 | 只作缓存/异步用途 | 严格禁止 |
 |---|---|---|---|
-| 订单是否存在/状态/多少钱 | MySQL`fg_order`、`fg_payment_record`和订单SKU快照 | Portal状态显示、Kafka订单通知 | Redis成功就显示订单已创建或已付款 |
+| 订单是否存在/状态/多少钱 | MySQL`fg_order`、`fg_payment_record`和订单SKU快照 | Portal状态显示、RabbitMQ订单通知 | Redis成功就显示订单已创建或已付款 |
 | 活动有多少可卖 | MySQL`fg_promo_stock.total/reserved/sold`和`fg_promo_purchase_intent` | Redis活动窗口、预扣存量/去重资格 | Redis值=购买成功/售出总量的单一证据 |
 | 用户是否有某API月权益 | MySQL`fg_api_subscription`和唯一`fg_entitlement_grant` | Portal订阅卡片、商品缓存 | 付款接口直接修改旧V11`fg_subscription`或余额 |
-| 每次调用有没有获得配额 | V11原`fg_quota_ledger`或V12新`fg_api_quota_ledger`与对应余额行；单笔只能命中其一 | Redis Token/速率桶、Kafka用量、Daily读模型 | Kafka/异步Daily参与实时扣配额或退款 |
-| 后续步骤是否被执行 | MySQL业务Outbox、消费去重表和事务状态 | Kafka可重复传递；Redis补偿事件 | 以一次Kafka ACK或Redis INCR宣称MySQL权益最终一致 |
+| 每次调用有没有获得配额 | V11原`fg_quota_ledger`或V12新`fg_api_quota_ledger`与对应余额行；单笔只能命中其一 | Redis Token/速率桶、V11 Kafka与V12 RabbitMQ异步用量、Daily读模型 | MQ/异步Daily参与实时扣配额或退款 |
+| 后续步骤是否被执行 | MySQL业务Outbox、消费去重表和事务状态 | RabbitMQ/V11 Kafka均可重复传递；Redis补偿事件 | 以一次MQ ACK或Redis INCR宣称MySQL权益最终一致 |
 
 ## 2. 强制数据库不变量（DDL CHECK + UNIQUE + 事务复核）
 
@@ -56,7 +56,7 @@ Redis临时claim（只候选，无可靠购买受理）
        | MySQL: 库存reserved+1 + 持久intent + 业务Outbox 同事务
        v
 ACCEPTED (HTTP 202；仅已持久排队)
-       | 业务Outbox Kafka at-least-once，订单Worker幂等
+       | 业务Outbox RabbitMQ at-least-once，订单Worker幂等
        v
 ORDER_READY (MySQL已有PENDING_PAYMENT订单，仍未付款)
        |                         \
@@ -72,7 +72,7 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 
 **DB受理前后**：服务根据Redis候选先持APP行锁→预占BASE权益槽，在同一MySQL事务条件更新`reserved`、写入`fg_promo_purchase_intent`、`fg_business_outbox`，提交后才向用户返回202及intentId。此时确实有持久资格，但仍不是付款或权益。DB唯一键冲突与故障不得让Redis的临时结果自动变订单。重复抢购返回原intent/原订单状态，不产生另一份库存预留；同用户换APP也受活动级唯一键限制。
 
-**持久Intent超时**：ACCEPTED已经占用MySQL reserved，但Kafka长期停机可能一直无法成单；必须设`order_creation_deadline_at`与有界扫描的`IntentTimeoutCloser`，仅对未创建订单的ACCEPTED用MySQL事务CAS转EXPIRED，释放一次reserved和当前holder的HELD槽，写业务Outbox补偿事件。晚到Consumer不能复活EXPIRED。202如果因网络丢失，通过已登录用户的`GET /portal/api/promotions/{id}/my-claim`或同幂等键安全重试查真实持久Intent，不得依靠Redis软claim证明受理。
+**持久Intent超时**：ACCEPTED已经占用MySQL reserved，但RabbitMQ长期停机可能一直无法成单；必须设`order_creation_deadline_at`与有界扫描的`IntentTimeoutCloser`，仅对未创建订单的ACCEPTED用MySQL事务CAS转EXPIRED，释放一次reserved和当前holder的HELD槽，写业务Outbox补偿事件。晚到Consumer不能复活EXPIRED。202如果因网络丢失，通过已登录用户的`GET /portal/api/promotions/{id}/my-claim`或同幂等键安全重试查真实持久Intent，不得依靠Redis软claim证明受理。
 
 **MySQL库存转换**：订单异步创建不再次`reserved++`，只确认已有持久intent。模拟付款同事务`reserved--,sold++`，超时关闭同事务`reserved--`，两者竞争同一订单/预留状态，**最多一个方向成功**。迟到Consumer先查intent/库存保留状态，不能“复活”取消或超时intent。已经消耗的权益不因用户模拟退款自动将sold减回可售。
 
@@ -81,9 +81,9 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 ## 5. 业务消息、用量消息和数据库事务不可混淆
 
 旧C使用`fg_outbox_event + fg_consumed_event`处理`USAGE_GRANTED`，核对旧`fg_quota_ledger`并更新`fg_usage_daily`，已拥有租约/ACK/CAS/有限重试。**不要让订单事件走这个消费者的严格8字段事件解析**。V12设计：
-- 同一Kafka Broker，独立Topic `flowgate.commerce.v1`、独立ConsumerGroup `flowgate-commerce-worker-v1`，独立`fg_business_outbox`和`fg_business_event_consumed`，复用Worker通用租约投递与故障策略的**实现思想/可安全抽取的代码**，但不改旧用量事件历史事实。
-- 事件类型`PROMO_INTENT_ACCEPTED`、`PAYMENT_CONFIRMED`、`STOCK_RELEASED`、`ENTITLEMENT_GRANTED`等使用固定版本`eventVersion`+eventId+aggregateId+occuredAtUtc，不带Token、手机号、全量订单JSON、任何用户密码。消费者基于本地MySQL order/intent重查可信SKU和状态，不相信Kafka payload直接发额。
-- 先落MySQL订单/库存/Outbox事务→提交→异步Kafka投递；消费者重试可重复，多次送同事件，MySQL唯一grant/消费去重防重复；DB提交完成后才ACK Kafka。没有Broker ACK时Outbox保持可重试，不能直接标SENT；已经SENT却未消费、Kafka丢记录仍需与C同等级别的受控重排/对账。
+- V12-B/C在V12-A已有Rabbit Broker上新增独立Commerce DirectExchange `flowgate.commerce.v12`及quorum main/TTL retry/poison队列，独立`fg_business_outbox`和`fg_business_event_consumed`，复用A修复后的Rabbit可靠投递与故障分类思想；旧V11-C的Kafka Broker与用量消息/旧账本不迁移。
+- 事件类型`PROMO_INTENT_ACCEPTED`、`PAYMENT_CONFIRMED`、`STOCK_RELEASED`、`ENTITLEMENT_GRANTED`等使用固定版本`eventVersion`+eventId+aggregateId+occuredAtUtc，不带Token、手机号、全量订单JSON、任何用户密码。消费者基于本地MySQL order/intent重查可信SKU和状态，不相信Rabbit消息payload直接发额。
+- 先落MySQL订单/库存/Outbox事务→提交→异步RabbitMQ投递；消费者重试可重复，多次送同事件，MySQL唯一grant/消费去重防重复；DB提交后才Rabbit basicAck。只有publisher confirm且无mandatory return才SENT；发送结果不确定Outbox保持可重试；已经SENT却未消费/队列丢记录仍需受控重排/对账。
 - V12实时API准入仍以MySQL新月余额与Ledger为准，Gateway WebClient非阻塞调用Control。V12用量独立写`fg_api_usage_outbox`，通过新Topic/ConsumerGroup严格消费到`fg_api_consumed_event`与`fg_api_usage_daily`；核对新`fg_api_quota_ledger`，同事务唯一消费标记+日报累加。**绝不向旧C `fg_usage_daily` 混写V12数据**，V11原八字段消费者不接收新版本事件。
 - 消息乱序：Worker处理以订单/intent行状态CAS或版本号为准，旧`PAYMENT_CONFIRMED`不会覆盖`FULFILLED/REFUNDED`，迟到`PROMO_INTENT_ACCEPTED`不能复活终态。不可恢复坏消息保留offset/隔离并提供运营处理，不静默丢弃。
 
@@ -95,15 +95,15 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 | 两个用户猜对方app/order ID | Portal直接调用GET/POST | 403或不暴露的404，业务记录不变 |
 | 同一个clientRequestId重试/换商品 | 两路并发创建订单 | 同参数同订单；换参数409；金额来自服务端 |
 | 模拟支付 vs 超时取消 | 真实双线程同时触发 | 仅一个终态；不双开权益、不双释放库存 |
-| 付款提交成功，进程在发送Kafka前崩 | 停Worker/恢复 | Outbox可补投，最终1个Grant/1笔订单FULFILLED |
-| Kafka同消息100次/ACK前崩 | 真实消费者重放 | 收据/Grant/库存恰好一次，不提前ACK |
+| 付款提交成功，进程在发送RabbitMQ前崩 | 停Worker/恢复 | Outbox可补投，最终1个Grant/1笔订单FULFILLED |
+| RabbitMQ同消息100次/ACK前崩 | 真实消费者重放 | 收据/Grant/库存恰好一次，不提前ACK |
 | Redis Lua扣库存后应用崩在DB前 | 注入halt/重启 | 无持久intent则不能202；临时候选过期释放，MySQL库存未减少 |
-| DB受理后Kafka离线 | 抢购真实202然后停Broker | intent和DB reserved真实存在；恢复后恰好1订单，或到达明确Intent截止后CAS EXPIRED并释放一次库存，绝不出现无法解释的永久reserved |
+| DB受理后RabbitMQ离线 | 抢购真实202然后停Broker | intent和DB reserved真实存在；恢复后恰好1订单，或到达明确Intent截止后CAS EXPIRED并释放一次库存，绝不出现无法解释的永久reserved |
 | 100份活动2万并发（**待实测**） | 两Control/至少两Worker | DB `sold+reserved<=100`、每用户最多1、最多100合法持久intent；拒绝数/延迟据实记录 |
 | Redis缓存丢失/AOF回退 | 停Redis、恢复重建 | 新抢fail-closed，MySQL订单/库存不丢，重建后无超卖/无永久少卖 |
 | 临时DB故障/长事务 | 持久intent与消费恢复 | 无“已受理但DB不存在”；恢复后账本与库存最终收敛 |
 | 同月V11旧订阅与V12买API | 两类发布路由实际调用 | 旧`fg_quota_balance`不改，新API池独立；无双Ledger/跨API额度消耗 |
-| Kafka C旧V1事件与V12新事件混用 | 重放双方及跨天 | 两类Ledger都可核对、Daily不双计、UTC日按事件时间；当日对账不能冒充封账MATCH |
+| 旧Kafka V11事件与V12 Rabbit事件各自重放 | 重放双方及跨天 | 两类Ledger都可核对、Daily不双计、UTC日按事件时间；当日对账不能冒充封账MATCH |
 | 钱款已模拟成功但权益DAO失败 | 强制SQL约束失败→恢复 | 订单显示`PAID_PENDING_FULFILLMENT`或`FULFILLMENT_RETRY`，恢复后1个权益，不冒充已可调用 |
 | 刷新Portal/退出/非法调试URL | 浏览器真实操作 | 认证及Key不会出现在URL、浏览器持久存储、请求日志，不接受任意上游URL |
 
@@ -111,6 +111,6 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 
 ## 7. 审核结论与取舍
 
-**选MySQL持久受理 + Redis高并发软预扣 + Kafka订单后处理**，原因：Win者数量由库存上限控制，数据库只服务有限候选并以原子条件更新兜底；对所有请求同步写库不可行，但也不能让Redis孤立预扣充当不可恢复的“已受理”回执。重试、最终订单/权益和库存释放都有MySQL权威事件能追溯。付出的代价是每个赢者有一次MySQL写入，且在DB高压或Red​is失联时可能短暂少卖；D阶段应实测该代价，而不是假定无限QPS。
+**选MySQL持久受理 + Redis高并发软预扣 + RabbitMQ订单后处理**，原因：Win者数量由库存上限控制，数据库只服务有限候选并以原子条件更新兜底；对所有请求同步写库不可行，但也不能让Redis孤立预扣充当不可恢复的“已受理”回执。重试、最终订单/权益和库存释放都有MySQL权威事件能追溯。付出的代价是每个赢者有一次MySQL写入，且在DB高压或Red​is失联时可能短暂少卖；D阶段应实测该代价，而不是假定无限QPS。
 
 **验收语义唯一**：持久202只代表抢购受理、ORDER_READY只代表待支付、PAID_PENDING_FULFILLMENT只代表模拟付款已确认、FULFILLED才表示月权益在DB开通、Gateway授权成功才是一次真实配额准入。任何页面和监控不得把这些状态压缩为一个“抢购成功”。
