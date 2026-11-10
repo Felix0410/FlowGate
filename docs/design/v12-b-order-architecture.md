@@ -48,6 +48,8 @@ B0不是已完成的事实；**Codex完成B0后必须提交新的真实证据**�
 - `fg_api_quota_balance`与`fg_api_quota_ledger`不删除、不回填历史；`ApiQuotaChargeService`的`status='ACTIVE'`限制本来就会拒绝退款后SUSPENDED的后续调用。
 - `fg_api_sku`当前DDL支持`FREE_BASE/PAID_BASE`和CURRENT_MONTH/NEXT_MONTH，但A的MarketService只创建/展示免费：B仅放开**管理员创建全新PAID_BASE且price_cents>0**的入口，按不可变SKU报价；A原`claimOffer`仍只接受FREE_BASE。
 
+**兼容旧订阅**：与A的免费领取保持相同保守原则，同APP目标UTC月若已有V11旧`fg_subscription`的重叠生效期间，则B创建付费订单前返回`409 LEGACY_SUBSCRIPTION_CONFLICT`；不跨池迁移旧额度。不同APP的Legacy与V12业务仍可并存，Gateway同一route只选一种模式。
+
 **可售条件**：真实上市`listing.status='LISTED'`、category ACTIVE、SKU ACTIVE、价格正数、APP与Developer ACTIVE、用户OWNER、目标API已在当前可信发布快照具备V12 APP_API计量且全部节点支持；每次创建订单时后端重验，不能只凭页面历史结果。订单创建后下架/改列表文案**不影响订单原快照**，但若API真实路由下线、无法履约要保留已付订单在可解释待恢复/退款状态，不假开通可用。
 
 ## 四、业务状态机（事件、资格与订单拆开）
@@ -89,7 +91,7 @@ B0不是已完成的事实；**Codex完成B0后必须提交新的真实证据**�
 
 **锁序（不可临时改）**：
 1. 已有订单的支付/关闭/退款/履约：**先用非锁定SELECT只读取不可变order的app/api/period/id定位**→`fg_application FOR UPDATE`→`fg_api_entitlement_slot FOR UPDATE`→`fg_order FOR UPDATE`，之后按需`fg_api_subscription/fg_api_quota_balance`与`fg_payment_record`、Outbox、transition。事务锁后**重新核验**order.id/immutable字段/slot holder/状态，禁止拿初次快照直接更新。
-2. 创建订单：先查`(principal,requestId)`并比对指纹（同用户同参数返回原单），再锁APP→slot→冻结SKU报价→创建Order→slot=HELD(holder=ORDER,orderId)；唯一键冲突事务整回滚，**在新只读事务**查询已胜出订单比对指纹、给同参幂等结果或409。若另一个APP用相同requestId竞争，仍靠SQL唯一键判决，不泄露对方订单。
+2. 创建订单：先查`(principal,requestId)`并比对指纹（同用户同参数返回原单），再锁APP→slot→复核旧V11同APP/目标月重叠订阅→冻结SKU报价→创建Order→slot=HELD(holder=ORDER,orderId)；唯一键冲突事务整回滚，**在新只读事务**查询已胜出订单比对指纹、给同参幂等结果或409。若另一个APP用相同requestId竞争，仍靠SQL唯一键判决，不泄露对方订单。
 3. 已付订单的Worker保持同样app→slot→order→subscription/balance顺序。Gateway扣量会先锁APP再锁新余额；退款流程必须先持APP锁再判断Ledger，在同一DB事务内串行，避免“查询时没用，退款后又扣了一笔”。
 4. 所有失效/回收的HELD槽必须CAS校验`holder_type='ORDER' AND holder_id=本订单`和`version`；Worker处理晚到事件时先查订单真实终态，不修改其他订单后来获得的槽。**不能订单超时后照事件给已关闭订单开通权益**。
 5. 事务内不远程调用Rabbit/Redis/下游API，MySQL事务提交后异步Worker投递；应用行锁与slot是争抢资源，首版优先可证明正确，再在D性能实验评估吞吐优化。
