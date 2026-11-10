@@ -43,7 +43,7 @@
 
 ## V12-B：普通订单、模拟支付与可靠权益开通（商业闭环）
 
-**目标**：Portal用户选择真正付费SKU，订单创建→模拟支付→异步可靠开通指定API下个/本UTC月权益；订单、权益和失败状态均可查。复用A权益服务，不通过`/admin/subscriptions`间接开通。
+**目标**：Portal用户选择真正付费SKU，在**唯一BASE权益槽位提前占用成功后**创建订单→模拟支付→异步可靠开通指定API下个/本UTC月权益；订单、权益和失败状态均可查。复用A权益服务，不通过`/admin/subscriptions`间接开通。详细字段/状态/竞态见[交易与抢购蓝图](../design/v12-commerce-order-promotion-blueprint.md)。
 
 | 子段 | 范围与关键文件/表 | 强制验收 |
 |---|---|---|
@@ -58,13 +58,13 @@
 
 ## V12-C：限时9.9元/100份抢购与可靠恢复（核心高并发）
 
-**目标**：真实MySQL 100份库存下，高并发入口先由Redis Lua挡绝大多数失败候选；被接受的请求先写持久purchaseIntent+reserved+Outbox才回**202**；业务Kafka异步创单，模拟支付后成交/开通；出现停止Broker/Control/Redis与消费者重复时可恢复、不可超卖。
+**目标**：真实MySQL 100份库存下，高并发入口先由Redis Lua挡绝大多数失败候选；被接受的请求先持唯一BASE槽并写持久purchaseIntent+reserved+Outbox才回**202**；业务Kafka异步创单，模拟支付后成交/开通；对永久未创单Intent有超时回收，对用户丢失202响应有本人可信查回能力，停止Broker/Control/Redis与消费者重复时可恢复、不可超卖。
 
 | 子段 | 范围与实现位置 | 必须通过的门槛 |
 |---|---|---|
 | C0活动定义 | `fg_promotion`、`fg_promo_stock`，活动时间/版本/限购/退款与库存口径，Console管理页 | 活动SKU冻结、库存数约束、无资格不可下单 |
 | C1 Lua预筛+真实持久受理 | `static lua/claim.lua`（服务资源可改命名）、`PromotionAdmissionService`；Redis TIME+库存+一人一单；`UPDATE stock ... reserved+sold<total`、intent与Outbox同MySQL事务 | Redis成功DB失败不202、APP崩在Lua与DB之间TTL重建、双Control限购和DB库存条件更新、状态与活动epoch |
-| C2订单Worker | `PromotionOrderConsumer`订阅已有业务Topic、唯一持久intent和唯一order关联，消费后Ack，状态查询 | 202不是已买；Kafka停恢复/重复/乱序，终态不复活、不二次扣reserved |
+| C2订单Worker | `PromotionOrderConsumer`订阅已有业务Topic、唯一持久intent和唯一order关联，消费后Ack；`IntentTimeoutCloser`回收超过创单截止仍未成单的已受理Intent | 202不是已买；Kafka停恢复/重复/乱序，过期受理只释放一次reserved/HELD，终态不复活 |
 | C3支付/取消与Redis补偿 | 复用B的支付/CAS关闭，`reserved--,sold++`或`reserved--`唯一事务；`StockRebuildService`校验DB/Redis差异，带epoch重建 | MySQL sold+reserved不超过total；支付vs关闭仅一赢；补偿重复/Redis失忆不超卖；无坏账/孤儿intent |
 | C4运营/体验 | Portal特价详情、活动倒计时（显示用，后端时钟权威）、排队/待付/已开通状态；Console真实活动剩余/持久受理/订单/权益/失败重排与原因 | 交互不混淆四种结果，管理页不暴露Redis临时余额为权威 |
 | C5可选优惠券 | **只有C0～C4真实稳定后另行确认**。先单一固定价券/一次使用/到期，不做叠加复杂满减；券核销应绑定订单行状态且取消能回退 | 有真实促销需求再开发，否则延至V12-D之后 |
