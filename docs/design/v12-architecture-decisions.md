@@ -1,6 +1,6 @@
 # FlowGate V1.2｜正式设计决定与V11兼容裁决（ADR总表）
 
-> 2026-11-10 · **设计冻结候选，尚未实现**。此文档在逻辑冲突时优先于2026-11-10早先的总体提案；后续Codex按这里的边界实现，不应临场再选别的权益/回滚架构。项目负责人可在派工前审阅调整；变更必须追加ADR，不能悄悄改变约束。
+> 2026-11-10 · **总体架构设计定稿，尚未实现**。此文档在逻辑冲突时优先于2026-11-10早先的总体提案；后续Codex按这里的边界实现，不应临场再选别的权益/回滚架构。项目负责人可在派工前审阅调整；变更必须追加ADR，不能悄悄改变约束。
 
 ## ADR-01：入口和权限
 
@@ -29,7 +29,7 @@
 
 **修正早期提案的关键业务漏洞：若只在支付后用`UNIQUE(APP,API,month)`拒绝重复BASE，则用户可能付了两张订单，却只有一份权益能够建立。**
 
-- 新增`fg_api_entitlement_slot`主键或唯一`(application_id,api_id,period_yyyymm)`。固定一行状态`AVAILABLE|HELD|GRANTED`、`holder_type=ORDER|PROMO`、`holder_id`、`version`。免费领取直接在一笔事务从AVAILABLE→GRANTED（或插入GRANTED）；普通BASE订单**创建事务内先将槽置HELD**且绑定当前order，返回待支付；抢购在写MySQL持久intent/库存reserved/业务Outbox**同一事务**将槽置HELD且绑定intent。
+- 新增`fg_api_entitlement_slot`主键或唯一`(application_id,api_id,period_yyyymm)`。固定一行状态`AVAILABLE|HELD|GRANTED`、`holder_type=FREE_GRANT|ORDER|PROMO`、`holder_id`、`version`。免费领取直接在一笔事务从AVAILABLE→GRANTED（或插入GRANTED）；普通BASE订单**创建事务内先将槽置HELD**且绑定当前order，返回待支付；抢购在写MySQL持久intent/库存reserved/业务Outbox**同一事务**将槽置HELD且绑定intent。
 - **唯一锁顺序：应用行FOR UPDATE → 权益槽行FOR UPDATE（必要时先INSERT IGNORE再当前读）→ 订单或intent行 → 活动库存行 → 订阅/余额 → Outbox与审计。** 所有竞争路径必须遵循与现有V11一致的应用锁并避免锁序反转。若单独为库存锁优化吞吐，需做明确并发死锁测试及独立ADR，不允许开发中擅自变更锁序。
 - HELD只可能由其持有者按`(holder_type,holder_id,version)`CAS转为GRANTED或AVAILABLE；**付款成功后不得因为短暂异步故障释放槽**，保持HELD直到成功开通或受控冲正；订单被超时关闭/用户取消时才释放到AVAILABLE。历史已GRANTED不可再转AVAILABLE，退款不能清旧Ledger。
 - 订单创建、活动受理、免费领取都要在**持应用锁后**校验已有GRANTED与HELD，再决定是否受理；相同幂等请求返回原状态，不同请求的冲突返回409，不能把已付买不到的冲突推给权益Worker。数据库最后用槽唯一和Grant来源唯一兜底。
@@ -50,9 +50,9 @@
 ## ADR-07：抢购只对被Redis筛出的候选进行MySQL持久受理
 
 - Redis Lua的活动时间/版本/库存/用户资格+claimId临时预扣都是**可丢失的候选**；只有MySQL同一事务里`fg_api_entitlement_slot HELD`、`fg_promo_stock.reserved+1`（条件`reserved+sold<total`）、唯一`fg_promo_purchase_intent`、`fg_business_outbox`一起提交后，才能返回202且附真实intentId。
-- Kafka订单Worker创建PENDING_PAYMENT订单且绑定既有intent，不二次预占槽或库存；模拟支付成功同事务将`reserved--,sold++`并生成付款收据/Outbox，订单过期同事务释放reserved及HELD。各路径按持有者CAS，不可晚到重建订单或二次退库存。
+- Kafka订单Worker创建PENDING_PAYMENT订单且绑定既有intent，不二次预占槽或库存；模拟支付成功同事务将`reserved--,sold++`并生成付款收据/Outbox，订单过期同事务释放reserved及HELD。另设**IntentTimeoutCloser**：持久ACCEPTED若超过订单创建截止仍未成单，同事务将Intent置EXPIRED、释放reserved和其HELD槽并写STOCK_RELEASED；晚到Worker不允许复活。各路径按持有者CAS，不可晚到重建订单或二次退库存。
 - Redis故障/失忆后活动FAIL-CLOSED进入REBUILDING；基于MySQL权威`total-reserved-sold`和仍有效Redis候选租约重新构建带epoch的新视图，禁止旧Lua/补偿覆盖新epoch。**允许有界少卖，必须不超卖**，恢复/重建需有测试。
-- C阶段会重用B同一`fg_business_outbox`和模拟支付状态机，不另造“秒杀订单”。
+- C阶段会重用B同一`fg_business_outbox`和模拟支付状态机，不另造“秒杀订单”。202回执丢失时提供`GET /portal/api/promotions/{id}/my-claim`按本人身份查持久Intent；只有Redis临时claim则答“尚未持久受理”。B/C详细表字典、受理超时、状态机和真实测试见[交易抢购蓝图](v12-commerce-order-promotion-blueprint.md)。
 
 ## ADR-08：验收、Git与技术栈
 
