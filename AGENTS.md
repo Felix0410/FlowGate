@@ -1,3 +1,15 @@
+# FlowGate 当前任务｜V12-B普通订单与RabbitMQ遗留修复（设计已完成，待本地Codex编码）
+
+> **唯一执行入口：`CODEX_V12_B_EXEC_PROMPT.md`**，唯一完整分段合同`docs/progress/v12-b-order-payment.md`，业务/SQL/状态机`docs/design/v12-b-order-architecture.md`、`docs/design/v12-b-transactions-acceptance.md`。负责人明确要求将A的三项复审P1并入B阶段，**B0先做A的坏JSON/重试、真实Rabbit故障、旧V11无V12表的Console待就绪**；B0定向实测通过后才能B1～B7实现付费API商品→订单→模拟支付→Rabbit Commerce可靠Grant→Gateway消费→受控模拟退款、页面与手册，B8停机交复审。
+>
+> **真实仓库事实**：A的功能分支`feat/v12-a-portal@f2026c59c7a7359e14e3ecd1d10f0c1a84cac8d8`有Portal/freeSKU/月权益/RabbitMQ usage及定向证据；A7负责人手测未完成，P1-A01/A02/A03**尚未编码修复**。V12-B仅有设计分支`docs/v12-b-order-design`与本任务书，**B0～B8尚未实施/未测试**。原V11-C Kafka必须保留，V12所有新业务消息统一RabbitMQ但A usage与B commerce彼此隔离。
+>
+> **Git和安全**：本地Codex从最新`docs/v12-b-order-design`新建`feat/v12-b-orders`并开Draft PR，base只认设计父分支；不重新执行旧`CODEX_V12_A_RABBIT_REVIEW_FIX_PROMPT.md`或A原开发提示，不自动进入C秒杀或D性能，不合并main/修改PR#15及旧PR base。JDK17、MySQL8.4、Redis7、Rabbit3.13、旧Kafka、SpringBoot4、原生ESM，无新微服务/真支付SDK；用户.env/IDE/旧MySQL/Redis/Kafka/Rabbit卷/历史Ledger不可动，真实测试只用带验证归属的全新隔离实例/端口/卷，完成停机保留数据。复杂Java代码准确中文注释按`// 1.`、`// 2.`、`// 3.`，每个后端增量同步Portal/Console与中文帮助。
+>
+> 以下A/C/E/UX“当前任务”均为历史阶段交接，请保留但**不再当作本轮执行指令**。
+
+---
+
 # FlowGate 当前交接：V12-A源码复审后P1轻量修补（2026-11-10）
 
 > 真正已实现：PR #15 `feat/v12-a-portal`含Portal、免费API权益、独立RabbitMQ V12用量与定向联调；V11-C Kafka保留。ChatGPT只读远端源码复审报告：`docs/reviews/v12-a-rabbitmq-static-review-2026-11-10.md`。**A0～A6真实代码和提交的功能证据已存在，A7仍待P1-A01～A03修补、真实Rabbit故障小矩阵与负责人真人手测**。未重跑全模块Java或用户环境，别把文档复审当完整实机验收。
