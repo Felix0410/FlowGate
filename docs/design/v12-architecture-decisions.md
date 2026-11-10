@@ -69,3 +69,8 @@
 - 消费端先校验本地Ledger/Outbox，同事务去重和日聚合，COMMIT后手动ACK。临时数据库故障经持久重试队列退避，重试副本确认前不ACK原消息；永久格式/权威冲突进入持久隔离队列。SENT未消费仍须300秒等待期、ADMIN审计/CAS补投。
 - `FLOWGATE_V12_ASYNC_ENABLED`默认false；关闭不创建V12交换机/队列/监听器，Outbox保留NEW。V12 Rabbit连接配置仅Control持有。全新隔离环境叠加 `compose.v12-a.yml`，不能迁移/重启用户已有Kafka或RabbitMQ。
 - 用户同时要求功能优先、避免过度测试。本轮只做编译、已有快速单测、定向前端与隔离功能主链路，100并发/完整历史故障矩阵/负责人手测明确列为未执行，不以局部验证冒充正式验收。
+
+
+### ADR-13实施后的统一后续合同（2026-11-10补充）
+
+**V12-B普通订单与V12-C限时抢购也一律用RabbitMQ**，不是只把V12-A用量换成Rabbit后在B/C再新建Kafka业务Topic。业务消息使用同一Rabbit Broker上**独立于usage读模型的commerce exchange/quorum主/TTL retry/poison队列及独立BusinessOutbox**；消费端COMMIT后basicAck、confirm且无mandatory return才SENT、持久事件源+业务唯一键抗重复，实际方案见[消息迁移设计补充](v12-rabbitmq-adaptation.md)。本ADR-13优先覆盖旧ADR-03/ADR-06/ADR-07及交易蓝图中提到“V12新Kafka Topic/ConsumerGroup/offset ACK”的旧文本。**V11-C已有Kafka仍然运行**，没有获准做全局消息迁移或删除旧队列；不得把“V12 RabbitMQ”误写成“全仓库无Kafka”。
