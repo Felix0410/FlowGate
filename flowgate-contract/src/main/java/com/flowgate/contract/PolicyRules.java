@@ -8,10 +8,11 @@ public final class PolicyRules {
     private PolicyRules() {}
     public static final String ENFORCED = "ENFORCED_BLOCK2";
     public static final String PROTECTED = "ENFORCED_BLOCK3";
+    public static final String QUOTA_V12 = "ENFORCED_QUOTA_V12";
     public static final String QUOTA = "ENFORCED_QUOTA_V1";
-    public static String execution(String type) { return type.equals("USAGE_QUOTA")?QUOTA:Set.of("RATE_LIMIT","CONCURRENCY").contains(type)?ENFORCED:PROTECTED; }
+    public static String execution(String type) { return type.equals("USAGE_QUOTA_V12")?QUOTA_V12:type.equals("USAGE_QUOTA")?QUOTA:Set.of("RATE_LIMIT","CONCURRENCY").contains(type)?ENFORCED:PROTECTED; }
     public static boolean active(Map<String,Object> policy) {
-        return Boolean.TRUE.equals(policy.get("enabled")) && Set.of(ENFORCED,PROTECTED,QUOTA).contains(String.valueOf(policy.get("executionStatus")));
+        return Boolean.TRUE.equals(policy.get("enabled")) && Set.of(ENFORCED,PROTECTED,QUOTA,QUOTA_V12).contains(String.valueOf(policy.get("executionStatus")));
     }
     public static long id(Map<String,Object> entry, String field) {
         Object value = entry.get(field);
@@ -28,7 +29,7 @@ public final class PolicyRules {
             case "RATE_LIMIT" -> Set.of("capacity", "refillPerSecond");
             case "CONCURRENCY" -> Set.of("maxConcurrent");
             case "TIMEOUT" -> Set.of("timeoutMs");
-            case "USAGE_QUOTA" -> Set.of("unitsPerCall");
+            case "USAGE_QUOTA", "USAGE_QUOTA_V12" -> Set.of("unitsPerCall");
             case "CIRCUIT_BREAKER" -> Set.of("failureRateThreshold","slidingWindowSize","minimumNumberOfCalls","waitDurationMs");
             default -> throw new IllegalArgumentException("不支持的执行策略");
         };
@@ -42,7 +43,7 @@ public final class PolicyRules {
                     && value.longValue() >= 1 && value.longValue() <= 1_000_000, "治理参数必须为1..1000000整数");
         }
         // 3. 保护类型再收紧业务范围，保留旧四字段CB参数契约。
-        if(type.equals("USAGE_QUOTA")) Rules.require(node.get("unitsPerCall").intValue()<=100,"每次准入单位须1..100");
+        if(type.equals("USAGE_QUOTA") || type.equals("USAGE_QUOTA_V12")) Rules.require(node.get("unitsPerCall").intValue()<=100,"每次准入单位须1..100");
         if(type.equals("TIMEOUT")) Rules.require(node.get("timeoutMs").intValue()>=50 && node.get("timeoutMs").intValue()<=10000,"timeoutMs必须50..10000");
         if(type.equals("CIRCUIT_BREAKER")) {
             Rules.require(node.get("failureRateThreshold").intValue()<=100,"失败率必须1..100");
@@ -74,7 +75,7 @@ public final class PolicyRules {
             if (!active(policy)) continue;
             String scope=(String)binding.get("targetType"); long target=id(binding,"targetId");
             Rules.require(scope.equals(policy.get("scope")), "绑定作用域不一致");
-            if ("USAGE_QUOTA".equals(policy.get("type"))) {
+            if (Set.of("USAGE_QUOTA","USAGE_QUOTA_V12").contains(policy.get("type"))) {
                 Rules.require(Set.of("API","ROUTE").contains(scope),"配额仅支持API/ROUTE");
                 if("API".equals(scope)) {
                     var api=snapshot.apis().stream().filter(a->id(a,"id")==target).findFirst().orElse(Map.of());

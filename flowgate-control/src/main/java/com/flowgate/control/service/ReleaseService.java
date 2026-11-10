@@ -17,6 +17,8 @@ public class ReleaseService {
     private final ConfigReleaseMapper releases;
     private final AuditService audit;
     private QuotaActivationService quota;
+    private com.flowgate.control.portal.V12Readiness v12;
+    @org.springframework.beans.factory.annotation.Autowired public void setV12(com.flowgate.control.portal.V12Readiness v12){this.v12=v12;}
     @org.springframework.beans.factory.annotation.Autowired public void setQuota(QuotaActivationService quota) { this.quota=quota; }
     public ReleaseService(CatalogService catalog, ConfigStateMapper state, ConfigReleaseMapper releases, AuditService audit) {
         this.catalog = catalog; this.state = state; this.releases = releases; this.audit = audit;
@@ -65,6 +67,7 @@ public class ReleaseService {
             if(quota==null)throw new ApiFailure(409,"QUOTA_FEATURE_NOT_READY","配额链路未启用");
             quota.requireReady(current.currentVersion,current.currentVersion==0?"":find(current.currentVersion).sha256);
         }
+        if(candidate.routes().stream().anyMatch(r -> QuotaPolicy.freeze(candidate,r).mode()==QuotaPolicy.Mode.V12_APP_API)) v12.requireNodes(current.currentVersion,current.currentVersion==0?"":find(current.currentVersion).sha256);
         // 2. CAS 防止两个发布者丢更新；失败会回滚全部写入，没有孤立版本。
         if (state.advance(expected, current.optimisticVersion, next) != 1) throw new ApiFailure(409, "VERSION_CONFLICT", "其他发布已先提交");
         ConfigRelease release = new ConfigRelease(); release.version = next; release.sha256 = candidate.checksum();
@@ -78,7 +81,7 @@ public class ReleaseService {
         Snapshot old = SnapshotCodec.JSON.readValue(find(version).snapshotJson, Snapshot.class);
         SnapshotCodec.verify(old);
         for (var service : old.services()) Rules.upstream((String)service.get("upstreamUri"), catalog.allowed());
-        return SnapshotCodec.seal(new Snapshot(1, next, "", old.services(), old.apis(), old.routes().stream().map(r ->
+        return SnapshotCodec.seal(new Snapshot(old.schemaVersion(), next, "", old.services(), old.apis(), old.routes().stream().map(r ->
                 new RouteSpec(r.routeId(), r.method(), r.publicPath(), r.upstreamPath(), r.upstreamUri(), r.isPublic(), r.requiredScope(), r.priority(), next)).toList(),
                 old.policies(), old.bindings()));
     }
@@ -109,7 +112,7 @@ public class ReleaseService {
                     api.isPublic, api.requiredScope, route.priority, version));
         }
         // 3. 只选白名单字段；策略分别标注块2执行/块3待办；规范化载荷后计算 SHA-256。
-        return SnapshotCodec.seal(new Snapshot(1, version, "",
+        return SnapshotCodec.seal(new Snapshot(policies.stream().anyMatch(p->"USAGE_QUOTA_V12".equals(p.type)&&Boolean.TRUE.equals(p.enabled))?2:1, version, "",
                 services.stream().map(s -> Map.<String,Object>of("id", s.id, "code", s.code, "name", s.name, "upstreamUri", s.upstreamUri, "enabled", s.enabled)).toList(),
                 apis.stream().map(a -> Map.<String,Object>of("id", a.id, "serviceId", a.serviceId, "method", a.method, "publicPath", a.publicPath,
                         "upstreamPath", a.upstreamPath, "isPublic", a.isPublic, "requiredScope", a.requiredScope, "enabled", a.enabled)).toList(), specs,

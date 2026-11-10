@@ -1,3 +1,4 @@
+import {renderMarket} from './market.js';
 import {readinessPanel} from './readiness.js';
 import {createApi, redact} from './api.js';
 import {h, button, badge, notice, permissionButton, openDialog, viewLink, table} from './ui.js';
@@ -73,7 +74,7 @@ export function start(documentRef = document, browser = typeof window === 'undef
   const ctx = {
     api, role: '', params: {}, pageState: {}, lastViews: {}, state(view = ctx.view) { return ctx.pageState[view] ||= {}; }, data: Object.fromEntries(['services', 'apis', 'routes', 'policies', 'current', 'nodes', 'health'].map(key => [key, null])), view: 'dashboard', callers: [], issued: null, readAt: '',
     heading(title, description, action) {
-      const anchors = {dashboard: 'start', services: 'connect', apis: 'connect', routes: 'connect', developers: 'openapi', apps: 'openapi', plans: 'openapi', subscriptions: 'openapi', quota: 'quota', 'quota-policy': 'quota', usage: 'async-usage', 'async-events': 'async-usage', reconciliation: 'async-usage', rate: 'protect', concurrency: 'protect', protection: 'protect', releases: 'release', callers: 'callers', monitoring: 'monitor', audits: 'monitor'};
+      const anchors = {market: 'market', dashboard: 'start', services: 'connect', apis: 'connect', routes: 'connect', developers: 'openapi', apps: 'openapi', plans: 'openapi', subscriptions: 'openapi', quota: 'quota', 'quota-policy': 'quota', usage: 'async-usage', 'async-events': 'async-usage', reconciliation: 'async-usage', rate: 'protect', concurrency: 'protect', protection: 'protect', releases: 'release', callers: 'callers', monitoring: 'monitor', audits: 'monitor'};
       el('page-head').replaceChildren(h('div', {class: 'page-heading'}, h('p', {class: 'breadcrumb'}, domainFor(ctx.view).label), h('h1', {}, title), description ? h('p', {}, description) : null), h('div', {class: 'page-actions'}, h('a', {class: 'page-help', href: 'guide.html#' + (anchors[ctx.view] || 'start'), target: '_blank', rel: 'noopener'}, '使用说明', h('span', {class: 'sr-only'}, '（新窗口）')), action));
     },
     unavailable(text) { return h('div', {class: 'card'}, notice(text, 'error'), button('重新读取', () => ctx.refresh())); },
@@ -117,7 +118,7 @@ export function start(documentRef = document, browser = typeof window === 'undef
       el('page-content').replaceChildren(notice('正在读取页面…'));
       try {
         // 2. 页面切换与会话退出后，迟到响应不得覆盖新页面或重新展示敏感回执。
-        const content = view === 'usage' || view === 'reconciliation' ? await renderUsage(ctx, view === 'reconciliation') : view === 'async-events' ? await renderAsyncEvents(ctx) : view === 'quota' ? await renderQuota(ctx) : businessKinds[view] ? await renderBusiness(ctx, view) : ['services', 'apis', 'routes'].includes(view) ? renderCatalog(ctx, view) : ['rate', 'concurrency', 'protection', 'quota-policy'].includes(view) ? await renderGovernance(ctx, view) : view === 'releases' ? await renderReleases(ctx) : view === 'callers' ? renderCallers(ctx) : view === 'monitoring' ? await renderMonitoring(ctx) : view === 'audits' ? await renderAudits(ctx) : dashboard(ctx);
+        const content = view === 'market' ? await renderMarket(ctx) : view === 'usage' || view === 'reconciliation' ? await renderUsage(ctx, view === 'reconciliation') : view === 'async-events' ? await renderAsyncEvents(ctx) : view === 'quota' ? await renderQuota(ctx) : businessKinds[view] ? await renderBusiness(ctx, view) : ['services', 'apis', 'routes'].includes(view) ? renderCatalog(ctx, view) : ['rate', 'concurrency', 'protection', 'quota-policy'].includes(view) ? await renderGovernance(ctx, view) : view === 'releases' ? await renderReleases(ctx) : view === 'callers' ? renderCallers(ctx) : view === 'monitoring' ? await renderMonitoring(ctx) : view === 'audits' ? await renderAudits(ctx) : dashboard(ctx);
         if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(content);
       } catch (error) { if (ticket === renderNumber && ctx.role) el('page-content').replaceChildren(ctx.unavailable(error.message)); }
       finally { if (ticket === renderNumber) el('page-content').setAttribute('aria-busy', 'false'); }

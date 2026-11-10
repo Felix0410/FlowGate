@@ -1,5 +1,7 @@
 # FlowGate — 高并发 API 网关与流量治理平台
 
+> **V12-A新入口**：普通用户 `/portal/`，Console客户业务新增API市场。V12异步使用RabbitMQ，V11继续Kafka；安全默认关闭，只在新隔离环境安装新表。见[Portal与隔离运行指南](docs/guides/v12-a-portal.md)。
+
 > **V1.1-E本地交付入口**：[详细中文手册](docs/guides/v11-local-delivery.md)。`python3 scripts/v11-local.py doctor`只读诊断；`up --isolated`建立独立全链路演示，`status --isolated`查看状态，`stop --isolated`只停自有服务并保留卷。初始V0需先发布非计量版本，不能直接签发APP凭证。自动测试与E6负责人手测分开记录，详见[E实施记录](docs/progress/v11-e-local-delivery-implementation.md)。
 
 > **2026-11-09 复审结论**：FlowGate V11-C三项P1整改（Kafka持久卷/SENT原事件补投、DB临时故障自动重试、Ledger-Outbox完整性诊断）已通过ChatGPT远端**源码与Codex提交的真实隔离测试证据复核**。最新[审核闭环报告](docs/reviews/v11-c-review-fix-verification-2026-11-09.md)。这不是ChatGPT重新执行Kafka/Java/MySQL，也不是常驻用户环境部署；Async默认OFF。可进入V11-D**设计与验收规划**，但D代码/四组公平压测、真人375/1280浏览器检查、旧PR合并仍待单独授权。

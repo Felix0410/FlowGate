@@ -2,6 +2,7 @@ import {h, badge, notice, permissionButton, searchableTable, formFields, openDia
 import {canWrite} from './api.js';
 import {apiName} from './catalog.js';
 export const policyTypes = {
+  USAGE_QUOTA_V12: {name: 'API独立月度计量', scopes: ['API', 'ROUTE'], description: '按应用、API和UTC月计量，独立免费权益池。要求全部接流节点支持V12。', parameters: [['unitsPerCall', '每次准入消耗单位', 1, 1, 100, '1–100整数。']]},
   USAGE_QUOTA: {name: '月度计量准入', scopes: ['API', 'ROUTE'], description: '仅私有启用API/路由。成功Grant即消耗单位，下游失败也不退款；默认开关关闭，完整接流名单及能力检查通过才允许发布。', parameters: [['unitsPerCall', '每次准入消耗单位', 1, 1, 100, '1–100整数，不是速率或并发。']]},
   RATE_LIMIT: {name: '速率限制', scopes: ['ROUTE', 'SERVICE', 'API', 'GLOBAL', 'CALLER'], description: '控制短时额度和持续每秒速率。跨网关共享Redis预算，超额请求返回429。', parameters: [
     ['capacity', '短时容量（次）', 5, 1, 1000000, '令牌桶最多保留多少次额度。'], ['refillPerSecond', '每秒补充（次）', 2, 1, 1000000, '持续允许的每秒速率，不是同时处理数量。']]},
@@ -84,8 +85,8 @@ export function editPolicy(ctx, type, original = null, bindings = []) {
   });
 }
 export async function renderGovernance(ctx, mode) {
-  const types = mode === 'quota-policy' ? ['USAGE_QUOTA'] : mode === 'rate' ? ['RATE_LIMIT'] : mode === 'concurrency' ? ['CONCURRENCY'] : ['TIMEOUT', 'CIRCUIT_BREAKER'];
-  const create = () => types.length === 1 ? editPolicy(ctx, types[0]) : openDialog('选择故障保护规则', h('div', {class: 'actions'}, types.map(type => button(policyTypes[type].name, () => editPolicy(ctx, type)))), null);
+  const types = mode === 'quota-policy' ? ['USAGE_QUOTA', 'USAGE_QUOTA_V12'] : mode === 'rate' ? ['RATE_LIMIT'] : mode === 'concurrency' ? ['CONCURRENCY'] : ['TIMEOUT', 'CIRCUIT_BREAKER'];
+  const create = () => types.length === 1 ? editPolicy(ctx, types[0]) : openDialog('选择规则类型', h('div', {class: 'actions'}, types.map(type => button(policyTypes[type].name, () => editPolicy(ctx, type)))), null);
   ctx.heading(mode === 'quota-policy' ? '计量规则' : mode === 'rate' ? '速率限制' : mode === 'concurrency' ? '并发保护' : '故障保护', '', permissionButton('新建规则', create, ctx.role, false, true));
   if (ctx.data.policies === null) return ctx.unavailable('规则未读取，请重试。');
   const records = (ctx.data.policies || []).filter(p => types.includes(p.type));

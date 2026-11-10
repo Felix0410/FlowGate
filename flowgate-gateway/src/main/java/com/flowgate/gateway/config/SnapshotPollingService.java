@@ -130,7 +130,7 @@ public class SnapshotPollingService {
         Snapshot current = store.applied();
         if (current == null) return Mono.empty();
         return client.post().uri("/internal/nodes/applied").bodyValue(Map.of("nodeId", nodeId, "version", current.version(), "checksum", current.checksum(),
-                "circuitStates",protection==null?List.of():protection.states(current),"supportedFeatures",quotaReady?List.of(QuotaPolicy.FEATURE):List.of()))
+                "circuitStates",protection==null?List.of():protection.states(current),"supportedFeatures",quotaReady?List.of(QuotaPolicy.FEATURE,QuotaPolicy.FEATURE_V12):List.of()))
                 .retrieve().toBodilessEntity().timeout(Duration.ofSeconds(3)).then();
     }
     @PreDestroy public void close() { if (running != null) running.dispose(); }

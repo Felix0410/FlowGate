@@ -26,7 +26,7 @@ public class QuotaChargeService {
   var snapshot=SnapshotCodec.JSON.readValue(release.snapshotJson,Snapshot.class);SnapshotCodec.verify(snapshot);
   var route=snapshot.routes().stream().filter(r->r.routeId().equals(q.routeId())).findFirst().orElseThrow(()->new ApiFailure(409,"CONFIG_VERSION_MISMATCH","历史路由不存在"));
   var plan=QuotaPolicy.freeze(snapshot,route);
-  if(!plan.metered()||plan.apiId()!=q.apiId()||plan.units()!=q.units())throw new ApiFailure(409,"CONFIG_VERSION_MISMATCH","历史计量策略/API/单位不匹配");
+  if(plan.mode()!=QuotaPolicy.Mode.V11_APP||plan.apiId()!=q.apiId()||plan.units()!=q.units())throw new ApiFailure(409,"CONFIG_VERSION_MISMATCH","历史计量策略/API/单位不匹配");
   var link=links.selectById(q.principalId());if(link==null)throw denied("APP_TOKEN_REVOKED","应用主体关联无效");
   // 1. 先应用共享锁再查客户/身份，和停用、轮换的应用独占锁形成一致授权边界。
   var app=apps.shareById(link.applicationId);if(app==null||!"ACTIVE".equals(app.status))throw denied("APP_DISABLED","应用已停用");

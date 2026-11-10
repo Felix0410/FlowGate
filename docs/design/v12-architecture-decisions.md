@@ -59,3 +59,13 @@
 - 旧V11-D的10万级SQL和四组公平压测仍未执行；E6负责人真人1280/375验收未签，不把E自动Chromium算真人完成。V12-A从隔离V11-E基线开工；新的DDD分包仅留在Control（Portal/Market/Entitlement/Commerce），不增新微服务。
 - Java17/SpringBoot4/Gateway WebFlux非阻塞/MySQL8.4/Redis7 Lua/Kafka4.1.1/原生ESM；新增依赖必须有业务必要性。除增量SQL外不改旧表/历史Ledger；不引入Seata/Nacos/ELK/ShardingSphere/Redisson整套/新前端构建工具。
 - 旧PR #1～#13不合并、不改base；所有测试新隔离Docker项目/随机端口/私有凭证/不碰用户现有.env/IDE/持久卷。每段真实Java/Node/Python/HTTP/浏览器和安全测试证据，失败留痕，未运行写未运行；不可提前称V12已上线。
+
+## ADR-13：V12消息链改用RabbitMQ（2026-11-10负责人明确授权）
+
+负责人在实施过程中明确选择“V12改用RabbitMQ，保留V11 Kafka”。此决定覆盖本文及A合同中V12新Topic/Group要求；V11-C的Kafka、原表、原事件格式与历史证据保持不变。
+
+- V12使用Spring Boot官方AMQP，独立持久Direct交换机 `flowgate.usage.v12`、quorum业务队列、5秒TTL重试队列与毒消息隔离队列。quorum死信采用at-least-once和reject-publish。
+- MySQL仍是权威：新余额、Ledger、Outbox同事务；RabbitMQ不会参与同步授权扣量。Outbox租约到期可重领，持久消息收到publisher confirm且未发生mandatory return才标SENT；传输不确定保留原eventId重试。
+- 消费端先校验本地Ledger/Outbox，同事务去重和日聚合，COMMIT后手动ACK。临时数据库故障经持久重试队列退避，重试副本确认前不ACK原消息；永久格式/权威冲突进入持久隔离队列。SENT未消费仍须300秒等待期、ADMIN审计/CAS补投。
+- `FLOWGATE_V12_ASYNC_ENABLED`默认false；关闭不创建V12交换机/队列/监听器，Outbox保留NEW。V12 Rabbit连接配置仅Control持有。全新隔离环境叠加 `compose.v12-a.yml`，不能迁移/重启用户已有Kafka或RabbitMQ。
+- 用户同时要求功能优先、避免过度测试。本轮只做编译、已有快速单测、定向前端与隔离功能主链路，100并发/完整历史故障矩阵/负责人手测明确列为未执行，不以局部验证冒充正式验收。

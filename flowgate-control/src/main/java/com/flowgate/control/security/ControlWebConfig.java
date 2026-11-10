@@ -13,6 +13,8 @@ public class ControlWebConfig implements WebMvcConfigurer {
     }
     @Override public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("redirect:/console/");
+        registry.addViewController("/portal").setViewName("redirect:/portal/");
+        registry.addViewController("/portal/").setViewName("forward:/portal/index.html");
         registry.addViewController("/console").setViewName("redirect:/console/");
         registry.addViewController("/console/").setViewName("forward:/console/index.html");
         registry.addViewController("/test-console/").setViewName("forward:/test-console/index.html");
