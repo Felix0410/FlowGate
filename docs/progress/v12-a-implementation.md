@@ -47,4 +47,4 @@ RabbitMQ是按负责人明确决定修改的合同，见ADR-13。同步授权仍
 
 根 `.env` 前后哈希一致。没有迁移用户旧库、操作旧Ledger、重启用户已有容器、停止IDE、删卷或执行DROP/TRUNCATE/down -v/reset/clean。仅启动/停止本任务新随机owner项目与不可变测试Jar。最终两个Gateway、Control、Demo及该轮MySQL/Redis/Kafka/RabbitMQ容器均已停止，**所有测试卷保留**。运行凭证仅 `.local/` 0600文件，没有写入证据/源码/PR。
 
-代码SHA、远端推送及Draft PR以实际提交后的交付映射记录为准。
+功能提交 `458be6e7a9f6720ae36753f90de13cb5a5378636`。验证证据独立后续提交；远端推送与Draft PR以真实交付映射为准。

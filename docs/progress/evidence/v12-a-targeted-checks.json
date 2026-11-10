@@ -1,0 +1,41 @@
+{
+  "codeCommit": "458be6e7a9f6720ae36753f90de13cb5a5378636",
+  "jdk": "Microsoft OpenJDK 17.0.18",
+  "java": {
+    "distinctTestsPassed": 82,
+    "initialStage": {
+      "contract": 11,
+      "control": 37,
+      "gateway": 26,
+      "demo": 4
+    },
+    "rabbitStageTargeted": {
+      "executed": 6,
+      "newWorkerTests": 4,
+      "repeatedPortalTests": 2
+    },
+    "full82AfterRabbit": "NOT_EXECUTED"
+  },
+  "nodeEntrypoints": {
+    "scripts/v12-a-portal-test.mjs": 0,
+    "scripts/workbench-console-test.mjs": 0,
+    "scripts/v11-b-console-test.mjs": 0
+  },
+  "pythonRuntimeTests": {
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0
+  },
+  "finalPackaging": {
+    "exitCode": 0,
+    "testsSkipped": true,
+    "countedAsTests": false
+  },
+  "guideConsistencyExitCode": 0,
+  "gitDiffCheckExitCode": 0,
+  "artifactSha256": {
+    "flowgate-control": "4a274a8ffd694e1410341a83e1c47b629af6c5a0cabb23e981330dee39b19bf0",
+    "flowgate-gateway": "c014ff18792233701dfb72784e6c29bbf2f5019e02f7f9c49bb8463ba337a400",
+    "flowgate-demo": "30e2635dd8f0ce644f55d8c06db98f0bd9fbd60b231cd901d64137601d60455a"
+  }
+}

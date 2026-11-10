@@ -1,0 +1,253 @@
+{
+  "runId": "20261110t113348-9426",
+  "scope": "targeted V12 functionality; no historical fault matrix or load experiment",
+  "designBase": "e77624f",
+  "checks": [
+    "14-table migration and second idempotent migration passed",
+    "real private V12 release applied by both Gateways; listing published with Free5",
+    "8 concurrent free claims: 1 success + 7 conflicts; other user independent; lifetime claim cannot switch app",
+    "dual Gateway Free5: 5x200 + 429, remaining0, Ledger=Outbox=Consumed=Daily=5; duplicate RabbitMQ events do not aggregate twice; current-day PROVISIONAL"
+  ],
+  "requests": [
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/1/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/categories",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/apps/1",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/status",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis?q=%E7%9C%9F%E5%AE%9E",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/free-grants",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/free-grants",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 401
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 429
+    },
+    {
+      "path": "/portal/api/quota?applicationId=1&apiId=1&period=202611",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/quota?applicationId=1&apiId=1&period=202611",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/ledger?applicationId=1&apiId=1&period=202611",
+      "status": 404
+    },
+    {
+      "path": "/admin/market/reconciliation?day=2026-11-10",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/revoke",
+      "status": 200
+    }
+  ],
+  "notExecuted": [
+    "two-Control registration race",
+    "100-request concurrency/load",
+    "V11 B23/C26 real fault regression",
+    "RabbitMQ outage/recovery fault matrix (V12), Kafka fault matrix (V11)",
+    "historical-day final MATCH",
+    "owner manual acceptance",
+    "V11 E6",
+    "V11 D performance"
+  ],
+  "gatewayStatuses": [
+    200,
+    200,
+    200,
+    200,
+    200,
+    429
+  ],
+  "quota": {
+    "total_units": 5,
+    "remaining_units": 0,
+    "period_yyyymm": "202611",
+    "api_id": 1,
+    "version": 5
+  },
+  "reconciliation": {
+    "consumedGrants": 5,
+    "integrityGaps": 0,
+    "source": "V12_APP_API",
+    "ledgerGrants": 5,
+    "dayUtc": "2026-11-10",
+    "ledgerUnits": 5,
+    "status": "PROVISIONAL"
+  },
+  "counts": {
+    "ledger": 5,
+    "outbox": 5,
+    "consumed": 5,
+    "daily": 5,
+    "legacyLedger": 0
+  },
+  "passed": true,
+  "rootEnvUnchanged": true,
+  "isolationProject": "flowgate-v11-demo-e5eef9bac58e",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-a/20261110t113348-9426",
+  "cleanup": {
+    "state": "STOPPED",
+    "secondGateway": "STOPPED",
+    "allTestVolumesRetained": true
+  },
+  "rabbitVersion": "3.13.7",
+  "codeCommit": "458be6e7a9f6720ae36753f90de13cb5a5378636"
+}
