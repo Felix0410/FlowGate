@@ -72,6 +72,8 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 
 **DB受理前后**：服务根据Redis候选先持APP行锁→预占BASE权益槽，在同一MySQL事务条件更新`reserved`、写入`fg_promo_purchase_intent`、`fg_business_outbox`，提交后才向用户返回202及intentId。此时确实有持久资格，但仍不是付款或权益。DB唯一键冲突与故障不得让Redis的临时结果自动变订单。重复抢购返回原intent/原订单状态，不产生另一份库存预留；同用户换APP也受活动级唯一键限制。
 
+**持久Intent超时**：ACCEPTED已经占用MySQL reserved，但Kafka长期停机可能一直无法成单；必须设`order_creation_deadline_at`与有界扫描的`IntentTimeoutCloser`，仅对未创建订单的ACCEPTED用MySQL事务CAS转EXPIRED，释放一次reserved和当前holder的HELD槽，写业务Outbox补偿事件。晚到Consumer不能复活EXPIRED。202如果因网络丢失，通过已登录用户的`GET /portal/api/promotions/{id}/my-claim`或同幂等键安全重试查真实持久Intent，不得依靠Redis软claim证明受理。
+
 **MySQL库存转换**：订单异步创建不再次`reserved++`，只确认已有持久intent。模拟付款同事务`reserved--,sold++`，超时关闭同事务`reserved--`，两者竞争同一订单/预留状态，**最多一个方向成功**。迟到Consumer先查intent/库存保留状态，不能“复活”取消或超时intent。已经消耗的权益不因用户模拟退款自动将sold减回可售。
 
 **Redis补偿**：MySQL释放成功后业务Outbox写`STOCK_RELEASED`，Redis处理按`(activityId,intentId,epoch)`幂等CAS更新；新活动epoch/过期临时claim的补偿不得覆盖重建后的新库存。Redis AOF或实例故障时，活动可以短暂`REBUILDING`/拒绝新抢，按MySQL`total-reserved-sold`和临时候选有效租约重建，通过Lua状态切换再开放；不保证永远“绝不少卖”，但必须能修复**漏单/少卖**，并始终**不超卖**。把Redis与DB两个库存直接INCR/DECR而无持久intent/outbox的方案一律拒绝。
@@ -96,7 +98,7 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 | 付款提交成功，进程在发送Kafka前崩 | 停Worker/恢复 | Outbox可补投，最终1个Grant/1笔订单FULFILLED |
 | Kafka同消息100次/ACK前崩 | 真实消费者重放 | 收据/Grant/库存恰好一次，不提前ACK |
 | Redis Lua扣库存后应用崩在DB前 | 注入halt/重启 | 无持久intent则不能202；临时候选过期释放，MySQL库存未减少 |
-| DB受理后Kafka离线 | 抢购真实202然后停Broker | intent和DB reserved真实存在；恢复后恰好1订单，绝不失受理 |
+| DB受理后Kafka离线 | 抢购真实202然后停Broker | intent和DB reserved真实存在；恢复后恰好1订单，或到达明确Intent截止后CAS EXPIRED并释放一次库存，绝不出现无法解释的永久reserved |
 | 100份活动2万并发（**待实测**） | 两Control/至少两Worker | DB `sold+reserved<=100`、每用户最多1、最多100合法持久intent；拒绝数/延迟据实记录 |
 | Redis缓存丢失/AOF回退 | 停Redis、恢复重建 | 新抢fail-closed，MySQL订单/库存不丢，重建后无超卖/无永久少卖 |
 | 临时DB故障/长事务 | 持久intent与消费恢复 | 无“已受理但DB不存在”；恢复后账本与库存最终收敛 |
