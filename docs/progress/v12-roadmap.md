@@ -4,7 +4,7 @@
 
 ## 0. 决策：先锁业务合同，再逐阶段编码
 
-首版商业闭环固定下列**设计规则（尚未开发）**：
+首版商业闭环固定下列**设计规则（尚未开发）**；B/C的细化表结构、状态机与持久Intent回收见[订单与抢购蓝图](../design/v12-commerce-order-promotion-blueprint.md)，A的可执行设计见[V12-A合同](v12-a-portal-free-subscription.md)：
 1. Portal用户+个人Developer、上架真实API市场、创建APP与Key；
 2. **V12专属APP-API-UTC月权益池**，Legacy V11 App全局月池保留并存，路由显式只选一种扣量模式；
 3. A先只支持一份免费BASE真实权益；B支持付费订单/模拟结算/可靠开通；C支持活动库存100份示例与异步订单；
@@ -30,7 +30,7 @@
 | A0身份与归属 | PORTAL_USER用途隔离、注册/login/logout、受限个人Developer与`fg_developer_member`；数据库唯一、登录频控、OWNER检查 | `flowgate-control/.../portal/PortalIdentityService.java`、`PortalAuthFilter.java`、`sql/flowgate-v12-a.sql` |
 | A1可售市场 | Listing/分类、SKU不可变报价、上下架、真实API发布校验、搜索/详情/文档；缓存只对公开数据，先MySQL筛选 | `.../market/ApiMarketService.java`、`PortalCatalogController.java`、`fg_api_listing/category/sku` |
 | A2 APP/Key | Portal只读/创建自有APP，复用AppCredentialService代次/Scope/一次性显示；显式B就绪与V12能力门禁；跨工作区禁止 | `.../portal/PortalApplicationController.java`、`AppOwnershipService.java`，复用旧B实体 |
-| A3 V12权威权益 | `FREE_TRIAL`唯一来源、同一事务创建V12 BASE权益+余额；新增V12 quota mode/ledger与版本化用量事件，旧V11原账本和C版本仍兼容；必要时先发布V12安全路由 | `.../entitlement/EntitlementGrantService.java`、`ApiQuotaChargeService.java`、`fg_api_subscription/entitlement_grant/api_quota_balance/api_quota_ledger`，Gateway与Contract最小变更 |
+| A3 V12权威权益 | `FREE_TRIAL`每Portal用户/API终身唯一，APP/API/月的唯一BASE槽、同事务创建V12 Grant/订阅/余额；新增V12 quota mode/ledger与**独立V12用量Outbox/日报**，旧V11原账本和C版本仍兼容；必要时先发布V12安全路由 | `.../entitlement/EntitlementGrantService.java`、`ApiQuotaChargeService.java`、`fg_api_subscription/entitlement_grant/api_quota_balance/api_quota_ledger`，Gateway与Contract最小变更 |
 | A4 Portal成品 | 首页搜索/分类、API详情和真实文档、注册登录、应用、Key、免费领取、余额；每个页面真空态/错误和自助流程中文指南 | `static/portal/index.html`、`portal/app.js`、`portal/pages/*.js`、`docs/guides/v12-portal-guide.md` |
 
 **API骨架**：`POST /portal/api/auth/register|login|logout`、`GET /portal/api/catalog/apis`、`GET /portal/api/catalog/apis/{id}/offers`、`GET/POST /portal/api/apps`、`POST /portal/api/free-grants`、`GET /portal/api/subscriptions`和`/quota`。用量明细可暂显示“授权流水，异步统计稍后”，不要伪造C数据。
