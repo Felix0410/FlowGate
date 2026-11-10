@@ -1,17 +1,17 @@
 # FlowGate V1.2｜业务化升级阶段路线与验收门槛（2026-11-10）
 
-> **状态：总体路线提案，不是已编码或下发Codex指令。** 当前最新V11功能候选基线`feat/v11-e-local-delivery@b7f2a88794a6936d1e9854408e27d6f1f5387915`；新设计专属`docs/v12-platform-business-redesign`，不修改E/D/旧PR。主文档：[总体业务架构](../design/flowgate-v1.2-business-architecture.md)，强制规则：[一致性合同](../design/v12-transaction-invariants.md)，事实依据：[仓库审计](../reviews/v12-current-state-audit-2026-11-10.md)。
+> **状态：总体设计及关键ADR已定稿、V12-A详细实施合同和Codex单阶段提示词已备好；**无任何V12业务代码、迁移或运行结果，未启动Codex。 当前最新V11功能候选基线`feat/v11-e-local-delivery@b7f2a88794a6936d1e9854408e27d6f1f5387915`；新设计专属`docs/v12-platform-business-redesign`，不修改E/D/旧PR。主文档：[总体业务架构](../design/flowgate-v1.2-business-architecture.md)，权威规则：[V12 ADR](../design/v12-architecture-decisions.md)与[一致性合同](../design/v12-transaction-invariants.md)，事实依据：[仓库审计](../reviews/v12-current-state-audit-2026-11-10.md)。
 
 ## 0. 决策：先锁业务合同，再逐阶段编码
 
-首版商业闭环采取以下**已建议但待负责人审定**的范围：
+首版商业闭环固定下列**设计规则（尚未开发）**：
 1. Portal用户+个人Developer、上架真实API市场、创建APP与Key；
 2. **V12专属APP-API-UTC月权益池**，Legacy V11 App全局月池保留并存，路由显式只选一种扣量模式；
 3. A先只支持一份免费BASE真实权益；B支持付费订单/模拟结算/可靠开通；C支持活动库存100份示例与异步订单；
 4. 同月升级、加包、自动续费、退款/优惠券复杂组合不作为首版强制功能；下一月续订可以支持单个BASE排队；首版只做风险清楚的受控模拟退款或明确`NOT_SUPPORTED`，不假装自动扣回已使用额度；
 5. 保留V11-D未实施的SQL/四组公平压测和E6负责人真人手测，不把新V12阶段编号覆盖旧验收记录。
 
-建议PR堆叠：现有`feat/v11-e-local-delivery` → `docs/v12-platform-business-redesign`（本轮设计，Draft）→ 用户确认后`feat/v12-a-portal` → `feat/v12-b-orders` → `feat/v12-c-flash-sale` → `test/v12-d-final-acceptance`。新阶段Codex只读对应阶段详细合同，不跨阶段擅自实现。**当前没有创建这些功能分支、SQL或Codex详细任务书。**
+建议PR堆叠：现有`feat/v11-e-local-delivery` → `docs/v12-platform-business-redesign`（本轮设计，Draft）→ 用户确认后`feat/v12-a-portal` → `feat/v12-b-orders` → `feat/v12-c-flash-sale` → `test/v12-d-final-acceptance`。新阶段Codex只读对应阶段详细合同，不跨阶段擅自实现。**目前未创建任何V12功能分支/业务SQL/源码；仅为A写出[完整实施合同](v12-a-portal-free-subscription.md)和根目录[Codex提示词](../../CODEX_V12_A_EXEC_PROMPT.md)，待单独执行与复审。**
 
 ## V12-0：进入开发前的基线与选择题（不新加产品业务）
 
