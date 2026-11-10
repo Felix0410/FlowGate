@@ -62,7 +62,7 @@
 - `.../commerce/BaseEntitlementSlotService.java`：收敛A的锁槽语义，不能给旧免费领取引入回归。
 
 **SQL并发最小核心**：
-1. 验证当前登录主体、OWNER、APP ACTIVE；同`(user,requestId)`查询已存订单，`fingerprint=SHA256(appId,skuId,periodPolicy)`同参返回原单，无参冲突409。因为sku.period冻结在DB，指纹应从**请求确定性字段**构造，不能把随UTC月变化的字段放入同一clientRequestId重试指纹，才可跨月返回同单。
+1. 验证当前登录主体、OWNER、APP ACTIVE；同`(user,requestId)`查询已存订单，`fingerprint=SHA256(userId,appId,skuId,skuKind,periodPolicy)`同参返回原单，无参冲突409。因为sku.period冻结在DB，指纹应从**请求确定性字段**构造，不能把随UTC月变化的字段放入同一clientRequestId重试指纹，才可跨月返回同单。
 2. 锁APP`FOR UPDATE`→检查并插空slot→slot当前读`FOR UPDATE`→如HELD/GRANTED返回409`BASE_ENTITLEMENT_CONFLICT`→冻结CURRENT/NEXT月份、price/units/有效期→插`fg_order(PENDING_PAYMENT)`→slot`HELD(holder_type=ORDER,holder_id=orderId)`→`fg_order_transition`同一事务提交，HTTP201。
 3. 唯一键并发冲突需让失败事务先回滚再按同user+requestId重新读已胜出的订单，**不要把DB duplicate-key直接当未知500**；重试POST返回原订单且状态可能已付款/取消。按SQL`UNIQUE(principal_id,client_request_id)`安全处理不同APP并发。
 4. 仅内部用户owner可查单，输入任意别人的orderNo/应用id一律404；Order快照的`price_cents,period,api_id,app_id`后续不能随SKU/市场变更。
