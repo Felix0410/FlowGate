@@ -53,3 +53,8 @@ NORMAL_ORDER / PROMO_INTENT
 - 新商品支付/抢购上线前，在独立Rabbit 3.13与MySQL8.4隔离Compose验证：Broker发送确认失败（Outbox可恢复）、Broker真实重启/消息保留、持久retry→消费/Poison队列、重复/乱序100次、付款vs关闭、Intent超时释放、Grant唯一/不双开。失败历史和数据口径必须可追溯。
 - B/C任务书将`com.flowgate.control.commerce`服务和`fg_business_outbox`独立于A异步读模型，不把两套Consumer混在一个RabbitListener或复用旧V11 C Kafka八字段事件代码。启动开关建议`FLOWGATE_V12_COMMERCE_ASYNC_ENABLED=false`默认安全OFF；启用只影响隔离演示，真实部署需另经负责人授权。
 - **此文件只定架构/合同，本轮没有创建任何B/C Java/SQL/Rabbit队列源码，也没有迁移旧V11 Kafka。**
+
+
+## V12-B定稿之后的落地引用（2026-11-10）
+
+B普通订单、模拟付款、模拟退款、唯一权益槽、Commerce Outbox和独立Rabbit监听器的**唯一实际实施规范**为[ B订单架构 ](v12-b-order-architecture.md)、[ B事务验收矩阵 ](v12-b-transactions-acceptance.md)与[ B0～B8分段合同 ](../progress/v12-b-order-payment.md)。负责人已决定将A消息异常与旧Console三项P1融入**B0**先修，不再单开A代码补丁PR。**B0/B业务均尚未实施**；此文件的架构设计不替代真实Broker停机/持卷重建/Poison与Quorum证据。
