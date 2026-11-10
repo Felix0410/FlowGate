@@ -15,4 +15,13 @@ class QuotaPolicyTest {
  @Test void independentPlanHasTrustedVersionAndUnits(){var s=sample(false,false);PolicyRules.validate(s);var p=QuotaPolicy.freeze(s,s.routes().get(0));assertTrue(p.metered());assertEquals(2,p.apiId());assertEquals(s.checksum(),p.snapshotChecksum());assertFalse(PolicyRules.enforced(s.policies().get(0)));}
  @Test void publicAndDuplicateEffectiveQuotaAreRejected(){assertThrows(IllegalArgumentException.class,()->PolicyRules.validate(sample(true,false)));assertThrows(IllegalArgumentException.class,()->PolicyRules.validate(sample(false,true)));assertThrows(IllegalArgumentException.class,()->PolicyRules.parameters("USAGE_QUOTA","{\"unitsPerCall\":101}"));}
  @Test void legacySnapshotWithoutQuotaStaysNone(){var s=sample(false,false);var old=SnapshotCodec.seal(new Snapshot(1,1,"",s.services(),s.apis(),s.routes(),List.of(),List.of()));assertEquals(QuotaPolicy.NONE,QuotaPolicy.freeze(old,old.routes().get(0)));SnapshotCodec.verify(old);}
+ @Test void v12RequiresNewSchemaAndNeverSharesLegacyPool(){
+  var old=sample(false,false);var p=new HashMap<>(old.policies().get(0));p.put("type","USAGE_QUOTA_V12");p.put("executionStatus",PolicyRules.QUOTA_V12);
+  var invalid=SnapshotCodec.seal(new Snapshot(1,1,"",old.services(),old.apis(),old.routes(),List.of(p),old.bindings()));
+  assertThrows(IllegalArgumentException.class,()->PolicyRules.validate(invalid));
+  var v12=SnapshotCodec.seal(new Snapshot(2,1,"",old.services(),old.apis(),old.routes(),List.of(p),old.bindings()));
+  SnapshotCodec.verify(v12);PolicyRules.validate(v12);assertEquals(QuotaPolicy.Mode.V12_APP_API,QuotaPolicy.freeze(v12,v12.routes().get(0)).mode());assertEquals(QuotaPolicy.Mode.V11_APP,QuotaPolicy.freeze(old,old.routes().get(0)).mode());
+  var mixed=new ArrayList<Map<String,Object>>(old.policies());p.put("id",2);mixed.add(p);var bindings=new ArrayList<Map<String,Object>>(old.bindings());bindings.add(Map.of("id",2,"policyId",2,"targetType","ROUTE","targetId",3,"targetRouteId","metered"));
+  var duplicate=SnapshotCodec.seal(new Snapshot(2,1,"",old.services(),old.apis(),old.routes(),mixed,bindings));assertThrows(IllegalArgumentException.class,()->PolicyRules.validate(duplicate));
+ }
 }

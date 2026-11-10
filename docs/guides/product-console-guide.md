@@ -201,3 +201,12 @@ Kafka仍是单Broker本地演示。持久卷不是生产HA，SENT补投不是跨
 ## 本地V1.1完整交付与就绪诊断
 
 按[本地交付手册](v11-local-delivery.md)执行只读doctor、隔离启动、非计量初版、凭证和配额，再核对Kafka日报与历史对账。首页和发布中心显示V1/B/C真实就绪状态，数据库无法由页面证明时保持UNKNOWN；关闭演示保留全部卷。页面手册入口为[本地交付手册HTML](local-delivery.html)。隔离通过不表示用户常驻库已激活；E6仍须负责人手测。
+
+<a id="market"></a>
+## API市场运营（V12）
+
+在API接入中创建私有API与路由，治理策略选择“API独立月度计量”，发布并等待全部接流节点应用。客户业务的“API市场”提供分类、商品、免费SKU和上架操作。普通用户在独立 `/portal/` 注册和登录，不需要ADMIN密码。
+
+先创建分类、关联真实API的商品，再创建当月零元免费SKU，最后上架。SKU额度不可修改，调整需创建新SKU。商品保存不等于上架，上架不改变路由快照；后台会复验当前版本/checksum、完整节点心跳、V12能力、新表和开关。下架不删除历史权益。
+
+市场页提供V12独立用量对账。MySQL账本是权威准入记录，RabbitMQ日报可能延迟；当前日为PROVISIONAL，待消费为PENDING，完整性缺口显示INTEGRITY_GAP。V11旧用量和Kafka链路继续使用原入口。Portal具体操作与隔离运行详见仓库 `docs/guides/v12-a-portal.md`。

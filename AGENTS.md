@@ -1,3 +1,18 @@
+# FlowGate 当前交接：V12-A源码复审后P1轻量修补（2026-11-10）
+
+> 真正已实现：PR #15 `feat/v12-a-portal`含Portal、免费API权益、独立RabbitMQ V12用量与定向联调；V11-C Kafka保留。ChatGPT只读远端源码复审报告：`docs/reviews/v12-a-rabbitmq-static-review-2026-11-10.md`。**A0～A6真实代码和提交的功能证据已存在，A7仍待P1-A01～A03修补、真实Rabbit故障小矩阵与负责人真人手测**。未重跑全模块Java或用户环境，别把文档复审当完整实机验收。
+>
+> **下一份唯一待执行Codex合同**：`CODEX_V12_A_RABBIT_REVIEW_FIX_PROMPT.md`。只修坏JSON错误分类/无限重试、真实Rabbit持久死信恢复验证、V12默认OFF旧Console市场待就绪提示，及必需文档/定向测试；**不得自动执行旧`CODEX_V12_A_EXEC_PROMPT.md`重做A**、不得启动B/C订单/秒杀、D压力测试、迁移全项目Kafka、合并任何旧PR/main。保护未提交本地文件、用户.env/IDE/MySQL/Redis/Kafka/Rabbit卷。
+
+
+> 负责人2026-11-10授权完成V12-A，功能优先、避免过度测试，并明确选择“V12改用RabbitMQ，保留V11 Kafka”。执行合同 `CODEX_V12_A_EXEC_PROMPT.md`、详细合同 `docs/progress/v12-a-portal-free-subscription.md`；消息边界以 `docs/design/v12-architecture-decisions.md` ADR-13为准。
+> 独立功能分支 `feat/v12-a-portal` 基于最新设计分支 `docs/v12-platform-business-redesign@e77624f`。已实施Portal、真实市场/免费SKU、自助应用/APP Token、APP/API/月免费唯一权益、V12计量与RabbitMQ专线、Console市场入口及中文指南。进度及真实定向证据见 `docs/progress/v12-a-implementation.md`。
+> Java82个不同测试分次运行通过（不是Rabbit接入后完整82项重跑），Node3入口、Python14、隔离双Gateway 5次200/第6次429、8并发唯一领取、RabbitMQ去重汇总、真实Chromium已执行；大矩阵与负责人手测未执行。A7/正式验收未通过，PR保持Draft。
+> 不进入V12-B订单/C活动或V11-D性能，不合并main/旧PR。根.env、用户旧数据库/卷/IDE/旧Ledger继续保护；新功能默认OFF，仅新隔离实例迁移，所有测试卷保留。
+> 下列V11/C/E“当前任务”为历史记录，不重执行。
+
+---
+
 # 当前状态：V1.1-E 自动实施完成，等待复审与E6负责人手测
 
 > E0～E5已在独立功能分支完成编码和定向实测：Java75、Node9入口、Python14、原B23项/C26组、新E真实5/6+Kafka+历史MATCH和1280/375Chromium。详见`docs/progress/v11-e-local-delivery-implementation.md`及证据JSON。**E6负责人手测未执行，不能称正式交付验收通过。**

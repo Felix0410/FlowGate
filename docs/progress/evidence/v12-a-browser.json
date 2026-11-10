@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "engine": "ego-browser Chromium",
+  "viewports": [
+    {
+      "width": 1280,
+      "overflow": false,
+      "screenshot": "v12-a-portal-1280.png"
+    },
+    {
+      "width": 375,
+      "overflow": false,
+      "secretCount": 0,
+      "evidence": "observed in preceding ego-browser round after Emulation.setDeviceMetricsOverride; later invocation reset viewport"
+    }
+  ],
+  "checks": [
+    "real registration and login",
+    "real app creation",
+    "market search",
+    "pure-text malicious HTML documentation",
+    "free entitlement claimed via UI",
+    "short-lived token issued via UI",
+    "same token real Gateway 5x200+429 through background HTTP (no browser CORS proxy)",
+    "authoritative remaining0 and five ledger rows visible",
+    "RabbitMQ daily caught up with pending0",
+    "secret removed on navigation",
+    "logout clears personal view"
+  ],
+  "ownerManualAcceptance": "NOT_EXECUTED",
+  "keyboard": {
+    "width": 1498,
+    "focus": "我的应用",
+    "screenshot": "v12-a-portal-keyboard-1498.png"
+  },
+  "note": "375px DOM observation passed; the later screenshot after ego-browser round reset was correctly renamed 1498px. No retained 375px screenshot.",
+  "codeCommit": "458be6e7a9f6720ae36753f90de13cb5a5378636"
+}

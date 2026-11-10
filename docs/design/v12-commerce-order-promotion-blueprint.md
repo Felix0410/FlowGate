@@ -1,5 +1,7 @@
 # FlowGate V1.2｜V12-B订单与V12-C限时抢购详细设计蓝图
 
+> **2026-11-10消息架构补充**：V12-B普通订单及V12-C抢购消息均按[ RabbitMQ修订合同 ](v12-rabbitmq-adaptation.md)采用独立Commerce Exchange、quorum主/TTL重试/Poison队列和业务Outbox；**本文件涉及V12新Kafka Topic/Group、offset ACK的旧措辞不再适用**。V11-C Kafka保留，不做全量迁移。
+
 > **状态：详细设计定稿，暂不生成V12-B/C Codex实施指令、不编码、不迁移、不宣称通过。** 适用前置`docs/design/v12-architecture-decisions.md`、`docs/design/v12-transaction-invariants.md`、`docs/progress/v12-a-portal-free-subscription.md`。如有实现冲突以最近ADR为准。此文档只是把后续阶段业务合同锁定，防止V12-A完成后临时重选订单方案。
 
 ## 1. 先定义商品/权益/订单/抢购到底是什么

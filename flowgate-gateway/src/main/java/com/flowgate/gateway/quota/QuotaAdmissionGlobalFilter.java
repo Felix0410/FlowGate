@@ -36,7 +36,7 @@ public class QuotaAdmissionGlobalFilter implements GlobalFilter,Ordered,QuotaSup
    if(principal==null||generation==null){inflight.decrementAndGet();return Mono.error(new QuotaDenied(401,"INVALID_APP_CREDENTIAL","缺少可信应用身份"));}
    var charge=new QuotaCharge(UUID.randomUUID().toString(),principal,generation,plan.apiId(),plan.routeId(),plan.appliedVersion(),plan.snapshotChecksum(),plan.units());
    // 2. 只重试内部网络通信一次，不重试已转发的业务POST；总时间与在途数量均有上限。
-   return Mono.defer(()->client.post().uri("/internal/quota/charge").bodyValue(charge).exchangeToMono(response->response.bodyToMono(tools.jackson.databind.JsonNode.class).switchIfEmpty(Mono.error(new QuotaDenied(503,"QUOTA_UNAVAILABLE","配额响应为空"))).flatMap(body->{
+   return Mono.defer(()->client.post().uri(plan.mode()==QuotaPolicy.Mode.V12_APP_API?"/internal/quota/charge-v12":"/internal/quota/charge").bodyValue(charge).exchangeToMono(response->response.bodyToMono(tools.jackson.databind.JsonNode.class).switchIfEmpty(Mono.error(new QuotaDenied(503,"QUOTA_UNAVAILABLE","配额响应为空"))).flatMap(body->{
     int status=response.statusCode().value();
     if(status==200){
      if(!body.has("chargeId")||!charge.chargeId().equals(body.get("chargeId").stringValue())||!body.has("chargedUnits")||!body.get("chargedUnits").isIntegralNumber()||body.get("chargedUnits").longValue()!=plan.units()||!body.has("remainingUnits")||!body.get("remainingUnits").isIntegralNumber()||body.get("remainingUnits").longValue()<0||!body.has("duplicate")||!body.get("duplicate").isBoolean()||!body.has("periodUtc")||!body.get("periodUtc").stringValue().matches("[0-9]{6}"))return Mono.error(new QuotaDenied(503,"QUOTA_UNAVAILABLE","配额响应未通过验证"));
@@ -44,7 +44,7 @@ public class QuotaAdmissionGlobalFilter implements GlobalFilter,Ordered,QuotaSup
     }
     String code=body.has("code")?body.get("code").stringValue():"QUOTA_UNAVAILABLE";
     if(status==429&&"QUOTA_EXHAUSTED".equals(code))return Mono.error(new QuotaDenied(429,code,"本月准入单位已耗尽"));
-    if(status==403&&Set.of("APP_DISABLED","DEVELOPER_DISABLED","NO_ACTIVE_SUBSCRIPTION","INSUFFICIENT_SCOPE","APP_TOKEN_REVOKED").contains(code))return Mono.error(new QuotaDenied(403,code,"应用、凭证、订阅或授权范围不可用"));
+    if(status==403&&Set.of("APP_DISABLED","DEVELOPER_DISABLED","NO_ACTIVE_SUBSCRIPTION","NO_ACTIVE_API_ENTITLEMENT","INSUFFICIENT_SCOPE","APP_TOKEN_REVOKED").contains(code))return Mono.error(new QuotaDenied(403,code,"应用、凭证、订阅或授权范围不可用"));
     return Mono.error(new QuotaDenied(503,"QUOTA_UNAVAILABLE","配额服务未授权，依赖或配置不可用"));
    })).timeout(Duration.ofSeconds(2)))
     .retryWhen(Retry.max(1).filter(error->error instanceof WebClientRequestException||error instanceof java.util.concurrent.TimeoutException))

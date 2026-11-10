@@ -1,0 +1,20 @@
+# 只由显式V12新隔离实例叠加，V11原Compose不变。管理口不映射。
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}
+    environment:
+      RABBITMQ_DEFAULT_USER: ${FLOWGATE_RABBITMQ_USERNAME:?}
+      RABBITMQ_DEFAULT_PASS: ${FLOWGATE_RABBITMQ_PASSWORD:?}
+      RABBITMQ_DEFAULT_VHOST: /flowgate-v12
+    ports: ['127.0.0.1:${FLOWGATE_RABBITMQ_PORT:?}:5672']
+    volumes: ['rabbitmq-data:/var/lib/rabbitmq']
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, check_running]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+volumes:
+  rabbitmq-data:
+    labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}

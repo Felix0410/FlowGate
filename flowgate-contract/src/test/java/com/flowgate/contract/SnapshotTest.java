@@ -11,7 +11,7 @@ class SnapshotTest {
         String reordered = "{\"routes\":[],\"policies\":[],\"bindings\":[],\"apis\":[],\"services\":[],\"checksum\":\"" + snapshot.checksum() + "\",\"version\":1,\"schemaVersion\":1}";
         assertDoesNotThrow(() -> SnapshotCodec.verify(SnapshotCodec.JSON.readValue(reordered, Snapshot.class)));
         assertThrows(IllegalArgumentException.class, () -> SnapshotCodec.verify(new Snapshot(1, 2, snapshot.checksum(), List.of(), List.of(), List.of(), List.of(), List.of())));
-        assertThrows(IllegalArgumentException.class, () -> SnapshotCodec.verify(SnapshotCodec.seal(new Snapshot(2, 1, "", List.of(), List.of(), List.of(), List.of(), List.of()))));
+        assertThrows(IllegalArgumentException.class, () -> SnapshotCodec.verify(SnapshotCodec.seal(new Snapshot(3, 1, "", List.of(), List.of(), List.of(), List.of(), List.of()))));
     }
     @Test void rejectsAmbiguousOrUnsafePathsAndTargets() {
         var allowed = Set.of("http://127.0.0.1:8085");

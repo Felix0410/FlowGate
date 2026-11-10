@@ -1,3 +1,5 @@
+> **实施补充授权（2026-11-10）**：负责人选择V12改用RabbitMQ、V11保留Kafka；功能优先，只做必要定向验证。见ADR-13，本文中V12 Kafka专线要求由RabbitMQ专线取代。未执行的大矩阵/人工验收必须如实列出。
+
 # 给本地Codex的唯一执行提示：FlowGate V12-A（Portal+API市场+免费API权益）
 
 > **这是供负责人确认后交给Codex的实施合同，当前GitHub PR #14只含设计文档，未自动启动Codex和任何业务编码。**

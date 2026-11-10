@@ -116,7 +116,7 @@ def docker_target(port, service, project=None, owner=None):
             raise LocalFailure('端口属于非预期Compose服务，拒绝接管或exec')
         if owner and labels.get('io.flowgate.v11-demo.owner') != owner:
             raise LocalFailure('隔离容器owner不一致，拒绝操作')
-        if not image.startswith({'mysql': 'mysql:8.4', 'redis': 'redis:7', 'kafka': 'apache/kafka:4.1.1'}[service]):
+        if not image.startswith({'mysql': 'mysql:8.4', 'redis': 'redis:7', 'kafka': 'apache/kafka:4.1.1', 'rabbitmq': 'rabbitmq:3-management'}[service]):
             raise LocalFailure('依赖镜像版本或身份不符')
         return cid
     raise LocalFailure('未找到与配置端口和Compose身份一致的运行容器')

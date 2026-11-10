@@ -2,7 +2,7 @@
 export const domains = [
   {key: 'dashboard', label: '工作台', tabs: [['dashboard', '概览']]},
   {key: 'access', label: 'API 接入', tabs: [['services', '服务'], ['apis', 'API'], ['routes', '路由'], ['callers', '旧调用方凭证']]},
-  {key: 'business', label: '客户业务', tabs: [['developers', '客户'], ['apps', '应用'], ['plans', '套餐'], ['subscriptions', '订阅']]},
+  {key: 'business', label: '客户业务', tabs: [['developers', '客户'], ['apps', '应用'], ['plans', '套餐'], ['subscriptions', '订阅'], ['market', 'API市场']]},
   {key: 'policies', label: '治理策略', tabs: [['rate', '限速'], ['concurrency', '并发'], ['protection', '故障保护'], ['quota-policy', '计量规则']]},
   {key: 'usage', label: '用量与对账', tabs: [['quota', '余额与账本'], ['usage', '用量统计'], ['reconciliation', '对账结果']]},
   {key: 'releases', label: '发布中心', tabs: [['releases', '版本与节点']]},

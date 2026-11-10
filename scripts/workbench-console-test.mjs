@@ -5,7 +5,7 @@ import {domains, views, parseRoute, routeHash} from '../flowgate-control/src/mai
 import {renderBusiness} from '../flowgate-control/src/main/resources/static/console/openapi-business.js';
 import {renderCatalog} from '../flowgate-control/src/main/resources/static/console/catalog.js';
 import {reportSelection, rememberReport} from '../flowgate-control/src/main/resources/static/console/report-context.js';
-assert.equal(domains.length, 7); assert.equal(new Set(views.map(row => row[0])).size, 20);
+assert.equal(domains.length, 7); assert.equal(new Set(views.map(row => row[0])).size, 21);
 for (const [view] of views) assert.equal(parseRoute(routeHash(view)).view, view);
 assert.deepEqual(parseRoute('#business/apps?id=2&token=secret&password=p&response=raw'), {view: 'apps', params: {id: '2'}});
 assert.equal(parseRoute('#unknown/screen?id=1').view, 'dashboard');

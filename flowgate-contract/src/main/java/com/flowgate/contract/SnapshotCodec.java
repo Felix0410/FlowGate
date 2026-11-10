@@ -51,7 +51,7 @@ public final class SnapshotCodec {
     }
 
     public static void verify(Snapshot snapshot) {
-        if (snapshot.schemaVersion() != 1 || snapshot.version() < 1 || !checksum(snapshot).equals(snapshot.checksum())) {
+        if ((snapshot.schemaVersion() != 1 && snapshot.schemaVersion() != 2) || snapshot.version() < 1 || !checksum(snapshot).equals(snapshot.checksum())) {
             throw new IllegalArgumentException("快照版本格式或校验和错误");
         }
     }
