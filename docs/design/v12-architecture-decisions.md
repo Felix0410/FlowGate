@@ -1,6 +1,6 @@
 # FlowGate V1.2｜正式设计决定与V11兼容裁决（ADR总表）
 
-> 2026-11-10 · **总体架构设计定稿，尚未实现**。此文档在逻辑冲突时优先于2026-11-10早先的总体提案；后续Codex按这里的边界实现，不应临场再选别的权益/回滚架构。项目负责人可在派工前审阅调整；变更必须追加ADR，不能悄悄改变约束。
+> 2026-11-10 · **总体架构已定稿。V12-A已编码并有定向证据但A7三项P1待修，合并入V12-B0；V12-B订单/付费/退款仍是设计，未编码。**此文档在逻辑冲突时优先于2026-11-10早先的总体提案；后续Codex按这里的边界实现，不应临场再选别的权益/回滚架构。项目负责人可在派工前审阅调整；变更必须追加ADR，不能悄悄改变约束。
 
 ## ADR-01：入口和权限
 
@@ -22,7 +22,7 @@
 - V12新增`fg_api_subscription`、`fg_api_quota_balance`、`fg_api_quota_ledger`，以**APP+API+UTC月**唯一，单次授权不得从老池兜底。新增且显式的V12 policy type `USAGE_QUOTA_V12`、执行标识`ENFORCED_QUOTA_V12`、可信节点Feature`USAGE_QUOTA_V12`；旧`USAGE_QUOTA`仍保持`ENFORCED_QUOTA_V1`。
 - 更新`QuotaPolicy.freeze()`/Contract为显式`mode=NONE|V11_APP|V12_APP_API`，解析旧schemaVersion=1快照时**默认保留V11/none老语义**；不得因升级重新序列化或改变旧checksum，不能在同一实际route同时生效V11和V12，不得使旧Gateway或不支持V12的节点接流。旧Gateway不能应用新规则时Fail Closed且不变成普通私有Caller。
 - `QuotaAdmissionGlobalFilter`按可信metadata执行有界WebClient非阻塞到`/internal/quota/charge`或`/internal/quota/charge-v12`，共用原inflight、retry sameChargeId、timeout、安全指标，旧Caller不变。V12在Control凭可信principal→APP/Developer/Scope→路由策略→指定API月权益→锁余额→去重Ledger→扣减/Outbox同事务。Grant发生即消耗，下游失败不退款。
-- V12不使用旧C的聚合表替代新模式：新增独立`fg_api_usage_outbox`、`fg_api_consumed_event`、`fg_api_usage_daily`及`flowgate.usage.v12`独立消费者组；消费者校验V12 Ledger/同事件再同事务去重与日报UPSERT。**不能把V12事件直接送入C现有严格八字段的`UsageGrantedEvent`或混入`fg_usage_daily`造成不同来源难对账。** Portal用量页面清楚区分**MySQL权威授权流水**与**Kafka异步日报可能滞后**。未来统一报表用只读UNION/来源标识，不在热路径合并。
+- V12不使用旧C的聚合表替代新模式：新增独立`fg_api_usage_outbox`、`fg_api_consumed_event`、`fg_api_usage_daily`及RabbitMQ `flowgate.usage.v12`独立交换机/quorum队列；消费者校验V12 Ledger/同事件再同事务去重与日报UPSERT。**不能把V12事件直接送入C现有严格八字段的`UsageGrantedEvent`或混入`fg_usage_daily`造成不同来源难对账。** Portal用量页面清楚区分**MySQL权威授权流水**与**RabbitMQ异步日报可能滞后**。未来统一报表用只读UNION/来源标识，不在热路径合并。
 - 若出于实现成本后续要合并旧C异步表，必须另起ADR并补齐`metering_mode`迁移、复合唯一键、全部日聚合与孤儿审计的真实回归；当前禁止隐式合流。
 
 ## ADR-04：BASE权益在付款前预占槽位，避免双付单开通失败
@@ -43,21 +43,21 @@
 
 ## ADR-06：订单、模拟结算、异步权益、消息
 
-- 普通订单`PENDING_PAYMENT → PAID_PENDING_FULFILLMENT → FULFILLED`；过期/取消只可从PENDING_PAYMENT出发；支付/关闭在相同MySQL订单行CAS；支付事务写`fg_payment_record`唯一收据及`fg_business_outbox PAYMENT_CONFIRMED`，不在事务里同步调用Kafka。
-- 业务Kafka使用**同一Broker新Topic/Group和独立BusinessOutbox/ConsumerDedup**，旧C用量Kafka链完全保持。消费者事务内确认持有槽、引用原订单、唯一Grant、创建月余额、订单FULFILLED，再提交offset；失败重试/永久毒消息/受控SENT补投与C同等级别，不能声称消息恰好一次。
+- 普通订单`PENDING_PAYMENT → PAID_PENDING_FULFILLMENT → FULFILLED`；过期/取消只可从PENDING_PAYMENT出发；支付/关闭在相同MySQL订单行CAS；支付事务写`fg_payment_record`唯一收据及`fg_business_outbox PAYMENT_CONFIRMED`，不在MySQL事务里同步调用RabbitMQ。
+- V12-B/C业务消息使用独立RabbitMQ Commerce DirectExchange+quorum主/重试/Poison队列、独立BusinessOutbox/ConsumerDedup，**旧C用量Kafka链完全保留**。消费者事务内确认持有槽、引用原订单、唯一Grant、创建月余额、订单FULFILLED，COMMIT后才basicAck；发布方有publisher confirm+mandatory return，失败重试/永久毒消息/受控SENT补投，不宣称跨系统恰好一次。
 - 付费权益开通失败保持PAID_PENDING_FULFILLMENT或显式RETRY，不释放HELD槽、不会假显示“已开通”；后续对账与恢复必需。
 
 ## ADR-07：抢购只对被Redis筛出的候选进行MySQL持久受理
 
 - Redis Lua的活动时间/版本/库存/用户资格+claimId临时预扣都是**可丢失的候选**；只有MySQL同一事务里`fg_api_entitlement_slot HELD`、`fg_promo_stock.reserved+1`（条件`reserved+sold<total`）、唯一`fg_promo_purchase_intent`、`fg_business_outbox`一起提交后，才能返回202且附真实intentId。
-- Kafka订单Worker创建PENDING_PAYMENT订单且绑定既有intent，不二次预占槽或库存；模拟支付成功同事务将`reserved--,sold++`并生成付款收据/Outbox，订单过期同事务释放reserved及HELD。另设**IntentTimeoutCloser**：持久ACCEPTED若超过订单创建截止仍未成单，同事务将Intent置EXPIRED、释放reserved和其HELD槽并写STOCK_RELEASED；晚到Worker不允许复活。各路径按持有者CAS，不可晚到重建订单或二次退库存。
+- RabbitMQ订单Worker创建PENDING_PAYMENT订单且绑定既有intent，不二次预占槽或库存；模拟支付成功同事务将`reserved--,sold++`并生成付款收据/Outbox，订单过期同事务释放reserved及HELD。另设**IntentTimeoutCloser**：持久ACCEPTED若超过订单创建截止仍未成单，同事务将Intent置EXPIRED、释放reserved和其HELD槽并写STOCK_RELEASED；晚到Worker不允许复活。各路径按持有者CAS，不可晚到重建订单或二次退库存。
 - Redis故障/失忆后活动FAIL-CLOSED进入REBUILDING；基于MySQL权威`total-reserved-sold`和仍有效Redis候选租约重新构建带epoch的新视图，禁止旧Lua/补偿覆盖新epoch。**允许有界少卖，必须不超卖**，恢复/重建需有测试。
 - C阶段会重用B同一`fg_business_outbox`和模拟支付状态机，不另造“秒杀订单”。202回执丢失时提供`GET /portal/api/promotions/{id}/my-claim`按本人身份查持久Intent；只有Redis临时claim则答“尚未持久受理”。B/C详细表字典、受理超时、状态机和真实测试见[交易抢购蓝图](v12-commerce-order-promotion-blueprint.md)。
 
 ## ADR-08：验收、Git与技术栈
 
 - 旧V11-D的10万级SQL和四组公平压测仍未执行；E6负责人真人1280/375验收未签，不把E自动Chromium算真人完成。V12-A从隔离V11-E基线开工；新的DDD分包仅留在Control（Portal/Market/Entitlement/Commerce），不增新微服务。
-- Java17/SpringBoot4/Gateway WebFlux非阻塞/MySQL8.4/Redis7 Lua/Kafka4.1.1/原生ESM；新增依赖必须有业务必要性。除增量SQL外不改旧表/历史Ledger；不引入Seata/Nacos/ELK/ShardingSphere/Redisson整套/新前端构建工具。
+- Java17/SpringBoot4/Gateway WebFlux非阻塞/MySQL8.4/Redis7 Lua/RabbitMQ(V12)/Kafka4.1.1(V11旧链)/原生ESM；新增依赖必须有业务必要性。除增量SQL外不改旧表/历史Ledger；不引入Seata/Nacos/ELK/ShardingSphere/Redisson整套/新前端构建工具。
 - 旧PR #1～#13不合并、不改base；所有测试新隔离Docker项目/随机端口/私有凭证/不碰用户现有.env/IDE/持久卷。每段真实Java/Node/Python/HTTP/浏览器和安全测试证据，失败留痕，未运行写未运行；不可提前称V12已上线。
 
 ## ADR-13：V12消息链改用RabbitMQ（2026-11-10负责人明确授权）
