@@ -1,6 +1,6 @@
 # FlowGate V12-A｜普通用户Portal、API市场、自助免费权益、APP调用｜详细Codex实施合同
 
-> **当前状态：V12-A功能实施与定向验证完成，等待A7复审及负责人手测；负责人于2026-11-10明确授权V12改用RabbitMQ，V11保留Kafka，并要求功能优先、定向验证。以下V12新Kafka要求由ADR-13覆盖，历史V11要求保持不变。** 前置审计`docs/reviews/v12-current-state-audit-2026-11-10.md`、总设计`docs/design/flowgate-v1.2-business-architecture.md`、正式ADR`docs/design/v12-architecture-decisions.md`、一致性合同`docs/design/v12-transaction-invariants.md`。本阶段**不允许实现B普通订单/模拟支付、C抢购/优惠券、D性能实验**。
+ > **当前状态：V12-A功能实施与定向验证完成；首次A7静态复审已发现三项P1需要补丁/定向故障验证，负责人手测尚未执行；负责人于2026-11-10明确授权V12改用RabbitMQ，V11保留Kafka，并要求功能优先、定向验证。以下V12新Kafka要求由ADR-13覆盖，历史V11要求保持不变。** 前置审计`docs/reviews/v12-current-state-audit-2026-11-10.md`、总设计`docs/design/flowgate-v1.2-business-architecture.md`、正式ADR`docs/design/v12-architecture-decisions.md`、一致性合同`docs/design/v12-transaction-invariants.md`。本阶段**不允许实现B普通订单/模拟支付、C抢购/优惠券、D性能实验**。
 >
 > **分支栈建议**：`feat/v11-e-local-delivery` → `docs/v12-platform-business-redesign`（本设计）→ **仅本地Codex新建**`feat/v12-a-portal`；Draft PR base只对准直接设计父分支。Codex先确保设计分支远端最新HEAD，`git fetch`并比对同一源码树，不重置未提交工作/不挪旧PR基线。
 
@@ -161,9 +161,9 @@ A阶段不制作“我的订单/限时特价/优惠券支付成功”可点击�
 | A2 | 市场分类/Listing/SKU/Console上架 | 已实施/定向验证 | `v12-a-functional-smoke.json`、`v12-a-browser.json` |
 | A3 | APP自助/Key复用+免费BASE唯一权益/余额 | 已实施/定向验证 | `v12-a-functional-smoke.json`、`v12-a-browser.json` |
 | A4 | Contract与Gateway显式V12配额模式/旧快照安全 | 已实施/定向验证 | `v12-a-functional-smoke.json`、`v12-a-browser.json` |
-| A5 | V12专属Outbox/Kafka日报/只读对账 | 已实施/定向验证 | `v12-a-functional-smoke.json`、`v12-a-browser.json` |
+| A5 | V12专属Outbox/RabbitMQ日报/只读对账 | 已实施/定向验证 | `v12-a-functional-smoke.json`、`v12-a-browser.json` |
 | A6 | Portal全流程用户体验、独立全链路Smoke/证据 | 已实施/定向验证 | `v12-a-functional-smoke.json`、`v12-a-browser.json` |
-| A7 | ChatGPT远端源码+证据复审、负责人手动验收 | 未执行 | `docs/reviews/v12-a-*.md` |
+| A7 | ChatGPT远端源码+证据复审、负责人手动验收 | 首次静态源码复审完成：P1-A01～A03待修；真实故障复核与负责人手测未执行 | `docs/reviews/v12-a-*.md` |
 
 **任何子段开始后**每次提交必须同步Portal/Console对应真实功能与中文帮助，不允许代码先行、页面持续是半成品；复杂Java方法用中文`// 1.`、`// 2.`、`// 3.`注释。单段失败必须停止并记录原因，未证明成功不提前写完成。只有A真正通过后才设计或下发V12-B编码任务。
 
