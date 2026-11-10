@@ -1,6 +1,6 @@
 # FlowGate V1.2｜订单、库存、权益、配额与Kafka跨系统一致性合同
 
-> **设计状态：未实现、未测试、未迁移。** 本文件是后续V12-A/B/C必须遵守的**一致性验收依据**，优先于任意Codex临时实现建议；业务主文档`flowgate-v1.2-business-architecture.md`。所有示例数量仅为不变量或待测试期望，不是现有性能结果。
+> **设计状态：未实现、未测试、未迁移。** 本文件是后续V12-A/B/C必须遵守的**一致性验收依据**，最新[ADR](v12-architecture-decisions.md)对冲突规定拥有优先级，二者均优先于Codex临时实现建议；业务主文档`flowgate-v1.2-business-architecture.md`。所有示例数量仅为不变量或待测试期望，不是现有性能结果。
 
 ## 1. 先锁定五个相互独立的事实与真相来源
 
@@ -18,7 +18,7 @@
 2. 商品：`fg_api_listing.api_id UNIQUE`，SKU一经被引用的价格`price_cents`、`quota_units`、`period_policy`快照永久不变；新的价格创建新revision或新SKU，不回写历史订单。
 3. 订单：`fg_order.order_no UNIQUE`、`UNIQUE(user_id,client_request_id)`；在服务端对同幂等键的applicationId/apiId/skuId/period做SHA256指纹比较，不同参数返回409，**同请求重试只返回同一订单**。
 4. 支付模拟凭证：`UNIQUE(order_id,provider,provider_reference)`或Provider唯一流水，确认一次只产生一份收据；未完成支付的订单没有已激活的新权益。
-5. BASE权益：`fg_api_subscription UNIQUE(application_id,api_id,period_yyyymm)`；`fg_entitlement_grant UNIQUE(source_type,source_id,api_id,period_yyyymm)`，`BASE`和`TOPUP`来源区分。首次冻结BASE单位，后续TOPUP只能增加新API池且留下追加Grant，旧V11冻结始终只读。
+5. BASE权益：`fg_api_entitlement_slot UNIQUE(application_id,api_id,period_yyyymm)`必须在免费领取、普通订单创建及活动持久受理时先锁定/占位，`AVAILABLE/HELD/GRANTED`状态及持有者CAS不可越过；`fg_api_subscription UNIQUE(app,api,month)`和`fg_entitlement_grant UNIQUE(source_type,source_id)`双重兜底。首版只有BASE；TOPUP暂不实现；旧V11冻结始终只读。**付款前没有槽位，不能创建待支付BASE订单**，防两单已付只开通一份。
 6. V12余额：`fg_api_quota_balance UNIQUE(application_id,api_id,period_yyyymm)`，`0<=remaining_units<=total_units`；V12 Ledger `charge_id UNIQUE`且`units>0`；事务锁余额、扣余额、插唯一Ledger和事件必须成功或全部回滚。跨模式同一chargeId/路由版本不得双计，版本元数据固定meteringMode。
 7. 活动抢购：`fg_promo_purchase_intent UNIQUE(activity_id,user_id)`且活动首版限购1；`fg_promo_stock CHECK(total>=0 AND reserved>=0 AND sold>=0 AND reserved+sold<=total)`；DB库存`reserved`是持久受理未付款，`sold`是已付款销售，不允许同一个intent释放两次。绑定`UNIQUE(promo_intent_id)`订单，订单至多有一张活动库存预留。
 8. Outbox：`fg_business_outbox(event_id UNIQUE,event_type,aggregate_id,version,payload,status,lease...)`独立旧C用量表，`fg_business_event_consumed(event_id PK)`与业务实体唯一键双保险；生产者不能在DB事务外先发消息当唯一事件事实。
@@ -42,7 +42,7 @@ FULFILLMENT_RETRY ----(修复后同一orderId重试)-------> FULFILLED
 ```
 
 **不变式**：
-- `PENDING_PAYMENT`之前**不能创建付费权益**；`PAID_PENDING_FULFILLMENT`表示模拟付款已确认但**APP可能尚不能调用**。只有`FULFILLED`且当前UTC月有效、对应API路由已发布/Token有效，页面才显示权益可用。
+- 创建`PENDING_PAYMENT`之前须先同事务**预占该APP/API/月唯一BASE槽位**，未付款只能HELD，不能创建付费权益；`PAID_PENDING_FULFILLMENT`表示模拟付款已确认但**APP可能尚不能调用**。只有`FULFILLED`且当前UTC月有效、对应API路由已发布/Token有效，页面才显示权益可用。
 - `simulate-pay`与过期关闭更新**相同MySQL订单行**，SQL `WHERE status='PENDING_PAYMENT' AND expires_at>UTC_TIMESTAMP`或互斥锁；关闭SQL `WHERE status='PENDING_PAYMENT' AND expires_at<=UTC_TIMESTAMP`。同一订单这两个分支只能一个成功。模拟付款一旦成功，超时任务不得撤销它。
 - 支付确认事务只写订单状态、收据与业务Outbox。权益开通Worker必须在**另一个MySQL事务**一次完成来源唯一Grant、V12订阅、余额、订单`FULFILLED`与必要审计；事务异常不得ACK业务事件。失败状态诊断不能丢掉原支付收据/事件。
 - 如果权益期间当前已过期，不能擅自滚到下个月。要么在订单创建时控制支付期限早于权益到期、购买时展示日期，要么进入人工退款/补偿状态；不能假授权，也不能转成新产品。
@@ -70,7 +70,7 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 
 **Lua职责仅限**`Redis TIME`、活动版本、窗口、用户资格、Redis临时可用名额及claimId/TTL；脚本成功**不是可靠202**，也不是可靠库存最终事实。服务若在Lua后、DB提交前崩溃，Redis孤立预扣按TTL+活动epoch重建恢复；这笔用户**没有成功受理回执**，重试看DB是否已有intent，无记录不能冒充排队成功。
 
-**DB受理前后**：服务根据Redis候选在同一MySQL事务条件更新`reserved`、写入`fg_promo_purchase_intent`、`fg_business_outbox`，提交后才向用户返回202及intentId。此时确实有持久资格，但仍不是付款或权益。DB唯一键冲突与故障不得让Redis的临时结果自动变订单。重复抢购返回原intent/原订单状态，不产生另一份库存预留；同用户换APP也受活动级唯一键限制。
+**DB受理前后**：服务根据Redis候选先持APP行锁→预占BASE权益槽，在同一MySQL事务条件更新`reserved`、写入`fg_promo_purchase_intent`、`fg_business_outbox`，提交后才向用户返回202及intentId。此时确实有持久资格，但仍不是付款或权益。DB唯一键冲突与故障不得让Redis的临时结果自动变订单。重复抢购返回原intent/原订单状态，不产生另一份库存预留；同用户换APP也受活动级唯一键限制。
 
 **MySQL库存转换**：订单异步创建不再次`reserved++`，只确认已有持久intent。模拟付款同事务`reserved--,sold++`，超时关闭同事务`reserved--`，两者竞争同一订单/预留状态，**最多一个方向成功**。迟到Consumer先查intent/库存保留状态，不能“复活”取消或超时intent。已经消耗的权益不因用户模拟退款自动将sold减回可售。
 
@@ -82,7 +82,7 @@ FULFILLED（权益可用）           DB reserved-1，Redis异步补偿视图
 - 同一Kafka Broker，独立Topic `flowgate.commerce.v1`、独立ConsumerGroup `flowgate-commerce-worker-v1`，独立`fg_business_outbox`和`fg_business_event_consumed`，复用Worker通用租约投递与故障策略的**实现思想/可安全抽取的代码**，但不改旧用量事件历史事实。
 - 事件类型`PROMO_INTENT_ACCEPTED`、`PAYMENT_CONFIRMED`、`STOCK_RELEASED`、`ENTITLEMENT_GRANTED`等使用固定版本`eventVersion`+eventId+aggregateId+occuredAtUtc，不带Token、手机号、全量订单JSON、任何用户密码。消费者基于本地MySQL order/intent重查可信SKU和状态，不相信Kafka payload直接发额。
 - 先落MySQL订单/库存/Outbox事务→提交→异步Kafka投递；消费者重试可重复，多次送同事件，MySQL唯一grant/消费去重防重复；DB提交完成后才ACK Kafka。没有Broker ACK时Outbox保持可重试，不能直接标SENT；已经SENT却未消费、Kafka丢记录仍需与C同等级别的受控重排/对账。
-- V12实时API准入仍以MySQL新月余额与Ledger为准，Gateway WebClient非阻塞调用Control。为使旧C日报能包含V12调用，新增严格`USAGE_GRANTED_V12`事件版本与消费校验分支，必须核对新`fg_api_quota_ledger`、同事务幂等更新日表；旧V11版本1始终能消费，不能让两个Consumer对同eventId双计数。
+- V12实时API准入仍以MySQL新月余额与Ledger为准，Gateway WebClient非阻塞调用Control。V12用量独立写`fg_api_usage_outbox`，通过新Topic/ConsumerGroup严格消费到`fg_api_consumed_event`与`fg_api_usage_daily`；核对新`fg_api_quota_ledger`，同事务唯一消费标记+日报累加。**绝不向旧C `fg_usage_daily` 混写V12数据**，V11原八字段消费者不接收新版本事件。
 - 消息乱序：Worker处理以订单/intent行状态CAS或版本号为准，旧`PAYMENT_CONFIRMED`不会覆盖`FULFILLED/REFUNDED`，迟到`PROMO_INTENT_ACCEPTED`不能复活终态。不可恢复坏消息保留offset/隔离并提供运营处理，不静默丢弃。
 
 ## 6. 必须故障注入的最小安全矩阵
