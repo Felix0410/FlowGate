@@ -1,4 +1,7 @@
-# FlowGate 当前任务｜V12-B普通订单与RabbitMQ遗留修复（设计已完成，待本地Codex编码）
+# FlowGate 当前任务｜V12-B实施不变；B后必须统一RabbitMQ退役Kafka（2026-11-17）
+
+> **最新负责人指令（高于下方历史ADR-13长期保留Kafka说法）**：现有V12-B开发范围保持不变，旧V11 Kafka可以仅在B交付期间暂存；**B通过复审后，先独立完成V12-M迁移与Kafka全量运行依赖清退、验证V11旧用量在RabbitMQ正确消费，再启动V12-C抢购**。参见`docs/design/v12-architecture-decisions.md#adr-14v12-b完成后全面退役kafka消息系统统一rabbitmq2026-11-17负责人明确决定`、`docs/design/v12-post-b-kafka-retirement.md`、`docs/progress/v12-roadmap.md`。现阶段不要顺手删除Kafka、不清空旧V11历史MySQL表/旧Kafka用户卷、不启用旧新MQ双投；V12-M尚未派发Codex任务或实施。
+
 
 > **唯一执行入口：`CODEX_V12_B_EXEC_PROMPT.md`**，唯一完整分段合同`docs/progress/v12-b-order-payment.md`，业务/SQL/状态机`docs/design/v12-b-order-architecture.md`、`docs/design/v12-b-transactions-acceptance.md`。负责人明确要求将A的三项复审P1并入B阶段，**B0先做A的坏JSON/重试、真实Rabbit故障、旧V11无V12表的Console待就绪**；B0定向实测通过后才能B1～B7实现付费API商品→订单→模拟支付→Rabbit Commerce可靠Grant→Gateway消费→受控模拟退款、页面与手册，B8停机交复审。
 >
