@@ -1,7 +1,8 @@
 # 只由显式V12新隔离实例叠加，V11原Compose不变。管理口不映射。
 services:
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.13.7-management
+    hostname: v12-rabbit
     labels: {io.flowgate.v11-demo.owner: '${FG_V11_DEMO_OWNER:?}'}
     environment:
       RABBITMQ_DEFAULT_USER: ${FLOWGATE_RABBITMQ_USERNAME:?}

@@ -9,16 +9,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/admin/market")
 public class MarketAdminController {
-    private final MarketCatalogService market;private final ApiUsageService usage;
-    public MarketAdminController(MarketCatalogService market,ApiUsageService usage){this.market=market;this.usage=usage;}
+    private final MarketReadiness readiness;private final MarketCatalogService market;private final ApiUsageService usage;
+    public MarketAdminController(MarketCatalogService market,ApiUsageService usage,MarketReadiness readiness){this.readiness=readiness;this.market=market;this.usage=usage;}
     private long actor(HttpServletRequest r){return ((Session)r.getAttribute("session")).principalId();}
-    @GetMapping("/categories") public Object categories(){return market.categories(true);}
-    @PostMapping("/categories") public Object category(@RequestBody Map<String,Object> b,HttpServletRequest r){return market.category(b,actor(r));}
-    @GetMapping("/listings") public Object listings(@RequestParam(defaultValue="0")long afterId,@RequestParam(defaultValue="20")int limit){return market.adminListings(afterId,limit);}
-    @PostMapping("/listings") public Object create(@RequestBody Map<String,Object> b,HttpServletRequest r){return market.save(null,b,actor(r));}
-    @PatchMapping("/listings/{id}") public Object save(@PathVariable long id,@RequestBody Map<String,Object> b,HttpServletRequest r){return market.save(id,b,actor(r));}
-    @PostMapping("/listings/{id}/skus") public Object sku(@PathVariable long id,@RequestBody Map<String,Object> b,HttpServletRequest r){return market.sku(id,b,actor(r));}
-    @PostMapping("/listings/{id}/publish") public Object publish(@PathVariable long id,HttpServletRequest r){return market.publish(id,actor(r));}
-    @GetMapping("/reconciliation") public Object reconcile(@RequestParam String day){return usage.reconcile(java.time.LocalDate.parse(day));}
-    @PostMapping("/events/{eventId}/replay") public Object replay(@PathVariable String eventId,HttpServletRequest r){return usage.replay(eventId,actor(r));}
+    @GetMapping("/readiness") public Object readiness(){return readiness.status();}
+    @GetMapping("/categories") public Object categories(){readiness.require();return market.categories(true);}
+    @PostMapping("/categories") public Object category(@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.category(b,actor(r));}
+    @GetMapping("/listings") public Object listings(@RequestParam(defaultValue="0")long afterId,@RequestParam(defaultValue="20")int limit){readiness.require();return market.adminListings(afterId,limit);}
+    @PostMapping("/listings") public Object create(@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.save(null,b,actor(r));}
+    @PatchMapping("/listings/{id}") public Object save(@PathVariable long id,@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.save(id,b,actor(r));}
+    @PostMapping("/listings/{id}/skus") public Object sku(@PathVariable long id,@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.sku(id,b,actor(r));}
+    @PostMapping("/listings/{id}/publish") public Object publish(@PathVariable long id,HttpServletRequest r){readiness.require();return market.publish(id,actor(r));}
+    @GetMapping("/reconciliation") public Object reconcile(@RequestParam String day){readiness.require();return usage.reconcile(java.time.LocalDate.parse(day));}
+    @PostMapping("/events/{eventId}/replay") public Object replay(@PathVariable String eventId,HttpServletRequest r){readiness.require();return usage.replay(eventId,actor(r));}
 }

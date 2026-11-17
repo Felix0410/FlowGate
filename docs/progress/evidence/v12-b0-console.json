@@ -1,0 +1,36 @@
+{
+  "runId": "20261117t202809-77c0",
+  "scope": "legacy V11 zero V12 schema default OFF safety",
+  "designBase": "e77624f",
+  "checks": [
+    "legacy V11 with zero V12 tables: readiness DISABLED HTTP200",
+    "market read/write fail-closed503, no missing-table500",
+    "legacy services and releases HTTP200"
+  ],
+  "requests": [],
+  "notExecuted": [
+    "two-Control registration race",
+    "100-request concurrency/load",
+    "V11 B23/C26 real fault regression",
+    "Kafka full fault matrix (V11)",
+    "historical-day final MATCH",
+    "owner manual acceptance",
+    "V11 E6",
+    "V11 D performance"
+  ],
+  "readiness": {
+    "message": "Portal默认关闭；请参考隔离环境指南，不迁移用户旧数据库。",
+    "status": "DISABLED"
+  },
+  "v12Tables": 0,
+  "passed": true,
+  "rootEnvUnchanged": true,
+  "isolationProject": "flowgate-v11-demo-763a623e0e5f",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b0-off/20261117t202809-77c0",
+  "browser": {
+    "engine": "ego lite Chromium",
+    "legacyMarket": "DISABLED visible; legacy business navigation present",
+    "screenshot": "v12-b0-legacy-disabled.png",
+    "ownerManualAcceptance": "NOT_EXECUTED"
+  }
+}

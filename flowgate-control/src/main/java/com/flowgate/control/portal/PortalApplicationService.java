@@ -14,8 +14,8 @@ import static com.flowgate.control.service.BusinessInputs.*;
 /** 自助应用与权益。应用锁→权益槽→唯一免费来源→不可变Grant→订阅/余额。 */
 @Service
 public class PortalApplicationService {
-    private final PortalStore db;private final PortalOwnershipService owner;private final DeveloperApplicationService applications;private final AppCredentialService credentials;private final MarketCatalogService market;private final V12Readiness readiness;
-    public PortalApplicationService(PortalStore db,PortalOwnershipService owner,DeveloperApplicationService applications,AppCredentialService credentials,MarketCatalogService market,V12Readiness readiness){this.db=db;this.owner=owner;this.applications=applications;this.credentials=credentials;this.market=market;this.readiness=readiness;}
+    private final EntitlementGrantService grants;private final PortalStore db;private final PortalOwnershipService owner;private final DeveloperApplicationService applications;private final AppCredentialService credentials;private final MarketCatalogService market;private final V12Readiness readiness;
+    public PortalApplicationService(PortalStore db,PortalOwnershipService owner,DeveloperApplicationService applications,AppCredentialService credentials,MarketCatalogService market,V12Readiness readiness,EntitlementGrantService grants){this.grants=grants;this.db=db;this.owner=owner;this.applications=applications;this.credentials=credentials;this.market=market;this.readiness=readiness;}
     public Object apps(long user,long after,int limit){page(after,limit);return db.rows("SELECT a.id,a.developer_id,a.code,a.name,a.status FROM fg_application a JOIN fg_developer_member m ON m.developer_id=a.developer_id WHERE m.principal_id=? AND m.role='OWNER' AND m.status='ACTIVE' AND a.id>? ORDER BY a.id LIMIT ?",user,after,limit);}
     @Transactional public Object create(long user,Map<String,Object> b){fields(b,"developerId","code","name");long developer=number(b.get("developerId"),Long.MAX_VALUE,"工作区");owner.developer(user,developer);return applications.saveApp(null,Map.of("developerId",developer,"code",b.get("code"),"name",b.get("name")),user);}
     public Object credential(long user,long app,String action){
@@ -44,10 +44,8 @@ public class PortalApplicationService {
         long claim;
         try{claim=db.insert("INSERT INTO fg_portal_free_claim(principal_id,api_id,application_id,sku_id,period_yyyymm) VALUES(?,?,?,?,?)",user,api,app,sku,period);}catch(DuplicateKeyException duplicate){throw new ApiFailure(409,"FREE_ALREADY_CLAIMED","你已领取过该API的免费权益");}
         // 3. 唯一来源、槽、订阅、余额在同一数据库提交；客户端没有直接设置余额入口。
-        long grant=db.insert("INSERT INTO fg_entitlement_grant(source_type,source_id,application_id,api_id,period_yyyymm,units) VALUES('FREE_TRIAL',?,?,?,?,?)",claim,app,api,period,units);
+        long grant=grants.grant("FREE_TRIAL",claim,app,api,period,units,start,end);
         db.update("UPDATE fg_api_entitlement_slot SET state='GRANTED',holder_type='FREE_GRANT',holder_id=?,version=version+1 WHERE application_id=? AND api_id=? AND period_yyyymm=?",grant,app,api,period);
-        long subscription=db.insert("INSERT INTO fg_api_subscription(application_id,api_id,period_yyyymm,effective_at,expires_at,grant_id,units_snapshot) VALUES(?,?,?,?,?,?,?)",app,api,period,java.sql.Timestamp.from(start),java.sql.Timestamp.from(end),grant,units);
-        db.update("INSERT INTO fg_api_quota_balance(application_id,api_id,period_yyyymm,subscription_id,total_units,remaining_units) VALUES(?,?,?,?,?,?)",app,api,period,subscription,units,units);
         return Map.of("entitlementId",grant,"applicationId",app,"apiId",api,"periodUtc",period,"totalUnits",units,"remainingUnits",units);
     }
     public Object subscriptions(long user,long app,long after,int limit){owner.app(user,app);page(after,limit);return db.rows("SELECT s.*,a.method,a.public_path FROM fg_api_subscription s JOIN fg_api a ON a.id=s.api_id WHERE s.application_id=? AND s.id>? ORDER BY s.id LIMIT ?",app,after,limit);}

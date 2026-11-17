@@ -1,0 +1,470 @@
+{
+  "runId": "20261117t203231-9cdf",
+  "scope": "targeted V12 functionality; no historical fault matrix or load experiment",
+  "designBase": "e77624f",
+  "checks": [
+    "14-table migration and second idempotent migration passed",
+    "real private V12 release applied by both Gateways; listing published with Free5",
+    "8 concurrent free claims: 1 success + 7 conflicts; other user independent; lifetime claim cannot switch app",
+    "dual Gateway Free5: 5x200 + 429, remaining0, Ledger=Outbox=Consumed=Daily=5; duplicate RabbitMQ events do not aggregate twice; current-day PROVISIONAL",
+    "real malformed JSON + authoritative conflict Poison; unchanged after TTL window",
+    "real MySQL pause -> persistent TTL retry copy -> resume and deduplicated consumption",
+    "Broker stopped: new Gateway grant commits Ledger/Outbox, no premature SENT; restart catches up once",
+    "fixed-hostname Rabbit container force-recreate retained quorum persisted message on same owned volume",
+    "real mandatory return: Outbox FAILED, never SENT until original routing restored",
+    "malformed local Outbox excluded from automatic claim; permanent error visible, original payload restored"
+  ],
+  "requests": [
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/1/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/categories",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/apps/1",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/status",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis?q=%E7%9C%9F%E5%AE%9E",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/free-grants",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/free-grants",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 401
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 429
+    },
+    {
+      "path": "/portal/api/quota?applicationId=1&apiId=1&period=202611",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/quota?applicationId=1&apiId=1&period=202611",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/ledger?applicationId=1&apiId=1&period=202611",
+      "status": 404
+    },
+    {
+      "path": "/admin/market/reconciliation?day=2026-11-17",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/2/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/2",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/revoke",
+      "status": 200
+    }
+  ],
+  "notExecuted": [
+    "two-Control registration race",
+    "100-request concurrency/load",
+    "V11 B23/C26 real fault regression",
+    "Kafka full fault matrix (V11)",
+    "historical-day final MATCH",
+    "owner manual acceptance",
+    "V11 E6",
+    "V11 D performance"
+  ],
+  "b0": {
+    "rabbitVersion": "3.13.7",
+    "featureFlags": [
+      {
+        "name": "classic_mirrored_queue_version",
+        "state": "enabled"
+      },
+      {
+        "name": "classic_queue_type_delivery_support",
+        "state": "enabled"
+      },
+      {
+        "name": "detailed_queues_endpoint",
+        "state": "enabled"
+      },
+      {
+        "name": "direct_exchange_routing_v2",
+        "state": "enabled"
+      },
+      {
+        "name": "drop_unroutable_metric",
+        "state": "enabled"
+      },
+      {
+        "name": "empty_basic_get_metric",
+        "state": "enabled"
+      },
+      {
+        "name": "feature_flags_v2",
+        "state": "enabled"
+      },
+      {
+        "name": "implicit_default_bindings",
+        "state": "enabled"
+      },
+      {
+        "name": "khepri_db",
+        "state": "disabled"
+      },
+      {
+        "name": "listener_records_in_ets",
+        "state": "enabled"
+      },
+      {
+        "name": "maintenance_mode_status",
+        "state": "enabled"
+      },
+      {
+        "name": "message_containers",
+        "state": "enabled"
+      },
+      {
+        "name": "message_containers_deaths_v2",
+        "state": "enabled"
+      },
+      {
+        "name": "quorum_queue",
+        "state": "enabled"
+      },
+      {
+        "name": "quorum_queue_non_voters",
+        "state": "enabled"
+      },
+      {
+        "name": "restart_streams",
+        "state": "enabled"
+      },
+      {
+        "name": "stream_filtering",
+        "state": "enabled"
+      },
+      {
+        "name": "stream_queue",
+        "state": "enabled"
+      },
+      {
+        "name": "stream_sac_coordinator_unblock_group",
+        "state": "enabled"
+      },
+      {
+        "name": "stream_single_active_consumer",
+        "state": "enabled"
+      },
+      {
+        "name": "stream_update_config_command",
+        "state": "enabled"
+      },
+      {
+        "name": "tracking_records_in_ets",
+        "state": "enabled"
+      },
+      {
+        "name": "user_limits",
+        "state": "enabled"
+      },
+      {
+        "name": "virtual_host_metadata",
+        "state": "enabled"
+      }
+    ],
+    "topology": [
+      {
+        "name": "flowgate.usage.v12.poison",
+        "type": "quorum",
+        "messages_ready": 0,
+        "messages_unacknowledged": 0,
+        "arguments": [
+          [
+            "x-queue-type",
+            "longstr",
+            "quorum"
+          ]
+        ]
+      },
+      {
+        "name": "flowgate.usage.v12.aggregate",
+        "type": "quorum",
+        "messages_ready": 0,
+        "messages_unacknowledged": 0,
+        "arguments": [
+          [
+            "x-overflow",
+            "longstr",
+            "reject-publish"
+          ],
+          [
+            "x-dead-letter-exchange",
+            "longstr",
+            "flowgate.usage.v12"
+          ],
+          [
+            "x-dead-letter-strategy",
+            "longstr",
+            "at-least-once"
+          ],
+          [
+            "x-dead-letter-routing-key",
+            "longstr",
+            "poison"
+          ],
+          [
+            "x-queue-type",
+            "longstr",
+            "quorum"
+          ]
+        ]
+      },
+      {
+        "name": "flowgate.usage.v12.retry",
+        "type": "quorum",
+        "messages_ready": 0,
+        "messages_unacknowledged": 0,
+        "arguments": [
+          [
+            "x-overflow",
+            "longstr",
+            "reject-publish"
+          ],
+          [
+            "x-dead-letter-exchange",
+            "longstr",
+            "flowgate.usage.v12"
+          ],
+          [
+            "x-message-ttl",
+            "signedint",
+            5000
+          ],
+          [
+            "x-dead-letter-strategy",
+            "longstr",
+            "at-least-once"
+          ],
+          [
+            "x-dead-letter-routing-key",
+            "longstr",
+            "granted"
+          ],
+          [
+            "x-queue-type",
+            "longstr",
+            "quorum"
+          ]
+        ]
+      }
+    ],
+    "ttlObserved": 1,
+    "poison": 2,
+    "persistentBefore": 1,
+    "persistentAfter": 1,
+    "ledger": 7,
+    "daily": 7,
+    "mandatoryReturnObserved": true,
+    "permanentOutboxAttemptsStable": true
+  },
+  "gatewayStatuses": [
+    200,
+    200,
+    200,
+    200,
+    200,
+    429
+  ],
+  "quota": {
+    "total_units": 5,
+    "remaining_units": 0,
+    "period_yyyymm": "202611",
+    "api_id": 1,
+    "version": 5
+  },
+  "reconciliation": {
+    "ledgerUnits": 5,
+    "dayUtc": "2026-11-17",
+    "ledgerGrants": 5,
+    "source": "V12_APP_API",
+    "integrityGaps": 0,
+    "consumedGrants": 5,
+    "status": "PROVISIONAL"
+  },
+  "counts": {
+    "ledger": 5,
+    "outbox": 5,
+    "consumed": 5,
+    "daily": 5,
+    "legacyLedger": 0
+  },
+  "passed": true,
+  "rootEnvUnchanged": true,
+  "isolationProject": "flowgate-v11-demo-3b3be244df00",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b0/20261117t203231-9cdf",
+  "targetedJUnit": {
+    "command": "Java17 Maven V12RabbitWorkerTest,V12RabbitReliabilityTest",
+    "exitCode": 0,
+    "tests": 8,
+    "failures": 0
+  },
+  "resolvedIssues": [
+    "P1-A01",
+    "P1-A02",
+    "P1-A03 (console evidence separate)"
+  ]
+}

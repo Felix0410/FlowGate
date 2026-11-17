@@ -2,6 +2,8 @@ import {h,button,notice,permissionButton,table,formFields,openDialog} from './ui
 /** 商品运营只调用管理API；Portal用户始终使用独立登录与客户端。 */
 export async function renderMarket(ctx) {
   ctx.heading('API市场运营','上架商品必须引用已发布、节点已应用的V12私有计量API。SKU额度不可改写，请创建新SKU。');
+  const ready=await ctx.api.request('/admin/market/readiness');
+  if(ready.status!=='READY')return h('section',{class:'card'},notice(ready.message),h('a',{href:'/console/guide.html'},'查看隔离启用指南'));
   const [categories,listings] = await Promise.all([ctx.api.request('/admin/market/categories'),ctx.api.request('/admin/market/listings?limit=100')]);
   const category = () => { const f=formFields([{name:'code',label:'分类标识'},{name:'name',label:'分类名称'}]);openDialog('创建分类',f.node,async()=>{await ctx.api.request('/admin/market/categories',{method:'POST',body:f.values()});await ctx.saved('分类已创建。');},{submitLabel:'创建分类'}); };
   const edit = row => {const f=formFields([{name:'apiId',label:'关联API',value:row?.api_id,options:(ctx.data.apis||[]).map(a=>({value:a.id,label:a.method+' '+a.publicPath})),disabled:!!row},{name:'categoryId',label:'分类',value:row?.category_id,options:categories.map(c=>({value:c.id,label:c.name}))},{name:'title',label:'商品标题',value:row?.title},{name:'summary',label:'简介',value:row?.summary},{name:'docText',label:'公开文档（纯文本）',value:row?.doc_text,required:false}]);openDialog(row?'编辑商品':'创建商品',f.node,async()=>{const values=f.values();await ctx.api.request('/admin/market/listings'+(row?'/'+row.id:''),{method:row?'PATCH':'POST',body:{...values,apiId:Number(values.apiId),categoryId:Number(values.categoryId),...(row?{revision:row.revision}:{})}});await ctx.saved('商品信息已保存；上架不改变API路由。');});};
