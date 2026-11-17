@@ -70,4 +70,4 @@ mvn -B -ntp -pl flowgate-control -am package -DskipTests</code></pre>
 <h2 id="market">API市场运营（V12）</h2>
 <p>在API接入中创建私有API与路由，治理策略选择“API独立月度计量”，发布并等待全部接流节点应用。客户业务的“API市场”提供分类、商品、免费SKU和上架操作。普通用户在独立 <code>/portal/</code> 注册和登录，不需要ADMIN密码。</p>
 <p>先创建分类、关联真实API的商品，再创建当月零元免费SKU，最后上架。SKU额度不可修改，调整需创建新SKU。商品保存不等于上架，上架不改变路由快照；后台会复验当前版本/checksum、完整节点心跳、V12能力、新表和开关。下架不删除历史权益。</p>
-<p>市场页提供V12独立用量对账。MySQL账本是权威准入记录，RabbitMQ日报可能延迟；当前日为PROVISIONAL，待消费为PENDING，完整性缺口显示INTEGRITY_GAP。V11旧用量和Kafka链路继续使用原入口。Portal具体操作与隔离运行详见仓库 <code>docs/guides/v12-a-portal.md</code>。</p></article></main><footer><a href="#start">回到启动说明</a> · 本机业务手册</footer></body></html>
+<p>市场页提供V12独立用量对账。MySQL账本是权威准入记录，RabbitMQ日报可能延迟；当前日为PROVISIONAL，待消费为PENDING，完整性缺口显示INTEGRITY_GAP。V11旧用量和Kafka链路继续使用原入口。Portal具体操作与隔离运行详见仓库 <code>docs/guides/v12-a-portal.md</code>。</p></article><section class="card"><h2>V12-B订单运营</h2><p>客户业务→API市场：ADMIN创建正价BASE报价；普通用户在Portal自助下单。仅模拟结算。订单状态区分待付款、已付款待权益、已开通、已关闭及已模拟退款。</p><p>默认关闭或缺表先显示未就绪，不自动迁移用户旧库。业务Rabbit恢复后原Outbox补投；Poison需核对权威数据，SENT超过300秒且启动冷却结束方可由ADMIN确认原事件重排，保留审计。</p></section></main><footer><a href="#start">回到启动说明</a> · 本机业务手册</footer></body></html>

@@ -1,0 +1,6 @@
+import assert from 'node:assert/strict';
+import {money,orderStatus,skuPeriod} from '../flowgate-control/src/main/resources/static/portal/commerce.js';
+import {createPortalApi} from '../flowgate-control/src/main/resources/static/portal/api.js';
+assert.equal(money(990),'¥9.90');assert.equal(skuPeriod('NEXT_MONTH',new Date('2026-12-31T23:59:59Z')),'202701');assert.equal(orderStatus('PAID_PENDING_FULFILLMENT'),'已模拟付款，等待权益');assert.equal(orderStatus('REFUNDED'),'已模拟退款');
+const calls=[];const api=createPortalApi(async(path,options)=>{calls.push({path,options});return {ok:true,json:async()=>({orderNo:'order',status:'PENDING_PAYMENT'})};});const body={applicationId:1,skuId:2,clientRequestId:'stable-request'};await api.request('/orders',{body});await api.request('/orders',{body});assert.deepEqual(JSON.parse(calls[0].options.body),JSON.parse(calls[1].options.body));assert.equal(Object.keys(body).length,3);assert.equal(calls[0].options.cache,'no-store');
+const {readFile}=await import('node:fs/promises');const app=await readFile(new URL('../flowgate-control/src/main/resources/static/portal/app.js',import.meta.url),'utf8');assert.ok(app.includes('o.canRefund'));assert.ok(!/innerHTML|localStorage|sessionStorage/.test(app));console.log('V12-B Node: prices, UTC periods, honest status, stable request, safe DOM PASS');

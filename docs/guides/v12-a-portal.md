@@ -51,3 +51,7 @@ RabbitMQ日报与MySQL实时账本是不同口径。异步关闭时Outbox保留N
 旧V11未安装V12表且Portal关闭时，Console“客户业务→API市场”显示DISABLED，先读`/admin/market/readiness`，不访问缺失的市场表。仅在新隔离库显式安装十四张A表、启用Portal后继续操作；禁止为消除提示自动迁移用户旧库。
 
 V12 Rabbit消息语法/权威冲突保留Poison，暂时依赖故障最多12次持久TTL重试，重试副本确认后才ACK原件。永久损坏Outbox以`INVALID_OUTBOX_PERMANENT`标识且停止自动领取。运营需核对原Ledger与原事件，修复冲突后按原eventId审计补投；不能另造授权流水。Rabbit单节点只证明持久恢复，不代表高可用。
+
+## 普通付费订单
+
+V12-B在原免费入口旁增加正价BASE报价，普通用户可选择本人应用→确认订单→模拟支付→等待权益→签发APP Token→Gateway调用。下月报价下月UTC起生效，完全未用可模拟退款，已使用不回滚。完整步骤和异常恢复见[订单指南](v12-b-orders.md)。A免费领取仍保持每用户/API终身一次与当月有效，不被订单替代。

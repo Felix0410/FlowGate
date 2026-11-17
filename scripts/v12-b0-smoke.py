@@ -54,7 +54,7 @@ def main():
         for k in list(second_env):
             if k.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_KAFKA_','FLOWGATE_USAGE_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):second_env.pop(k)
         log=work/'gateway2.log'
-        with log.open('w') as stream:second=subprocess.Popen([java,'-Dflowgate.v12-test.owner='+state['owner'],'-jar',str(home/'artifacts/flowgate-gateway.jar')],cwd=core.ROOT,env=second_env,stdout=stream,stderr=subprocess.STDOUT)
+        with log.open('w') as stream:second=subprocess.Popen([java,'-Dflowgate.v12-test.owner='+state['owner'],'-jar',str(home/'artifacts/flowgate-gateway.jar')],cwd=core.ROOT,env=second_env,stdout=stream,stderr=subprocess.STDOUT,start_new_session=True)
         control='http://127.0.0.1:'+str(ports['control']);gateways=['http://127.0.0.1:'+str(ports[k]) for k in ('gateway','gateway2')]
         wait(lambda:core.http_json(gateways[1],'/actuator/health')[0]==200,'第二Gateway启动')
         def request(expected,path,token=None,body=None,base=control,method=None):

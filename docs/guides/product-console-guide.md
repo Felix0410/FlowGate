@@ -210,3 +210,7 @@ Kafka仍是单Broker本地演示。持久卷不是生产HA，SENT补投不是跨
 先创建分类、关联真实API的商品，再创建当月零元免费SKU，最后上架。SKU额度不可修改，调整需创建新SKU。商品保存不等于上架，上架不改变路由快照；后台会复验当前版本/checksum、完整节点心跳、V12能力、新表和开关。下架不删除历史权益。
 
 市场页提供V12独立用量对账。MySQL账本是权威准入记录，RabbitMQ日报可能延迟；当前日为PROVISIONAL，待消费为PENDING，完整性缺口显示INTEGRITY_GAP。V11旧用量和Kafka链路继续使用原入口。Portal具体操作与隔离运行详见仓库 `docs/guides/v12-a-portal.md`。
+
+## V12-B订单运营
+
+客户业务的API市场支持正价BASE SKU、订单状态筛选、SIM收据、权益与业务事件诊断。只有ADMIN可创建报价及确认原事件补投，OPERATOR/VIEWER只读；开关OFF或无B表显示未就绪。付款确认和权益开通分开显示，Poison保留运营检查，SENT补投要求300秒等待与启动冷却、原eventId和审计。详见[普通订单与模拟结算](v12-b-orders.md)，不迁移用户旧库，不接真实支付。
