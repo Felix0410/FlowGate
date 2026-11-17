@@ -1,3 +1,7 @@
+> **2026-11-17 最新消息架构决定**：V12-B当前执行范围不变；B完成后先实施独立**V12-M（旧V11-C Kafka用量迁移至RabbitMQ）**，经真隔离测试确认原MySQL Ledger/Outbox/Consumed/Daily完整且Kafka-free全栈运行，再进入V12-C抢购。**最终版本只运行RabbitMQ、不保留Kafka客户端与服务依赖**。旧Kafka用户数据卷和历史证据绝不自动删除。此项当前仅设计、尚未实际删除Kafka；详见[迁移合同](docs/design/v12-post-b-kafka-retirement.md)和[ADR-14](docs/design/v12-architecture-decisions.md)。
+
+> **V12-B设计状态（2026-11-10）**：已经在`docs/v12-b-order-design`完成[普通订单与模拟支付架构](docs/design/v12-b-order-architecture.md)、[SQL事务与故障矩阵](docs/design/v12-b-transactions-acceptance.md)、[B0～B8阶段合同](docs/progress/v12-b-order-payment.md)与[Codex单阶段执行提示](CODEX_V12_B_EXEC_PROMPT.md)。A的三项Rabbit/旧Console P1已**合并为未来B0修复任务，尚未实际修复**。A已有Portal和免费权益源码及RabbitMQ定向测试；B订单/付费/退款与独立Commerce RabbitMQ**还没有编码/实测**。V11旧Kafka保留；PR均Draft，不自动部署或修改用户已有数据卷。
+
 # FlowGate — 高并发 API 网关与流量治理平台
 
 > **V12-A新入口**：普通用户 `/portal/`，Console客户业务新增API市场。V12异步使用RabbitMQ，V11继续Kafka；安全默认关闭，只在新隔离环境安装新表。见[Portal与隔离运行指南](docs/guides/v12-a-portal.md)。
