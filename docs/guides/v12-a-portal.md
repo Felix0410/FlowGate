@@ -45,3 +45,13 @@ RabbitMQ日报与MySQL实时账本是不同口径。异步关闭时Outbox保留N
 `scripts/v12-a-smoke.py`只建立新隔离项目，做功能主链路和小规模并发，不是性能测试。默认结束停止自有JVM/容器并保留卷；`--keep-running`仅供同轮页面检查，需之后显式stop并停止该轮额外Gateway进程。进度/证据见 `docs/progress/v12-a-implementation.md`。
 
 负责人仍需亲自完成账号注册、市场搜索、应用/权益/凭证操作、调用、375px与键盘体验。自动化通过不代表人工验收、V11 E6或D性能完成。所有PR保持Draft，不合并main。
+
+## V12-B0继承修复
+
+旧V11未安装V12表且Portal关闭时，Console“客户业务→API市场”显示DISABLED，先读`/admin/market/readiness`，不访问缺失的市场表。仅在新隔离库显式安装十四张A表、启用Portal后继续操作；禁止为消除提示自动迁移用户旧库。
+
+V12 Rabbit消息语法/权威冲突保留Poison，暂时依赖故障最多12次持久TTL重试，重试副本确认后才ACK原件。永久损坏Outbox以`INVALID_OUTBOX_PERMANENT`标识且停止自动领取。运营需核对原Ledger与原事件，修复冲突后按原eventId审计补投；不能另造授权流水。Rabbit单节点只证明持久恢复，不代表高可用。
+
+## 普通付费订单
+
+V12-B在原免费入口旁增加正价BASE报价，普通用户可选择本人应用→确认订单→模拟支付→等待权益→签发APP Token→Gateway调用。下月报价下月UTC起生效，完全未用可模拟退款，已使用不回滚。完整步骤和异常恢复见[订单指南](v12-b-orders.md)。A免费领取仍保持每用户/API终身一次与当月有效，不被订单替代。

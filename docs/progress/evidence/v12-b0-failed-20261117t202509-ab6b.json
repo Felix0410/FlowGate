@@ -1,0 +1,138 @@
+{
+  "runId": "20261117t202509-ab6b",
+  "scope": "targeted V12 functionality; no historical fault matrix or load experiment",
+  "designBase": "e77624f",
+  "checks": [
+    "14-table migration and second idempotent migration passed",
+    "real private V12 release applied by both Gateways; listing published with Free5"
+  ],
+  "requests": [
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/1/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/categories",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/apps/1",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/status",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis?q=%E7%9C%9F%E5%AE%9E",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1",
+      "status": 200
+    }
+  ],
+  "notExecuted": [
+    "two-Control registration race",
+    "100-request concurrency/load",
+    "V11 B23/C26 real fault regression",
+    "Kafka full fault matrix (V11)",
+    "historical-day final MATCH",
+    "owner manual acceptance",
+    "V11 E6",
+    "V11 D performance"
+  ],
+  "failure": "[503, 503, 503, 503, 503, 503, 503, 503]",
+  "passed": false,
+  "rootEnvUnchanged": true,
+  "isolationProject": "flowgate-v11-demo-fd0f7a6c9f66",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b0/20261117t202509-ab6b"
+}

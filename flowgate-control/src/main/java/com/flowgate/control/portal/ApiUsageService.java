@@ -13,7 +13,7 @@ import static com.flowgate.control.portal.PortalStore.*;
 /** V12读模型专线：原事件核验、同事务去重聚合、只读完整性对账和受控补投。 */
 @Service
 public class ApiUsageService {
-    private final PortalStore db;private final AuditService audit;private final TransactionTemplate tx;private final TransactionTemplate read;
+    private final long started=System.nanoTime();private final PortalStore db;private final AuditService audit;private final TransactionTemplate tx;private final TransactionTemplate read;
     public ApiUsageService(PortalStore db,AuditService audit,PlatformTransactionManager manager){this.db=db;this.audit=audit;tx=new TransactionTemplate(manager);tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);tx.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);tx.setTimeout(4);read=new TransactionTemplate(manager);read.setReadOnly(true);read.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);read.setTimeout(4);}
     private ApiFailure conflict(){return new ApiFailure(409,"V12_EVENT_CONFLICT","事件与V12本地权威流水不一致");}
     private void validate(ApiUsageGrantedEvent e){
@@ -29,12 +29,12 @@ public class ApiUsageService {
         db.update("INSERT INTO fg_api_usage_daily(day_utc,application_id,api_id,authorized_units,grant_count) VALUES(?,?,?,?,1) ON DUPLICATE KEY UPDATE authorized_units=authorized_units+?,grant_count=grant_count+1",java.sql.Date.valueOf(e.day()),e.applicationId(),e.apiId(),e.units(),e.units());return "CONSUMED";
     });}catch(DuplicateKeyException collision){return tx.execute(status->{validate(e);String result=duplicate(e);if(result==null)throw conflict();return result;});}}
     public List<Map<String,Object>> claim(int limit){if(limit<1)return List.of();return tx.execute(status->{
-        var rows=db.rows("SELECT * FROM fg_api_usage_outbox WHERE (status IN ('NEW','FAILED') AND next_attempt_at<=UTC_TIMESTAMP(3)) OR (status='IN_FLIGHT' AND lease_until<UTC_TIMESTAMP(3)) ORDER BY id LIMIT ? FOR UPDATE SKIP LOCKED",Math.min(limit,20));
+        var rows=db.rows("SELECT * FROM fg_api_usage_outbox WHERE (status IN ('NEW','FAILED') AND (last_error_code IS NULL OR last_error_code<>'INVALID_OUTBOX_PERMANENT') AND next_attempt_at<=UTC_TIMESTAMP(3)) OR (status='IN_FLIGHT' AND lease_until<UTC_TIMESTAMP(3)) ORDER BY id LIMIT ? FOR UPDATE SKIP LOCKED",Math.min(limit,20));
         for(var row:rows){String owner=UUID.randomUUID().toString();db.update("UPDATE fg_api_usage_outbox SET status='IN_FLIGHT',lease_owner=?,lease_until=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 30 SECOND),attempt_count=attempt_count+1 WHERE id=?",owner,row.get("id"));row.put("lease_owner",owner);}return rows;
     });}
     public void sent(Map<String,Object> row){db.update("UPDATE fg_api_usage_outbox SET status='SENT',lease_owner=NULL,lease_until=NULL,last_error_code=NULL,next_attempt_at=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 300 SECOND) WHERE id=? AND status='IN_FLIGHT' AND lease_owner=?",row.get("id"),row.get("lease_owner"));}
     public void failed(Map<String,Object> row,String code){db.update("UPDATE fg_api_usage_outbox SET status='FAILED',lease_owner=NULL,lease_until=NULL,last_error_code=?,next_attempt_at=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL LEAST(30,POW(2,LEAST(attempt_count,5))) SECOND) WHERE id=? AND status='IN_FLIGHT' AND lease_owner=?",code,row.get("id"),row.get("lease_owner"));}
-    public Object replay(String id,long actor){if(!UUID.fromString(id).toString().equals(id))throw new IllegalArgumentException();return tx.execute(status->{
+    public Object replay(String id,long actor){if(System.nanoTime()-started<java.util.concurrent.TimeUnit.SECONDS.toNanos(300))throw new ApiFailure(409,"REPLAY_COOLDOWN","进程启动后需等待300秒再补投");if(!UUID.fromString(id).toString().equals(id))throw new IllegalArgumentException();return tx.execute(status->{
         // 2. 只允许SENT且过300秒仍未消费者，以状态CAS补投原事件，永不再扣量。
         var row=db.need("SELECT o.id,o.status,(o.next_attempt_at<=UTC_TIMESTAMP(3)) AS waited,c.event_id AS consumed FROM fg_api_usage_outbox o LEFT JOIN fg_api_consumed_event c ON c.event_id=o.event_id WHERE o.event_id=? FOR UPDATE",id);
         if(!"SENT".equals(row.get("status"))||n(row,"waited")!=1||row.get("consumed")!=null)throw new ApiFailure(409,"REPLAY_NOT_ELIGIBLE","仅已发送超过300秒且未消费的事件可补投");

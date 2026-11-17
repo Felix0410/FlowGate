@@ -143,7 +143,7 @@
 
 | 段 | 内容 | 真实编码状态 | 计划证据 |
 |---|---|---|---|
-| B0 | A三项P1修复+真Rabbit故障+旧Console OFF | NOT_STARTED | `v12-b0-rabbit-fixes.json`、`v12-b0-console.json` |
+| B0 | A三项P1修复+真Rabbit故障+旧Console OFF | LOCAL_PASS（待复审） | `v12-b0-rabbit-fixes.json`、`v12-b0-console.json` |
 | B1 | 6表新迁移/约束/就绪门禁 | NOT_STARTED | `v12-b1-schema.json` |
 | B2 | PAID_BASE SKU/市场页面与上架 | NOT_STARTED | `v12-b2-market.json` |
 | B3 | 幂等订单与BASE槽预占 | NOT_STARTED | `v12-b3-order.json` |
@@ -154,3 +154,10 @@
 | B8 | 远端源码复审/负责人真人手测 | NOT_STARTED | `docs/reviews/v12-b-*.md` |
 
 **最终交付需能手动演示**：普通用户A注册/APP→B购买正价本月套餐→MySQL订单→模拟付款→Rabbit异步Grant→同一个APP Token经Gateway扣该API额度→订单与余额/流水→未用权益受控模拟退款及已用拒绝→运营Console真实订单/消息恢复；同时旧V11、A免费领取不被破坏。B设计定稿不等于B实施完成。
+
+
+## 本轮实施记录（2026-11-18）
+
+B0：本地8项Rabbit定向JUnit通过；独立旧V11无V12表的HTTP与真实Chromium市场DISABLED通过。全新Rabbit3.13.7隔离环境真实验证Poison、MySQL暂停→TTL重试→恢复去重、Broker停止期间Ledger/Outbox提交、恢复追平、固定hostname保留命名卷重建、mandatory return不误标SENT、永久损坏Outbox停止自动claim。见`evidence/v12-b0-rabbit-fixes.json`、`evidence/v12-b0-console.json`；三次失败记录独立保留（权益重构SQL占位符、Rabbit参数格式、异步统计等待）。全部用户.env未变，测试卷保留。单节点quorum不等于HA，负责人手测未执行。
+
+开始时fetch尚未完成，曾按旧蓝图预写订单草稿；fetch发现本合同后立即快进至设计父分支`0a69307`，暂停B后续工作，先完成B0验证。草稿未作为B阶段完成或测试通过。B0完成提交后再校正B1～B7合同。
