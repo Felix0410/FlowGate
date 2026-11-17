@@ -59,6 +59,18 @@
 
 **阶段终点**：普通用户完成“选商品→创建订单→模拟支付→等待权益→APP调用→余额”闭环，且模拟交易具有真实状态机和恢复机制。B通过后才开始大规模抢购。
 
+## V12-M：统一RabbitMQ并退役Kafka（B完成后、C开始前必须实施）
+
+> **2026-11-17决策：V12-B结束后的后续版本不再保留Kafka。** 本阶段是**未来计划，未编码/未运行**；不得让正在执行的B顺手删掉旧Kafka。详细合同见[Kafka退役与V11用量迁移设计](../design/v12-post-b-kafka-retirement.md)，权威决定为ADR-14。
+
+- **M0审计和恢复基线**：B通过复审之后盘点V11 Kafka用量Outbox/Consumed/日报，确认事件Schema、SENT未消费、租约、原旧账本无缺失，建立完整隔离样本和未迁移数据保护清单。
+- **M1 Rabbit接替V11用量**：新独立legacy-usage exchange/quorum主/重试/Poison队列，继续用原V11 MySQL Ledger/Outbox/Consumed/Daily与eventId，严格at-least-once和DB去重；V12-A Rabbit用量、B Commerce不改。
+- **M2可靠切换与恢复**：旧Kafka发布/消费停写/排空或按MySQL权威Outbox和Consumed可恢复地补投，切换时唯一发布路由、双Control避免混合写；对账/业务准入不断账。不能把Kafka offset当业务事实。
+- **M3正式移除Kafka运行依赖**：从当前代码、Maven、配置、Compose与新启动脚本移除Kafka客户端与Broker，**保持旧MySQL记录和历史证据不变**；真实“完全不启动Kafka”的V11+V12业务回归、重复消息及Rabbit故障测试全部通过才算完成。
+- **M4停机交付**：新的迁移阶段Draft PR、清晰可重复的演练/回滚手册与独立脱敏证据。任何原用户Kafka卷、数据或容器未经授权不得停止、删除或破坏。
+
+**开始V12-C的硬门槛**：V12-M通过真实Kafka-free全栈验收；否则V12-C不得开工。迁移不等于删除旧V11账本。当前先执行V12-B，不提前生成M的Codex编码任务。
+
 ## V12-C：限时9.9元/100份抢购与可靠恢复（核心高并发）
 
 **目标**：真实MySQL 100份库存下，高并发入口先由Redis Lua挡绝大多数失败候选；被接受的请求先持唯一BASE槽并写持久purchaseIntent+reserved+Outbox才回**202**；业务RabbitMQ异步创单，模拟支付后成交/开通；对永久未创单Intent有超时回收，对用户丢失202响应有本人可信查回能力，停止Broker/Control/Redis与消费者重复时可恢复、不可超卖。
@@ -121,3 +133,8 @@
 V12-A独立功能分支`feat/v12-a-portal`已远端提交自助Portal、商品免费权益、V12 APP/API月配额、独立**RabbitMQ**用量链路与定向证据，见[实施记录](v12-a-implementation.md)和[首次复审](../reviews/v12-a-rabbitmq-static-review-2026-11-10.md)。A0～A6代码和部分真实测试已交付，A7有三项P1待修及负责人手测；**不能标成整阶段正式验收通过**，当前没开始B/C代码。
 
 **队列选择最终裁决**：V12新业务消息（A用量、B订单付款/权益、C抢购Intent/库存补偿）采用RabbitMQ独立exchange/quorum main/retry/poison队列，保留MySQL Outbox+幂等事务；**旧V11-C Kafka保留不迁移**。此前本路线及交易蓝图里提到未来V12 Kafka Consumer/Topic的文字以[消息适配设计](../design/v12-rabbitmq-adaptation.md)与ADR-13为准。B/C的阶段开发合同必须写Rabbit的publisher confirm、mandatory returns、COMMIT后basicAck、持久重试/隔离和实际容器故障测试。
+
+
+## 2026-11-17 最新MQ决议（覆盖2026-11-10旧“保留Kafka”文字）
+
+负责人已明确要求**完成V12-B后，不再长期保留Kafka**。本路线旧段落中“保留V11-C Kafka”的文字只适用于**B交付之前的历史/过渡架构**，不能作为V12-C/D的长期目标。新顺序是 **V12-A → V12-B（目前仍保留旧Kafka）→ V12-M（Rabbit统一迁移并退役旧Kafka）→ V12-C（抢购仅Rabbit）→ V12-D（无Kafka全链路验收）**。V12-M完成前不得将“Kafka已移除”写入项目功能清单或简历。历史文档和测试证据照旧保留。
