@@ -74,3 +74,14 @@
 ### ADR-13实施后的统一后续合同（2026-11-10补充）
 
 **V12-B普通订单与V12-C限时抢购也一律用RabbitMQ**，不是只把V12-A用量换成Rabbit后在B/C再新建Kafka业务Topic。业务消息使用同一Rabbit Broker上**独立于usage读模型的commerce exchange/quorum主/TTL retry/poison队列及独立BusinessOutbox**；消费端COMMIT后basicAck、confirm且无mandatory return才SENT、持久事件源+业务唯一键抗重复，实际方案见[消息迁移设计补充](v12-rabbitmq-adaptation.md)。本ADR-13优先覆盖旧ADR-03/ADR-06/ADR-07及交易蓝图中提到“V12新Kafka Topic/ConsumerGroup/offset ACK”的旧文本。**V11-C已有Kafka仍然运行**，没有获准做全局消息迁移或删除旧队列；不得把“V12 RabbitMQ”误写成“全仓库无Kafka”。
+
+
+## ADR-14：V12-B完成后全面退役Kafka，消息系统统一RabbitMQ（2026-11-17负责人明确决定）
+
+**新的最终决策覆盖此前ADR-13“永久保留V11-C Kafka”的长期计划**：V12-B实施期间仍沿用既有旧V11 Kafka，以免扩大正在执行的B范围；**B完成并通过源码/定向测试复审之后，必须先完成独立V12-M消息收敛阶段，才可以启动V12-C抢购开发**。从V12-M通过后的现行运行架构中移除Kafka Broker、Kafka专用发布者/消费者、Kafka Maven依赖及当前Compose/配置依赖，全部改为RabbitMQ。
+
+旧V11的MySQL配额Ledger、Outbox、ConsumedEvent、Daily账本及历史事件ID**完整保留**，迁移的只是消息传输路径；V11的USAGE_GRANTED使用独立Rabbit legacy-usage交换机/quorum队列并由新消费者继续核对同一旧账本和同一旧幂等表。V12-A API级用量、V12-B Commerce与未来C抢购仍使用各自独立Rabbit队列；同一事件不得未经仲裁双投Kafka/Rabbit。
+
+必须通过隔离真机的**无Kafka Broker/客户端/环境变量的全栈启动**和旧新两类Ledger对账、断网恢复、重复事件/历史SENT缺消费补投，再删除当前代码的Kafka运行路径；原用户持久Kafka数据卷/现存服务**不得未经单独许可停止或删除**，历史提交、阶段文档和原测试证据不删除。确切切换、回滚和验收合同：[V12-B后Kafka退役设计](v12-post-b-kafka-retirement.md)。
+
+**当前只有新增设计决定，Kafka源码并未移除，V12-B也未被要求提前改造旧链路。**
