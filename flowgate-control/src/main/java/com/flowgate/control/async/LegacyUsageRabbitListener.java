@@ -16,12 +16,11 @@ import org.springframework.stereotype.Component;
 public class LegacyUsageRabbitListener {
     private final UsageAggregationService aggregation;private final RabbitTemplate rabbit;private final LegacyTransportFence fence;private final AsyncDiagnostics diagnostics;
     public LegacyUsageRabbitListener(UsageAggregationService aggregation,@Qualifier("legacyUsageRabbitTemplate")RabbitTemplate rabbit,LegacyTransportFence fence,AsyncDiagnostics diagnostics){this.aggregation=aggregation;this.rabbit=rabbit;this.fence=fence;this.diagnostics=diagnostics;}
-    @RabbitListener(id="legacyUsage",queues=LegacyUsageRabbitConfiguration.QUEUE,containerFactory="legacyUsageRabbitFactory")
+    @RabbitListener(id="legacyUsage",queues=LegacyUsageRabbitConfiguration.QUEUE,containerFactory="legacyUsageRabbitFactory",autoStartup="false")
     public void receive(Message message,Channel channel)throws Exception{
-        // 1. FROZEN禁止消费；抛出容器回退异常保留源消息，不把维护暂停当作Poison。
-        if(!fence.allows("RABBIT"))throw new org.springframework.amqp.AmqpException("CUTOVER_FROZEN");
-        // 2. 严格解析/权威冲突进Poison，临时故障确认retry副本后ACK；未知最多12次。
+        // 1. 容器只在RABBIT模式启动；已活跃时数据库短断走持久TTL重试，不在源队列热重投。
         RabbitDelivery.receive(message,channel,rabbit,LegacyUsageRabbitConfiguration.EXCHANGE,payload->{
+            if(!fence.allows("RABBIT"))throw new org.springframework.dao.DataAccessResourceFailureException("LEGACY_FENCE_UNAVAILABLE");
             String outcome=aggregation.process(payload);diagnostics.count("CONSUMED".equals(outcome)?"consumed":"duplicate");
         });
     }

@@ -1,0 +1,526 @@
+{
+  "passed": true,
+  "checks": [
+    "Kafka-free Jar/env/Compose three services; nine isolated legacy/API/commerce quorum queues",
+    "real Rabbit down Gateway200 persists old Ledger+Outbox; broker recovery consumes original event once",
+    "real DB pause → confirmed durable 5s retry visible → automatic original-event recovery",
+    "100 actual legacy deliveries deduplicated; malformed JSON/source conflict/wrong schema isolated in durable Poison",
+    "real mandatory return and quorum overflow publisher NACK rejected by RabbitDelivery",
+    "actual MySQL COMMIT then real Channel close before ACK; Broker redelivery; one Consumed and one Daily increment",
+    "ADMIN recovery refuses authoritative conflict409; only own injected payload repaired, original event restored",
+    "real owner Rabbit container removal/recreation with same volume+hostname retains quorum persistent message and Poison; consumer reconnects"
+  ],
+  "services": [
+    "rabbitmq",
+    "redis",
+    "mysql"
+  ],
+  "sourceCommit": "303529d16bdd94f2c6b4bd0e704c98db87bef5fb",
+  "legacyCounts": [
+    "21",
+    "21",
+    "21",
+    "21"
+  ],
+  "closedDay": {
+    "rows": [
+      {
+        "aggregatedUnits": 2,
+        "apiName": "GET /api/v11/legacy/{id}",
+        "aggregatedCount": 2,
+        "expectedCount": 2,
+        "expectedUnits": 2,
+        "consumedUnits": 2,
+        "dayUtc": "2026-11-18",
+        "applicationId": 11,
+        "consumedCount": 2,
+        "apiId": 3,
+        "applicationName": "旧V11应用",
+        "outboxBacklog": 0,
+        "status": "MATCH"
+      }
+    ],
+    "nextCursor": null,
+    "asOfUtc": "2026-11-19T13:42:10.041Z",
+    "asyncEnabled": true,
+    "statisticMeaning": "授权单位与次数，异步读模型可能延迟，不是业务成功量",
+    "integrityStatus": "NO_GAP_IN_SCAN",
+    "integrityWarnings": [],
+    "integrityTruncated": false,
+    "integrityScan": {
+      "fromUtc": "2026-11-17",
+      "note": "缺事件日期未知；写入时间仅作候选筛选，包含相邻UTC日，不作为日报归属。单次最多100个异常样本。",
+      "untilUtcExclusive": "2026-11-20"
+    }
+  },
+  "doctor": {
+    "schemaVersion": 1,
+    "profile": "v11",
+    "isolated": true,
+    "state": "READY",
+    "checks": [
+      {
+        "id": "java17",
+        "state": "READY",
+        "reason": "Java17版本检查",
+        "action": "使用JDK17"
+      },
+      {
+        "id": "docker",
+        "state": "READY",
+        "reason": "Docker可访问",
+        "action": ""
+      },
+      {
+        "id": "compose",
+        "state": "READY",
+        "reason": "Compose可用",
+        "action": ""
+      },
+      {
+        "id": "jars",
+        "state": "READY",
+        "reason": "三模块Jar与工作台源码可用",
+        "action": ""
+      },
+      {
+        "id": "mysql",
+        "state": "READY",
+        "reason": "已用当前配置执行只读查询",
+        "action": ""
+      },
+      {
+        "id": "redis",
+        "state": "READY",
+        "reason": "会话服务只读PING",
+        "action": "核对Redis认证/数据库配置"
+      },
+      {
+        "id": "control",
+        "state": "READY",
+        "reason": "control实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "gateway",
+        "state": "READY",
+        "reason": "gateway实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "demo",
+        "state": "READY",
+        "reason": "demo实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "processOwnership",
+        "state": "READY",
+        "reason": "已核对隔离进程身份",
+        "action": "外部进程由负责人管理；可使用up --isolated"
+      },
+      {
+        "id": "schema.v1",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.b",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.c",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.m",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "preflight",
+        "state": "READY",
+        "reason": "四项历史风险必须全零",
+        "action": ""
+      },
+      {
+        "id": "quotaActivation",
+        "state": "READY",
+        "reason": "隔离受管进程已配置计量",
+        "action": "登录工作台读取实际就绪原因；不要全局修改.env开关"
+      },
+      {
+        "id": "nodes",
+        "state": "READY",
+        "reason": "完整名单通过当前数据库只读门禁核对",
+        "action": ""
+      },
+      {
+        "id": "rabbitProtocol",
+        "state": "READY",
+        "reason": "Rabbit真实协议响应",
+        "action": ""
+      },
+      {
+        "id": "asyncActivation",
+        "state": "READY",
+        "reason": "隔离Control配置异步开启",
+        "action": "登录工作台读取C状态；关闭时余额可用、日报暂不聚合"
+      },
+      {
+        "id": "consumer",
+        "state": "READY",
+        "reason": "Legacy主quorum有活跃消费者且DB栅栏RABBIT，不代表所有SENT已统计",
+        "action": ""
+      }
+    ],
+    "project": "flowgate-v11-demo-0ed24b5a585c",
+    "ports": {
+      "control": 62156,
+      "gateway": 62157,
+      "demo": 62158,
+      "mysql": 62159,
+      "redis": 62160,
+      "rabbitmq": 62161
+    },
+    "volumes": {
+      "mysql": "flowgate-v11-demo-0ed24b5a585c_mysql-data",
+      "redis": "flowgate-v11-demo-0ed24b5a585c_redis-data",
+      "rabbitmq": "flowgate-v11-demo-0ed24b5a585c_rabbitmq-data"
+    },
+    "console": "http://127.0.0.1:62156/console/"
+  },
+  "rabbitQueues": [
+    {
+      "name": "flowgate.commerce.v12.retry",
+      "type": "quorum",
+      "messages": 0,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-dead-letter-exchange",
+          "longstr",
+          "flowgate.commerce.v12"
+        ],
+        [
+          "x-message-ttl",
+          "signedint",
+          5000
+        ],
+        [
+          "x-dead-letter-strategy",
+          "longstr",
+          "at-least-once"
+        ],
+        [
+          "x-dead-letter-routing-key",
+          "longstr",
+          "payment"
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.usage.v12.poison",
+      "type": "quorum",
+      "messages": 0,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.b0.persist",
+      "type": "quorum",
+      "messages": 2,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.m6.nack.0f5a8b97-2829-4f71-baab-d845baed76d4",
+      "type": "quorum",
+      "messages": 2,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-max-length",
+          "signedint",
+          1
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.usage.v12.aggregate",
+      "type": "quorum",
+      "messages": 0,
+      "consumers": 4,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-dead-letter-exchange",
+          "longstr",
+          "flowgate.usage.v12"
+        ],
+        [
+          "x-dead-letter-strategy",
+          "longstr",
+          "at-least-once"
+        ],
+        [
+          "x-dead-letter-routing-key",
+          "longstr",
+          "poison"
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.usage.legacy.poison",
+      "type": "quorum",
+      "messages": 12,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.usage.v12.retry",
+      "type": "quorum",
+      "messages": 0,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-dead-letter-exchange",
+          "longstr",
+          "flowgate.usage.v12"
+        ],
+        [
+          "x-message-ttl",
+          "signedint",
+          5000
+        ],
+        [
+          "x-dead-letter-strategy",
+          "longstr",
+          "at-least-once"
+        ],
+        [
+          "x-dead-letter-routing-key",
+          "longstr",
+          "granted"
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.commerce.v12.orders",
+      "type": "quorum",
+      "messages": 0,
+      "consumers": 4,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-dead-letter-exchange",
+          "longstr",
+          "flowgate.commerce.v12"
+        ],
+        [
+          "x-dead-letter-strategy",
+          "longstr",
+          "at-least-once"
+        ],
+        [
+          "x-dead-letter-routing-key",
+          "longstr",
+          "poison"
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.usage.legacy.retry",
+      "type": "quorum",
+      "messages": 0,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-dead-letter-exchange",
+          "longstr",
+          "flowgate.usage.legacy"
+        ],
+        [
+          "x-message-ttl",
+          "signedint",
+          5000
+        ],
+        [
+          "x-dead-letter-strategy",
+          "longstr",
+          "at-least-once"
+        ],
+        [
+          "x-dead-letter-routing-key",
+          "longstr",
+          "granted"
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.commerce.v12.poison",
+      "type": "quorum",
+      "messages": 2,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.usage.legacy.aggregate",
+      "type": "quorum",
+      "messages": 0,
+      "consumers": 4,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-dead-letter-exchange",
+          "longstr",
+          "flowgate.usage.legacy"
+        ],
+        [
+          "x-dead-letter-strategy",
+          "longstr",
+          "at-least-once"
+        ],
+        [
+          "x-dead-letter-routing-key",
+          "longstr",
+          "poison"
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    },
+    {
+      "name": "flowgate.m6.nack.aca0aad6-6566-427c-bd95-f9e73f17457d",
+      "type": "quorum",
+      "messages": 2,
+      "consumers": 0,
+      "arguments": [
+        [
+          "x-overflow",
+          "longstr",
+          "reject-publish"
+        ],
+        [
+          "x-max-length",
+          "signedint",
+          1
+        ],
+        [
+          "x-queue-type",
+          "longstr",
+          "quorum"
+        ]
+      ]
+    }
+  ],
+  "persistentQueueCountBefore": 2,
+  "persistentQueueCountAfter": 2,
+  "poisonCountBeforeRebuild": 12,
+  "poisonCountAfterRebuild": 12,
+  "rootEnvUnchanged": true,
+  "oldLedgerUnchanged": true,
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261119t132241-1692",
+  "ownerManual": "NOT_EXECUTED",
+  "notExecuted": [
+    "complete historical V11 B23/C26 fault matrix",
+    "multi-node Rabbit HA",
+    "D/C load tests",
+    "user persistent-environment migration"
+  ]
+}
