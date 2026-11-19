@@ -1,6 +1,6 @@
 # FlowGate V12-M｜RabbitMQ单中间件收敛与Kafka退役——Codex逐段实施合同
 
-> **仅设计定稿，M0～M8全部NOT_STARTED**。方案见[完整架构](../design/v12-m-rabbitmq-migration-architecture.md)，真实旧源码审计见[现状核验](../reviews/v12-m-preflight-audit-2026-11-19.md)；独立设计分支`docs/v12-m-rabbitmq-convergence`，父`feat/v12-b-orders@c857d3b8532ae98dcfb208d10dd140efa0a3037b`。V12-B PR #17仍Draft，需先复审其真实源码/证据；旧B功能分支相对旧B设计分支behind5的ADR-14差异以本设计的最终决定覆盖，但**不能通过修改PR#17/head/base/rebase来实现**。本阶段不含V12-C秒杀、不自动合并任意PR。
+> **M0～M7候选实施及定向验证完成，M8独立复审/负责人手测待完成**。方案见[完整架构](../design/v12-m-rabbitmq-migration-architecture.md)，真实旧源码审计见[现状核验](../reviews/v12-m-preflight-audit-2026-11-19.md)；独立设计分支`docs/v12-m-rabbitmq-convergence`，父`feat/v12-b-orders@c857d3b8532ae98dcfb208d10dd140efa0a3037b`。V12-B PR #17仍Draft，需先复审其真实源码/证据；旧B功能分支相对旧B设计分支behind5的ADR-14差异以本设计的最终决定覆盖，但**不能通过修改PR#17/head/base/rebase来实现**。本阶段不含V12-C秒杀、不自动合并任意PR。
 
 ## 总体编码纪律与停止条件
 
@@ -94,18 +94,18 @@
 - Draft PR base必须是`docs/v12-m-rabbitmq-convergence`、功能分支`feat/v12-m-rabbitmq-only`；记录完整提交SHA及实际exitCode，不改PR#17或历史PR的head/base、不合并main、不进入C或D。停在M8等待复审。
 - **通过判据**：当前项目源码/可执行包/现行Compose/配置/自动测试不依赖Kafka，真实无Kafka隔离环境跑V11旧月用量+V12-A新用量+B Commerce三链、旧历史Outbox追平且无双计、Rabbit断连/持卷恢复/Poison/重复投递均验证，旧用户资产未动。
 
-## 唯一进度表（此时全部未实施）
+## 唯一进度表（候选交付；正式验收待M8）
 
 | 阶段 | 任务 | 编码状态 | 计划证据 |
 |---|---|---|---|
-| M0 | B验收与Legacy链路/环境只读基线 | NOT_STARTED | `v12-m0-baseline.json` |
-| M1 | DB切换fence、Legacy Rabbit与双Broker兼容模式 | NOT_STARTED | `v12-m1-legacy-rabbit.json` |
-| M2 | 受控FROZEN切换、旧SENT/FAILED恢复与演练 | NOT_STARTED | `v12-m2-cutover.json` |
-| M3 | Console Rabbit诊断、原REST/权限、中文页面 | NOT_STARTED | `v12-m3-console.json` |
-| M4 | Kafka Java/Maven/Compose/脚本正式清退 | NOT_STARTED | `v12-m4-removal.json` |
-| M5 | 无Kafka三链路真实E2E与浏览器 | NOT_STARTED | `v12-m5-kafka-free-e2e.json` |
-| M6 | 故障与旧消息重复/混合版本边界 | NOT_STARTED | `v12-m6-failure-matrix.json` |
-| M7 | Runbook、README/AGENTS/指南同步 | NOT_STARTED | `v12-m7-docs.json` |
-| M8 | 远端代码复审与负责人手测 | NOT_STARTED | `docs/reviews/v12-m-*.md` |
+| M0 | B验收与Legacy链路/环境只读基线 | LOCAL_PASS（待复审） | `v12-m0-baseline.json` |
+| M1 | DB切换fence、Legacy Rabbit与双Broker兼容模式 | LOCAL_PASS（待复审） | `v12-m1-legacy-rabbit.json` |
+| M2 | 受控FROZEN切换、旧SENT/FAILED恢复与演练 | LOCAL_PASS（待复审） | `v12-m2-cutover.json` |
+| M3 | Console Rabbit诊断、原REST/权限、中文页面 | LOCAL_PASS（待复审） | `v12-m3-console.json` |
+| M4 | Kafka Java/Maven/Compose/脚本正式清退 | LOCAL_PASS（待复审） | `v12-m4-removal.json` |
+| M5 | 无Kafka三链路真实E2E与浏览器 | LOCAL_PASS（待复审） | `v12-m5-kafka-free-e2e.json` |
+| M6 | 故障与旧消息重复/混合版本边界 | LOCAL_PASS（待复审） | `v12-m6-failure-matrix.json` |
+| M7 | Runbook、README/AGENTS/指南同步 | LOCAL_PASS（待复审） | `v12-m7-docs.json` |
+| M8 | 远端代码复审与负责人手测 | PENDING_REVIEW / OWNER_MANUAL_NOT_EXECUTED | `docs/reviews/v12-m-*.md` |
 
-**本文件是详细设计和验收标准，不是M阶段已实现或旧Kafka已经删除的声明。**
+**本文件记录详细合同及候选实施状态；真实提交、命令和范围以[实施记录](v12-m-implementation.md)与各阶段证据为准。用户常驻环境未迁移，旧用户Kafka卷保留，M8未通过。**

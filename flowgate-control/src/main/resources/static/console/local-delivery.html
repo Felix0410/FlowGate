@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlowGate 完整使用说明</title><link rel="stylesheet" href="style.css"></head><body class="manual"><header><h1>FlowGate 完整使用说明</h1><p>按实际页面逐项说明：先完成最小闭环，再按需抽查。无需访问GitHub。</p><a class="manual-link" href="./">返回业务页面</a></header><nav class="manual-toc" aria-label="手册目录"><a href="#start">1. 准备与只读检查</a></nav><main><article><h1>FlowGate V1.1 本地完整交付手册</h1>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlowGate 完整使用说明</title><link rel="stylesheet" href="style.css"></head><body class="manual"><header><h1>FlowGate 完整使用说明</h1><p>按实际页面逐项说明：先完成最小闭环，再按需抽查。无需访问GitHub。</p><a class="manual-link" href="./">返回业务页面</a></header><nav class="manual-toc" aria-label="手册目录"><a href="#start">1. 准备与只读检查</a></nav><main><article><p>&gt; 当前运行器为V12-M Rabbit-only版本；旧实例不能自动重启接管，先按[v12-m维护Runbook](v12-m-kafka-retirement-runbook.md)核验。</p>
+<h1>FlowGate V1.1 本地完整交付手册</h1>
 <p>本手册管理独立演示环境。它与您原有的IDE、数据库、Redis、RabbitMQ分别运行，不表示原环境已启用B/C。原V1启动方式仍见README；不要同时占用相同应用端口。</p>
 <h2 id="start">1. 准备与只读检查</h2>
 <p>需要Java17、Maven、Python3、已启动的Docker及Compose。先在项目根目录构建：</p>
@@ -33,5 +34,5 @@ python3 scripts/v11-local.py status --isolated --instance practice</code></pre>
 <pre><code>python3 scripts/v11-local.py stop --isolated
 # practice实例则增加 --instance practice
 python3 scripts/v11-local.py up --isolated</code></pre>
-<p>只停止身份匹配的自有JVM/容器；卷、客户、订阅、Ledger与RabbitMQ offset全部保留。重复up不会重置账号或额度。失败也保留卷，没有自动删卷入口。用户常驻环境不属于这个脚本的接管范围。</p>
+<p>只停止身份匹配的自有JVM/容器；卷、客户、订阅、Ledger与Rabbit持久消息与MySQL消费标记全部保留。重复up不会重置账号或额度。失败也保留卷，没有自动删卷入口。用户常驻环境不属于这个脚本的接管范围。</p>
 <p>本轮自动测试与负责人验收分别记录。请负责人按<code>docs/progress/v11-e-local-delivery.md</code>的E6清单在1280px/375px、键盘与真实业务链路手测；未勾选前不表示正式交付通过。不自动合并PR，也不进入D性能阶段。</p></article></main><footer><a href="#start">回到启动说明</a> · 本机业务手册</footer></body></html>

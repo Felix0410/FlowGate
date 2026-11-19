@@ -27,7 +27,7 @@ Rabbit暂时故障会保留原Outbox并退避重投。格式/权威冲突进入P
 
 - A前置：Portal、V12 quota、V12 async真实就绪，完整接流Gateway能力与版本已确认。
 - B开启：两个Commerce开关均为true；`/admin/commerce/readiness`还会真实检查六表、业务Rabbit拓扑和活跃Worker。
-- `flowgate.commerce.v12`、`flowgate.commerce.v12.orders/retry/poison`与A usage队列隔离。V11-C继续Kafka，不迁移旧消息或账本。
+- `flowgate.commerce.v12`、`flowgate.commerce.v12.orders/retry/poison`与A usage队列隔离。V11旧用量由V12-M独立legacy Rabbit队列接管；原MySQL账本/eventId与UTC日语义保持不变。
 - Broker恢复后保留原卷及固定Rabbit节点主机名，原Outbox和消费去重可恢复；单节点quorum不提供多数派高可用。
 - 测试结束只按本轮`.local/v12-b/<run>/cleanup.json`与owner、进程启动身份停止自有实例，不删除卷、不操作用户旧实例或IDE。
 

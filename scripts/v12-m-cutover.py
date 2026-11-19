@@ -10,7 +10,7 @@ def controls(home):
     # 1. 隔离单机清单是本工具的明确边界；未知Control/IDE一律阻断，绝不停止它们。
     rows=[]
     for line in raw.splitlines():
-        if ('-jar ' in line and 'flowgate-control.jar' in line) or re.search(r'\bcom\.flowgate\.control\.\w*Application\b',line):
+        if ('-jar ' in line and 'flowgate-control' in line) or re.search(r'\bcom\.flowgate\.control\.\w*Application\b',line) or re.search(r'\bjava\b.*(?:^|\s)@[^ ]+',line):
             pid,cmd=line.strip().split(None,1);rows.append({'pid':int(pid),'owned':str(home/'artifacts/flowgate-control.jar') in cmd})
     return rows
 

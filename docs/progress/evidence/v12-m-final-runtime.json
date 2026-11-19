@@ -1,0 +1,182 @@
+{
+  "passed": true,
+  "checks": [
+    "two concurrent ADMIN offline CAS: one success + one conflict; FROZEN final Controls keep Gateway200 and original Ledger/NEW Outbox with async PENDING",
+    "offline audited RABBIT resume; FROZEN original event consumed once; Ledger/Outbox/Consumed/Daily reconcile",
+    "final Jar real Commerce order/pay/Grant/Gateway200/used-refund409/unused-refund200; independent API usage consumes; cross-user404; OPERATOR/VIEWER legacy read200/write403"
+  ],
+  "sourceCommit": "bb93377a3e9b44d00b33001202307ab441ec0d42",
+  "controlJarSha256": "49a6f963b63beabb608b6a2a681073b34b9b309aa451accdfa5cc32074b85984",
+  "legacyCounts": [
+    "22",
+    "22",
+    "22",
+    "22"
+  ],
+  "apiCounts": [
+    "14",
+    "14",
+    "14",
+    "14"
+  ],
+  "commerceIntegrity": {
+    "simulationOnly": true,
+    "status": "PROVISIONAL",
+    "paidPending": 0,
+    "integrityGaps": 0,
+    "review": 0,
+    "dayUtc": "2026-11-19",
+    "orders": 10,
+    "scope": "全局有界订单完整性；不作为按日资金结算"
+  },
+  "concurrentCasExitCodes": [
+    2,
+    0
+  ],
+  "finalFence": "RABBIT\t4",
+  "doctor": {
+    "schemaVersion": 1,
+    "profile": "v11",
+    "isolated": true,
+    "state": "READY",
+    "checks": [
+      {
+        "id": "java17",
+        "state": "READY",
+        "reason": "Java17版本检查",
+        "action": "使用JDK17"
+      },
+      {
+        "id": "docker",
+        "state": "READY",
+        "reason": "Docker可访问",
+        "action": ""
+      },
+      {
+        "id": "compose",
+        "state": "READY",
+        "reason": "Compose可用",
+        "action": ""
+      },
+      {
+        "id": "jars",
+        "state": "READY",
+        "reason": "三模块Jar与工作台源码可用",
+        "action": ""
+      },
+      {
+        "id": "mysql",
+        "state": "READY",
+        "reason": "已用当前配置执行只读查询",
+        "action": ""
+      },
+      {
+        "id": "redis",
+        "state": "READY",
+        "reason": "会话服务只读PING",
+        "action": "核对Redis认证/数据库配置"
+      },
+      {
+        "id": "control",
+        "state": "READY",
+        "reason": "control实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "gateway",
+        "state": "READY",
+        "reason": "gateway实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "demo",
+        "state": "READY",
+        "reason": "demo实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "processOwnership",
+        "state": "READY",
+        "reason": "已核对隔离进程身份",
+        "action": "外部进程由负责人管理；可使用up --isolated"
+      },
+      {
+        "id": "schema.v1",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.b",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.c",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.m",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "preflight",
+        "state": "READY",
+        "reason": "四项历史风险必须全零",
+        "action": ""
+      },
+      {
+        "id": "quotaActivation",
+        "state": "READY",
+        "reason": "隔离受管进程已配置计量",
+        "action": "登录工作台读取实际就绪原因；不要全局修改.env开关"
+      },
+      {
+        "id": "nodes",
+        "state": "READY",
+        "reason": "完整名单通过当前数据库只读门禁核对",
+        "action": ""
+      },
+      {
+        "id": "rabbitProtocol",
+        "state": "READY",
+        "reason": "Rabbit真实协议响应",
+        "action": ""
+      },
+      {
+        "id": "asyncActivation",
+        "state": "READY",
+        "reason": "隔离Control配置异步开启",
+        "action": "登录工作台读取C状态；关闭时余额可用、日报暂不聚合"
+      },
+      {
+        "id": "consumer",
+        "state": "READY",
+        "reason": "Legacy主quorum有活跃消费者且DB栅栏RABBIT，不代表所有SENT已统计",
+        "action": ""
+      }
+    ],
+    "project": "flowgate-v11-demo-0ed24b5a585c",
+    "ports": {
+      "control": 62156,
+      "gateway": 62157,
+      "demo": 62158,
+      "mysql": 62159,
+      "redis": 62160,
+      "rabbitmq": 62161
+    },
+    "volumes": {
+      "mysql": "flowgate-v11-demo-0ed24b5a585c_mysql-data",
+      "redis": "flowgate-v11-demo-0ed24b5a585c_redis-data",
+      "rabbitmq": "flowgate-v11-demo-0ed24b5a585c_rabbitmq-data"
+    },
+    "console": "http://127.0.0.1:62156/console/"
+  },
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261119t132241-1692",
+  "rootEnvUnchanged": true
+}
