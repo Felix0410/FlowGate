@@ -17,7 +17,7 @@ import v11_local_runtime as runtime
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--keep-running',action='store_true',help='保留本轮自有隔离实例供浏览器验证，之后必须显式stop');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--keep-running',action='store_true',help='保留本轮自有隔离实例供浏览器验证，之后必须显式stop');parser.add_argument('--evidence-prefix',choices=['v12-b','v12-m5'],default='v12-b');args=parser.parse_args()
     run=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S').lower()+'-'+secrets.token_hex(2)
     work=core.ROOT/'.local'/'v12-b'/run;runtime.private_directory(work.parent);runtime.private_directory(work)
     home=runtime.instance_home('v12b-'+run)
@@ -38,7 +38,7 @@ def main():
     class Checks(list):
         def append(self,value):super().append(value);print('PASS '+value,flush=True)
     checks=Checks();requests=[];second=None;second_control=None;success=False
-    result={'runId':run,'scope':'targeted V12 functionality; no historical fault matrix or load experiment','designBase':'e77624f','checks':checks,'requests':requests,'notExecuted':['two-Control registration race','20k C concurrency/load','full V11 B23/C26 historical fault matrices (key V11 regressions separately recorded)','historical-day final MATCH','owner manual acceptance','V11 E6','V11 D performance']}
+    result={'runId':run,'scope':'targeted V12 functionality; no historical fault matrix or load experiment','designBase':'48dc05abf33c7bab7e5c1a90bc306d79f82aef3f','sourceCommit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':checks,'requests':requests,'notExecuted':['two-Control registration race','20k C concurrency/load','full V11 B23/C26 historical fault matrices (key V11 regressions separately recorded)','historical-day final MATCH','owner manual acceptance','V11 E6','V11 D performance']}
     def wait(fn,label,seconds=65):
         until=time.monotonic()+seconds
         while time.monotonic()<until:
@@ -55,7 +55,7 @@ def main():
         checks.append('14-table migration and second idempotent migration passed')
         second_env=dict(os.environ,**env);second_env.update(GATEWAY_PORT=str(ports['gateway2']),FLOWGATE_NODE_ID='v12-second-'+run)
         for k in list(second_env):
-            if k.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_KAFKA_','FLOWGATE_USAGE_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):second_env.pop(k)
+            if k.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):second_env.pop(k)
         log=work/'gateway2.log'
         with log.open('w') as stream:second=subprocess.Popen([java,'-Dflowgate.v12-test.owner='+state['owner'],'-jar',str(home/'artifacts/flowgate-gateway.jar')],cwd=core.ROOT,env=second_env,stdout=stream,stderr=subprocess.STDOUT,start_new_session=True)
         control='http://127.0.0.1:'+str(ports['control']);gateways=['http://127.0.0.1:'+str(ports[k]) for k in ('gateway','gateway2')]
@@ -212,7 +212,7 @@ def main():
         finally:core.command(['docker','unpause',mysql_id])
         wait(lambda:qcount('flowgate.commerce.v12.retry')==0 and qcount('flowgate.commerce.v12.orders')==0,'B TTL恢复去重')
         checks.append('commerce malformed JSON + authoritative conflict Poison; real DB pause TTL retry and recovery deduplication')
-        # 旧V11 Free5与Kafka消费仍按原池计量，V12的两个Rabbit读模型不混入。
+        # 旧V11 Free5与Rabbit消费仍按原池计量，V12的两个Rabbit读模型不混入。
         legacy_api=request(201,'/admin/apis',admin,{'serviceId':service['id'],'method':'GET','publicPath':'/api/v11/legacy/{id}','upstreamPath':'/demo/fast/{id}','isPublic':False,'requiredScope':'demo:read','enabled':True})
         request(201,'/admin/routes',admin,{'apiId':legacy_api['id'],'routeId':'v11-legacy','priority':0,'enabled':True})
         legacy_policy=request(201,'/admin/policies',admin,{'code':'v11-legacy-quota','type':'USAGE_QUOTA','scope':'API','parametersJson':'{"unitsPerCall":1}','enabled':True});request(201,f"/admin/policies/{legacy_policy['id']}/bindings",admin,{'targetType':'API','targetId':legacy_api['id']});publish()
@@ -223,9 +223,9 @@ def main():
         request(201,'/admin/subscriptions',admin,{'applicationId':legacy_app['id'],'planId':legacy_plan['id'],'effectiveAt':start.isoformat().replace('+00:00','Z'),'expiresAt':end.isoformat().replace('+00:00','Z')})
         legacy_key=request(200,f"/admin/apps/{legacy_app['id']}/credentials",admin,{'scopes':['demo:read']})['token']
         for i in range(6):request(200 if i<5 else 429,'/api/v11/legacy/1',legacy_key,base=gateways[i%2])
-        wait(lambda:sql('SELECT COALESCE(SUM(grant_count),0) FROM fg_usage_daily;')=='5','旧V11真实Kafka日报')
+        wait(lambda:sql('SELECT COALESCE(SUM(grant_count),0) FROM fg_usage_daily;')=='5','旧V11真实Rabbit日报')
         assert sql('SELECT COUNT(*) FROM fg_quota_ledger;SELECT COUNT(*) FROM fg_outbox_event;SELECT COUNT(*) FROM fg_consumed_event;').splitlines()==['5','5','5']
-        checks.append('legacy V11 dual Gateway Free5 5x200/429; old Ledger=Outbox=Consumed=Kafka Daily5, independent of both V12 Rabbit models')
+        checks.append('legacy V11 dual Gateway Free5 5x200/429; old Ledger=Outbox=Consumed=Rabbit Daily5, independent of both V12 Rabbit models')
         # 真账户ACL：只在本轮私有库创建两个审核角色，复用私有测试密码，不写入证据。
         for role in ('OPERATOR','VIEWER'):
             mutate("INSERT INTO fg_principal(principal_type,username,password_hash,role,scopes_json,enabled) VALUES('ADMIN','b-"+role.lower()+"','"+hashed+"','"+role+"','[]',TRUE);")
@@ -252,7 +252,7 @@ def main():
         result['failure']=type(error).__name__+': '+str(error)+' at line '+str(traceback.extract_tb(error.__traceback__)[-1].lineno);print('主链路失败：'+result['failure'],flush=True)
     finally:
         result['passed']=success;result['rootEnvUnchanged']=root_hash==core.file_hash(core.ROOT/'.env');result['isolationProject']=state['project'];result['localRuntime']=str(work)
-        out=core.ROOT/('docs/progress/evidence/v12-b7-e2e.json' if success else 'docs/progress/evidence/v12-b-failed-'+run+'.json');out.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+        out=core.ROOT/('docs/progress/evidence/'+('v12-m5-kafka-free-e2e.json' if args.evidence_prefix=='v12-m5' else 'v12-b7-e2e.json') if success else 'docs/progress/evidence/'+args.evidence_prefix+'-failed-'+run+'.json');out.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
         # 成功时保留运行实例用于同轮浏览器检查，后续由显式stop收尾；失败立即停自有进程/容器。
         runtime.save(work/'cleanup.json',{'home':str(home),'secondControlPid':second_control.pid if second_control else None,'secondPid':second.pid if second else None,'owner':state['owner']})
         if not success or not args.keep_running:

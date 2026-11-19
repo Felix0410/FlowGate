@@ -65,14 +65,13 @@ def actor(env,token_file):
     return int(session['principalId'])
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--home',type=Path,required=True);p.add_argument('--target',choices=['FROZEN','RABBIT','KAFKA']);p.add_argument('--expect-mode',choices=['KAFKA','FROZEN','RABBIT']);p.add_argument('--expect-epoch',type=int);p.add_argument('--admin-token-file',type=Path);p.add_argument('--compat-rollback',action='store_true');args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--home',type=Path,required=True);p.add_argument('--target',choices=['FROZEN','RABBIT']);p.add_argument('--expect-mode',choices=['KAFKA','FROZEN','RABBIT']);p.add_argument('--expect-epoch',type=int);p.add_argument('--admin-token-file',type=Path);args=p.parse_args()
     home=args.home.resolve();state,env,sql,report=inspect(home)
     if not args.target:print(json.dumps(report));return 0
     if report['controls'] or report['activeLeases']:raise c.LocalFailure('仍有Control或在途租约；先核对全部旧实例退出，等待租约过期')
     if not args.admin_token_file or args.expect_mode is None or args.expect_epoch is None:raise c.LocalFailure('须提供ADMIN会话、预期mode和epoch')
     who=actor(env,args.admin_token_file);old=report['mode'];target=args.target
     allowed={('KAFKA','FROZEN'),('FROZEN','RABBIT'),('RABBIT','FROZEN')}
-    if args.compat_rollback:allowed.add(('FROZEN','KAFKA'))
     if (old,target) not in allowed or old!=args.expect_mode or report['epoch']!=args.expect_epoch:raise c.LocalFailure('模式或代次冲突；重新读取，禁止force')
     high=int(sql('SELECT COALESCE(MAX(id),0) FROM fg_outbox_event;'));checked=health(sql,high)
     # 3. DB CAS与审计同事务；全进程退出后不会有旧回调越过栅栏。仅控制表与审计写入。
