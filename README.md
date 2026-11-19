@@ -1,4 +1,4 @@
-> **当前V12-M（2026-11-19）**：代码/构建/当前Compose与运行器统一RabbitMQ。M0基线、M1/M2兼容切换和Kafka-free三链联调已通过；最终证据与待验项见[实施记录](docs/progress/v12-m-implementation.md)。下面早期V1/V11设计与交付叙事保留为历史，旧Kafka技术描述不代表当前依赖。用户常驻环境尚未迁移，PR保持Draft，不进入C/D或合并main。
+> **当前V12-M（2026-11-19）**：代码/构建/当前Compose与运行器统一RabbitMQ。M0基线、M1/M2兼容切换和Kafka-free三链联调已通过；最终证据与待验项见[实施记录](docs/progress/v12-m-implementation.md)。下面早期V1/V11设计与交付叙事保留为历史，旧Kafka技术描述不代表当前依赖。负责人明确授权后，本机常驻环境已迁移并启动Rabbit；原密码与旧Kafka卷保留，PR保持Draft，不进入C/D或合并main。
 
 
 # FlowGate — 高并发 API 网关与流量治理平台
@@ -248,7 +248,9 @@ cp -n .env.example .env
 chmod 600 .env
 ```
 
-编辑未跟踪的 `.env`，填写实际 JDK 路径、数据库密码、Redis 密码、管理员哈希和内部密钥。推荐使用 `compose.local.yml`：独立的 MySQL 8.4 / Redis 7 容器、持久化数据卷，默认仅绑定 `127.0.0.1:13307` / `127.0.0.1:16380`，不占用其他项目的 3306/6379。MySQL 的 root 密码由 `FG_MYSQL_ROOT_PASSWORD` 配置，应用使用 `flowgate` 用户；容器首次创建数据卷时自动执行 `sql/flowgate-init.sql`。
+编辑未跟踪的 `.env`，填写实际 JDK 路径、数据库密码、Redis 密码、管理员哈希和内部密钥。推荐使用 `compose.local.yml`：独立的 MySQL 8.4 / Redis 7 / RabbitMQ 3.13.7 容器、持久化数据卷，默认仅绑定 `127.0.0.1:13307` / `127.0.0.1:16380`，不占用其他项目的 3306/6379。MySQL 的 root 密码由 `FG_MYSQL_ROOT_PASSWORD` 配置，应用使用 `flowgate` 用户；容器首次创建数据卷时自动执行 `sql/flowgate-init.sql`。
+
+**本机当前已经运行**：后台 [Console](http://127.0.0.1:8081/console/)、普通用户 [Portal](http://127.0.0.1:8081/portal/)、[Rabbit管理台](http://127.0.0.1:15672)。Console沿用原管理员账号/密码；Rabbit账号与密码只在本地`.env`，不进入Git。正常Docker项目现在是MySQL、Redis、Rabbit，旧Kafka容器已移除但3个旧卷保留。
 
 配置完成后，可一条命令启动 Docker 依赖及三个 JVM：
 
@@ -262,7 +264,7 @@ python3 scripts/run-local.py stop
 docker compose -f compose.local.yml stop
 ```
 
-脚本自动读取根目录 `.env`，只管理经过 PID/Jar 路径核对的本项目进程；日志在 `.local/run/`（已忽略）。修改 Java 代码后先重新 Maven package，再 restart。Docker Desktop 需保持运行；数据库卷已存在时，修改 `.env` 不会自动重置 MySQL 账号密码，不要通过删除数据卷处理配置变更。
+脚本静态解析根目录 `.env`（不执行Shell），明确启动MySQL/Redis/Rabbit且不重建已有容器，只管理经过owner/PID启动时间/Jar快照核对的本项目进程；日志在 `.local/run/`（已忽略）。修改 Java 代码后先重新 Maven package，再 restart。Docker Desktop 需保持运行；数据库卷已存在时，修改 `.env` 不会自动重置 MySQL 账号密码，不要通过删除数据卷处理配置变更。
 
 如果不用 Compose 而是自行维护 MySQL，需要创建专用数据库及有权限的应用账号，并执行 DDL（端口使用 `.env` 的实际值）：
 

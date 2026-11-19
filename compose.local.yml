@@ -38,13 +38,12 @@ services:
   rabbitmq:
     image: rabbitmq:3.13.7-management
     hostname: flowgate-rabbit
-    profiles: [mq]
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${FLOWGATE_RABBITMQ_USERNAME:?请配置Rabbit账号}
       RABBITMQ_DEFAULT_PASS: ${FLOWGATE_RABBITMQ_PASSWORD:?请配置Rabbit密码}
       RABBITMQ_DEFAULT_VHOST: /flowgate-v12
-    ports: ['127.0.0.1:${FLOWGATE_RABBITMQ_PORT:-5672}:5672']
+    ports: ['127.0.0.1:${FLOWGATE_RABBITMQ_PORT:-5672}:5672', '127.0.0.1:${FLOWGATE_RABBITMQ_MANAGEMENT_PORT:-15672}:15672']
     volumes: ['rabbitmq-data:/var/lib/rabbitmq']
     healthcheck:
       test: [CMD, rabbitmq-diagnostics, -q, check_running]

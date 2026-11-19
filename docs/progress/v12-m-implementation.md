@@ -33,3 +33,17 @@ M0～M7候选实施与定向自动验证已完成；M8独立远端源码复审�
 ## 远端交付回执
 
 已通过GitHub App交付[Draft PR #19](https://github.com/Felix0410/FlowGate/pull/19)，base为M设计分支，未改PR#17。原生git push返回403/exit128；App创建同内容Git树并保留六阶段父链。源码检查点本地`702ec47`对应远端`281847a02db37a38286307c8f7d60b1f1b52677c`，树`ddb5a45ffa74346f113857dfec5e293b581165c7`完全一致；该检查点后仅增加本回执文档。各阶段远端tree/parent均实际GET回读核对，映射见`evidence/v12-m-delivery.json`。main与B功能分支SHA未变。兼容回滚本地`f26db25`在远端对应`72cfb593501384f2629d6cf4e69aad8dca30a6d1`。PR待M8独立复审和负责人手测，不正式签验收。
+
+## 负责人追加授权后的本机常驻迁移（2026-11-19）
+
+负责人明确指出日常环境也必须一起可运行，因此在本轮对`flowgate-local`执行实际迁移。先静态读取根.env、盘点PID/端口、确认唯一其他Java进程为IDEA Maven服务且不触碰；全库单事务备份54915字节、根.env与旧Kafka恢复配置保存到私有`.local/live-rabbit-migration/20261119T143901Z/`（均0600，未提交凭证）。
+
+原V11 Ledger/Outbox/Consumed/Daily均0，Kafka三个分区earliest/latest均0，无消费组、无Control、无活跃租约，四项旧库预检全零，无历史待补消息。仅新增A/B/M表，原业务表逐表哈希保持一致。用既有ADMIN主体记录负责人授权的离线DB维护审计，不伪造HTTP登录会话，`KAFKA/1→FROZEN/2→RABBIT/3`、高水位0。
+
+本地.env补Rabbit随机凭证、完整单Gateway名单和A/B开关，保留原MySQL/Redis/管理员密码及内部密钥。Compose默认含Rabbit和回环5672/15672；旧MySQL/Redis不重建。移除已停止的旧Kafka容器，保留全部3个旧Kafka卷。
+
+修复原常驻`run-local.py`漏启Rabbit的问题，并改为静态配置解析、owner+PID启动时间核验、不可变Jar快照、原容器no-recreate与明确的应用健康等待。新增4项配置不执行/PID复用/归属测试通过；一键start实际启动通过，重复start实际通过且没有新增JVM或重建容器。此次没有Java改动，不重跑已经通过的94项Java或历史故障矩阵。
+
+常驻doctor READY，三JVM与Rabbit UP，9个quorum队列，三主队列各2活跃消费者，stream_queue enabled，at-least-once DLX/reject-publish参数实际检查通过。Console/Portal/测试台/状态/目录API均200；真实Gateway `/api/demo/fast/migration-check` 返回200，Rabbit管理API认证验证3.13.7。证据`evidence/v12-m-local-deployment.json`。一次部署验证脚本误把Rabbit CLI参数typed-array当对象已修正重跑，不算产品失败或通过成绩。
+
+当前环境故意保持运行供负责人使用；启动入口`python3 scripts/run-local.py start`，状态`status`，改用IDEA前先`stop`释放三个应用端口（Docker依赖不停止），IDEA沿用根.env。Console登录仍用原密码。Portal真实市场尚未上架API时会显示真实空态，不插入假商品、订单或占用用户额度来演示。独立源码复审和负责人业务验收仍待完成。
