@@ -1,3 +1,5 @@
+> **V12-M最新进度（2026-11-19）**：V12-B普通订单/模拟结算/权益Rabbit Commerce**实际源码已提交PR#17（Draft）**，但最终阶段证据与负责人验收待补。负责人要求B之后正式退役Kafka，已在`docs/v12-m-rabbitmq-convergence`完成[从真实B源码出发的Kafka退役架构](docs/design/v12-m-rabbitmq-migration-architecture.md)、[M0～M8实施合同](docs/progress/v12-m-rabbitmq-convergence.md)、[源码审计](docs/reviews/v12-m-preflight-audit-2026-11-19.md)及[Codex执行提示词](CODEX_V12_M_EXEC_PROMPT.md)。**现在尚未删除Kafka任何代码/客户端/容器，也没有真正执行迁移**；M完成后运行版仅RabbitMQ，旧V11 MySQL历史账本和用户Kafka卷继续保留。历史段落出现Kafka属于旧项目演进记录，不能作为最终项目依赖说明。
+
 > **V12-B设计状态（2026-11-10）**：已经在`docs/v12-b-order-design`完成[普通订单与模拟支付架构](docs/design/v12-b-order-architecture.md)、[SQL事务与故障矩阵](docs/design/v12-b-transactions-acceptance.md)、[B0～B8阶段合同](docs/progress/v12-b-order-payment.md)与[Codex单阶段执行提示](CODEX_V12_B_EXEC_PROMPT.md)。A的三项Rabbit/旧Console P1已**合并为未来B0修复任务，尚未实际修复**。A已有Portal和免费权益源码及RabbitMQ定向测试；B订单/付费/退款与独立Commerce RabbitMQ**还没有编码/实测**。V11旧Kafka保留；PR均Draft，不自动部署或修改用户已有数据卷。
 
 # FlowGate — 高并发 API 网关与流量治理平台

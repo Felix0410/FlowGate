@@ -1,3 +1,15 @@
+# FlowGate 当前唯一下一阶段：V12-M统一RabbitMQ并退役Kafka（设计完成、未编码）
+
+> **负责人最新要求**：V12-B完成后所有消息链统一RabbitMQ，彻底移除Kafka运行/构建依赖；**M完成后才能进入V12-C抢购**。本阶段唯一执行入口`CODEX_V12_M_EXEC_PROMPT.md`，M0～M8唯一详细任务合同`docs/progress/v12-m-rabbitmq-convergence.md`、完整架构`docs/design/v12-m-rabbitmq-migration-architecture.md`、真实源码审计`docs/reviews/v12-m-preflight-audit-2026-11-19.md`、ADR-14。老ADR-13“永久保留Kafka”仅代表旧B过渡阶段，已被覆盖。
+
+> **真实源码基线**：`feat/v12-b-orders@c857d3b8532ae98dcfb208d10dd140efa0a3037b`，PR#17 Draft，已有B0三P1修复+真实订单/Commerce/退款代码。远端B1～B8完整证据和进度未完全同步，M0必须先复核，未证实的不能写已通过。M设计分支`docs/v12-m-rabbitmq-convergence`直接基于最新B代码；本地Codex从其最新HEAD新建`feat/v12-m-rabbitmq-only`且Draft PR直接以设计分支为base，不触碰B/旧PR/main。
+
+> **安全硬线**：M1短暂兼容Kafka/Rabbit只是为了可回滚的**单路由栅栏**迁移，最终版本必须Kafka-free。旧V11 MySQL Ledger/Outbox/Consumed/Daily及eventId/chargeId/UTC日不变，新Rabbit legacy-usage队列与V12-A usage/B Commerce独立。迁移新隔离owner/随机端口/新卷；用户.env/IDE、常驻MySQL/Redis/Kafka/Rabbit容器与卷/未提交文件只读保护，不允许down -v、删除用户Kafka volume、DROP/TRUNCATE旧表、Git reset-hard/clean-fd/force。Java17/SpringBoot4/原生ESM、中文`// 1.`关键业务注释，所有阶段对应Console与中文指南同步。M阶段完成即停，等待复审和负责人手测，不自动进入C/D/合并main。
+
+> 以下B/A/V11-E/V11-C等“当前任务”保留为**历史材料**，不再作为Codex新一轮执行指令。
+
+---
+
 # FlowGate 当前任务｜V12-B普通订单与RabbitMQ遗留修复（设计已完成，待本地Codex编码）
 
 > **唯一执行入口：`CODEX_V12_B_EXEC_PROMPT.md`**，唯一完整分段合同`docs/progress/v12-b-order-payment.md`，业务/SQL/状态机`docs/design/v12-b-order-architecture.md`、`docs/design/v12-b-transactions-acceptance.md`。负责人明确要求将A的三项复审P1并入B阶段，**B0先做A的坏JSON/重试、真实Rabbit故障、旧V11无V12表的Console待就绪**；B0定向实测通过后才能B1～B7实现付费API商品→订单→模拟支付→Rabbit Commerce可靠Grant→Gateway消费→受控模拟退款、页面与手册，B8停机交复审。
