@@ -11,7 +11,7 @@
 
 ## 2. 全实例停止与单路由切换
 
-兼容实现与真实回滚演练固定在Git提交`f26db25`。最终Rabbit-only源码已不含Kafka客户端，不能静默回到旧传输。不要把兼容版用于未知旧Control仍运行的灰度双写。
+兼容实现与真实回滚演练固定在本地Git提交`f26db25`；GitHub App等价远端提交为`72cfb593501384f2629d6cf4e69aad8dca30a6d1`，完整映射见`docs/progress/evidence/v12-m-delivery.json`。最终Rabbit-only源码已不含Kafka客户端，不能静默回到旧传输。不要把兼容版用于未知旧Control仍运行的灰度双写。
 
 显式安装`sql/flowgate-v12-m.sql`只新增控制表；首次为KAFKA/epoch1，重复安装不重置。新建且经owner验证为空的隔离库由启动器显式选择RABBIT，已有库永不自动改模式。
 
