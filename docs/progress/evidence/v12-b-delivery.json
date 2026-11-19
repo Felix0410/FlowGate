@@ -1,0 +1,36 @@
+{
+  "nativePush": {
+    "exitCode": 128,
+    "httpStatus": 403
+  },
+  "route": "authorized connected GitHub app",
+  "branch": "feat/v12-b-orders",
+  "base": "docs/v12-b-order-design",
+  "pr": {
+    "number": 17,
+    "url": "https://github.com/Felix0410/FlowGate/pull/17",
+    "draft": true
+  },
+  "commits": [
+    {
+      "local": "875bbfff8754491359c1a14d827938836960d9eb",
+      "remote": "566b1f46091971131b954a42073b777c04c016d7",
+      "tree": "f79f8199c27290e6cf9d636297f40b7713146e86",
+      "exactTreeVerified": true
+    },
+    {
+      "local": "8c3beb5a1618a87cbf136ce6fe4345785e1b79f8",
+      "remote": "c857d3b8532ae98dcfb208d10dd140efa0a3037b",
+      "tree": "e3157516289690f60d7b19d6d41412066b02c732",
+      "exactTreeVerified": true
+    }
+  ],
+  "designParent": "0a69307672e4492d2482acab0237bb81f16062bd",
+  "latestDesign": "f228cd3e64ebad44625538a60319b38aac3228e7",
+  "latestDesignScope": "documentation-only ADR14: B unchanged; future M after review, before C",
+  "notes": [
+    "API commit SHAs differ from local author metadata; identical trees and ordered parents retained",
+    "Evidence documentation commit and design merge follow the mapped code commits; final ref verified after update",
+    "No main/old PR mutation"
+  ]
+}
