@@ -1,0 +1,80 @@
+{
+  "passed": true,
+  "ownerAndManifestVerified": true,
+  "removed": {
+    "containers": 38,
+    "volumes": 56,
+    "networks": 10
+  },
+  "projects": [
+    {
+      "project": "flowgate-v11-demo-ce74748c45f3",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-ece4af87a1a3",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-763a623e0e5f",
+      "containers": 3,
+      "volumes": 5,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-6749f41dcf84",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-3b3be244df00",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-fd0f7a6c9f66",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-5fefaf5c6304",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-ff5e566d582d",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-0ed24b5a585c",
+      "containers": 3,
+      "volumes": 3,
+      "networks": 1
+    },
+    {
+      "project": "flowgate-v11-demo-95cc60e31cee",
+      "containers": 4,
+      "volumes": 6,
+      "networks": 1
+    }
+  ],
+  "runningContainersAfter": [
+    "flowgate-local-kafka-1",
+    "flowgate-local-redis-1",
+    "flowgate-local-mysql-1"
+  ],
+  "userContainersVolumesTouched": false,
+  "unrelatedStoppedContainersDeleted": false,
+  "imagesRemoved": false,
+  "globalPruneUsed": false
+}

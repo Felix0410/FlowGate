@@ -1,0 +1,45 @@
+{
+  "failuresRetained": [
+    {
+      "phase": "M1",
+      "failure": "old test constructors missing new fence parameter",
+      "resolved": true
+    },
+    {
+      "phase": "M2",
+      "failure": "duplicate CONTROL_PORT kwargs in test launcher",
+      "resolved": true
+    },
+    {
+      "phase": "M2",
+      "failure": "ambiguous Rabbit connection factory in Boot auto configuration",
+      "resolved": true
+    },
+    {
+      "phase": "M2",
+      "failure": "Redis ownership target missing and UNION collation mismatch in read-only health query",
+      "resolved": true
+    },
+    {
+      "phase": "M6",
+      "failure": "DB-unavailable fence caused source requeue instead of durable TTL retry; listener lifecycle and failure routing fixed",
+      "resolved": true
+    },
+    {
+      "phase": "M6",
+      "failure": "quorum overflow may allow small surplus before NACK; bounded probe sends until actual broker NACK",
+      "resolved": true
+    },
+    {
+      "phase": "M6",
+      "failure": "Spring probe callback threads delayed process exit after successful assertion; standalone probe closes and exits with actual assertion status",
+      "resolved": true
+    },
+    {
+      "phase": "M6",
+      "failure": "Rabbit queue metrics sampled before new persistent message visible; wait for settled before/after counters",
+      "resolved": true
+    }
+  ],
+  "rawLogs": "private .local; no credentials exported"
+}

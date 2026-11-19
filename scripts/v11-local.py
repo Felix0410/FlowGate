@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--config', type=Path, default=ROOT / '.env', help='只读静态环境文件，不执行Shell')
     parser.add_argument('--isolated', action='store_true', help='显式管理本工具的新隔离环境')
     parser.add_argument('--instance', default='default')
-    for kind in ('control', 'gateway', 'demo', 'mysql', 'redis', 'kafka'): parser.add_argument('--' + kind + '-port', type=int)
+    for kind in ('control', 'gateway', 'demo', 'mysql', 'redis', 'rabbitmq'): parser.add_argument('--' + kind + '-port', type=int)
     args = parser.parse_args()
     try:
         if args.isolated:

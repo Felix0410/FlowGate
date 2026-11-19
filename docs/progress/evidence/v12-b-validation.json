@@ -1,0 +1,45 @@
+{
+  "sourceCommit": "8c3beb5a1618a87cbf136ce6fe4345785e1b79f8",
+  "designParent": "0a69307672e4492d2482acab0237bb81f16062bd",
+  "b0Commit": "875bbfff8754491359c1a14d827938836960d9eb",
+  "java": {
+    "distinctPassed": 95,
+    "contract": 11,
+    "control": 54,
+    "gateway": 26,
+    "demo": 4,
+    "execution": "staged runs; final Control54+Contract11 rerun; Gateway26 earlier same unchanged module; Demo4 socket-enabled rerun",
+    "fullFinal95SingleRun": false
+  },
+  "node": {
+    "entrypointsPassed": 9,
+    "command": "for task_test in scripts/*test.mjs; do node \"$task_test\" || exit; done",
+    "exitCode": 0
+  },
+  "python": {
+    "passed": 14,
+    "command": "PYTHONPYCACHEPREFIX=/tmp/flowgate-v12-b-pycache python3 -m unittest discover -s scripts -p test_v11_local.py",
+    "exitCode": 0
+  },
+  "controlJarSha256": "0a24c1a01d986205168d9cfa14e626a73487e6986bc2e0ab788dcb690fdf0069",
+  "diffCheckExitCode": 0,
+  "independentReview": "PENDING",
+  "ownerManualAcceptance": "NOT_EXECUTED",
+  "notExecuted": [
+    "full historical V11 B23/C26 fault matrices",
+    "C/D load/performance",
+    "independent Linux host",
+    "user environment migration",
+    "independent live cold-start replay cooldown refusal"
+  ],
+  "failuresRetained": [
+    "initial Demo/Python restricted socket failure; socket-enabled targeted reruns pass",
+    "v12-b-failed-20261117t204318-0809.json",
+    "v12-b-failed-20261117t204537-0add.json",
+    "B0 three failed evidence files retained"
+  ],
+  "notes": [
+    "v12-b0 evidence designBase e77624f was inherited A script metadata; actual B design parent is designParent here",
+    "latest UI/source-link changes validated by final Control tests and real browser; earlier fault matrix was not all rerun"
+  ]
+}

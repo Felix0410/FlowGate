@@ -15,7 +15,7 @@ public class UsageAggregationService {
  public UsageAggregationService(OutboxEventEntryMapper outbox,QuotaLedgerEntryMapper ledger,ConsumedEventMapper consumed,UsageDailyMapper daily,PlatformTransactionManager manager){this.outbox=outbox;this.ledger=ledger;this.consumed=consumed;this.daily=daily;tx=new TransactionTemplate(manager);tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);tx.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);tx.setTimeout(4);}
  private ApiFailure conflict(String code){return new ApiFailure(409,code,"事件与本地权威记录不一致，已停止该分区等待诊断");}
  private void validate(UsageGrantedEvent e){
-  // 1. Kafka不是可信数字来源；完整八字段必须与本地Outbox一致，并交叉校验Ledger。
+  // 1. Rabbit不是可信数字来源；完整八字段必须与本地Outbox一致，并交叉校验Ledger。
   var source=outbox.selectOne(new QueryWrapper<OutboxEventEntry>().eq("event_id",e.eventId()));
   if(source==null||!"USAGE_GRANTED".equals(source.eventType)||!e.equals(UsageGrantedEvent.parse(source.payloadJson)))throw conflict("EVENT_CONFLICT");
   var grant=ledger.find(e.chargeId());

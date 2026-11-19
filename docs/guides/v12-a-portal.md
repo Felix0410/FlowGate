@@ -20,7 +20,7 @@ FLOWGATE_V12_QUOTA_ENABLED=true
 FLOWGATE_V12_ASYNC_ENABLED=true
 ```
 
-新实例安装 V1→V11→C→V12-A，叠加 `compose.v12-a.yml`。RabbitMQ使用单独随机端口、随机密码、独立vhost `/flowgate-v12`和新命名卷。V11仍使用Kafka。默认六个E端口若占用需用 `--control-port`、`--gateway-port` 等分别指定空闲端口，不能停止占用端口的用户进程。Rabbit端口由新实例自动选取。
+新实例安装 V1→V11→C→V12-A，使用含Rabbit的 `compose.v11-demo.yml`（旧overlay仅空兼容入口）。RabbitMQ使用单独随机端口、随机密码、独立vhost `/flowgate-v12`和新命名卷。V11旧用量由独立legacy Rabbit队列消费，旧Kafka只属于历史阶段。默认六个E端口若占用需用 `--control-port`、`--gateway-port` 等分别指定空闲端口，不能停止占用端口的用户进程。Rabbit端口用`--rabbitmq-port`显式覆盖，测试脚本自动分配随机端口。
 
 已有E实例不会自动迁移或改变消息中间件，不能拿旧实例名重启当作V12迁移。所有stop均保留卷。隔离运行清单和凭证保存在 `.local/`，不要提交、截图或公开这些文件。
 

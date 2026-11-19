@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "java17": {
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "mvn test package -DargLine=-javaagent:.../mockito-core-5.23.0.jar",
+    "exitCode": 0,
+    "execution": "one final full reactor94 after DB-fence fix; earlier clean reactor94 separately passed"
+  },
+  "python": {
+    "runtimeSafety": 14,
+    "cutoverInventorySafety": 2,
+    "exitCodes": [
+      0,
+      0
+    ]
+  },
+  "node": {
+    "entrypoints": 9,
+    "exitCode": 0
+  },
+  "dependencyTreeKafkaMatches": 0,
+  "runtimeKafkaImportConfigScanMatches": 0,
+  "finalRuntime": "v12-m-final-runtime.json",
+  "fullHistoricalB23C26": "NOT_EXECUTED",
+  "C_D_load": "NOT_EXECUTED",
+  "ownerManual": "NOT_EXECUTED",
+  "independentReview": "PENDING"
+}

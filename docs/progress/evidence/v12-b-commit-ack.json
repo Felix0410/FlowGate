@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "commitAckLoss": true,
+  "brokerRedelivery": true,
+  "grant": 1,
+  "consumed": 1,
+  "probeExitCode": 0,
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261117t205032-8d1b",
+  "rootEnvUnchanged": true,
+  "finalControlJarSha256": "0a24c1a01d986205168d9cfa14e626a73487e6986bc2e0ab788dcb690fdf0069",
+  "probeScope": "production CommerceWorker/CommerceService; actual DB commit then proxy closes real Rabbit channel at ACK; Broker redelivery deduplicates; final summary/source-link-only changes followed probe"
+}

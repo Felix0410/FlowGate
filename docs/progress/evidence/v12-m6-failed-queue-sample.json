@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "checks": [
+    "Kafka-free Jar/env/Compose three services; nine isolated legacy/API/commerce quorum queues",
+    "real Rabbit down Gateway200 persists old Ledger+Outbox; broker recovery consumes original event once",
+    "real DB pause → confirmed durable 5s retry visible → automatic original-event recovery",
+    "100 actual legacy deliveries deduplicated; malformed JSON/source conflict/wrong schema isolated in durable Poison",
+    "real mandatory return and quorum overflow publisher NACK rejected by RabbitDelivery",
+    "actual MySQL COMMIT then real Channel close before ACK; Broker redelivery; one Consumed and one Daily increment",
+    "ADMIN recovery refuses authoritative conflict409; only own injected payload repaired, original event restored"
+  ],
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261119t132241-1692",
+  "failure": "private log retained; failure does not count as acceptance"
+}

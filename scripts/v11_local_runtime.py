@@ -14,7 +14,7 @@ import time
 import uuid
 import v11_local_core as core
 
-DEFAULT_PORTS = {'control': 8081, 'gateway': 8080, 'demo': 8085, 'mysql': 13407, 'redis': 16480, 'kafka': 19192}
+DEFAULT_PORTS = {'control': 8081, 'gateway': 8080, 'demo': 8085, 'mysql': 13407, 'redis': 16480, 'rabbitmq': 15682}
 
 
 def instance_home(instance='default'):
@@ -101,7 +101,7 @@ def owned_pid(home, state, module):
 
 def volume_identities(state, allow_missing=False):
     result = {}
-    for kind in (('mysql', 'redis', 'kafka', 'rabbitmq') if state.get('v12Rabbitmq') else ('mysql', 'redis', 'kafka')):
+    for kind in ('mysql', 'redis', 'rabbitmq'):
         name = state['project'] + '_' + kind + '-data'
         proc = subprocess.run(['docker', 'volume', 'inspect', '--format', '{{json .Labels}}', name], capture_output=True, text=True)
         if proc.returncode and allow_missing: continue
@@ -118,7 +118,7 @@ def containers(state, env):
     ids = core.command(['docker', 'ps', '-a', '--filter', 'label=com.docker.compose.project=' + state['project'], '--format', '{{.ID}}']).splitlines()
     for cid in ids:
         labels = json.loads(core.command(['docker', 'inspect', '--format', '{{json .Config.Labels}}', cid])) or {}
-        if labels.get('io.flowgate.v11-demo.owner') != state['owner'] or labels.get('com.docker.compose.service') not in ('mysql', 'redis', 'kafka', 'rabbitmq'):
+        if labels.get('io.flowgate.v11-demo.owner') != state['owner'] or labels.get('com.docker.compose.service') not in ('mysql', 'redis', 'rabbitmq'):
             raise core.LocalFailure('项目内存在身份不符的容器，拒绝操作')
         result.append(cid)
     return result
@@ -160,7 +160,7 @@ def check_ports(home, state, env):
         core.docker_target(state['rabbitPort'], 'rabbitmq', state['project'], state['owner'])
     for kind, port in state['ports'].items():
         if port_free(port): continue
-        if kind in ('mysql', 'redis', 'kafka'):
+        if kind in ('mysql', 'redis', 'rabbitmq'):
             core.docker_target(port, kind, state['project'], state['owner'])
         else:
             pid = owned_pid(home, state, 'flowgate-' + kind)
@@ -190,17 +190,15 @@ def fresh(home, source, ports, config):
     owner = uuid.uuid4().hex
     state = {'schemaVersion': 1, 'owner': owner, 'project': 'flowgate-v11-demo-' + owner[:12], 'ports': ports, 'sourceHash': core.file_hash(config), 'initialized': False, 'processes': {}}
     env = {key: source[key] for key in ('JAVA_HOME', 'FG_BOOTSTRAP_ADMIN_USERNAME', 'FG_BOOTSTRAP_ADMIN_BCRYPT', 'FLOWGATE_INTERNAL_KEY')}
-    env.update(FG_V11_DEMO_OWNER=owner, FG_MYSQL_USERNAME='flowgate', FG_MYSQL_PASSWORD=secrets.token_urlsafe(30), FG_MYSQL_ROOT_PASSWORD=secrets.token_urlsafe(30), FG_REDIS_PASSWORD=secrets.token_urlsafe(30), FG_REDIS_HOST='127.0.0.1', FG_REDIS_DATABASE='0', FG_MYSQL_PORT=str(ports['mysql']), FG_REDIS_PORT=str(ports['redis']), FLOWGATE_KAFKA_PORT=str(ports['kafka']), CONTROL_PORT=str(ports['control']), GATEWAY_PORT=str(ports['gateway']), DEMO_PORT=str(ports['demo']))
-    env.update(FG_MYSQL_URL=f"jdbc:mysql://127.0.0.1:{ports['mysql']}/flowgate_v11_demo?connectionTimeZone=UTC", FLOWGATE_CONTROL_URI=f"http://127.0.0.1:{ports['control']}", FLOWGATE_CONSOLE_ORIGIN=f"http://127.0.0.1:{ports['control']}", FLOWGATE_ALLOWED_UPSTREAMS=f"http://127.0.0.1:{ports['demo']}", FLOWGATE_DEMO_STATUS_URI=f"http://127.0.0.1:{ports['demo']}", FLOWGATE_NODE_ID='e-demo-' + owner[:12], FLOWGATE_QUOTA_TRAFFIC_NODES='e-demo-' + owner[:12], FLOWGATE_QUOTA_ACTIVATION_ENABLED='true', FLOWGATE_ASYNC_ENABLED='true', FLOWGATE_KAFKA_BOOTSTRAP_SERVERS=f"127.0.0.1:{ports['kafka']}", FLOWGATE_USAGE_TOPIC='flowgate.usage.v1', FLOWGATE_USAGE_GROUP='flowgate-usage-aggregate-v1')
+    env.update(FG_V11_DEMO_OWNER=owner, FG_MYSQL_USERNAME='flowgate', FG_MYSQL_PASSWORD=secrets.token_urlsafe(30), FG_MYSQL_ROOT_PASSWORD=secrets.token_urlsafe(30), FG_REDIS_PASSWORD=secrets.token_urlsafe(30), FG_REDIS_HOST='127.0.0.1', FG_REDIS_DATABASE='0', FG_MYSQL_PORT=str(ports['mysql']), FG_REDIS_PORT=str(ports['redis']), CONTROL_PORT=str(ports['control']), GATEWAY_PORT=str(ports['gateway']), DEMO_PORT=str(ports['demo']))
+    env.update(FG_MYSQL_URL=f"jdbc:mysql://127.0.0.1:{ports['mysql']}/flowgate_v11_demo?connectionTimeZone=UTC", FLOWGATE_CONTROL_URI=f"http://127.0.0.1:{ports['control']}", FLOWGATE_CONSOLE_ORIGIN=f"http://127.0.0.1:{ports['control']}", FLOWGATE_ALLOWED_UPSTREAMS=f"http://127.0.0.1:{ports['demo']}", FLOWGATE_DEMO_STATUS_URI=f"http://127.0.0.1:{ports['demo']}", FLOWGATE_NODE_ID='e-demo-' + owner[:12], FLOWGATE_QUOTA_TRAFFIC_NODES='e-demo-' + owner[:12], FLOWGATE_QUOTA_ACTIVATION_ENABLED='true', FLOWGATE_ASYNC_ENABLED='true')
     # V12仅显式配置的新实例启用，旧E实例配置与迁移保持原样。
     for key in ('FLOWGATE_PORTAL_ENABLED', 'FLOWGATE_V12_QUOTA_ENABLED', 'FLOWGATE_V12_ASYNC_ENABLED', 'FLOWGATE_V12_COMMERCE_ENABLED', 'FLOWGATE_V12_COMMERCE_ASYNC_ENABLED'):
         if source.get(key) == 'true': env[key] = 'true'
-    if env.get('FLOWGATE_PORTAL_ENABLED') == 'true':
-        state['v12Rabbitmq'] = True
-        with socket.socket() as sock:
-            sock.bind(('127.0.0.1', 0)); rabbit_port = sock.getsockname()[1]
-        state['rabbitPort'] = rabbit_port
-        env.update(FLOWGATE_RABBITMQ_HOST='127.0.0.1', FLOWGATE_RABBITMQ_PORT=str(rabbit_port), FLOWGATE_RABBITMQ_USERNAME='flowgate', FLOWGATE_RABBITMQ_PASSWORD=secrets.token_urlsafe(30))
+    state['v12Rabbitmq'] = True
+    state['rabbitOnly'] = True
+    state['rabbitPort'] = ports['rabbitmq']
+    env.update(FLOWGATE_RABBITMQ_HOST='127.0.0.1', FLOWGATE_RABBITMQ_PORT=str(ports['rabbitmq']), FLOWGATE_RABBITMQ_USERNAME='flowgate', FLOWGATE_RABBITMQ_PASSWORD=secrets.token_urlsafe(30))
     private_directory(home.parent); private_directory(home)
     save(home / 'env.json', env); save(home / 'state.json', state)
     return state, env
@@ -213,6 +211,7 @@ def start(home, config, ports):
         if core.file_hash(config) != state['sourceHash']: raise core.LocalFailure('源配置已改变，保留旧实例；请使用原配置或新实例，不重置密码')
         if ports and ports != state['ports']: raise core.LocalFailure('已有实例端口不可隐式改写，请使用新实例')
     else: state, env = fresh(home, source, ports or DEFAULT_PORTS.copy(), config)
+    if not state.get('rabbitOnly'): raise core.LocalFailure('历史实例不能由Rabbit-only启动器重启；请按迁移Runbook离线核验，禁止自动接管')
     # 2. 所有检查在启动前完成；只对首次建立且身份连续的演示库做初始化。
     validate_ports(state['ports']); check_ports(home, state, env); containers(state, env); volume_identities(state, True)
     version = subprocess.run([str(Path(env['JAVA_HOME']) / 'bin/java'), '-version'], capture_output=True, text=True, timeout=5)
@@ -235,15 +234,17 @@ def start(home, config, ports):
             if tables and not state.get('migrationStarted'): raise core.LocalFailure('库已非空且无首次迁移凭据，拒绝初始化')
             if tables - expected: raise core.LocalFailure('隔离库出现非预期表，拒绝初始化')
             state['migrationStarted'] = True; save(home / 'state.json', state)
-            scripts = ['flowgate-init.sql', 'flowgate-v11.sql', 'flowgate-v11-c.sql']
+            scripts = ['flowgate-init.sql', 'flowgate-v11.sql', 'flowgate-v11-c.sql', 'flowgate-v12-m.sql']
             if env.get('FLOWGATE_PORTAL_ENABLED') == 'true': scripts.append('flowgate-v12-a.sql')
             if env.get('FLOWGATE_V12_COMMERCE_ENABLED') == 'true': scripts.append('flowgate-v12-b.sql')
             for script in scripts:
                 core.mysql_query(env, (core.ROOT / 'sql' / script).read_text(), state['project'], state['owner'], read_only=False)
+            # 仅首次、全新owner且无旧Outbox时选择Rabbit；重复启动不会改既有模式。
+            core.mysql_query(env, "UPDATE fg_legacy_mq_cutover SET mode='RABBIT',epoch=epoch+1,changed_at=UTC_TIMESTAMP(3) WHERE id=1 AND mode='KAFKA' AND epoch=1 AND NOT EXISTS(SELECT 1 FROM fg_outbox_event);", state['project'], state['owner'], read_only=False)
             state['initialized'] = True; save(home / 'state.json', state)
         elif expected - tables: raise core.LocalFailure('已初始化实例缺表，拒绝自动补迁移；请先doctor诊断')
         if any(core.preflight(env, state['project'], state['owner']).values()): raise core.LocalFailure('四项历史风险非零，停止启用，不修改账本')
-        wait_for(lambda: core.kafka_probe(env, state['project'], state['owner']), 'Kafka协议', 40)
+        wait_for(lambda: core.rabbit_probe(env, state['project'], state['owner']), 'Rabbit协议', 40)
         artifacts = home / 'artifacts'; private_directory(artifacts)
         overlay = home / 'static' / 'console'; private_directory(overlay.parent); private_directory(overlay)
         runtime = overlay / 'runtime-config.js'
@@ -257,7 +258,7 @@ def start(home, config, ports):
             proc_env = dict(os.environ, **env)
             if module != 'flowgate-control':
                 for key in list(proc_env):
-                    if key.startswith(('FG_MYSQL_', 'FG_BOOTSTRAP_', 'FLOWGATE_ASYNC_', 'FLOWGATE_KAFKA_', 'FLOWGATE_USAGE_', 'FLOWGATE_QUOTA_', 'FLOWGATE_RABBITMQ_', 'FLOWGATE_V12_', 'FLOWGATE_PORTAL_')): proc_env.pop(key)
+                    if key.startswith(('FG_MYSQL_', 'FG_BOOTSTRAP_', 'FLOWGATE_ASYNC_', 'FLOWGATE_QUOTA_', 'FLOWGATE_RABBITMQ_', 'FLOWGATE_V12_', 'FLOWGATE_PORTAL_')): proc_env.pop(key)
             else: proc_env['SPRING_WEB_RESOURCES_STATIC_LOCATIONS'] = overlay.parent.as_uri() + '/,classpath:/static/'
             log = home / (module + '.log'); fd = os.open(log, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
             os.fchmod(fd, 0o600)
@@ -274,7 +275,7 @@ def start(home, config, ports):
                 return code == 200 and (module != 'flowgate-control' or all(result.get(k) == 'UP' for k in ('mysql', 'redis', 'demo')))
             wait_for(ready, kind + '启动', 45)
             if not listener_owned(port, process.pid): raise core.LocalFailure('实际监听PID不符，拒绝标就绪')
-        wait_for(lambda: core.kafka_probe(env, state['project'], state['owner'], consumer=True), 'Kafka消费组', 45)
+        wait_for(lambda: core.rabbit_probe(env, state['project'], state['owner'], consumer=True), 'Rabbit活跃消费者', 45)
         state['running'] = True; save(home / 'state.json', state)
     except Exception:
         # 3. 失败只退出本次刚启动的自有JVM；依赖仍保留，任何路径都不删卷或账本。

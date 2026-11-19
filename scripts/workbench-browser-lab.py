@@ -14,7 +14,7 @@ spec.loader.exec_module(base)
 
 
 def main():
-    # 1. 强制隔离异步与计量，不继承用户.env开关，更不访问常驻Kafka或用户数据库。
+    # 1. 强制隔离异步与计量，不继承用户.env开关，更不访问常驻Rabbit或用户数据库。
     os.environ['FLOWGATE_ASYNC_ENABLED'] = 'false'
     os.environ['FLOWGATE_QUOTA_ACTIVATION_ENABLED'] = 'false'
     os.environ['SPRING_WEB_RESOURCES_STATIC_LOCATIONS'] = (ROOT / 'flowgate-control/src/main/resources/static').as_uri() + '/'

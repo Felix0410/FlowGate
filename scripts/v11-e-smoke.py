@@ -36,7 +36,7 @@ def main():
     libs=work/'hash-libs';runtime.private_directory(libs)
     with zipfile.ZipFile(core.jar_path('flowgate-control')) as jar:
         for name in jar.namelist():
-            if name.startswith('BOOT-INF/lib/') and ('spring-security-crypto-' in name or 'commons-logging-' in name): (libs/Path(name).name).write_bytes(jar.read(name))
+            if name.startswith('BOOT-INF/lib/') and ('spring-security-crypto-' in name or 'commons-logging-' in name or 'amqp-client-' in name or 'slf4j-api-' in name): (libs/Path(name).name).write_bytes(jar.read(name))
     hashed=core.command([java,'-cp',os.pathsep.join(str(p) for p in libs.iterdir()),str(core.ROOT/'scripts/PasswordHashTool.java')],data=password+'\n')
     config=work/'config.env'
     text={'JAVA_HOME':java_home,'FG_BOOTSTRAP_ADMIN_USERNAME':'e4-admin','FG_BOOTSTRAP_ADMIN_BCRYPT':hashed,'FLOWGATE_INTERNAL_KEY':secrets.token_hex(32)}
@@ -106,13 +106,13 @@ def main():
             if index==5: assert value['code']=='QUOTA_EXHAUSTED'
         counts=sql(f"SELECT total_units,remaining_units FROM fg_quota_balance WHERE application_id={app['id']}; SELECT COUNT(*) FROM fg_quota_ledger WHERE application_id={app['id']}; SELECT COUNT(*) FROM fg_outbox_event WHERE JSON_EXTRACT(payload_json,'$.applicationId')={app['id']};")
         assert counts.splitlines()==['5\t0','5','5'], 'B权威守恒不成立'
-        wait(lambda:sql(f"SELECT COALESCE(SUM(grant_count),0) FROM fg_usage_daily WHERE application_id={app['id']};")=='5','真实Kafka日报5')
+        wait(lambda:sql(f"SELECT COALESCE(SUM(grant_count),0) FROM fg_usage_daily WHERE application_id={app['id']};")=='5','真实Rabbit日报5')
         main_result={'http':statuses,'total':5,'remaining':0,'ledger':5,'outbox':5,'daily':5,'v1':v1,'v2':v2}
         request(409,'/admin/subscriptions',admin,subscription)
         checks.append('B真实5个200+第6个429，余额5/0、Ledger/Outbox/日报各5；401/Scope403/旧Caller隔离/同月409')
         # 2. 仅暂停新实例Broker；另一个新App产生1个新Grant，不重放主业务以假装修复统计。
         outage,_=create_app('e-outage');outage_token=request(200,f"/admin/apps/{outage['id']}/credentials",admin,{'scopes':['demo:read']})['token']
-        paused=core.docker_target(ports['kafka'],'kafka',state['project'],state['owner']);core.command(['docker','pause',paused])
+        paused=core.docker_target(ports['rabbitmq'],'rabbitmq',state['project'],state['owner']);core.command(['docker','pause',paused])
         request(200,'/api/e/metered/1',outage_token,base=gateway)
         assert sql(f"SELECT COUNT(*) FROM fg_quota_ledger WHERE application_id={outage['id']};")=='1'
         assert sql(f"SELECT COUNT(*) FROM fg_consumed_event c JOIN fg_quota_ledger l ON l.charge_id=c.charge_id WHERE l.application_id={outage['id']};")=='0'
@@ -120,12 +120,12 @@ def main():
         wait(lambda:sql(f"SELECT COALESCE(SUM(grant_count),0) FROM fg_usage_daily WHERE application_id={outage['id']};")=='1','Broker恢复原事件追平')
         checks.append('自有Broker暂停时B授权不丢、Outbox积压；恢复后原事件追平1，未重做业务扣额')
         payload=sql(f"SELECT payload_json FROM fg_outbox_event WHERE JSON_EXTRACT(payload_json,'$.applicationId')={app['id']} ORDER BY id LIMIT 1;")
-        kafka=core.docker_target(ports['kafka'],'kafka',state['project'],state['owner'])
-        core.command(['docker','exec','-i',kafka,'/opt/kafka/bin/kafka-console-producer.sh','--bootstrap-server','localhost:9092','--topic','flowgate.usage.v1'],data=payload+'\n',timeout=20)
+        data='\n'.join([env['FLOWGATE_RABBITMQ_HOST'],env['FLOWGATE_RABBITMQ_PORT'],env['FLOWGATE_RABBITMQ_USERNAME'],env['FLOWGATE_RABBITMQ_PASSWORD'],payload])+'\n'
+        core.command([java,'-cp',os.pathsep.join(str(p) for p in libs.iterdir()),str(core.ROOT/'scripts/V12RabbitPublishProbe.java'),'flowgate.usage.legacy','granted'],data=data)
         wait(lambda:core.http_json(control,'/admin/async-events/summary',admin)[1]['processCounters']['duplicate']>=1,'真实重复事件幂等')
         assert sql(f"SELECT SUM(grant_count) FROM fg_usage_daily WHERE application_id={app['id']};")=='5'
         request(400,f'/admin/reconciliation?from={today}&to={today}',admin)
-        checks.append('重复Kafka事件未双计；真实今日未封账查询400，不伪造今日MATCH')
+        checks.append('重复Rabbit事件未双计；真实今日未封账查询400，不伪造今日MATCH')
         # 3. 测试专用：仅重启自有Control，以MySQL会话时钟创建新的过往事实，随后恢复再封账查询。
         def restart_clock(frozen):
             current,stored=runtime.load(home);pid=runtime.owned_pid(home,current,'flowgate-control');os.kill(pid,signal.SIGTERM)

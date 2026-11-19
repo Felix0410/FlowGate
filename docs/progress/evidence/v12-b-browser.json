@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "browser": "real Chromium / ego-browser",
+  "viewports": [
+    {
+      "width": 1280,
+      "height": 900,
+      "scrollWidth": 1280
+    },
+    {
+      "width": 375,
+      "height": 812,
+      "documentScrollWidth": 375
+    }
+  ],
+  "checks": [
+    "ordinary user created app and selected paid SKU via UI",
+    "broker offline payment shown PAID_PENDING_FULFILLMENT; broker recovery FULFILLED",
+    "UI issued APP Token; real Gateway call HTTP200 via Node fetch with browser-issued credential (not page CORS proof)",
+    "used order refund action absent",
+    "second UI purchase fulfilled then unused refund REFUNDED",
+    "ADMIN Console REFUNDED filter and real SIM payment/refund receipt dialog",
+    "keyboard Escape/Tab focus BUTTON",
+    "both sessions logged out; Portal refresh + orders requires login"
+  ],
+  "screenshots": [
+    "v12-b-pending-1280.png",
+    "v12-b-fulfilled-1280.png",
+    "v12-b-fulfilled-375.png",
+    "v12-b-refunded-375.png",
+    "v12-b-console-order.png",
+    "v12-b-fulfilled-exact-1280.png"
+  ],
+  "ownerManualAcceptance": "NOT_EXECUTED",
+  "notes": [
+    "selector ambiguity and login wait predicate errors recovered after inspecting page; no secret screenshot",
+    "agent browser evidence does not replace owner manual acceptance",
+    "earlier *1280 filenames were actually desktop default1510; exact1280 capture separately verified"
+  ]
+}

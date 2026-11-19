@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "checks": [
+    "Kafka-free Jar/env/Compose three services; nine isolated legacy/API/commerce quorum queues",
+    "real Rabbit down Gateway200 persists old Ledger+Outbox; broker recovery consumes original event once"
+  ],
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261119t132241-1692",
+  "failure": "private log retained; failure does not count as acceptance"
+}

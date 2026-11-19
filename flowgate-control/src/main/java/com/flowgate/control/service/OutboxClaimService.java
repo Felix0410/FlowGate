@@ -5,7 +5,7 @@ import java.util.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.*;
 import org.springframework.transaction.support.TransactionTemplate;
-/** 短事务队列领取；每轮唯一owner隔离同实例的迟到回执，绝不在事务中等待Kafka。 */
+/** 短事务队列领取；每轮唯一owner隔离同实例的迟到回执，绝不在事务中等待Rabbit。 */
 @Service
 public class OutboxClaimService {
  private final OutboxEventEntryMapper mapper;private final TransactionTemplate tx;

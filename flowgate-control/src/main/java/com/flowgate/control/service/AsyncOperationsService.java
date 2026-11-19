@@ -10,23 +10,21 @@ import org.springframework.transaction.support.TransactionTemplate;
 /** 安全运营查询和ADMIN失败重排；对账只读RR快照，不修改任何权威余额。 */
 @Service
 public class AsyncOperationsService {
+ private final LegacyUsageRabbitOperations recovery;
  private final long started=System.nanoTime();private final int replayGraceSeconds;
  private final LedgerIntegrityMapper integrity;
  private final AsyncUsageReadMapper reads;private final ApplicationEntryMapper clock;private final AuditService audit;private final TransactionTemplate snapshot,write;private final AsyncBrokerProbe broker;private final AsyncDiagnostics diagnostics;
- public AsyncOperationsService(AsyncUsageReadMapper reads,ApplicationEntryMapper clock,AuditService audit,PlatformTransactionManager manager,AsyncBrokerProbe broker,AsyncDiagnostics diagnostics,LedgerIntegrityMapper integrity,@org.springframework.beans.factory.annotation.Value("${flowgate.async.replay-grace-seconds:300}")int grace){if(grace<1||grace>86400)throw new IllegalArgumentException("补投等待期须1..86400秒，生产建议至少300秒");replayGraceSeconds=grace;this.integrity=integrity;this.reads=reads;this.clock=clock;this.audit=audit;this.broker=broker;this.diagnostics=diagnostics;snapshot=new TransactionTemplate(manager);snapshot.setReadOnly(true);snapshot.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);snapshot.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);snapshot.setTimeout(8);write=new TransactionTemplate(manager);}
- private org.springframework.kafka.config.KafkaListenerEndpointRegistry listeners;
- @org.springframework.beans.factory.annotation.Autowired(required=false) public void setListeners(org.springframework.kafka.config.KafkaListenerEndpointRegistry registry){listeners=registry;}
- /** 框架容器的运行/分配/暂停事实，不以历史消费计数推测Listener在线。 */
+ public AsyncOperationsService(AsyncUsageReadMapper reads,ApplicationEntryMapper clock,AuditService audit,PlatformTransactionManager manager,AsyncBrokerProbe broker,AsyncDiagnostics diagnostics,LedgerIntegrityMapper integrity,@org.springframework.beans.factory.annotation.Value("${flowgate.async.replay-grace-seconds:300}")int grace,LegacyUsageRabbitOperations recovery){this.recovery=recovery;if(grace<300||grace>86400)throw new IllegalArgumentException("补投等待期须300..86400秒");replayGraceSeconds=grace;this.integrity=integrity;this.reads=reads;this.clock=clock;this.audit=audit;this.broker=broker;this.diagnostics=diagnostics;snapshot=new TransactionTemplate(manager);snapshot.setReadOnly(true);snapshot.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);snapshot.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);snapshot.setTimeout(8);write=new TransactionTemplate(manager);}
+ private org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry listeners;
+ @org.springframework.beans.factory.annotation.Autowired(required=false) public void setListeners(org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry registry){listeners=registry;}
+ /** 当前实例实际活跃Legacy消费者，不能用历史累计次数推定。 */
  private Object consumerStatus(){
   if(!broker.enabled())return Map.of("state","BLOCKED","reason","异步开关关闭");
-  if(listeners==null||listeners.getListenerContainers().isEmpty())return Map.of("state","UNKNOWN","reason","尚未取得Consumer容器");
-  for(var container:listeners.getListenerContainers()){
-   if(!container.isRunning())return Map.of("state","BLOCKED","reason","Consumer未运行");
-   var partitions=container.getAssignedPartitions();
-   if(partitions==null||partitions.isEmpty())return Map.of("state","UNKNOWN","reason","Consumer尚未取得分区");
-   if(container.isContainerPaused()||container.isPauseRequested()||partitions.stream().anyMatch(p->container.isPartitionPaused(p)||container.isPartitionPauseRequested(p)))return Map.of("state","BLOCKED","reason","Consumer有暂停分区，请先诊断毒消息，禁止跳offset");
-  }
-  return Map.of("state","READY","reason","Consumer实际运行且已分配分区；不代表日报已追平");
+  var status=broker.status();var fence=(Map<?,?>)status.get("fence");
+  if(fence==null||!"RABBIT".equals(fence.get("mode")))return Map.of("state","BLOCKED","reason","CUTOVER_FROZEN：路由未切至Rabbit或栅栏未知");
+  var container=listeners==null?null:listeners.getListenerContainer("legacyUsage");
+  boolean active=container instanceof org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer simple&&simple.isRunning()&&simple.getActiveConsumerCount()>0;
+  return Map.of("state",active?"READY":"UNKNOWN","reason",active?"本实例Rabbit legacy消费者活跃；不代表日报已追平":"尚未取得活跃legacy消费者事实");
  }
  private long number(Map<String,Object> row,String key){return ((Number)row.get(key)).longValue();}
  public Object query(boolean reconcile,String from,String to,Long app,Long api,String cursor,int limit){
@@ -42,7 +40,7 @@ public class AsyncOperationsService {
    // 2. 完整主键稳定分页，多读一条判断是否确有下一页。
    boolean more=rows.size()>limit;var page=new ArrayList<>(rows.subList(0,Math.min(rows.size(),limit)));String next=null;
    if(more){var last=page.get(page.size()-1);next=new UsageCursor(last.get("dayUtc").toString(),number(last,"applicationId"),number(last,"apiId")).encode();}
-   // 3. 未消费优先PENDING；齐全但统计不一致才MISMATCH，绝不按Kafka lag推导正确。
+   // 3. 未消费优先PENDING；齐全但统计不一致才MISMATCH，绝不按Broker队列深度推导正确。
    if(reconcile)for(var row:page){long expected=number(row,"expectedCount"),consumed=number(row,"consumedCount");row.put("outboxBacklog",Math.max(0,expected-consumed));row.put("status",consumed<expected?"PENDING":consumed==expected&&number(row,"expectedUnits")==number(row,"consumedUnits")&&expected==number(row,"aggregatedCount")&&number(row,"expectedUnits")==number(row,"aggregatedUnits")?"MATCH":"MISMATCH");}
    var result=new LinkedHashMap<String,Object>();result.put("rows",page);result.put("nextCursor",next);result.put("asOfUtc",asOf);result.put("asyncEnabled",broker.enabled());result.put("statisticMeaning","授权单位与次数，异步读模型可能延迟，不是业务成功量");
    if(reconcile){
@@ -54,8 +52,8 @@ public class AsyncOperationsService {
   });
  }
  public Object events(String status,long after,int limit){BusinessInputs.page(after,limit);if(status!=null&&!Set.of("NEW","LEASED","SENT","FAILED").contains(status))throw new IllegalArgumentException("状态非法");var rows=reads.events(status,after,limit,replayGraceSeconds);if(!replayWarm())rows.forEach(row->row.put("replayEligible",false));return rows;}
- public Object summary(){var result=new LinkedHashMap<>(reads.summary());result.put("overdueUnconsumedSent",reads.overdueSent(replayGraceSeconds));result.put("sentReplayScanLimit",1000);result.put("replayGraceSeconds",replayGraceSeconds);result.put("replayGuardReady",replayWarm());result.put("asyncEnabled",broker.enabled());result.put("broker",broker.status());result.put("processCounters",diagnostics.snapshot());result.put("runtime",Map.of("publisher",diagnostics.publisherStatus(),"consumer",consumerStatus()));result.put("poisonPolicy","数据库故障自动退避重试；永久毒消息暂停问题分区且不提交offset，不使用未确认DLT");return result;}
- public Object retry(long id,long actor){BusinessInputs.id(id);return write.execute(s->{if(reads.retry(id)!=1)throw new ApiFailure(409,"EVENT_STATE_CONFLICT","仅FAILED可重排，可能已被其他管理员处理");audit.record(actor,"RETRY_ASYNC_EVENT","outbox",Long.toString(id),null,"保留原eventId重新排队，不修改权威Ledger或余额");return Map.of("status","NEW");});}
+ public Object summary(){var result=new LinkedHashMap<>(reads.summary());result.put("overdueUnconsumedSent",reads.overdueSent(replayGraceSeconds));result.put("sentReplayScanLimit",1000);result.put("replayGraceSeconds",replayGraceSeconds);result.put("replayGuardReady",replayWarm());result.put("asyncEnabled",broker.enabled());result.put("broker",broker.status());result.put("processCounters",diagnostics.snapshot());result.put("runtime",Map.of("publisher",diagnostics.publisherStatus(),"consumer",consumerStatus()));result.put("source","V11_APP");result.put("poisonPolicy","数据库故障确认持久Retry后ACK源消息，5秒TTL重试；永久冲突/坏JSON及最多12次未知异常进入持久Poison，先修源数据再审计恢复");return result;}
+ public Object retry(long id,long actor){BusinessInputs.id(id);return write.execute(s->{String fingerprint=recovery.validate(id);if(reads.retry(id)!=1)throw new ApiFailure(409,"EVENT_STATE_CONFLICT","仅FAILED可重排，可能已被其他管理员处理");audit.record(actor,"RETRY_ASYNC_EVENT","outbox",Long.toString(id),null,"原事件恢复；fingerprint="+fingerprint);return Map.of("status","NEW");});}
  /** 新ACK写入next_attempt_at作为SENT等待期基点；启动冷却还保护旧版本时间含义不同的存量行。 */
  private boolean replayWarm(){return java.util.concurrent.TimeUnit.NANOSECONDS.toSeconds(System.nanoTime()-started)>=replayGraceSeconds;}
  public Object replay(long id,long actor){
@@ -64,9 +62,9 @@ public class AsyncOperationsService {
   if(!replayWarm())throw new ApiFailure(409,"REPLAY_GRACE_NOT_ELAPSED","补投保护等待期尚未结束，请稍后重新读取");
   return write.execute(s->{
    // 2. 状态/未消费/数据库时间门槛在一条UPDATE中CAS复验，双管理员只能一人成功。
-   if(reads.replay(id,replayGraceSeconds)!=1)throw new ApiFailure(409,"EVENT_REPLAY_CONFLICT","仅超过等待期且未消费的SENT事件可补投");
+   String fingerprint=recovery.validate(id);if(reads.replay(id,replayGraceSeconds)!=1)throw new ApiFailure(409,"EVENT_REPLAY_CONFLICT","仅超过等待期且未消费的SENT事件可补投");
    // 3. 与审计同事务，保留原payload/eventId，不访问或修改Quota余额及Ledger。
-   audit.record(actor,"REPLAY_SENT_EVENT","outbox",Long.toString(id),null,"超过等待期的SENT未消费原事件补投，不产生新授权");return Map.of("status","NEW");
+   audit.record(actor,"REPLAY_SENT_EVENT","outbox",Long.toString(id),null,"SENT原事件恢复；fingerprint="+fingerprint);return Map.of("status","NEW");
   });
  }
 }
