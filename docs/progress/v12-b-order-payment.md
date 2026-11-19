@@ -1,3 +1,5 @@
+> **M0核验更新（2026-11-19）**：B原始最终实施记录及真实证据从本地`a12bddb`恢复，并在新M隔离实例重跑关键B/A/V11链路。见[v12-m0-baseline](evidence/v12-m0-baseline.json)与[B实施记录](v12-b-implementation.md)。原PR#17及其分支没有改写；B8独立复审和负责人手测仍待完成。
+
 # FlowGate V12-B｜订单与模拟支付阶段实施合同（含A三项P1收口）
 
 > **状态：设计完成，Codex未执行V12-B，所有实现/验收待办。** 2026-11-10从真实远端`feat/v12-a-portal@f2026c59c7a7359e14e3ecd1d10f0c1a84cac8d8`建立`docs/v12-b-order-design`。完整业务裁决见[订单架构](../design/v12-b-order-architecture.md)，Kafka→RabbitMQ优先级见[消息适配](../design/v12-rabbitmq-adaptation.md)和ADR-13，A三个P1来源见[A静态复审](../reviews/v12-a-rabbitmq-static-review-2026-11-10.md)。本合同负责**在B0真实收掉P1后**完成正常商品订单/模拟付款/异步权益/有限模拟退款，**不开发V12-C抢购或优惠券**。
@@ -139,19 +141,19 @@
 - 旧A的P1后修若在B0已通过则需在B的证据标注`resolved_in_v12_b0`，但**不能不经负责人确认去改旧A PR #15为“已通过”**；新Draft PR最终链路要保留回溯。
 - 实施结束仅在`feat/v12-b-orders`提交Conventional Commits与Draft PR，base `docs/v12-b-order-design`；不得合并main、修改A/旧PR base、强推、清理旧卷、进入C抢购或D性能。
 
-## 进度表（设计阶段初始化；任何“完成”必须有真实SHA/测试）
+## 进度表（M0补齐原始B证据并实际复核；B8仍待验）
 
 | 段 | 内容 | 真实编码状态 | 计划证据 |
 |---|---|---|---|
 | B0 | A三项P1修复+真Rabbit故障+旧Console OFF | LOCAL_PASS（待复审） | `v12-b0-rabbit-fixes.json`、`v12-b0-console.json` |
-| B1 | 6表新迁移/约束/就绪门禁 | NOT_STARTED | `v12-b1-schema.json` |
-| B2 | PAID_BASE SKU/市场页面与上架 | NOT_STARTED | `v12-b2-market.json` |
-| B3 | 幂等订单与BASE槽预占 | NOT_STARTED | `v12-b3-order.json` |
-| B4 | 模拟付款/超时关闭竞态/唯一收据/Outbox | NOT_STARTED | `v12-b4-payment.json` |
-| B5 | Rabbit Commerce/可靠权益/消费幂等/补投对账 | NOT_STARTED | `v12-b5-commerce-rabbit.json` |
-| B6 | 受控模拟退款、Portal/Console/中文帮助 | NOT_STARTED | `v12-b6-experience.json` |
-| B7 | 全链路、定向真实故障、回归与浏览器 | NOT_STARTED | `v12-b7-e2e.json` |
-| B8 | 远端源码复审/负责人真人手测 | NOT_STARTED | `docs/reviews/v12-b-*.md` |
+| B1 | 6表新迁移/约束/就绪门禁 | LOCAL_PASS（M0复核；待复审） | `v12-b7-e2e.json`；原始细节见实施记录 |
+| B2 | PAID_BASE SKU/市场页面与上架 | LOCAL_PASS（M0复核；待复审） | `v12-b7-e2e.json`；原始细节见实施记录 |
+| B3 | 幂等订单与BASE槽预占 | LOCAL_PASS（M0复核；待复审） | `v12-b7-e2e.json`；原始细节见实施记录 |
+| B4 | 模拟付款/超时关闭竞态/唯一收据/Outbox | LOCAL_PASS（M0复核；待复审） | `v12-b7-e2e.json`；原始细节见实施记录 |
+| B5 | Rabbit Commerce/可靠权益/消费幂等/补投对账 | LOCAL_PASS（M0复核；待复审） | `v12-b7-e2e.json`；原始细节见实施记录 |
+| B6 | 受控模拟退款、Portal/Console/中文帮助 | LOCAL_PASS（M0复核；待复审） | `v12-b7-e2e.json`；原始细节见实施记录 |
+| B7 | 全链路、定向真实故障、回归与浏览器 | LOCAL_PASS（M0复核；待复审） | `v12-b7-e2e.json`；原始细节见实施记录 |
+| B8 | 远端源码复审/负责人真人手测 | PENDING_REVIEW / NOT_EXECUTED | `docs/reviews/v12-b-*.md` |
 
 **最终交付需能手动演示**：普通用户A注册/APP→B购买正价本月套餐→MySQL订单→模拟付款→Rabbit异步Grant→同一个APP Token经Gateway扣该API额度→订单与余额/流水→未用权益受控模拟退款及已用拒绝→运营Console真实订单/消息恢复；同时旧V11、A免费领取不被破坏。B设计定稿不等于B实施完成。
 

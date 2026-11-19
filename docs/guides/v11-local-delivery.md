@@ -1,6 +1,8 @@
+> 当前运行器为V12-M Rabbit-only版本；旧实例不能自动重启接管，先按[v12-m维护Runbook](v12-m-kafka-retirement-runbook.md)核验。
+
 # FlowGate V1.1 本地完整交付手册
 
-本手册管理独立演示环境。它与您原有的IDE、数据库、Redis、Kafka分别运行，不表示原环境已启用B/C。原V1启动方式仍见README；不要同时占用相同应用端口。
+本手册管理独立演示环境。它与您原有的IDE、数据库、Redis、RabbitMQ分别运行，不表示原环境已启用B/C。原V1启动方式仍见README；不要同时占用相同应用端口。
 
 <a id="start"></a>
 ## 1. 准备与只读检查
@@ -14,7 +16,7 @@ python3 scripts/v11-local.py doctor
 
 Java版本应为17；必要时先在当前终端设置自己的`JAVA_HOME`。根`.env`必须已有`JAVA_HOME`、`FG_BOOTSTRAP_ADMIN_USERNAME`、`FG_BOOTSTRAP_ADMIN_BCRYPT`、`FLOWGATE_INTERNAL_KEY`。管理员登录密码是生成BCrypt时使用的原始密码，不能把BCrypt字符串当密码。脚本只读`.env`，不会重设账号密码。缺项时参考`.env.example`手工配置；不要把密码、Token或整个`.env`发到日志/提交。
 
-`doctor`默认检查当前配置的V11条件，`--profile v1`只要求V1基础条件，不要求Kafka。`--json`输出脱敏结构。退出0表示所选配置就绪，2表示存在BLOCKED/UNKNOWN，1表示工具自身失败。无权限或事实不足只能UNKNOWN。诊断不登录、不写会话、不迁移数据库、不改开关。IDE/外部进程的真实启动参数无法证明时会保持UNKNOWN。
+`doctor`默认检查当前配置的V11条件，`--profile v1`只要求V1基础条件，不要求RabbitMQ。`--json`输出脱敏结构。退出0表示所选配置就绪，2表示存在BLOCKED/UNKNOWN，1表示工具自身失败。无权限或事实不足只能UNKNOWN。诊断不登录、不写会话、不迁移数据库、不改开关。IDE/外部进程的真实启动参数无法证明时会保持UNKNOWN。
 
 ## 2. 启动独立演示
 
@@ -23,14 +25,14 @@ python3 scripts/v11-local.py up --isolated
 python3 scripts/v11-local.py status --isolated
 ```
 
-首次启动会建立带独立身份的新Compose项目、MySQL/Redis/Kafka命名卷、新数据库；仅对这个可验证的新库安装V1/A/B/C结构并做四项只读风险预检。Kafka协议就绪后才启动Java服务，异步仅在Control运行。已有库不会因为重启就被覆盖安装。生成的运行文件放在私有`.local/v11-demo/`，不回写根`.env`。
+首次启动会建立带独立身份的新Compose项目、MySQL/Redis/RabbitMQ命名卷、新数据库；仅对这个可验证的新库安装V1/A/B/C结构并做四项只读风险预检。RabbitMQ协议就绪后才启动Java服务，异步仅在Control运行。已有库不会因为重启就被覆盖安装。生成的运行文件放在私有`.local/v11-demo/`，不回写根`.env`。
 
-默认打开`http://127.0.0.1:8081/console/`。Control/Gateway/Demo端口分别8081/8080/8085，依赖为13407/16480/19192。登录使用`.env`中的管理账号及您自己的原始密码。**up退出0仅说明服务启动成功；初始V0业务门禁应受阻。**
+默认打开`http://127.0.0.1:8081/console/`。Control/Gateway/Demo端口分别8081/8080/8085，依赖为13407/16480/15682。登录使用`.env`中的管理账号及您自己的原始密码。**up退出0仅说明服务启动成功；初始V0业务门禁应受阻。**
 
 端口冲突时脚本停止，不杀占用者。可以自行停IDE里旧项目，或一致覆盖端口：
 
 ```bash
-python3 scripts/v11-local.py up --isolated --instance practice --control-port 18081 --gateway-port 18080 --demo-port 18085 --mysql-port 23407 --redis-port 26480 --kafka-port 29192
+python3 scripts/v11-local.py up --isolated --instance practice --control-port 18081 --gateway-port 18080 --demo-port 18085 --mysql-port 23407 --redis-port 26480 --rabbitmq-port 25682
 python3 scripts/v11-local.py status --isolated --instance practice
 ```
 
@@ -64,9 +66,9 @@ python3 scripts/v11-local.py status --isolated --instance practice
 
 成功Grant即扣量，下游随后失败也不自动退款。余额以MySQL为准，不从异步日报或Redis推导。重复练习请创建新应用/套餐订阅，不能重置历史余额。
 
-## 6. Kafka、日报和历史对账
+## 6. RabbitMQ、日报和历史对账
 
-“运行监控→异步事件”查看Broker协议、Worker最近实际轮询、Consumer分区和失败/积压。SENT只代表投递，不代表已消费；“用量与对账→用量统计”筛选应用及UTC日期，最终应聚合5次/5单位。Kafka故障时账本仍是权威，日报可能滞后；恢复后应处理原Outbox，不要再次调用业务接口模拟补账。失败重试/补投仅ADMIN，并遵守原事件与等待期限制。
+“运行监控→异步事件”查看Broker协议、Worker最近实际轮询、Consumer分区和失败/积压。SENT只代表投递，不代表已消费；“用量与对账→用量统计”筛选应用及UTC日期，最终应聚合5次/5单位。RabbitMQ故障时账本仍是权威，日报可能滞后；恢复后应处理原Outbox，不要再次调用业务接口模拟补账。失败重试/补投仅ADMIN，并遵守原事件与等待期限制。
 
 对账只能查昨天及更早的UTC日。今天未封账，拒绝查询是正常行为，不能显示虚假的MATCH。新环境没有历史数据时历史空白也正常。本轮自动测试的历史MATCH来自隔离Control专用MySQL会话时钟创建的新Grant，恢复时钟后再对账；没有修改旧Ledger，也没有改变用户数据库全局时钟。常规使用者不用设置测试时钟，第二天可查询昨天真实事件。
 
@@ -89,6 +91,6 @@ python3 scripts/v11-local.py stop --isolated
 python3 scripts/v11-local.py up --isolated
 ```
 
-只停止身份匹配的自有JVM/容器；卷、客户、订阅、Ledger与Kafka offset全部保留。重复up不会重置账号或额度。失败也保留卷，没有自动删卷入口。用户常驻环境不属于这个脚本的接管范围。
+只停止身份匹配的自有JVM/容器；卷、客户、订阅、Ledger与Rabbit持久消息与MySQL消费标记全部保留。重复up不会重置账号或额度。失败也保留卷，没有自动删卷入口。用户常驻环境不属于这个脚本的接管范围。
 
 本轮自动测试与负责人验收分别记录。请负责人按`docs/progress/v11-e-local-delivery.md`的E6清单在1280px/375px、键盘与真实业务链路手测；未勾选前不表示正式交付通过。不自动合并PR，也不进入D性能阶段。

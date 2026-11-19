@@ -1,6 +1,6 @@
 # FlowGate V1.2｜业务化升级阶段路线与验收门槛（2026-11-10）
 
-> **最新进度（2026-11-19）**：V12-B真实订单/模拟支付/Commerce Rabbit源码已在`feat/v12-b-orders@c857d3b8532ae98dcfb208d10dd140efa0a3037b`和PR#17 Draft提交；其B0 Rabbit与旧Console故障修复有远端实测证据，但B1～B8最终证据/进度尚未完整同步到仓库、最终复审和负责人手测仍待执行。**新V12-M详细设计已完成，代码/迁移均未实施**，目标是B验收后无Kafka全栈；C、D均不得抢先启动。直接父分支`docs/v12-m-rabbitmq-convergence`是从真实B代码创建的独立设计分支，未改旧PR。详情：[M架构](../design/v12-m-rabbitmq-migration-architecture.md)、[M分段](v12-m-rabbitmq-convergence.md)、[M Codex提示](../../CODEX_V12_M_EXEC_PROMPT.md)。
+> **最新进度（2026-11-19）**：V12-M功能分支`feat/v12-m-rabbitmq-only`从真实设计HEAD实施；M0补齐B原始证据并重跑关键链路，M1/M2兼容单路由切换/回滚/双300秒SENT恢复通过，M4当前源码/构建/运行器Kafka-free，M5无Kafka三链真实联调通过。故障、浏览器与未验项以[M实施记录](v12-m-implementation.md)为准。M8独立复审/负责人手测尚未通过，C/D不启动。以下日期更早的状态段为历史，不代表当前代码依赖。
 
 
 > **真实状态（2026-11-10）**：A0～A6已在`feat/v12-a-portal`编码并有定向联调证据，A7含Rabbit三项P1和负责人真人验收仍未完成；**这三项P1按本轮负责人要求纳入V12-B0开发，不等于已经修好**。B订单/模拟支付/Rabbit Commerce只有本设计与[可执行B合同](v12-b-order-payment.md)，代码/迁移/运行均NOT_STARTED；C/D仍为设计或旧债。源基线：`feat/v12-a-portal@f2026c59c7a7359e14e3ecd1d10f0c1a84cac8d8`，设计分支`docs/v12-b-order-design`，不修改旧PR。
