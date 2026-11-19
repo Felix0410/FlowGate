@@ -116,7 +116,7 @@ def docker_target(port, service, project=None, owner=None):
             raise LocalFailure('端口属于非预期Compose服务，拒绝接管或exec')
         if owner and labels.get('io.flowgate.v11-demo.owner') != owner:
             raise LocalFailure('隔离容器owner不一致，拒绝操作')
-        if not image.startswith({'mysql': 'mysql:8.4', 'redis': 'redis:7', 'kafka': 'apache/kafka:4.1.1', 'rabbitmq': ('rabbitmq:3-management', 'rabbitmq:3.13.7-management')}[service]):
+        if not image.startswith({'mysql': 'mysql:8.4', 'redis': 'redis:7', 'rabbitmq': ('rabbitmq:3-management', 'rabbitmq:3.13.7-management')}[service]):
             raise LocalFailure('依赖镜像版本或身份不符')
         return cid
     raise LocalFailure('未找到与配置端口和Compose身份一致的运行容器')
@@ -135,7 +135,7 @@ def mysql_query(env, sql, project=None, owner=None, read_only=True):
 
 def schema_groups():
     extract = lambda file: set(re.findall(r'CREATE TABLE IF NOT EXISTS (fg_[a-z_]+)', (ROOT / 'sql' / file).read_text()))
-    return {'v1': extract('flowgate-init.sql'), 'b': extract('flowgate-v11.sql'), 'c': extract('flowgate-v11-c.sql')}
+    return {'v1': extract('flowgate-init.sql'), 'b': extract('flowgate-v11.sql'), 'c': extract('flowgate-v11-c.sql'), 'm': extract('flowgate-v12-m.sql')}
 
 
 def preflight(env, project=None, owner=None):
@@ -151,18 +151,15 @@ def preflight(env, project=None, owner=None):
     return risks
 
 
-def kafka_probe(env, project=None, owner=None, consumer=False):
-    port = int(env.get('FLOWGATE_KAFKA_PORT', '19092'))
-    cid = docker_target(port, 'kafka', project, owner)
-    config = 'request.timeout.ms=1000\ndefault.api.timeout.ms=3000\n'
-    args = ['docker', 'exec', '-i', cid, '/opt/kafka/bin/' + ('kafka-consumer-groups.sh' if consumer else 'kafka-topics.sh'), '--bootstrap-server', 'localhost:9092', '--command-config', '/dev/stdin']
+def rabbit_probe(env, project=None, owner=None, consumer=False):
+    port = int(env.get('FLOWGATE_RABBITMQ_PORT', '5672'))
+    cid = docker_target(port, 'rabbitmq', project, owner)
+    command(['docker', 'exec', cid, 'rabbitmq-diagnostics', '-q', 'check_running'])
     if consumer:
-        group = env.get('FLOWGATE_USAGE_GROUP', 'flowgate-usage-aggregate-v1')
-        if not re.fullmatch(r'[A-Za-z0-9._-]+', group):
-            raise LocalFailure('Kafka消费组格式不受支持')
-        value = command(args + ['--describe', '--group', group, '--state'], data=config)
-        return bool(re.search(r'\bStable\s+[1-9][0-9]*\b', value))
-    command(args + ['--list'], data=config)
+        rows = command(['docker', 'exec', cid, 'rabbitmqctl', '-q', 'list_queues', '-p', '/flowgate-v12', 'name', 'type', 'consumers']).splitlines()
+        main = [line.split() for line in rows if line.startswith('flowgate.usage.legacy.aggregate')]
+        if not main or len(main[0]) != 3 or main[0][1] != 'quorum' or int(main[0][2]) < 1: return False
+        return mysql_query(env, 'SELECT mode FROM fg_legacy_mq_cutover WHERE id=1;', project, owner) == 'RABBIT'
     return True
 
 
@@ -225,7 +222,7 @@ def doctor(env, profile='v11', project=None, owner=None, trusted_runtime=False):
         probe(name, endpoint, '确认端口属于本项目后手动启动；不要杀占用端口的进程')
     checks.append(check('processOwnership', 'READY' if trusted_runtime else 'UNKNOWN', '已核对隔离进程身份' if trusted_runtime else '外部或IDE进程不接管，PID归属未验证', '外部进程由负责人管理；可使用up --isolated'))
     groups = schema_groups()
-    for key in (['v1'] if profile == 'v1' else ['v1', 'b', 'c']):
+    for key in (['v1'] if profile == 'v1' else ['v1', 'b', 'c', 'm']):
         missing = groups[key] - tables if tables is not None else None
         checks.append(check('schema.' + key, 'UNKNOWN' if missing is None else 'BLOCKED' if missing else 'READY', '表结构未验证' if missing is None else '缺少表：' + '、'.join(sorted(missing)) if missing else '所需表存在', '已有库先备份并由负责人决定迁移；本工具不会迁移原库' if missing is None or missing else ''))
     if profile == 'v11':
@@ -245,8 +242,8 @@ def doctor(env, profile='v11', project=None, owner=None, trusted_runtime=False):
                 if not row or row[1] != current or row[4] != current or row[2] != checksum or row[5] != checksum or not all(0 <= int(row[i]) <= 15 for i in (3, 7)) or 'USAGE_QUOTA_V1' not in json.loads(row[6]): return False, '完整名单的版本/checksum/心跳/可信能力未就绪'
             return True, '完整名单通过当前数据库只读门禁核对'
         probe('nodes', node_gate, '先在发布中心发布非计量版本，等待所有接流节点确认')
-        probe('kafkaProtocol', lambda: (kafka_probe(env, project, owner), 'Kafka协议元数据响应'), '检查Kafka，TCP端口开放不代表协议可用')
+        probe('rabbitProtocol', lambda: (rabbit_probe(env, project, owner), 'Rabbit真实协议响应'), '检查Rabbit真实协议，不只检查端口')
         enabled = env.get('FLOWGATE_ASYNC_ENABLED', 'false') == 'true'
         checks.append(check('asyncActivation', 'READY' if enabled and trusted_runtime else 'BLOCKED' if not enabled else 'UNKNOWN', '隔离Control配置异步开启' if enabled and trusted_runtime else '异步关闭或外部Control实际开关未验证', '登录工作台读取C状态；关闭时余额可用、日报暂不聚合'))
-        probe('consumer', lambda: (enabled and kafka_probe(env, project, owner, True), '实际消费组须Stable且有成员，不代表所有SENT已统计'), '等待Topic与Consumer真实启动；查询异步事件诊断')
+        probe('consumer', lambda: (enabled and rabbit_probe(env, project, owner, True), 'Legacy主quorum有活跃消费者且DB栅栏RABBIT，不代表所有SENT已统计'), '等待Rabbit队列与Consumer真实启动；查询异步事件诊断')
     return report(checks, profile, bool(owner))

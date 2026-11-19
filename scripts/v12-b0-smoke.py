@@ -35,7 +35,7 @@ def main():
     state,env=runtime.fresh(home,source,{k:v for k,v in ports.items() if k!='gateway2'},config)
     env['FLOWGATE_QUOTA_TRAFFIC_NODES']+=',v12-second-'+run;runtime.save(home/'env.json',env)
     root_hash=core.file_hash(core.ROOT/'.env');checks=[];requests=[];second=None;success=False
-    result={'runId':run,'scope':'targeted V12 functionality; no historical fault matrix or load experiment','designBase':'e77624f','checks':checks,'requests':requests,'notExecuted':['two-Control registration race','100-request concurrency/load','V11 B23/C26 real fault regression','Kafka full fault matrix (V11)','historical-day final MATCH','owner manual acceptance','V11 E6','V11 D performance']}
+    result={'runId':run,'scope':'targeted V12 functionality; no historical fault matrix or load experiment','designBase':'e77624f','checks':checks,'requests':requests,'notExecuted':['two-Control registration race','100-request concurrency/load','V11 B23/C26 real fault regression','Rabbit full fault matrix (V11)','historical-day final MATCH','owner manual acceptance','V11 E6','V11 D performance']}
     def wait(fn,label,seconds=65):
         until=time.monotonic()+seconds
         while time.monotonic()<until:
@@ -52,7 +52,7 @@ def main():
         checks.append('14-table migration and second idempotent migration passed')
         second_env=dict(os.environ,**env);second_env.update(GATEWAY_PORT=str(ports['gateway2']),FLOWGATE_NODE_ID='v12-second-'+run)
         for k in list(second_env):
-            if k.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_KAFKA_','FLOWGATE_USAGE_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):second_env.pop(k)
+            if k.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):second_env.pop(k)
         log=work/'gateway2.log'
         with log.open('w') as stream:second=subprocess.Popen([java,'-Dflowgate.v12-test.owner='+state['owner'],'-jar',str(home/'artifacts/flowgate-gateway.jar')],cwd=core.ROOT,env=second_env,stdout=stream,stderr=subprocess.STDOUT,start_new_session=True)
         control='http://127.0.0.1:'+str(ports['control']);gateways=['http://127.0.0.1:'+str(ports[k]) for k in ('gateway','gateway2')]

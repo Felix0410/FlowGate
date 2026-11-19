@@ -6,7 +6,7 @@ export function quotaQuery(applicationId, period, afterId = 0) {
   if (!/^\d{4}(0[1-9]|1[0-2])$/.test(period)) throw new Error('月份须为YYYYMM，例如202611');
   return new URLSearchParams({applicationId: String(applicationId), period, afterId: String(afterId), limit: '20'}).toString();
 }
-/** MySQL只读余额与游标流水；空余额不等于0，不展示虚构Kafka送达量。 */
+/** MySQL只读余额与游标流水；空余额不等于0，不展示虚构Rabbit送达量。 */
 export async function renderQuota(ctx) {
   ctx.heading('配额与账本', '权威余额与流水 · 成功准入即消耗，下游失败不退款');
   const selection = reportSelection(ctx);

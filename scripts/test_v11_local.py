@@ -21,7 +21,7 @@ class DoctorTest(unittest.TestCase):
                     for asset in (core.ROOT / module / 'src/main/resources/static/console').iterdir():
                         if asset.is_file(): jar.writestr('BOOT-INF/classes/static/console/' + asset.name, asset.read_bytes())
 
-    def run_doctor(self, missing=(), nodes=True, kafka=True, profile='v11', failure=False):
+    def run_doctor(self, missing=(), nodes=True, rabbit=True, profile='v11', failure=False):
         tables = set.union(*core.schema_groups().values()) - set(missing)
         def sql(env, statement, *args):
             if failure: raise core.LocalFailure('password=never-print-this')
@@ -32,21 +32,21 @@ class DoctorTest(unittest.TestCase):
             if 'SELECT r.node_id' in statement: return 'node-a\t1\t' + 'a' * 64 + '\t0\t1\t' + 'a' * 64 + '\t["USAGE_QUOTA_V1"]\t0' if nodes else ''
             raise AssertionError('不应出现写入或未知SQL')
         def http(origin, path): return 200, {'control': 'UP', 'mysql': 'UP', 'redis': 'UP', 'demo': 'UP'} if path == '/status' else {'status': 'UP'}
-        with patch.object(core, 'mysql_query', sql), patch.object(core, 'docker_target', return_value='owned'), patch.object(core, 'kafka_probe', return_value=kafka), patch.object(core, 'http_json', http), patch.object(core, 'jar_path', side_effect=lambda module: self.path / (module + '.jar')), patch.object(core, 'command', side_effect=lambda args, **kwargs: 'PONG' if 'redis-cli' in args else 'available'), patch.object(core.subprocess, 'run', return_value=type('Result', (), {'stderr': 'openjdk version "17.0.18"', 'stdout': ''})()):
+        with patch.object(core, 'mysql_query', sql), patch.object(core, 'docker_target', return_value='owned'), patch.object(core, 'rabbit_probe', return_value=rabbit), patch.object(core, 'http_json', http), patch.object(core, 'jar_path', side_effect=lambda module: self.path / (module + '.jar')), patch.object(core, 'command', side_effect=lambda args, **kwargs: 'PONG' if 'redis-cli' in args else 'available'), patch.object(core.subprocess, 'run', return_value=type('Result', (), {'stderr': 'openjdk version "17.0.18"', 'stdout': ''})()):
             return core.doctor(self.env, profile, trusted_runtime=True)
 
     def test_ready_requires_all_facts(self):
         self.assertEqual(self.run_doctor()['state'], 'READY')
 
-    def test_v1_does_not_require_kafka(self):
-        self.assertEqual(self.run_doctor(profile='v1', kafka=False)['state'], 'READY')
+    def test_v1_does_not_require_rabbit(self):
+        self.assertEqual(self.run_doctor(profile='v1', rabbit=False)['state'], 'READY')
 
     def test_missing_b_and_c_block(self):
         for group in ['b', 'c']:
             self.assertEqual(self.run_doctor(missing=core.schema_groups()[group])['state'], 'BLOCKED')
 
-    def test_node_or_kafka_never_ready(self):
-        for overrides in [{'nodes': False}, {'kafka': False}]:
+    def test_node_or_rabbit_never_ready(self):
+        for overrides in [{'nodes': False}, {'rabbit': False}]:
             self.assertNotEqual(self.run_doctor(**overrides)['state'], 'READY')
 
     def test_unknown_errors_redacted(self):

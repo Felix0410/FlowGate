@@ -8,7 +8,7 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 
-/** V12共享传输边界：持久确认、有限重试、COMMIT后ACK。没有业务表或旧Kafka依赖。 */
+/** V12共享传输边界：持久确认、有限重试、COMMIT后ACK。没有业务表或旧Rabbit依赖。 */
 public final class RabbitDelivery {
     public static final String RETRY_HEADER="x-flowgate-retry-count";
     public static final int MAX_RETRIES=12;

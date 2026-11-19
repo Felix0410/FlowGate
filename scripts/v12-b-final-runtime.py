@@ -16,7 +16,7 @@ def main():
     if not cleanup.get('secondPid') or not r.identity(cleanup['secondPid']):
         gw_env=dict(os.environ,**env);gw_env.update(GATEWAY_PORT=str(ports['gateway2']),FLOWGATE_NODE_ID='v12-second-'+evidence['runId'])
         for key in list(gw_env):
-            if key.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_KAFKA_','FLOWGATE_USAGE_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):gw_env.pop(key)
+            if key.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):gw_env.pop(key)
         with (work/'gateway2-ack.log').open('w') as log:gw=subprocess.Popen([java,'-Dflowgate.v12-test.owner='+state['owner'],'-jar',str(home/'artifacts/flowgate-gateway.jar')],cwd=c.ROOT,env=gw_env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
         cleanup['secondPid']=gw.pid;r.save(work/'cleanup.json',cleanup)
     admin=req('/admin/auth/login',body={'username':browser['adminLogin'],'password':browser['password']})['token']
@@ -57,7 +57,7 @@ def restore(evidence,work,home,state,env,cleanup,java):
     if old_second and r.identity(old_second) and '-Dflowgate.v12-test.owner='+state['owner'] in r.identity(old_second)[0]:os.kill(old_second,signal.SIGTERM);r.wait_for(lambda:not r.identity(old_second),'更换自有第二Gateway',25)
     ports=evidence['ports'];second_env=dict(os.environ,**env);second_env.update(GATEWAY_PORT=str(ports['gateway2']),FLOWGATE_NODE_ID='v12-second-'+evidence['runId'])
     for key in list(second_env):
-        if key.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_KAFKA_','FLOWGATE_USAGE_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):second_env.pop(key)
+        if key.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):second_env.pop(key)
     with (work/'gateway2-final.log').open('w') as log:second=subprocess.Popen([java,'-Dflowgate.v12-test.owner='+state['owner'],'-jar',str(home/'artifacts/flowgate-gateway.jar')],cwd=c.ROOT,env=second_env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
     cleanup['secondPid']=second.pid;r.save(work/'cleanup.json',cleanup)
     control_env=dict(os.environ,**env);control_env['CONTROL_PORT']=str(ports['control2'])

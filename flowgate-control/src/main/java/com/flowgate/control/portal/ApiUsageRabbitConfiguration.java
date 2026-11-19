@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-/** V12独立RabbitMQ交换机/持久队列，V11 Kafka配置保持不变。OFF不创建队列或监听器。 */
+/** V12独立RabbitMQ交换机/持久队列，V11 Rabbit配置保持不变。OFF不创建队列或监听器。 */
 @Configuration
 @EnableRabbit
 @EnableScheduling
