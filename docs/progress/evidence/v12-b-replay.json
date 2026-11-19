@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "realSent300SecondWait": true,
+  "earlyReplayStatus": 409,
+  "adminReplayStatus": 200,
+  "consumedReplayStatus": 409,
+  "sameEventId": true,
+  "auditRows": 1,
+  "grantCount": 1,
+  "refundWorkerRaces": [
+    {
+      "refundStatus": 200,
+      "observedState": "PAID_PENDING_FULFILLMENT",
+      "finalState": "REFUNDED",
+      "grantCount": 0
+    },
+    {
+      "refundStatus": 200,
+      "observedState": "PAID_PENDING_FULFILLMENT",
+      "finalState": "REFUNDED",
+      "grantCount": 0
+    },
+    {
+      "refundStatus": 200,
+      "observedState": "PAID_PENDING_FULFILLMENT",
+      "finalState": "REFUNDED",
+      "grantCount": 0
+    }
+  ],
+  "fixture": "new task-owned simulated receipt conflict repaired; no Ledger edits",
+  "startupCooldown": "implemented; independent cold-start refusal test NOT_EXECUTED",
+  "controlJarSha256": "0a24c1a01d986205168d9cfa14e626a73487e6986bc2e0ab788dcb690fdf0069"
+}
