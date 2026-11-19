@@ -9,10 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(prefix="flowgate.async",name="enabled",havingValue="true")
 public class UsageEventListener {
+ private final com.flowgate.control.async.LegacyTransportFence fence;
  private final UsageAggregationService aggregation;private final AsyncDiagnostics diagnostics;
- public UsageEventListener(UsageAggregationService aggregation,AsyncDiagnostics diagnostics){this.aggregation=aggregation;this.diagnostics=diagnostics;}
+ public UsageEventListener(UsageAggregationService aggregation,AsyncDiagnostics diagnostics,com.flowgate.control.async.LegacyTransportFence fence){this.fence=fence;this.aggregation=aggregation;this.diagnostics=diagnostics;}
  @KafkaListener(id="flowgateUsage",groupId="${spring.kafka.consumer.group-id}",idIsGroup=false,topics="${flowgate.async.topic}",containerFactory="usageKafkaFactory")
  public void receive(String payload,Acknowledgment ack){
+  if(!fence.allows("KAFKA"))throw new org.springframework.dao.TransientDataAccessResourceException("CUTOVER_FROZEN");
   String outcome=aggregation.process(payload);
   diagnostics.count(outcome.equals("CONSUMED")?"consumed":"duplicate");
   ack.acknowledge();

@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 /** 真实TransactionTemplate边界与异步Future：COMMIT先于发送，只有Broker ACK才标记SENT。 */
 class V11OutboxPublisherTest {
+ private LegacyTransportFence fence(){var fence=mock(LegacyTransportFence.class);when(fence.allows("KAFKA")).thenReturn(true);return fence;}
  @Test void commitBeforeSendAndLateOwnerCannotClaimSuccess(){
   var mapper=mock(OutboxEventEntryMapper.class);var manager=mock(PlatformTransactionManager.class);when(manager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
   boolean[] committed={false};doAnswer(i->{committed[0]=true;return null;}).when(manager).commit(any());
@@ -20,7 +21,7 @@ class V11OutboxPublisherTest {
   when(mapper.claimable(20)).thenReturn(List.of(row));
   KafkaTemplate<String,String> kafka=mock(KafkaTemplate.class);var ack=new CompletableFuture<SendResult<String,String>>();
   when(kafka.send(anyString(),anyString(),anyString())).thenAnswer(i->{assertTrue(committed[0]);return ack;});
-  var diagnostics=new AsyncDiagnostics();var publisher=new OutboxPublisher(new OutboxClaimService(mapper,manager),kafka,"test",diagnostics);
+  var diagnostics=new AsyncDiagnostics();var publisher=new OutboxPublisher(new OutboxClaimService(mapper,manager),kafka,"test",diagnostics,fence());
   publisher.publish();verify(mapper,never()).sent(anyLong(),anyString());assertEquals(1,publisher.inflight());
   ack.complete(null);verify(mapper).sent(1,row.leaseOwner);assertEquals(0,publisher.inflight());assertEquals(1L,diagnostics.snapshot().get("staleOwner"));
  }
@@ -28,6 +29,6 @@ class V11OutboxPublisherTest {
   var claims=mock(OutboxClaimService.class);var row=new OutboxEventEntry();row.id=1L;row.eventId="00000000-0000-0000-0000-000000000001";row.payloadJson=new V11UsageEventTest().event;
   when(claims.claim(20)).thenReturn(List.of(row));KafkaTemplate<String,String> kafka=mock(KafkaTemplate.class);
   when(kafka.send(anyString(),anyString(),anyString())).thenReturn(CompletableFuture.failedFuture(new IllegalStateException()));
-  var publisher=new OutboxPublisher(claims,kafka,"test",new AsyncDiagnostics());publisher.publish();verify(claims).failed(row,"BROKER_UNAVAILABLE");verify(claims,never()).sent(any());assertEquals(0,publisher.inflight());
+  var publisher=new OutboxPublisher(claims,kafka,"test",new AsyncDiagnostics(),fence());publisher.publish();verify(claims).failed(row,"BROKER_UNAVAILABLE");verify(claims,never()).sent(any());assertEquals(0,publisher.inflight());
  }
 }

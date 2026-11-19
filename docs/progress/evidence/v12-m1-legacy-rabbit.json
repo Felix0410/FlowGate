@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "M1 compat DB KAFKA only route; two upgraded Controls old event consumed once; idempotent DDL",
+    "live old/new Control inventory prevents cutover",
+    "Rabbit original event 100 duplicates no double count; bad JSON and source conflict isolated; NEW/FAILED recovered"
+  ],
+  "mode": "RABBIT",
+  "queues": [
+    "flowgate.usage.legacy.aggregate",
+    "flowgate.usage.legacy.retry",
+    "flowgate.usage.legacy.poison"
+  ],
+  "source": "v12-m2-cutover.json"
+}

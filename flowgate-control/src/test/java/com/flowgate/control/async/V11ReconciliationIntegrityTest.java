@@ -16,7 +16,7 @@ class V11ReconciliationIntegrityTest {
   when(clock.nowUtc()).thenReturn(Instant.parse("2026-11-09T12:00:00Z"));
   when(reads.reconciliation(any(),any(),any(),any(),any(),any(),any(),anyInt())).thenReturn(List.of());
   when(integrity.scan(any(),any(),any(),any(),any(),any(),anyInt())).thenReturn(List.of(Map.of("code","LEDGER_WITHOUT_OUTBOX","recordId",4L,"relatedCount",0)));
-  var service=new AsyncOperationsService(reads,clock,audit,manager,mock(AsyncBrokerProbe.class),new AsyncDiagnostics(),integrity,300);
+  var service=new AsyncOperationsService(reads,clock,audit,manager,mock(AsyncBrokerProbe.class),new AsyncDiagnostics(),integrity,300,mock(LegacyUsageRabbitOperations.class));
   var result=(Map<?,?>)service.query(true,"2026-11-08","2026-11-08",null,null,null,20);
   assertEquals("INTEGRITY_GAP",result.get("integrityStatus"));assertTrue(((List<?>)result.get("rows")).isEmpty());assertEquals(1,((List<?>)result.get("integrityWarnings")).size());verifyNoInteractions(audit);verify(manager).commit(any());
  }

@@ -1,0 +1,147 @@
+{
+  "passed": true,
+  "checks": [
+    "M1 compat DB KAFKA only route; two upgraded Controls old event consumed once; idempotent DDL",
+    "live old/new Control inventory prevents cutover",
+    "Rabbit original event 100 duplicates no double count; bad JSON and source conflict isolated; NEW/FAILED recovered"
+  ],
+  "frozen": {
+    "previous": {
+      "mode": "KAFKA",
+      "epoch": 1,
+      "highWatermark": 0,
+      "activeLeases": 0,
+      "controls": [],
+      "oldInFlight": 0
+    },
+    "target": "FROZEN",
+    "epoch": 2,
+    "highWatermark": 8,
+    "validatedEvents": 8,
+    "nextStep": "启动同一兼容版本的受控Control集合；核验冷却后由ADMIN逐条原事件补投"
+  },
+  "rollback": {
+    "previous": {
+      "mode": "FROZEN",
+      "epoch": 2,
+      "highWatermark": 8,
+      "activeLeases": 0,
+      "controls": [],
+      "oldInFlight": 0
+    },
+    "target": "KAFKA",
+    "epoch": 3,
+    "highWatermark": 8,
+    "validatedEvents": 8,
+    "nextStep": "启动同一兼容版本的受控Control集合；核验冷却后由ADMIN逐条原事件补投"
+  },
+  "refreeze": {
+    "previous": {
+      "mode": "KAFKA",
+      "epoch": 3,
+      "highWatermark": 8,
+      "activeLeases": 0,
+      "controls": [],
+      "oldInFlight": 0
+    },
+    "target": "FROZEN",
+    "epoch": 4,
+    "highWatermark": 8,
+    "validatedEvents": 8,
+    "nextStep": "启动同一兼容版本的受控Control集合；核验冷却后由ADMIN逐条原事件补投"
+  },
+  "cutover": {
+    "previous": {
+      "mode": "FROZEN",
+      "epoch": 4,
+      "highWatermark": 8,
+      "activeLeases": 0,
+      "controls": [],
+      "oldInFlight": 0
+    },
+    "target": "RABBIT",
+    "epoch": 5,
+    "highWatermark": 11,
+    "validatedEvents": 11,
+    "nextStep": "启动同一兼容版本的受控Control集合；核验冷却后由ADMIN逐条原事件补投"
+  },
+  "ledgerUnchanged": true,
+  "legacyCounts": [
+    "11",
+    "11",
+    "11",
+    "11"
+  ],
+  "coldReplayRejected": true,
+  "real300SecondWarmup": true,
+  "summary": {
+    "oldestAgeSeconds": 0,
+    "failedCount": 0,
+    "newCount": 0,
+    "pendingConsumption": 0,
+    "totalCount": 11,
+    "leasedCount": 0,
+    "sentCount": 11,
+    "overdueUnconsumedSent": 0,
+    "sentReplayScanLimit": 1000,
+    "replayGraceSeconds": 300,
+    "replayGuardReady": true,
+    "asyncEnabled": true,
+    "broker": {
+      "transport": "RABBIT",
+      "quorumPolicy": "quorum/at-least-once DLX；实际类型与参数由部署检查验证",
+      "state": "BROKER_AVAILABLE",
+      "queues": [
+        {
+          "name": "flowgate.usage.legacy.aggregate",
+          "readyMessages": 0,
+          "consumers": 4
+        },
+        {
+          "name": "flowgate.usage.legacy.retry",
+          "readyMessages": 0,
+          "consumers": 0
+        },
+        {
+          "name": "flowgate.usage.legacy.poison",
+          "readyMessages": 2,
+          "consumers": 0
+        }
+      ],
+      "checkedAt": "2026-11-19T13:14:08.748044Z",
+      "fence": {
+        "mode": "RABBIT",
+        "epoch": 5,
+        "highWatermark": 11,
+        "checkedChangeAt": "2026-11-19T13:09:08.326Z"
+      }
+    },
+    "processCounters": {
+      "sent": 3,
+      "sendFailed": 0,
+      "staleOwner": 0,
+      "consumed": 3,
+      "duplicate": 55,
+      "conflict": 0,
+      "pausedPartition": 0,
+      "workerUnavailable": 0,
+      "transientRetry": 0,
+      "poisonPause": 0
+    },
+    "runtime": {
+      "consumer": {
+        "reason": "本实例Rabbit legacy消费者活跃；不代表日报已追平",
+        "state": "READY"
+      },
+      "publisher": {
+        "reason": "当前实例Worker最近已完成轮询",
+        "state": "READY"
+      }
+    },
+    "source": "V11_APP",
+    "poisonPolicy": "数据库故障确认持久Retry后ACK源消息，5秒TTL重试；永久冲突/坏JSON及最多12次未知异常进入持久Poison，先修源数据再审计恢复"
+  },
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261119t125427-87f5",
+  "brokerDrain": "old Kafka controls fully stopped; authoritative MySQL source recovery; no Kafka offset used",
+  "ownerManual": "NOT_EXECUTED"
+}

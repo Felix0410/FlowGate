@@ -13,13 +13,15 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(prefix="flowgate.async",name="enabled",havingValue="true")
 public class OutboxPublisher {
  private final OutboxClaimService claims;private final KafkaTemplate<String,String> kafka;private final String topic;private final AsyncDiagnostics diagnostics;
+ private final LegacyTransportFence fence;
  private final AtomicInteger inflight=new AtomicInteger();private final AtomicBoolean busy=new AtomicBoolean();
- public OutboxPublisher(OutboxClaimService claims,KafkaTemplate<String,String> kafka,@Value("${flowgate.async.topic}")String topic,AsyncDiagnostics diagnostics){this.claims=claims;this.kafka=kafka;this.topic=topic;this.diagnostics=diagnostics;}
+ public OutboxPublisher(OutboxClaimService claims,KafkaTemplate<String,String> kafka,@Value("${flowgate.async.topic}")String topic,AsyncDiagnostics diagnostics,LegacyTransportFence fence){this.fence=fence;this.claims=claims;this.kafka=kafka;this.topic=topic;this.diagnostics=diagnostics;}
  @Scheduled(fixedDelayString="${flowgate.async.poll-ms:1000}") public void publish(){
-  if(!busy.compareAndSet(false,true))return;
+  if(!fence.allows("KAFKA")||!busy.compareAndSet(false,true))return;
   try{
    // 1. 每轮最多20，整个实例最多100在途，领取事务返回后才调用传输。
    for(var row:claims.claim(Math.min(20,100-inflight.get()))){
+    if(!fence.allows("KAFKA"))break;
     UsageGrantedEvent event;
     try{event=UsageGrantedEvent.parse(row.payloadJson);if(!row.eventId.equals(event.eventId()))throw new IllegalArgumentException();}
     catch(RuntimeException invalid){claims.failed(row,"INVALID_EVENT");diagnostics.count("sendFailed");continue;}
