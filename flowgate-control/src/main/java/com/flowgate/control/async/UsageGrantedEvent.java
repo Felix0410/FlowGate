@@ -9,9 +9,13 @@ import tools.jackson.databind.JsonNode;
 /** B不可变Outbox的严格八字段事件；规范化指纹消除JSON字段顺序差异。 */
 public record UsageGrantedEvent(int version,String eventId,String chargeId,long applicationId,long apiId,String periodUtc,int units,Instant eventTime) {
     public static UsageGrantedEvent parse(String json) {
+        try{return parseStrict(json);}catch(java.time.DateTimeException invalid){throw new IllegalArgumentException("INVALID_USAGE_EVENT");}
+    }
+    private static UsageGrantedEvent parseStrict(String json) {
         // 1. 长度、字段集合和数字类型先校验，禁止宽松反序列化吞掉额外字段。
         require(json!=null&&json.getBytes(StandardCharsets.UTF_8).length<=4096);
-        JsonNode n=SnapshotCodec.JSON.readTree(json);
+        JsonNode n;
+        try{n=SnapshotCodec.JSON.readTree(json);}catch(tools.jackson.core.JacksonException invalid){throw new IllegalArgumentException("INVALID_USAGE_EVENT");}
         require(n.isObject()&&n.size()==8);
         for(String name:List.of("eventId","chargeId","periodUtc","eventTime"))require(n.has(name)&&n.get(name).isString());
         for(String name:List.of("version","applicationId","apiId","units"))require(n.has(name)&&n.get(name).isIntegralNumber()&&n.get(name).canConvertToLong());

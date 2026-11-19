@@ -62,5 +62,5 @@ spring.kafka:
     max-poll-records: 20
   listener:
     ack-mode: manual_immediate
-    auto-startup: ${FLOWGATE_ASYNC_ENABLED:false}
+    auto-startup: ${FLOWGATE_LEGACY_KAFKA_COMPAT_ENABLED:true}
     missing-topics-fatal: false
