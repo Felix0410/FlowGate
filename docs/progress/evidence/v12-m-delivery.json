@@ -1,0 +1,70 @@
+{
+  "delivered": true,
+  "pr": {
+    "number": 19,
+    "url": "https://github.com/Felix0410/FlowGate/pull/19",
+    "draft": true,
+    "base": "docs/v12-m-rabbitmq-convergence",
+    "head": "feat/v12-m-rabbitmq-only"
+  },
+  "transport": "GitHub App after native git push HTTP403/exit128",
+  "checkpoint": "candidate source before this delivery-receipt documentation commit",
+  "localSourceHead": "702ec47647257d9b3ca25db3121c2b247dfb4d77",
+  "remoteSourceHead": "281847a02db37a38286307c8f7d60b1f1b52677c",
+  "sourceTree": "ddb5a45ffa74346f113857dfec5e293b581165c7",
+  "allTreesAndParentsReadBackVerified": true,
+  "mappings": [
+    {
+      "local": "ef241a71646d1f700c5c57cc66bf7c9b6bee4520",
+      "remote": "c543d608e0444cdacc806739685f0d72909eaf1f",
+      "tree": "7e6d41351686a6799afc281b38b013eec57b62a6",
+      "parent": "48dc05abf33c7bab7e5c1a90bc306d79f82aef3f"
+    },
+    {
+      "local": "f26db251b7b9d4e8900e5e9e3b3e57989dc51c36",
+      "remote": "72cfb593501384f2629d6cf4e69aad8dca30a6d1",
+      "tree": "de6d8969cc9f9262562ed1b5c087e42ab52454ee",
+      "parent": "c543d608e0444cdacc806739685f0d72909eaf1f"
+    },
+    {
+      "local": "303529d16bdd94f2c6b4bd0e704c98db87bef5fb",
+      "remote": "f8dc1168186bb60ebcdd280f7e72a8f41291dde8",
+      "tree": "2bdc923bee1fc4107d2f3ee58a3e9114ca328c14",
+      "parent": "72cfb593501384f2629d6cf4e69aad8dca30a6d1"
+    },
+    {
+      "local": "bb93377a3e9b44d00b33001202307ab441ec0d42",
+      "remote": "8faded03e4e9519a7591ef6a1cc1aebcb6ff4b61",
+      "tree": "13cced2797e54a4090864e3f3996683ac9ed4da7",
+      "parent": "f8dc1168186bb60ebcdd280f7e72a8f41291dde8"
+    },
+    {
+      "local": "53cda2f1043c7ca3b5acd68d9bbe048d1dd93a6d",
+      "remote": "c5bdf96f2a2f59ee7558d51933c9d94d2a6fcfc3",
+      "tree": "80b589ea14b09dc1eb7dd924f4a4ee46c6cc2733",
+      "parent": "8faded03e4e9519a7591ef6a1cc1aebcb6ff4b61"
+    },
+    {
+      "local": "702ec47647257d9b3ca25db3121c2b247dfb4d77",
+      "remote": "281847a02db37a38286307c8f7d60b1f1b52677c",
+      "tree": "ddb5a45ffa74346f113857dfec5e293b581165c7",
+      "parent": "c5bdf96f2a2f59ee7558d51933c9d94d2a6fcfc3"
+    }
+  ],
+  "protectedRefs": [
+    {
+      "ref": "main",
+      "sha": "84a25d5a7b9545dff3556299efec3c310fc321cf"
+    },
+    {
+      "ref": "feat/v12-b-orders",
+      "sha": "c857d3b8532ae98dcfb208d10dd140efa0a3037b"
+    },
+    {
+      "ref": "docs/v12-m-rabbitmq-convergence",
+      "sha": "48dc05abf33c7bab7e5c1a90bc306d79f82aef3f"
+    }
+  ],
+  "formalAcceptance": "M8_PENDING_REVIEW_AND_OWNER_MANUAL_NOT_EXECUTED",
+  "userPersistentEnvironmentMigration": "NOT_EXECUTED"
+}

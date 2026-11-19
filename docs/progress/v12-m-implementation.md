@@ -29,3 +29,7 @@ M0～M7候选实施与定向自动验证已完成；M8独立远端源码复审�
 所有失败与修复摘要见`v12-m-failed-attempts.json`，M6三份失败状态证据保留。除产品缺陷修复外，还纠正了探针未退出、quorum容量允许少量超额、队列计数采样时序等测试工具问题；失败尝试不计为通过。
 
 完整旧V11 B23/C26历史故障矩阵、C/D负载性能、独立Linux主机、多节点Rabbit HA、用户常驻环境迁移、B8/M8独立复审及负责人真人手测均NOT_EXECUTED/PENDING。没有替负责人签验收，没有自动进入C/D，没有改PR#17的head/base，没有合并main。
+
+## 远端交付回执
+
+已通过GitHub App交付[Draft PR #19](https://github.com/Felix0410/FlowGate/pull/19)，base为M设计分支，未改PR#17。原生git push返回403/exit128；App创建同内容Git树并保留六阶段父链。源码检查点本地`702ec47`对应远端`281847a02db37a38286307c8f7d60b1f1b52677c`，树`ddb5a45ffa74346f113857dfec5e293b581165c7`完全一致；该检查点后仅增加本回执文档。各阶段远端tree/parent均实际GET回读核对，映射见`evidence/v12-m-delivery.json`。main与B功能分支SHA未变。兼容回滚本地`f26db25`在远端对应`72cfb593501384f2629d6cf4e69aad8dca30a6d1`。PR待M8独立复审和负责人手测，不正式签验收。
