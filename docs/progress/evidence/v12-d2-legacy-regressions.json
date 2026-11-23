@@ -1,0 +1,480 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "checks": [
+    "Free5 dual Gateway100 actual concurrent:5x200/95x429; Ledger5",
+    "internal HTTP100 samecharge -> one Ledger; checksum/units/version conflict409",
+    "real generation rotate/revoke vs stale Redis session; APP/developer suspend no charge",
+    "ADMIN/Portal/APP purpose isolation; OPERATOR/VIEWER read four diagnostics200 and credential writes403",
+    "SSRF endpoints rejected before outbound access",
+    "real CB failure OPEN rejects before debit then HALF_OPEN probe recovers CLOSED",
+    "timeout after debit retains Ledger; rate/concurrency rejection before debit; permit returns",
+    "real client socket cancellation permits subsequent request without refund",
+    "snapshot rollback removes unpublished fault routes on both nodes",
+    "actual MySQL pause metered503, public proxy200; recovered without Ledger rollback"
+  ],
+  "actualConcurrentFree5": {
+    "requests": 100,
+    "passed": 5,
+    "exhausted": 95
+  },
+  "internalSameChargeMessages": 100,
+  "kafkaStarted": false,
+  "notExecuted": [
+    "legacy binary mixed-node live upgrade in this script",
+    "cross-month DB session clock injection",
+    "original Kafka partition pause matrix not applicable"
+  ],
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "4e43a6d782bf5a0322debeb79d34475c64257bf68ac9e1d11e760b3d4521b67d",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/admin/developers",
+      "status": 201
+    },
+    {
+      "path": "/admin/plans",
+      "status": 201
+    },
+    {
+      "path": "/admin/plans",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps/5025/credentials",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps/5026/credentials",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/5026/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/api/v11/legacy/1",
+      "status": 403
+    },
+    {
+      "path": "/api/v11/legacy/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/5026/credentials/revoke",
+      "status": 200
+    },
+    {
+      "path": "/api/v11/legacy/1",
+      "status": 403
+    },
+    {
+      "path": "/admin/apps/5026/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/5026",
+      "status": 200
+    },
+    {
+      "path": "/api/v11/legacy/1",
+      "status": 403
+    },
+    {
+      "path": "/admin/apps/5026",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers/5010",
+      "status": 200
+    },
+    {
+      "path": "/api/v11/legacy/1",
+      "status": 403
+    },
+    {
+      "path": "/admin/developers/5010",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/api/v11/legacy/1",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/internal/quota/charge",
+      "status": 401
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/messaging/diagnostics",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/5026/credentials",
+      "status": 403
+    },
+    {
+      "path": "/admin/apps/5026/credentials/rotate",
+      "status": 403
+    },
+    {
+      "path": "/admin/apps/5026/credentials/revoke",
+      "status": 403
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/messaging/diagnostics",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/5026/credentials",
+      "status": 403
+    },
+    {
+      "path": "/admin/apps/5026/credentials/rotate",
+      "status": 403
+    },
+    {
+      "path": "/admin/apps/5026/credentials/revoke",
+      "status": 403
+    },
+    {
+      "path": "/admin/services",
+      "status": 400
+    },
+    {
+      "path": "/admin/services",
+      "status": 400
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/47/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/48/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/49/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/50/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/51/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/52/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/53/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/54/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/api/d-gates/2ab96834/fault",
+      "status": 503
+    },
+    {
+      "path": "/api/d-gates/2ab96834/fault",
+      "status": 503
+    },
+    {
+      "path": "/api/d-gates/2ab96834/fault",
+      "status": 200
+    },
+    {
+      "path": "/api/d-gates/2ab96834/timeout",
+      "status": 504
+    },
+    {
+      "path": "/api/d-gates/2ab96834/rate",
+      "status": 200
+    },
+    {
+      "path": "/api/d-gates/2ab96834/rate",
+      "status": 429
+    },
+    {
+      "path": "/api/d-gates/2ab96834/capacity",
+      "status": 503
+    },
+    {
+      "path": "/api/d-gates/2ab96834/capacity",
+      "status": 200
+    },
+    {
+      "path": "/api/d-gates/2ab96834/capacity",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/6/rollback",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/api/d-gates/2ab96834/capacity",
+      "status": 404
+    },
+    {
+      "path": "/admin/apis",
+      "status": 200
+    },
+    {
+      "path": "/api/v11/legacy/1",
+      "status": 503
+    },
+    {
+      "path": "/api/d-bench/proxy/fast/1",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

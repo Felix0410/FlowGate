@@ -130,7 +130,7 @@ def mysql_query(env, sql, project=None, owner=None, read_only=True):
     cid = docker_target(port, 'mysql', project, owner)
     proc_env = dict(os.environ, MYSQL_PWD=env.get('FG_MYSQL_PASSWORD', ''))
     statement = "SET time_zone = '+00:00';\n" + ('START TRANSACTION READ ONLY;\n' if read_only else '') + sql + ('\nROLLBACK;' if read_only else '')
-    return command(['docker', 'exec', '-i', '-e', 'MYSQL_PWD', cid, 'mysql', '-u', user, '-D', database, '-N', '-B'], env=proc_env, data=statement)
+    return command(['docker', 'exec', '-i', '-e', 'MYSQL_PWD', cid, 'mysql', '--default-character-set=utf8mb4', '-u', user, '-D', database, '-N', '-B'], env=proc_env, data=statement)
 
 
 def schema_groups():

@@ -26,3 +26,25 @@ class Lab(BaseLab):
   p=self.request('/admin/promotions',self.admin,{'name':name,'skuId':sku['id'],'promoPriceCents':100,'totalStock':stock,'beginsAt':iso(now-timedelta(seconds=1)),'endsAt':iso(now+timedelta(hours=2)),'orderCreationTtlSeconds':creation,'payTtlSeconds':pay})
   self.request('/admin/promotions/'+str(p['id'])+'/publish',self.admin,{})
   return p
+
+ def restart_gateways(self):
+  import signal
+  ids=[self.state.get('processes',{}).get('flowgate-gateway',{}).get('pid'),self.cleanup.get('secondPid')]
+  jar=self.home/'artifacts/flowgate-gateway.jar'
+  for pid in ids:
+   actual=r.identity(pid) if pid else None
+   if actual:
+    assert str(jar) in actual[0] and ('-Dflowgate.v11-demo.owner='+self.state['owner'] in actual[0] or '-Dflowgate.v12-test.owner='+self.state['owner'] in actual[0])
+    if pid==ids[0]:assert actual[1]==self.state['processes']['flowgate-gateway']['start']
+    os.kill(pid,signal.SIGTERM)
+  r.wait_for(lambda:all(not r.identity(p) for p in ids if p),'自有Gateway退出',30);jar.write_bytes(c.jar_path('flowgate-gateway').read_bytes())
+  for i,port in enumerate([self.state['ports']['gateway'],self.baseline['ports']['gateway2']]):
+   env=dict(os.environ,**self.env);env['GATEWAY_PORT']=str(port)
+   if i:env['FLOWGATE_NODE_ID']='v12-second-'+self.work.name
+   for k in list(env):
+    if k.startswith(('FG_MYSQL_','FG_BOOTSTRAP_','FLOWGATE_ASYNC_','FLOWGATE_QUOTA_','FLOWGATE_RABBITMQ_','FLOWGATE_V12_','FLOWGATE_PORTAL_')):env.pop(k)
+   with (self.work/('d-gateway'+str(i)+'.log')).open('a') as log:p=subprocess.Popen([self.java,('-Dflowgate.v12-test.owner=' if i else '-Dflowgate.v11-demo.owner=')+self.state['owner'],'-jar',str(jar)],cwd=c.ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+   r.wait_for(lambda:c.http_json('http://127.0.0.1:'+str(port),'/actuator/health')[0]==200,'自有Gateway启动',45)
+   if i==0:self.state['processes']['flowgate-gateway']={'pid':p.pid,'start':r.identity(p.pid)[1]}
+   else:self.cleanup['secondPid']=p.pid
+  self.state['artifactHashes']['flowgate-gateway']=c.file_hash(c.jar_path('flowgate-gateway'));r.save(self.home/'state.json',self.state);r.save(self.work/'cleanup.json',self.cleanup)
