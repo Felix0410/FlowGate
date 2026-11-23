@@ -1,3 +1,5 @@
+> **2026-11-23最终裁决：本文件是V11时代历史验收合同，不再单独实施。** 旧D-01的≥10万SQL/稳定游标+EXPLAIN ANALYZE、旧D-02的DIRECT/PROXY/GOVERNED/METERED四组公平实验、E6真人验收以及原异步用量/安全矩阵全部已纳入[唯一V12-D Final实施合同](v12-d-final-delivery.md)的D2～D8；当前项目只有RabbitMQ，下面所有旧Kafka故障/lag命令不得按字面运行，需以现行四Rabbit链等效真实场景替代。唯一Codex入口`../../CODEX_V12_D_FINAL_EXEC_PROMPT.md`；V11-D并没有因重新归类就自动PASS。下文为历史原文。
+
 # FlowGate V1.1-D：SQL 优化、正式产品验收、性能实验与交付（Codex 编码合同）
 
 > 状态：未开始；前置 A、B、C 均已通过定向验证。V1 的旧 Block4 证据应保留，**不能把 V1 纯代理性能冒充 V1.1 计量性能**。
