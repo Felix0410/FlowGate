@@ -24,3 +24,5 @@ D7：`c572509`。最终Java17 Maven verify97项/0失败0错误0跳过，Node9入
 D8：本轮实现者源码自审报告、完整结果/历史场景映射及中文runbook随同一Draft PR#22交付。总体CONDITIONALLY_READY，外部独立复审PENDING_REVIEW、负责人PENDING_OWNER；未签名不写ACCEPTED。原PR#17～#21/main/tag不改，旧PR冗余关闭方案仅供负责人决定。远端App提交如与本地SHA不同，以相同Git Tree和逐包单父链验证交付，实际交付记录见最终结果；不强推、不自合并。
 
 交付前语法检查：Node promotions.js --check exit0；Python py_compile首次因沙箱禁止写系统bytecode缓存而exit1，改为不写缓存的AST解析四入口exit0。git diff --check exit0。此环境错误不计入业务通过数。
+
+远端真实交付：原生push HTTP403/exit128，使用已连接GitHub App在同一分支按序生成10个提交；原生fetch exit0，逐包相同Tree和单父链均已核对。候选远端HEAD 09c007339efcda7002a2dd877ac8c8d7ab63e74e（在交付记录提交之前），本地/远端不同提交SHA但最终树相同。完整映射见v12-d8-github-delivery.json。原PR22 Draft/base C，未改旧PR/main。

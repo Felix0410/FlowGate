@@ -57,3 +57,5 @@ Java17 `mvn -B -ntp verify` exit0：97测试、零失败/错误/跳过；Node9�
 首次失败与修复记录在[v12-d7-full-regression](../progress/evidence/v12-d7-full-regression.json)，各证据记录测试时父SHA与运行Jar hash。测试工作树含当时未提交实现，不能把父SHA当作完整源码版本；逐包提交归档对应源码，最终Jar见D7。原始CSV按原字节gzip保存，[索引与SHA](evidence/v12-d-raw-index.json)，没有重算性能原始行。GitHub App交付若重新生成提交SHA，则以本地树SHA及同顺序父链核验，不强推旧分支。
 
 历史B/C场景的Rabbit替代与未执行范围见[场景映射](../reviews/v12-d-legacy-scenario-map.md)；源码自审见[最终自审](../reviews/v12-d-final-source-review.md)。
+
+远端已通过原生fetch核验：候选HEAD `09c007339efcda7002a2dd877ac8c8d7ab63e74e`（之后仅追加本交付记录），逐包Tree与本地相同、父链顺序一致；原生push403后走GitHub App，映射见[GitHub交付记录](../progress/evidence/v12-d8-github-delivery.json)。本地保留原实现提交历史，远端App提交SHA不同，勿盲目reset/rebase/force push。

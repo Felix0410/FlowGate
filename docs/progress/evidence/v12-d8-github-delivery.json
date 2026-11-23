@@ -1,0 +1,67 @@
+{
+  "verifiedThroughRemoteHead": "09c007339efcda7002a2dd877ac8c8d7ab63e74e",
+  "nativeFetchExitCode": 0,
+  "nativePushExitCode": 128,
+  "nativePushReason": "HTTP403; GitHub App authorized API route used",
+  "sameTreeAtEveryStage": true,
+  "orderedSingleParentChain": true,
+  "base": "feat/v12-c-promo-cache",
+  "head": "feat/v12-d-final-delivery",
+  "pr": 22,
+  "draft": true,
+  "oldPrRefsModified": false,
+  "mainMerged": false,
+  "mappings": [
+    {
+      "local": "72166df48dc6b703e9b45cb04024c9887818f076",
+      "remote": "154bd6ee0fe35b5e0eaa8930faac524be5f31666",
+      "tree": "11038f837f54209b8f7ec9d1c651d431a78f3f18"
+    },
+    {
+      "local": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+      "remote": "8e32dfffccf914ef3717a88096922e67c6ff5a81",
+      "tree": "21644c2ead602e3eb4de5dde10ea9e907b583525"
+    },
+    {
+      "local": "d4c96268cc01a5fe629c84ff6ac392cf9812c5b2",
+      "remote": "35f4d97592da73fe8bdff21621dfc29099be998d",
+      "tree": "70e1b370cf2661e6c9285092d7df9b01e7d11b7e"
+    },
+    {
+      "local": "31db0abe6edb501d30d7fbe1a12dca39e33b582a",
+      "remote": "295c06841ed8a6349fd8b9d370f389fa4035f29c",
+      "tree": "66ab999058da62d7ce697146f89f94c2186e555f"
+    },
+    {
+      "local": "6fb36dd36f4f8b7a261eec7811040d41baa9b603",
+      "remote": "406f32dff3fd1dc9f2f5fa22625138bd7e15d005",
+      "tree": "e4bee673c8302595b7ded3d7340578c6a852673a"
+    },
+    {
+      "local": "720261ae437ee00c7571b5b2e57a8f799f05b562",
+      "remote": "4d83d920a372cd75dd595ed5e30792f80c8421d7",
+      "tree": "631dd541072b29bf5c66cafb462e59ecd4b61b88"
+    },
+    {
+      "local": "658810ab4d8faf2b1657587609e6ff8996473593",
+      "remote": "395d83c5527c70269f72a9e03ec3d0f0820ffca0",
+      "tree": "ee0c650996aed3fc408e55345007e834e7bc3381"
+    },
+    {
+      "local": "851632bdf0d396362fbb955e86439a9f3d03e8cf",
+      "remote": "c60473a2a3653d75221433ae063e63d8590734f3",
+      "tree": "51b0f0b61f3d47f17c5957c505301066aa4f0bd1"
+    },
+    {
+      "local": "c572509ce327768a0364203652e9731e92a49bc8",
+      "remote": "2ee3cdc0747adf827b7e51d3b8f476b42f9bf4ae",
+      "tree": "54635c17cc68c8212e8be76d5ea70f08ba969577"
+    },
+    {
+      "local": "3fc641dab35f96825cdfd42ff2f07c9c3cda2740",
+      "remote": "09c007339efcda7002a2dd877ac8c8d7ab63e74e",
+      "tree": "42f3c3e4f54cfd2ca7cc9e6b5dcae26e8a837454"
+    }
+  ],
+  "note": "App commit metadata differs: local feature history and remote history have different SHAs with identical trees. Do not blindly push local history or rebase/reset; current working tree equals delivered candidate. This record is added after native verification of the candidate head."
+}
