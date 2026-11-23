@@ -23,3 +23,5 @@ python3 scripts/v12-c-preview.py stop
 其他机器：先按`docs/guides/v11-local-delivery.md`准备新的隔离配置和owner实例；仅在该新配置显式打开A/B及以上C开关。`v11-local.py up --isolated`首次建库会安装C五表、兼容CHECK/FK；已有隔离实例先停所有Control，再显式运行`python3 scripts/v12-c-migrate.py --instance-home <该隔离实例目录>`。这些脚本拒绝常驻flowgate-local，无自动用户库ALTER。
 
 实测与未执行范围见`docs/progress/v12-c-implementation.md`。20k QPS未达到，5k/20k阶梯未执行；独立源码复审与负责人真人验收待完成。
+
+D Final恢复补充：促销Outbox第8次发送失败后数据库仍为FAILED，运营显示RETRY_EXHAUSTED。管理员可在事件和当前节点均满300秒、无租约且未消费时，审计重新开启一批最多8次的原事件投递。永久坏事件不解封；已过期意向补投只记录忽略终态，不重新占库存。事件列表提供真实可补投时刻和当前节点剩余冷却，条件未到按钮禁用。
