@@ -1,3 +1,13 @@
+# FlowGate 当前状态：V12-C候选已实施，等待独立复审与负责人手测
+
+> 负责人明确授权完成C，并要求功能优先、少量关键测试。当前分支`feat/v12-c-promo-cache`，base=`docs/v12-c-high-concurrency-cache`。已实现公开套餐Redis缓存、C五表/原B CHECK兼容迁移、Lua软候选、MySQL持久202、独立Rabbit促销意图三队列、B订单/付款/取消/超时/退款库存联动，以及Portal/Console。证据与限制以`docs/progress/v12-c-implementation.md`为准。100库存120真实HTTP申请恰100受理/唯一订单；本机1000次公开缓存查询无新增公开投影回源，不称20k QPS；5k/20k阶梯和完整旧矩阵未展开。
+>
+> M8及C独立源码复审、负责人真人验收未完成；不称正式通过，不进入D/合并main/修改旧PR。根.env、IDE与flowgate-local常驻M服务保持原样；C测试只在本轮独立owner新卷中完成，候选按合同停机保留数据，可用`python3 scripts/v12-c-preview.py start`恢复，私有账号在.local/v12-c-access.md。缓存/活动默认OFF，不自动迁移用户库。
+>
+> 以下C设计初始化与更早M/B/A记录是历史，NOT_STARTED等旧状态不覆盖上方候选事实。
+
+---
+
 # FlowGate 下一阶段：V12-C高并发套餐缓存与限时抢购（2026-11-23仅设计）
 
 > **唯一Codex任务入口：`CODEX_V12_C_EXEC_PROMPT.md`**，唯一C0～C9实施合同：`docs/progress/v12-c-high-concurrency.md`。完整业务架构：`docs/design/v12-c-high-concurrency-promotion-architecture.md`；MySQL CHECK迁移/事务/库存：`docs/design/v12-c-concurrency-transactions.md`；**公开套餐读缓存及Lua soft库存的强制合同**：`docs/design/v12-c-cache-consistency.md`。ADR-15优先覆盖旧C蓝图任何不一致处。此阶段目前**只是设计已提交，C0～C9实现和实测均NOT_STARTED**。

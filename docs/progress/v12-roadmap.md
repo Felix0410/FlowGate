@@ -1,3 +1,5 @@
+> 2026-11-23实施更新：C功能候选已实现，真实关键证据见[v12-c-implementation.md](v12-c-implementation.md)。按负责人“快和准”仅100库存/120申请与1000公开读样本；大阶梯和完整旧矩阵未跑，20k QPS未达到。M8/C独立复审与真人验收待完成，不进入D。下方仅设计初始化状态保留为历史。
+
 # FlowGate V1.2｜业务化升级阶段路线与验收门槛（2026-11-10）
 
 > **2026-11-23 最新路线与C实施范围**：V12-M已交付Kafka-free代码候选PR#19/本机Rabbit部署记录，但M8独立复审和负责人真实手测待确认；**V12-C高并发套餐及Redis缓存详细设计现已完成，但C0～C9全部NOT_STARTED**。下一步先核验M8基线，Codex再从`docs/v12-c-high-concurrency-cache`按[完整架构](../design/v12-c-high-concurrency-promotion-architecture.md)、[Cache-Aside与Lua缓存恢复](../design/v12-c-cache-consistency.md)、[MySQL订单/Stock/Intent故障](../design/v12-c-concurrency-transactions.md)、[分段C0～C9](v12-c-high-concurrency.md)、[Codex执行提示词](../../CODEX_V12_C_EXEC_PROMPT.md)开发。**商品/套餐公开读缓存是C必做业务特性**，不是D才做的可选优化。任何老段落中“C用Kafka/保留V11 Kafka/不用缓存”均由ADR-14和ADR-15覆盖；现行只RabbitMQ，20k请求是待测目标，绝非已测QPS。

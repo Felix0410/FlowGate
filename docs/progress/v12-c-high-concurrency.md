@@ -1,3 +1,5 @@
+> 实施状态更新：C0～C9候选功能与必要实测见[v12-c-implementation.md](v12-c-implementation.md)，本文件保留原合同。负责人明确要求快和准、避免过多测试，因此5k/20k阶梯、完整历史矩阵、12次耗尽与300秒SENT补投实等不再展开；这些项保持NOT_EXECUTED，不把原设计目标当作PASS。独立复审和负责人真人验收仍待完成。
+
 # FlowGate V12-C｜高并发套餐缓存、限时抢购与Rabbit异步订单——C0～C9 Codex实施合同
 
 > **状态：已完成设计，C0～C9代码、迁移、测试全部NOT_STARTED。** 事实基线`feat/v12-m-rabbitmq-only@d6c1f33371690071c4bb7199dc9e7db5598d8079`、PR#19 Draft；C从`docs/v12-c-high-concurrency-cache`新建设计后功能分支，PR base只认本设计。**必须按序读**[整体架构](../design/v12-c-high-concurrency-promotion-architecture.md)、[MySQL事务/DDL/故障](../design/v12-c-concurrency-transactions.md)、[Redis缓存/重建](../design/v12-c-cache-consistency.md)、[Codex唯一提示](../../CODEX_V12_C_EXEC_PROMPT.md)、ADR-15。此前旧`v12-commerce-order-promotion-blueprint.md`仅为历史规划，C最新版以前述4份为准。
