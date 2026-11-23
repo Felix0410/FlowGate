@@ -1,0 +1,40 @@
+{
+  "pr": "https://github.com/Felix0410/FlowGate/pull/21",
+  "draft": true,
+  "base": "docs/v12-c-high-concurrency-cache",
+  "baseSha": "a4a48b78b04f04f728c2bb6614942eaf4f100e27",
+  "nativePush": "HTTP403",
+  "delivery": "GitHub App; native fetch verified every tree and ordered parent",
+  "stages": [
+    {
+      "local": "2369f0735f0df74de078adfafe2c37d08f62e54e",
+      "remote": "6a3113f0ab2e2ca6496d96f35cb6abe53f91a440",
+      "tree": "2333b271d13fc47aa7a28bf7f966ed79d82a93ad"
+    },
+    {
+      "local": "dd82c18768ecf2a0d377874dfccfd8503bdd0cdd",
+      "remote": "cb65f2dc4d906016698595af57effe1e755006c8",
+      "tree": "574d8e745bbfc4932258fa3b4cb3776f77cd0766"
+    },
+    {
+      "local": "35f1cbf8fb0ca2c905494e6c979406a451cde435",
+      "remote": "459aff56ba9949c1d3d224e81c751645c6ab021d",
+      "tree": "7eb0363eac4cc1049961979d2f0b14ba78735732"
+    },
+    {
+      "local": "1ee21830d311a1126892ba989cdf2da8f8312c0a",
+      "remote": "32b5bbe4f1c54d5f0a4d204c15d1843677a6159d",
+      "tree": "a3c1c5ec7b5b2281f4f64d1679598a46d1a1588d"
+    }
+  ],
+  "sourceTree": "a3c1c5ec7b5b2281f4f64d1679598a46d1a1588d",
+  "nativeFetchedDiffExitCode": 0,
+  "oldRefsUnchanged": {
+    "main": "84a25d5a7b9545dff3556299efec3c310fc321cf",
+    "B": "c857d3b8532ae98dcfb208d10dd140efa0a3037b",
+    "M": "d6c1f33371690071c4bb7199dc9e7db5598d8079"
+  },
+  "ownerPreview": "STOPPED; volumes retained; python3 scripts/v12-c-preview.py start",
+  "formalAcceptance": "PENDING_REVIEW",
+  "note": "This delivery metadata is appended after the four verified implementation stages."
+}

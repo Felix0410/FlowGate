@@ -193,7 +193,7 @@ def fresh(home, source, ports, config):
     env.update(FG_V11_DEMO_OWNER=owner, FG_MYSQL_USERNAME='flowgate', FG_MYSQL_PASSWORD=secrets.token_urlsafe(30), FG_MYSQL_ROOT_PASSWORD=secrets.token_urlsafe(30), FG_REDIS_PASSWORD=secrets.token_urlsafe(30), FG_REDIS_HOST='127.0.0.1', FG_REDIS_DATABASE='0', FG_MYSQL_PORT=str(ports['mysql']), FG_REDIS_PORT=str(ports['redis']), CONTROL_PORT=str(ports['control']), GATEWAY_PORT=str(ports['gateway']), DEMO_PORT=str(ports['demo']))
     env.update(FG_MYSQL_URL=f"jdbc:mysql://127.0.0.1:{ports['mysql']}/flowgate_v11_demo?connectionTimeZone=UTC", FLOWGATE_CONTROL_URI=f"http://127.0.0.1:{ports['control']}", FLOWGATE_CONSOLE_ORIGIN=f"http://127.0.0.1:{ports['control']}", FLOWGATE_ALLOWED_UPSTREAMS=f"http://127.0.0.1:{ports['demo']}", FLOWGATE_DEMO_STATUS_URI=f"http://127.0.0.1:{ports['demo']}", FLOWGATE_NODE_ID='e-demo-' + owner[:12], FLOWGATE_QUOTA_TRAFFIC_NODES='e-demo-' + owner[:12], FLOWGATE_QUOTA_ACTIVATION_ENABLED='true', FLOWGATE_ASYNC_ENABLED='true')
     # V12仅显式配置的新实例启用，旧E实例配置与迁移保持原样。
-    for key in ('FLOWGATE_PORTAL_ENABLED', 'FLOWGATE_V12_QUOTA_ENABLED', 'FLOWGATE_V12_ASYNC_ENABLED', 'FLOWGATE_V12_COMMERCE_ENABLED', 'FLOWGATE_V12_COMMERCE_ASYNC_ENABLED'):
+    for key in ('FLOWGATE_PORTAL_ENABLED', 'FLOWGATE_V12_QUOTA_ENABLED', 'FLOWGATE_V12_ASYNC_ENABLED', 'FLOWGATE_V12_COMMERCE_ENABLED', 'FLOWGATE_V12_COMMERCE_ASYNC_ENABLED', 'FLOWGATE_V12_CATALOG_CACHE_ENABLED', 'FLOWGATE_V12_PROMOTION_ENABLED'):
         if source.get(key) == 'true': env[key] = 'true'
     state['v12Rabbitmq'] = True
     state['rabbitOnly'] = True
@@ -230,6 +230,8 @@ def start(home, config, ports):
             expected |= set(re.findall(r'CREATE TABLE IF NOT EXISTS (\w+)', (core.ROOT/'sql/flowgate-v12-a.sql').read_text()))
         if env.get('FLOWGATE_V12_COMMERCE_ENABLED') == 'true':
             expected |= set(re.findall(r'CREATE TABLE IF NOT EXISTS (\w+)', (core.ROOT/'sql/flowgate-v12-b.sql').read_text()))
+        if env.get('FLOWGATE_V12_PROMOTION_ENABLED') == 'true':
+            expected |= set(re.findall(r'CREATE TABLE IF NOT EXISTS (\w+)', (core.ROOT/'sql/flowgate-v12-c.sql').read_text()))
         if not state['initialized']:
             if tables and not state.get('migrationStarted'): raise core.LocalFailure('库已非空且无首次迁移凭据，拒绝初始化')
             if tables - expected: raise core.LocalFailure('隔离库出现非预期表，拒绝初始化')
@@ -239,6 +241,11 @@ def start(home, config, ports):
             if env.get('FLOWGATE_V12_COMMERCE_ENABLED') == 'true': scripts.append('flowgate-v12-b.sql')
             for script in scripts:
                 core.mysql_query(env, (core.ROOT / 'sql' / script).read_text(), state['project'], state['owner'], read_only=False)
+            if env.get('FLOWGATE_V12_PROMOTION_ENABLED') == 'true':
+                import importlib.util
+                spec = importlib.util.spec_from_file_location('v12_c_migration', core.ROOT/'scripts/v12-c-migrate.py')
+                migration = importlib.util.module_from_spec(spec); spec.loader.exec_module(migration)
+                migration.migrate(home)
             # 仅首次、全新owner且无旧Outbox时选择Rabbit；重复启动不会改既有模式。
             core.mysql_query(env, "UPDATE fg_legacy_mq_cutover SET mode='RABBIT',epoch=epoch+1,changed_at=UTC_TIMESTAMP(3) WHERE id=1 AND mode='KAFKA' AND epoch=1 AND NOT EXISTS(SELECT 1 FROM fg_outbox_event);", state['project'], state['owner'], read_only=False)
             state['initialized'] = True; save(home / 'state.json', state)

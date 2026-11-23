@@ -1,4 +1,9 @@
+> 2026-11-23实施更新：C功能候选已实现，真实关键证据见[v12-c-implementation.md](v12-c-implementation.md)。按负责人“快和准”仅100库存/120申请与1000公开读样本；大阶梯和完整旧矩阵未跑，20k QPS未达到。M8/C独立复审与真人验收待完成，不进入D。下方仅设计初始化状态保留为历史。
+
 # FlowGate V1.2｜业务化升级阶段路线与验收门槛（2026-11-10）
+
+> **2026-11-23 最新路线与C实施范围**：V12-M已交付Kafka-free代码候选PR#19/本机Rabbit部署记录，但M8独立复审和负责人真实手测待确认；**V12-C高并发套餐及Redis缓存详细设计现已完成，但C0～C9全部NOT_STARTED**。下一步先核验M8基线，Codex再从`docs/v12-c-high-concurrency-cache`按[完整架构](../design/v12-c-high-concurrency-promotion-architecture.md)、[Cache-Aside与Lua缓存恢复](../design/v12-c-cache-consistency.md)、[MySQL订单/Stock/Intent故障](../design/v12-c-concurrency-transactions.md)、[分段C0～C9](v12-c-high-concurrency.md)、[Codex执行提示词](../../CODEX_V12_C_EXEC_PROMPT.md)开发。**商品/套餐公开读缓存是C必做业务特性**，不是D才做的可选优化。任何老段落中“C用Kafka/保留V11 Kafka/不用缓存”均由ADR-14和ADR-15覆盖；现行只RabbitMQ，20k请求是待测目标，绝非已测QPS。
+
 
 > **最新进度（2026-11-19）**：V12-M功能分支`feat/v12-m-rabbitmq-only`从真实设计HEAD实施；M0补齐B原始证据并重跑关键链路，M1/M2兼容单路由切换/回滚/双300秒SENT恢复通过，M4当前源码/构建/运行器Kafka-free，M5无Kafka三链真实联调通过。故障、浏览器与未验项以[M实施记录](v12-m-implementation.md)为准。M8独立复审/负责人手测尚未通过，C/D不启动。以下日期更早的状态段为历史，不代表当前代码依赖。
 
@@ -143,3 +148,19 @@ V12-A独立功能分支`feat/v12-a-portal`已远端提交自助Portal、商品�
 ## 最终决策覆盖说明（2026-11-19）
 
 本文2026-11-10旧历史段落中的Kafka4.1.1、长期保留旧V11 Kafka、V12尚未编码等说法，只代表当时方案/测试历史，**不再是M完成后的最终交付标准**。现在B代码已经提交，M0先做真实验收补证，M在独立设计/开发分支完成Kafka退役后才进入C。现行交付只Rabbit，历史Git证据仍完整保存。
+
+
+## 2026-11-23 V12-C新设计的执行顺序（覆盖早期C仅秒杀提案）
+
+- **C0** 真实M8/B代码与功能/本机安全基线；不在用户常驻库上测试或迁移。
+- **C1（强制缓存）** 免费与正价高频API套餐的公开商品分类、列表、详情、SKU报价：Redis Cache-Aside、随机TTL、负缓存、防击穿单飞、afterCommit版本失效、Redis故障下有界DB只读回源；**交易不信缓存价**。
+- **C2** MySQL五张活动/库存/Intent/独立Outbox/消费表，原B订单`source=NORMAL`硬CHECK安全扩展为PROMOTION兼容，真实后台冻结价格/月份/总库存。
+- **C3** 活动公开读缓存、Lua softRemaining/同用户租约+token+epoch候选、DB REBUILDING重建/旧候选阻断；Redis失联新claim503，已有订单继续。
+- **C4** Portal抢购/MySQL APP+Slot(PROMO)+Stock reserved+Intent ACCEPTED+Outbox同事务，只有DB COMMIT才HTTP202，失联响应可`my-claim`找回。
+- **C5** Rabbit独立Promo Intent quorum/TTL/Poison队列、原事件校验/幂等创B促销订单、Intent孤儿超时回收与SENT原事件补投。
+- **C6** B模拟付款成功才`reserved--,sold++`、唯一PaymentConfirmed/B Commerce Grant；未付款超时返reserved，已付款退款不返售，Ledger不倒改。
+- **C7** 库存/Intent/Order/Rabbit/缓存版本核账、活动管理与真实运营页；Redis重启/击穿、Rabbit故障恢复。
+- **C8** 冷热缓存DB降载测量、两Control/两Gateway、100份限量的1k→5k→20k请求目标和真实吞吐/p95/超卖检查，达不到要明示。
+- **C9** Portal/Console原生ESM高质量交互、1280/375真实浏览器、Java/Node/Python/故障证据、Draft PR，等待独立代码复审和负责人真人验收，不自动进入D。
+
+**本段是设计路线图，不表示C实现完成**；详见[唯一C分段合同](v12-c-high-concurrency.md)。V11-D旧SQL/四组公平路由正式性能及V12-D综合验收仍另列待办。

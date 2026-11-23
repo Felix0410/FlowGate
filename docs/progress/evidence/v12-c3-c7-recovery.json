@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "checks": [
+    "actual isolated Redis FLUSHDB rejects claim503 before reservation",
+    "ADMIN rebuild advances epoch and SCRIPT FLUSH fallback",
+    "actual Rabbit stop: durable202 -> Intent EXPIRED -> restart late event IGNORED_TERMINAL",
+    "initial harness failed from missing SQL terminator; fixed Lab query wrapper; original event consumed without application restart",
+    "real Rabbit container stopped: HTTP202 durable before broker confirmation",
+    "ACCEPTED creation deadline releases stock/own slot",
+    "Rabbit restart late event ignored without resurrecting order",
+    "MySQL pause/unpause: public response or client timeout, then recovery",
+    "existing isolated API Ledger rows/units unchanged",
+    "100-stock Intent/Order/Payment/Outbox/Consumed/Slot/Grant enhanced RR check has zero gaps"
+  ],
+  "promotionId": 8,
+  "epochBefore": 1,
+  "epochAfter": 3,
+  "reconciliation": {
+    "asOfUtc": "2026-11-23T10:54:04.561Z",
+    "integrityGaps": 0,
+    "available": 3,
+    "sold": 0,
+    "expectedSold": 0,
+    "expectedReserved": 0,
+    "reserved": 0,
+    "intents": 1,
+    "status": "PROVISIONAL",
+    "total": 3
+  },
+  "loadReconciliation": {
+    "asOfUtc": "2026-11-23T10:54:04.765Z",
+    "integrityGaps": 0,
+    "available": 0,
+    "sold": 10,
+    "expectedSold": 10,
+    "expectedReserved": 90,
+    "reserved": 90,
+    "intents": 100,
+    "status": "PROVISIONAL",
+    "total": 100
+  },
+  "mysqlPauseStatus": 503,
+  "notExecuted": [
+    "full historical B23/C26 matrices",
+    "5000/20000 load levels",
+    "owner manual acceptance"
+  ],
+  "sourceCommit": "dd82c18768ecf2a0d377874dfccfd8503bdd0cdd",
+  "controlJarSha256": "5718d4802e28a92d791ed4377a785054b08cd69cba30dbb5307cd56a7b36a3fa",
+  "owner": "93bf9c774e6c487e91826d0c97ee6972",
+  "project": "flowgate-v11-demo-93bf9c774e6c",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/8",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/8/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/6/reconciliation",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

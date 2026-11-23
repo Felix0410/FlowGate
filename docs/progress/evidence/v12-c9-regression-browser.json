@@ -1,0 +1,85 @@
+{
+  "passed": true,
+  "sourceCommit": "35f1cbf8fb0ca2c905494e6c979406a451cde435",
+  "java": {
+    "command": "JAVA_HOME=ms-17.0.18 mvn -q test package",
+    "exitCode": 0,
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scopeNote": "94 existing tests on implementation snapshot; final queue diagnostics/UI adjustments subsequently packaged and real HTTP checked"
+  },
+  "node": {
+    "entrypoints": 9,
+    "exitCode": 0
+  },
+  "python": {
+    "command": "python3 -m unittest discover -s scripts -p test_v11_local.py",
+    "tests": 14,
+    "exitCode": 0
+  },
+  "browser": {
+    "engine": "real Chromium via ego-browser",
+    "flow": [
+      "Console admin selects actual SKU and creates/publishes promotion",
+      "Portal creates application, selects it, submits claim",
+      "Intent polls then navigates to B order",
+      "simulated payment -> FULFILLED",
+      "keyboard Tab focus check"
+    ],
+    "viewports": [
+      {
+        "width": 1280,
+        "documentScrollWidth": 1280
+      },
+      {
+        "width": 375,
+        "documentScrollWidth": 375
+      }
+    ],
+    "screenshots": [
+      {
+        "path": "docs/progress/evidence/v12-c-browser/portal-375.png",
+        "sha256": "4a510f69bd29a9aec517d9769402226bd5a7cb5f29095b7f0ce2d55b446646be"
+      },
+      {
+        "path": "docs/progress/evidence/v12-c-browser/portal-1280.png",
+        "sha256": "1ccc77b36dd8bc3ae9277f8bc5a3e72ec14b4c73fe7856a62d02f345a4d9e4ee"
+      }
+    ],
+    "console375": {
+      "documentScrollWidth": 375,
+      "flow": "actual admin create/publish/select realSKU",
+      "minorAfterBrowserFix": "Removed null placeholder in native replaceChildren; JS syntax verified"
+    }
+  },
+  "failedAttempts": [
+    "initial stock no-auto-id insert NPE fixed and real flow passed",
+    "recovery harness SQL terminator fixed; same event rechecked",
+    "default sandbox JVM attach/socket bind denied; native existing regression passed"
+  ],
+  "notExecuted": [
+    "independent source review",
+    "owner manual acceptance",
+    "5000/20000 request ladder",
+    "full historical B23/C26",
+    "12-attempt retry exhaustion",
+    "300-second SENT replay actual wait"
+  ],
+  "featureDefaults": {
+    "FLOWGATE_V12_CATALOG_CACHE_ENABLED": false,
+    "FLOWGATE_V12_PROMOTION_ENABLED": false
+  },
+  "controlJarSha256": "b354680e1c890fd403fa2a3c703ecf2b4b78d1f058b78012cfbb7f6bb320706a",
+  "finalControlJarSha256": "b354680e1c890fd403fa2a3c703ecf2b4b78d1f058b78012cfbb7f6bb320706a",
+  "preview": {
+    "startStopStartTest": "PASS",
+    "finalState": "STOPPED",
+    "command": "python3 scripts/v12-c-preview.py start",
+    "privateAccessFile": ".local/v12-c-access.md",
+    "volumesRetained": true,
+    "persistentMControlPid": 68665,
+    "persistentMControlPort": 8081
+  }
+}

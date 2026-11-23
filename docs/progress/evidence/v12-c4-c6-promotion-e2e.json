@@ -1,0 +1,362 @@
+{
+  "passed": true,
+  "checks": [
+    "202 follows durable Intent/stock/slot/outbox",
+    "same request on other Control returns same Intent",
+    "cross-owner404 and changed request409",
+    "PROMOTION order frozen price100",
+    "ordinary B conflict",
+    "B simulated payment -> unique entitlement -> unused refund keeps sold",
+    "cancel releases reserved",
+    "real pay deadline closer releases reserved",
+    "Redis SCRIPT FLUSH -> EVALSHA fallback actual claim202"
+  ],
+  "promotionIds": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "reconciliation": [
+    {
+      "reserved": 0,
+      "intents": 1,
+      "status": "PROVISIONAL",
+      "total": 3,
+      "asOfUtc": "2026-11-23T10:43:33.490Z",
+      "integrityGaps": 0,
+      "available": 2,
+      "sold": 1,
+      "expectedSold": 1,
+      "expectedReserved": 0
+    },
+    {
+      "reserved": 0,
+      "intents": 1,
+      "status": "PROVISIONAL",
+      "total": 2,
+      "asOfUtc": "2026-11-23T10:43:33.509Z",
+      "integrityGaps": 0,
+      "available": 2,
+      "sold": 0,
+      "expectedSold": 0,
+      "expectedReserved": 0
+    },
+    {
+      "reserved": 0,
+      "intents": 1,
+      "status": "PROVISIONAL",
+      "total": 2,
+      "asOfUtc": "2026-11-23T10:43:33.529Z",
+      "integrityGaps": 0,
+      "available": 2,
+      "sold": 0,
+      "expectedSold": 0,
+      "expectedReserved": 0
+    },
+    {
+      "reserved": 1,
+      "intents": 1,
+      "status": "PENDING",
+      "total": 1,
+      "asOfUtc": "2026-11-23T10:43:33.554Z",
+      "integrityGaps": 0,
+      "available": 0,
+      "sold": 0,
+      "expectedSold": 0,
+      "expectedReserved": 1
+    }
+  ],
+  "notExecuted": [
+    "real external payments (simulation only)",
+    "owner manual acceptance"
+  ],
+  "sourceCommit": "dd82c18768ecf2a0d377874dfccfd8503bdd0cdd",
+  "controlJarSha256": "f627d76bb152aa44e2c5a0c6e60ce7e04628c163fd627bab1cd85a07d8ac70b7",
+  "owner": "93bf9c774e6c487e91826d0c97ee6972",
+  "project": "flowgate-v11-demo-93bf9c774e6c",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/promotions/2/claim",
+      "status": 202
+    },
+    {
+      "path": "/portal/api/promotions/2/claim",
+      "status": 202
+    },
+    {
+      "path": "/portal/api/purchase-intents/1",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/promotions/2/claim",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/promotions/2/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/2/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/2/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/orders/60bd5e3c-b3f4-4135-82f8-65b4dc09e990/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/60bd5e3c-b3f4-4135-82f8-65b4dc09e990",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/60bd5e3c-b3f4-4135-82f8-65b4dc09e990",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/60bd5e3c-b3f4-4135-82f8-65b4dc09e990/simulate-refund",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/3/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/promotions/3/claim",
+      "status": 202
+    },
+    {
+      "path": "/portal/api/purchase-intents/2",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/2",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/f4a5b962-b583-421d-a5c0-c56196c965f6/cancel",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/3",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/4/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/promotions/4/claim",
+      "status": 202
+    },
+    {
+      "path": "/portal/api/purchase-intents/3",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/3",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/3",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/ab1c4718-db8d-4b65-87a8-d7a3c7bf67b4",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/4",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/5/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/promotions/5/claim",
+      "status": 202
+    },
+    {
+      "path": "/admin/promotions/2/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/3/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/4/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/5/reconciliation",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

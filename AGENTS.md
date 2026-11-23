@@ -1,3 +1,27 @@
+# FlowGate 当前状态：V12-C候选已实施，等待独立复审与负责人手测
+
+> 负责人明确授权完成C，并要求功能优先、少量关键测试。当前分支`feat/v12-c-promo-cache`，base=`docs/v12-c-high-concurrency-cache`。已实现公开套餐Redis缓存、C五表/原B CHECK兼容迁移、Lua软候选、MySQL持久202、独立Rabbit促销意图三队列、B订单/付款/取消/超时/退款库存联动，以及Portal/Console。证据与限制以`docs/progress/v12-c-implementation.md`为准。100库存120真实HTTP申请恰100受理/唯一订单；本机1000次公开缓存查询无新增公开投影回源，不称20k QPS；5k/20k阶梯和完整旧矩阵未展开。
+>
+> M8及C独立源码复审、负责人真人验收未完成；不称正式通过，不进入D/合并main/修改旧PR。根.env、IDE与flowgate-local常驻M服务保持原样；C测试只在本轮独立owner新卷中完成，候选按合同停机保留数据，可用`python3 scripts/v12-c-preview.py start`恢复，私有账号在.local/v12-c-access.md。缓存/活动默认OFF，不自动迁移用户库。
+>
+> 以下C设计初始化与更早M/B/A记录是历史，NOT_STARTED等旧状态不覆盖上方候选事实。
+
+---
+
+# FlowGate 下一阶段：V12-C高并发套餐缓存与限时抢购（2026-11-23仅设计）
+
+> **唯一Codex任务入口：`CODEX_V12_C_EXEC_PROMPT.md`**，唯一C0～C9实施合同：`docs/progress/v12-c-high-concurrency.md`。完整业务架构：`docs/design/v12-c-high-concurrency-promotion-architecture.md`；MySQL CHECK迁移/事务/库存：`docs/design/v12-c-concurrency-transactions.md`；**公开套餐读缓存及Lua soft库存的强制合同**：`docs/design/v12-c-cache-consistency.md`。ADR-15优先覆盖旧C蓝图任何不一致处。此阶段目前**只是设计已提交，C0～C9实现和实测均NOT_STARTED**。
+
+> **基线和停止线**：C设计从真实M代码`feat/v12-m-rabbitmq-only@d6c1f33371690071c4bb7199dc9e7db5598d8079`而非旧V12-B计划开始；M PR#19 Draft且M8独立复审/负责人真人验收未完全签字，C0必须先核验，不能伪称M正式通过。旧M PR#18设计分支与PR#19功能分支曾有相同Git树和不同提交历史，**不擅自merge/rebase/改PR head/base**。Codex从`docs/v12-c-high-concurrency-cache`最新HEAD新建`feat/v12-c-promo-cache`，Draft PR base本设计分支，最终停机等源码复审/真人验收，不进入D、main或改旧PR。
+
+> **强制业务语义**：已上架高频API套餐公开分类/列表/详情/SKU报价必须Redis Cache-Aside，TTL随机化/负缓存/热点单飞/afterCommit失效/代次保护；缓存绝非价格或购买资格权威。抢购Lua的软库存只减少候选，只有MySQL Stock reserved+Intent ACCEPTED+Slot HELD(PROMO)+PromoOutbox同事务才HTTP202。C五表+原B Order CHECK安全扩展，Promo意图用独立Rabbit quorum队列（不与原B付款队列混投）、订单沿用B唯一Payment/Grant与Gateway Ledger；Redis丢失靠DB REBUILDING/epoch重建，缓存失败不能绕过DB导致超卖；模拟退款已付款sold不返售。最终项目**只RabbitMQ、不引Kafka**。
+
+> **保护用户资产**：本机PR#19已记录`flowgate-local`根.env/常驻Docker/MySQL/Redis/Rabbit及IDE进程和旧Kafka卷的真实迁移状态，但**本轮C没有操作常驻环境的授权**。不得改根.env、stop/重建/清理本机常驻JVM或容器卷，不能重跑M迁移脚本到用户库；所有C SQL/Redis FLUSHDB/压测只在自有随机owner的全新隔离实例。绝不reset-hard、clean-fd、force push、docker prune、down -v、DROP/TRUNCATE旧表。Java17、MySQL8.4、Redis7、Spring AMQP Rabbit、原生ESM，无Redisson/CDC/Seata/真支付/新微服务。复杂代码加充分中文注释，按1/2/3分点，后端每段同步Portal/Console页面及中文指南，禁止编造测试/库存/缓存命中率或20k QPS。
+
+> 以下V12-M、V12-B、V12-A和旧V11段落保留为**历史状态说明**，不再是当前Codex执行入口。
+
+---
+
 # FlowGate 当前状态｜V12-M候选实施完成，等待M8复审与负责人手测
 
 > **负责人随后明确要求同时完成日常运行环境**：本机`flowgate-local`已备份并迁移到RabbitMQ，旧Ledger/Outbox/Consumed/Daily均为0、Kafka三个分区offset均为0，审计`KAFKA1→FROZEN2→RABBIT3`；原业务表/密码保持不变。MySQL/Redis/Rabbit及三个自有JVM现已常驻运行，Console8081、Portal8081、Gateway8080、Rabbit5672/管理15672；旧Kafka容器已移除，3个旧卷保留。`python3 scripts/run-local.py start|status|restart|stop`静态加载根.env，保护IDE及非自有进程，不自动迁移或清库。**不要把这些常驻容器/JVM当成临时测试资源清理**。部署证据`docs/progress/evidence/v12-m-local-deployment.json`，M8独立复审/负责人业务手测仍待完成。下方“用户常驻环境未迁移”是此次追加授权之前的历史状态。

@@ -87,3 +87,17 @@
 - **唯一完成证明**：真实新隔离环境不启动Kafka Broker，Maven依赖树无Kafka客户端、当前源码/脚本/配置无Kafka发布/消费路径，V11旧月配额用量、V12-A新API用量、V12-B订单权益均通过RabbitMQ和MySQL旧新账本对账，历史SENT未消费补投、坏消息Poison、Broker持卷重建/ACK丢失/重复100次等恢复实测通过。负责人真人验收和本轮ChatGPT独立运行情况分别标注，不允许伪报。
 
 详见[源码盘点](../reviews/v12-m-preflight-audit-2026-11-19.md)、[完整迁移架构](v12-m-rabbitmq-migration-architecture.md)、[M0～M8任务合同](../progress/v12-m-rabbitmq-convergence.md)与根目录`CODEX_V12_M_EXEC_PROMPT.md`。**此ADR为后续设计授权，M源码/迁移/测试尚未执行。**
+
+
+## ADR-15：V12-C高并发套餐必须缓存，限时活动Redis候选+MySQL权威库存+Rabbit异步订单（2026-11-23）
+
+**本决定在M源码基础上新增C设计，覆盖旧B/C蓝图中任何“直接Kafka发送/以Redis预扣等于订单/不缓存商品详情”的旧想法。** V12-M已提交Kafka-free候选PR#19，但M8独立复审和负责人手测仍需核实；本轮`docs/v12-c-high-concurrency-cache`只有设计、C0～C9没有编码/测试。唯一编写/派工顺序：[C架构](v12-c-high-concurrency-promotion-architecture.md)→[MySQL交易](v12-c-concurrency-transactions.md)→[Redis缓存一致性](v12-c-cache-consistency.md)→[实施合同](../progress/v12-c-high-concurrency.md)→根`CODEX_V12_C_EXEC_PROMPT.md`。
+
+- **缓存是必需产品能力，不是可选优化**：公开API分类、搜索列表、套餐详情与SKU分价/额度/period、限时活动公开详情统一使用Redis7 Cache-Aside；TTL抖动、负缓存、token短锁热点单飞、afterCommit失效+generation CAS防旧慢Reader覆盖、Redis失败有界DB只读回源。缓存不持有用户身份/APP权限/余额/订单、真实交易价或库存权威。已上架正价B套餐和C高并发活动共享这层公开读缓存。
+- **抢购事务不可缓存权威**：一个活动对应已发布`PAID_BASE` SKU的冻结报价/单位/UTC月与总库存，一人一场最多一份。Redis Lua只做短TTL、带epoch+claimToken的原子**软候选扣减**；真正HTTP202必须以MySQL事务同提交`fg_promo_purchase_intent(ACCEPTED)`、`fg_promo_stock.reserved+1`、Slot `HELD(PROMO,intentId)`、PromoOutbox为前提。Redis为0可以欠卖，MySQL绝不允许超卖。
+- **持久业务事实**：C新建Promotion/PromoStock/PurchaseIntent/PromoOutbox/PromoConsumed五表，安全扩展原B Order CHECK/外键允许`source=PROMOTION,promo_intent_id`，但B `fg_business_outbox`只处理付款。新Rabbit `flowgate.commerce.v12`交换机下用**独立Promo Intent主/Retry/Poison quorum队列**，Consumer严格核对数据库源/Intent并唯一创建原B体系订单；原B模拟支付/退款/Commerce PaymentConfirmed唯一Grant，不能另造第二套Quota和订单。
+- **库存与退款**：Stock `0<=reserved+sold<=total`，Intent和Order状态CAS守卫每一次reserved变动；未创建订单Intent过期与未付款订单关单各回收自己的一份reserved/BASE Slot且不会重复，Rabbit迟到不能复活；模拟付款同事务`reserved--,sold++`，已付款后即使未用权益模拟退款**sold也不返售**，原Ledger和已扣余额不回转。
+- **Redis丢失必须可恢复**：数据库活动`REBUILDING`与epoch++，等共享锁在途受理结束，以MySQL`total-reserved-sold`重建Redis新epoch/softRemaining/gate，旧候选/旧补偿不得影响新代次。Redis失联或epoch不符时**拒新抢购503而不是绕过Redis冲击MySQL**；已受理Intent查询、已建单付款/关闭/退款和Gateway用量继续用MySQL业务事实。
+- **工程边界**：C功能开关与缓存开关默认OFF，旧B/M库未装C表时安全空态；只用既有Java17/Boot4/Gateway/MySQL8.4/Redis7/RabbitMQ3.13/原生ESM，禁止再加Kafka、Redisson/分布式事务中间件、真实支付、额外微服务。20k请求仅为**待测压力阶梯目标**，实际QPS/p95/DB查询下降必须隔离测量后才可声称。所有测试用新owner/随机容器/端口/卷，用户常驻`flowgate-local`、根.env、IDE/JVM、历史Ledger及原Kafka卷未经新授权不改动；C最后保持Draft PR/手测待确认，不自行进入D。
+
+**本ADR标志设计裁决，不代表C库存、缓存或抢购代码已实施。**

@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "designHead": "a4a48b78b04f04f728c2bb6614942eaf4f100e27",
+  "MRemoteHead": "d6c1f33371690071c4bb7199dc9e7db5598d8079",
+  "ownerAuthorization": "current user explicitly requested complete V12-C; proceed on M candidate without fabricating M8 acceptance",
+  "M8": "PENDING_INDEPENDENT_REVIEW_AND_OWNER_MANUAL",
+  "java": {
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "node": {
+    "entrypoints": 9,
+    "exitCode": 0
+  },
+  "B_M_newIsolatedRegression": "v12-c0-e2e.json",
+  "sourceFindings": [
+    "A slot already accepts PROMO",
+    "B Order CHECK currently only NORMAL",
+    "B payment Outbox only PAYMENT_CONFIRMED; promo separate outbox/queue required",
+    "public Market reads currently DB; financial paidOffer remains FOR SHARE",
+    "no runtime Kafka dependencies"
+  ],
+  "userPersistentAssetsTouched": false,
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "scope": "one existing baseline and required new C critical tests; no old full fault/load matrix"
+}

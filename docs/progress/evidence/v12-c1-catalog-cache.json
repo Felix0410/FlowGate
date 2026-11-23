@@ -1,0 +1,123 @@
+{
+  "passed": true,
+  "checks": [
+    "two Controls share hot public cache: 50 real HTTP queries, zero additional public projection DB loads",
+    "new SKU commit invalidates offers across Control instances; public cached data excludes purchasing authority",
+    "same missing public listing has real short-lived negative-cache hits",
+    "real Redis pause: bounded DB public fallback or503, no fake empty200"
+  ],
+  "beforeHot": [
+    {
+      "HIT": 0,
+      "MISS": 1,
+      "DB_LOAD": 1,
+      "NEGATIVE_HIT": 0,
+      "SINGLE_FLIGHT_WAIT": 0,
+      "DEGRADED": 0,
+      "INVALIDATED": 0,
+      "INVALIDATION_FAILED": 0
+    },
+    {
+      "HIT": 0,
+      "MISS": 0,
+      "DB_LOAD": 0,
+      "NEGATIVE_HIT": 0,
+      "SINGLE_FLIGHT_WAIT": 0,
+      "DEGRADED": 0,
+      "INVALIDATED": 0,
+      "INVALIDATION_FAILED": 0
+    }
+  ],
+  "afterHot": [
+    {
+      "HIT": 25,
+      "MISS": 1,
+      "DB_LOAD": 1,
+      "NEGATIVE_HIT": 0,
+      "SINGLE_FLIGHT_WAIT": 0,
+      "DEGRADED": 0,
+      "INVALIDATED": 0,
+      "INVALIDATION_FAILED": 0
+    },
+    {
+      "HIT": 25,
+      "MISS": 0,
+      "DB_LOAD": 0,
+      "NEGATIVE_HIT": 0,
+      "SINGLE_FLIGHT_WAIT": 0,
+      "DEGRADED": 0,
+      "INVALIDATED": 0,
+      "INVALIDATION_FAILED": 0
+    }
+  ],
+  "degradedStatuses": [
+    200,
+    503,
+    503,
+    200,
+    503,
+    503,
+    503,
+    503
+  ],
+  "sourceCommit": "2369f0735f0df74de078adfafe2c37d08f62e54e",
+  "controlJarSha256": "de4682e0b2942b8699793612fcec3e872d8303903d5403533910f997188daf26",
+  "owner": "93bf9c774e6c487e91826d0c97ee6972",
+  "project": "flowgate-v11-demo-93bf9c774e6c",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "requests": [
+    {
+      "path": "/portal/api/catalog/apis?limit=20",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/skus",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/99999999",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis/99999999",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis/99999999",
+      "status": 404
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

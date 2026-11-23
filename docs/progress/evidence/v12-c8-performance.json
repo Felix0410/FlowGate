@@ -1,0 +1,191 @@
+{
+  "passed": true,
+  "fixtures": "120 isolated MySQL identities/apps and Redis sessions; not120 real registrations",
+  "promotionId": 6,
+  "requests": [
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/6/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/6",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/6/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/6",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/6/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis?limit=20",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    }
+  ],
+  "accepted": 100,
+  "statuses": {
+    "202": 100,
+    "409": 20
+  },
+  "claimSeconds": 1.2227746249999998,
+  "claimQps": 98.13746339395948,
+  "claimLatency": {
+    "p50Ms": 241.75579099999987,
+    "p95Ms": 398.4937500000001,
+    "p99Ms": 484.34175
+  },
+  "authority": {
+    "intents": 100,
+    "orders": 100,
+    "payments": 10,
+    "grants": 10,
+    "total": 100,
+    "reserved": 90,
+    "sold": 10,
+    "available": 0
+  },
+  "reconciliation": {
+    "reserved": 90,
+    "intents": 100,
+    "status": "PROVISIONAL",
+    "total": 100,
+    "asOfUtc": "2026-11-23T10:46:49.779Z",
+    "integrityGaps": 0,
+    "available": 0,
+    "sold": 10,
+    "expectedSold": 10,
+    "expectedReserved": 90
+  },
+  "catalog": {
+    "completed": 1000,
+    "concurrency": 24,
+    "seconds": 0.671883416,
+    "qps": 1488.3534497002677,
+    "p50Ms": 14.556583999997486,
+    "p95Ms": 26.91037499999993,
+    "p99Ms": 32.16537500000172,
+    "countersBefore": [
+      {
+        "HIT": 59,
+        "MISS": 11,
+        "DB_LOAD": 10,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 1,
+        "DEGRADED": 0,
+        "INVALIDATED": 15,
+        "INVALIDATION_FAILED": 0
+      },
+      {
+        "HIT": 59,
+        "MISS": 5,
+        "DB_LOAD": 1,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 4,
+        "DEGRADED": 0,
+        "INVALIDATED": 0,
+        "INVALIDATION_FAILED": 0
+      }
+    ],
+    "countersAfter": [
+      {
+        "HIT": 559,
+        "MISS": 11,
+        "DB_LOAD": 10,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 1,
+        "DEGRADED": 0,
+        "INVALIDATED": 15,
+        "INVALIDATION_FAILED": 0
+      },
+      {
+        "HIT": 559,
+        "MISS": 5,
+        "DB_LOAD": 1,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 4,
+        "DEGRADED": 0,
+        "INVALIDATED": 0,
+        "INVALIDATION_FAILED": 0
+      }
+    ],
+    "projectionDbLoads": 0
+  },
+  "notExecuted": [
+    "5000/20000 request ladder per owner speed instruction",
+    "20k QPS NOT_REACHED",
+    "independent owner acceptance"
+  ],
+  "sourceCommit": "dd82c18768ecf2a0d377874dfccfd8503bdd0cdd",
+  "controlJarSha256": "f627d76bb152aa44e2c5a0c6e60ce7e04628c163fd627bab1cd85a07d8ac70b7",
+  "owner": "93bf9c774e6c487e91826d0c97ee6972",
+  "project": "flowgate-v11-demo-93bf9c774e6c",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "rootEnvUnchanged": true,
+  "claimRequests": 120
+}
