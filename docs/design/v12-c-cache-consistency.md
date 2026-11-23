@@ -84,7 +84,7 @@ redis.call('INCR', KEYS[5])
 return 'COMPENSATED'
 ```
 
-上述KEYS依次epoch,state,candidate,userLease,remaining。一次性删除candidateTokenKey使重复补偿无法二次INCR；同epoch检查防补偿旧候选错误地增加新活动库存。如果DB已COMMIT而HTTP中断不能补偿；如果补偿网络失败，允许软库存**短暂少卖**，由重建恢复。候选键TTL到期后，无法再次安全补偿（不因为softRemaining减少就推断可恢复）；定期epoch重建可以修复。**候选Lua写脚本应该短小、无慢循环或全量KEYS操作**，避免Redis单线程被阻塞。
+上述KEYS依次epoch,state,candidate,userLease,remaining。一次性删除candidateTokenKey使重复补偿无法二次INCR；同epoch检查防补偿旧候选错误地增加新活动库存。**只有明确证明MySQL事务已回滚才允许补偿；COMMIT结果未知（超时/断线）时先按同principal+requestId查MySQL，如果仍未知则不补偿、等待候选TTL/对账重建，绝不能把已提交名额误补回Redis**。如果DB已COMMIT而HTTP中断不能补偿；如果补偿网络失败，允许软库存**短暂少卖**，由重建恢复。候选键TTL到期后，无法再次安全补偿（不因为softRemaining减少就推断可恢复）；由30～60秒节流的对账任务在候选租约均过期且MySQL仍有可售名额、softRemaining却为0时自动触发安全epoch重建（重建工具单活动串行，不能多个Control同时重建）；定期epoch重建可以修复。**候选Lua写脚本应该短小、无慢循环或全量KEYS操作**，避免Redis单线程被阻塞。
 
 ## 5. Redis失忆与高并发重建（必须有跨DB时代次）
 
