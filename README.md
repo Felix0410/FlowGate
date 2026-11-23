@@ -1,3 +1,5 @@
+> **V12-C（2026-11-23）高并发套餐与Redis缓存详细设计已完成、代码尚未实现**：基于已提交的Kafka-free V12-M功能候选`feat/v12-m-rabbitmq-only`，在`docs/v12-c-high-concurrency-cache`设计了**公开API套餐分类/列表/详情/SKU报价的Redis Cache-Aside读缓存（必做）**、高并发活动软库存Lua与MySQL唯一持久Intent/库存/BASE槽、RabbitMQ独立活动意图队列异步创单和B原模拟支付/权益，以及Redis失忆重建/库存对账和真实并发压测。详细见[C架构](docs/design/v12-c-high-concurrency-promotion-architecture.md)、[缓存一致性](docs/design/v12-c-cache-consistency.md)、[MySQL事务与故障](docs/design/v12-c-concurrency-transactions.md)、[C0～C9执行合同](docs/progress/v12-c-high-concurrency.md)及[Codex提示词](CODEX_V12_C_EXEC_PROMPT.md)。**C源码/SQL/缓存和测试全部未执行，20k只是待测请求目标**；M PR#19仍Draft、M8人工/复审门槛保留。现有RabbitMQ-only项目、用户常驻环境与旧账本不自动变更，C实施只允新隔离卷。
+
 > **当前V12-M（2026-11-19）**：代码/构建/当前Compose与运行器统一RabbitMQ。M0基线、M1/M2兼容切换和Kafka-free三链联调已通过；最终证据与待验项见[实施记录](docs/progress/v12-m-implementation.md)。下面早期V1/V11设计与交付叙事保留为历史，旧Kafka技术描述不代表当前依赖。负责人明确授权后，本机常驻环境已迁移并启动Rabbit；原密码与旧Kafka卷保留，PR保持Draft，不进入C/D或合并main。
 
 
