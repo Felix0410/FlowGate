@@ -74,3 +74,16 @@
 ### ADR-13实施后的统一后续合同（2026-11-10补充）
 
 **V12-B普通订单与V12-C限时抢购也一律用RabbitMQ**，不是只把V12-A用量换成Rabbit后在B/C再新建Kafka业务Topic。业务消息使用同一Rabbit Broker上**独立于usage读模型的commerce exchange/quorum主/TTL retry/poison队列及独立BusinessOutbox**；消费端COMMIT后basicAck、confirm且无mandatory return才SENT、持久事件源+业务唯一键抗重复，实际方案见[消息迁移设计补充](v12-rabbitmq-adaptation.md)。本ADR-13优先覆盖旧ADR-03/ADR-06/ADR-07及交易蓝图中提到“V12新Kafka Topic/ConsumerGroup/offset ACK”的旧文本。**V11-C已有Kafka仍然运行**，没有获准做全局消息迁移或删除旧队列；不得把“V12 RabbitMQ”误写成“全仓库无Kafka”。
+
+
+## ADR-14：V12-B后统一RabbitMQ，全面退役Kafka运行链路（2026-11-19最终决定）
+
+**优先级**：此ADR-14覆盖ADR-13及其“V11 Kafka长期保留”的结论；仅B实际开发和受控迁移阶段允许短期并存。负责人要求**V12-B交付后，进入V12-M完成Kafka退役，再开发V12-C**。终态可运行项目只有RabbitMQ（V11旧APP用量、V12-A API用量、V12-B Commerce、未来V12-C抢购），不存在Kafka客户端/JAR/Topic/ConsumerGroup/Compose服务或启动环境依赖。
+
+- 旧V11`fg_quota_ledger`、`fg_outbox_event`、`fg_consumed_event`、`fg_usage_daily`的权威MySQL事实、历史eventId/chargeId/UTC日归属与消费唯一键保留不变；**迁移传输，不迁移额度、不删历史Ledger、不重新统计**。Rabbit Legacy单独Exchange+主quorum/TTL retry/Poison，与新API用量及订单Commerce隔离。
+- 不进行危险的Kafka/Rabbit常驻双写。M过渡阶段部署**全部可识别DB单路由fence**的Control，严格`KAFKA→FROZEN→RABBIT`+epoch CAS、全实例清单/旧Publisher in-flight drain/旧消费者退出、ADMIN审计，旧Kafka无法排空则按原MySQL Outbox/Consumed/原eventId持久补投；本来就存在的权威数据缺口先标INTEGRITY_GAP并阻止“完成”。
+- **实现分支从真实B功能HEAD`feat/v12-b-orders@c857d3b8532ae98dcfb208d10dd140efa0a3037b`继承**，M0先核对PR#17 B1～B8最终证据完整性；不能把B已提交业务代码误写成“未开发”，也不能把PR描述的通过项当独立实测。M不得修改PR#17及现有旧PR、main。
+- 完成M前不得删除旧MySQL账本、旧用户Kafka容器/持久卷或历史设计/证据；**移除现行构建/Compose中的Kafka配置与代码不等于获得权限销毁用户已有卷**。正式迁移常驻环境必须另经负责人授权、维护窗口与备份。
+- **唯一完成证明**：真实新隔离环境不启动Kafka Broker，Maven依赖树无Kafka客户端、当前源码/脚本/配置无Kafka发布/消费路径，V11旧月配额用量、V12-A新API用量、V12-B订单权益均通过RabbitMQ和MySQL旧新账本对账，历史SENT未消费补投、坏消息Poison、Broker持卷重建/ACK丢失/重复100次等恢复实测通过。负责人真人验收和本轮ChatGPT独立运行情况分别标注，不允许伪报。
+
+详见[源码盘点](../reviews/v12-m-preflight-audit-2026-11-19.md)、[完整迁移架构](v12-m-rabbitmq-migration-architecture.md)、[M0～M8任务合同](../progress/v12-m-rabbitmq-convergence.md)与根目录`CODEX_V12_M_EXEC_PROMPT.md`。**此ADR为后续设计授权，M源码/迁移/测试尚未执行。**

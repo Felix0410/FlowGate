@@ -1,8 +1,9 @@
-> **V12-B设计状态（2026-11-10）**：已经在`docs/v12-b-order-design`完成[普通订单与模拟支付架构](docs/design/v12-b-order-architecture.md)、[SQL事务与故障矩阵](docs/design/v12-b-transactions-acceptance.md)、[B0～B8阶段合同](docs/progress/v12-b-order-payment.md)与[Codex单阶段执行提示](CODEX_V12_B_EXEC_PROMPT.md)。A的三项Rabbit/旧Console P1已**合并为未来B0修复任务，尚未实际修复**。A已有Portal和免费权益源码及RabbitMQ定向测试；B订单/付费/退款与独立Commerce RabbitMQ**还没有编码/实测**。V11旧Kafka保留；PR均Draft，不自动部署或修改用户已有数据卷。
+> **当前V12-M（2026-11-19）**：代码/构建/当前Compose与运行器统一RabbitMQ。M0基线、M1/M2兼容切换和Kafka-free三链联调已通过；最终证据与待验项见[实施记录](docs/progress/v12-m-implementation.md)。下面早期V1/V11设计与交付叙事保留为历史，旧Kafka技术描述不代表当前依赖。负责人明确授权后，本机常驻环境已迁移并启动Rabbit；原密码与旧Kafka卷保留，PR保持Draft，不进入C/D或合并main。
+
 
 # FlowGate — 高并发 API 网关与流量治理平台
 
-> **V12-A新入口**：普通用户 `/portal/`，Console客户业务新增API市场。V12异步使用RabbitMQ，V11继续Kafka；安全默认关闭，只在新隔离环境安装新表。见[Portal与隔离运行指南](docs/guides/v12-a-portal.md)。
+> **V12-A新入口**：普通用户 `/portal/`，Console客户业务新增API市场。V11旧用量、V12异步与Commerce均使用独立RabbitMQ队列；安全默认关闭，只在新隔离环境安装新表。见[Portal与隔离运行指南](docs/guides/v12-a-portal.md)。
 
 > **V1.1-E本地交付入口**：[详细中文手册](docs/guides/v11-local-delivery.md)。`python3 scripts/v11-local.py doctor`只读诊断；`up --isolated`建立独立全链路演示，`status --isolated`查看状态，`stop --isolated`只停自有服务并保留卷。初始V0需先发布非计量版本，不能直接签发APP凭证。自动测试与E6负责人手测分开记录，详见[E实施记录](docs/progress/v11-e-local-delivery-implementation.md)。
 
@@ -247,7 +248,9 @@ cp -n .env.example .env
 chmod 600 .env
 ```
 
-编辑未跟踪的 `.env`，填写实际 JDK 路径、数据库密码、Redis 密码、管理员哈希和内部密钥。推荐使用 `compose.local.yml`：独立的 MySQL 8.4 / Redis 7 容器、持久化数据卷，默认仅绑定 `127.0.0.1:13307` / `127.0.0.1:16380`，不占用其他项目的 3306/6379。MySQL 的 root 密码由 `FG_MYSQL_ROOT_PASSWORD` 配置，应用使用 `flowgate` 用户；容器首次创建数据卷时自动执行 `sql/flowgate-init.sql`。
+编辑未跟踪的 `.env`，填写实际 JDK 路径、数据库密码、Redis 密码、管理员哈希和内部密钥。推荐使用 `compose.local.yml`：独立的 MySQL 8.4 / Redis 7 / RabbitMQ 3.13.7 容器、持久化数据卷，默认仅绑定 `127.0.0.1:13307` / `127.0.0.1:16380`，不占用其他项目的 3306/6379。MySQL 的 root 密码由 `FG_MYSQL_ROOT_PASSWORD` 配置，应用使用 `flowgate` 用户；容器首次创建数据卷时自动执行 `sql/flowgate-init.sql`。
+
+**本机当前已经运行**：后台 [Console](http://127.0.0.1:8081/console/)、普通用户 [Portal](http://127.0.0.1:8081/portal/)、[Rabbit管理台](http://127.0.0.1:15672)。Console沿用原管理员账号/密码；Rabbit账号与密码只在本地`.env`，不进入Git。正常Docker项目现在是MySQL、Redis、Rabbit，旧Kafka容器已移除但3个旧卷保留。
 
 配置完成后，可一条命令启动 Docker 依赖及三个 JVM：
 
@@ -261,7 +264,7 @@ python3 scripts/run-local.py stop
 docker compose -f compose.local.yml stop
 ```
 
-脚本自动读取根目录 `.env`，只管理经过 PID/Jar 路径核对的本项目进程；日志在 `.local/run/`（已忽略）。修改 Java 代码后先重新 Maven package，再 restart。Docker Desktop 需保持运行；数据库卷已存在时，修改 `.env` 不会自动重置 MySQL 账号密码，不要通过删除数据卷处理配置变更。
+脚本静态解析根目录 `.env`（不执行Shell），明确启动MySQL/Redis/Rabbit且不重建已有容器，只管理经过owner/PID启动时间/Jar快照核对的本项目进程；日志在 `.local/run/`（已忽略）。修改 Java 代码后先重新 Maven package，再 restart。Docker Desktop 需保持运行；数据库卷已存在时，修改 `.env` 不会自动重置 MySQL 账号密码，不要通过删除数据卷处理配置变更。
 
 如果不用 Compose 而是自行维护 MySQL，需要创建专用数据库及有权限的应用账号，并执行 DDL（端口使用 `.env` 的实际值）：
 
@@ -427,50 +430,14 @@ python3 scripts/v11-b-smoke.py
 历史夹具的`-DskipTests`只是生成旧版本网关二进制，不代表重测A。脚本只创建/清理独立随机端口容器及进程，不操作原持久卷；原始脱敏结果在`.local/acceptance/`，仓库证据在`docs/progress/evidence/`。负责人真实浏览器1280px/375px/键盘验收仍待执行。
 
 
-### V11-C 本地运行与业务抽查
+### 当前异步运行与迁移
 
-先完成B的SQL/完整网关升级和计量配置。由负责人备份并确认目标库后，在根目录执行C两张读模型表迁移（本轮Codex未操作用户持久库）：
+当前项目的消息中间件为RabbitMQ。V11_APP旧用量、V12_APP_API用量和Commerce订单使用同Broker的三套独立quorum主/5秒Retry/Poison队列；Gateway授权仍以MySQL余额/Ledger/Outbox事务为准。Kafka历史工具已归档到`docs/history/retired-kafka-tools`，不再用于当前构建与启动。
 
-```bash
-source .env
-docker compose -f compose.local.yml exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u "$MYSQL_USER" "$MYSQL_DATABASE"' < sql/flowgate-v11-c.sql
-```
+新隔离环境使用Java17构建，然后运行`python3 scripts/v11-local.py up --isolated --instance practice --config /你的私有配置路径`；端口可用`--rabbitmq-port`等参数显式指定。只读`doctor`验证真实Rabbit协议、Legacy quorum消费者和DB路由栅栏，端口开放不算就绪。原用户实例不由工具自动迁移或接管。
 
-保持`FLOWGATE_ASYNC_ENABLED=false`时，无Kafka也可继续原V1/B，Outbox积压且运营页明确显示关闭。需要单机演示异步时先启动可选Broker，再为**Control**加载以下变量并重启；Gateway不配置Kafka：
+旧环境切换步骤见[Kafka退役维护Runbook](docs/guides/v12-m-kafka-retirement-runbook.md)，功能语义见[Rabbit用量指南](docs/guides/v12-m-rabbitmq.md)。必须备份、盘点全部Control并退出旧版、等待租约、核验Ledger/Outbox/Consumed/Daily，再ADMIN epoch CAS切换；SENT恢复保留原eventId并遵守双300秒保护。不要通过反复调用业务接口补统计。
 
-```bash
-docker compose -f compose.local.yml --profile mq up -d kafka
-export FLOWGATE_ASYNC_ENABLED=true
-export FLOWGATE_KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
-export FLOWGATE_USAGE_TOPIC=flowgate.usage.v1
-export FLOWGATE_USAGE_GROUP=flowgate-usage-aggregate-v1
-```
+`FLOWGATE_ASYNC_ENABLED=false`仍为默认值。新建的空隔离库显式初始化为RABBIT；已存在的KAFKA/FROZEN/未知模式不会被启动器改成RABBIT。当前构建不提供回退到Kafka的动作，修复失败优先FROZEN，回滚到已验证的Rabbit版本。
 
-IDEA使用原Control运行配置并加载这些环境变量；默认仍用Java17。Topic由启用异步的Control声明创建，首次Broker不在线时定时有界重试初始化；生产者最多100在途/单批20，30秒租约和10秒发送deadline。单KRaft开发Broker副本1，使用独立kafka-data命名卷挂载镜像可写的/var/lib/kafka/data；源码配置不代表用户环境已经启动或迁移，不属于生产多Broker高可用。
-
-浏览器打开`http://127.0.0.1:8081/console/`：
-
-- “用量统计”：选择应用/API/UTC日期，查看授权单位与次数及最后聚合时间；可能延迟，不等于2xx成功量或费用。
-- “异步事件”：区分SENT（Broker确认）和已消费；ADMIN可确认重投FAILED，保留原eventId，不重新扣额。进程暂停/冲突计数重启归零。
-- “对账中心”：仅昨天及更早的UTC日，PENDING表示未追平，MATCH表示账本与读模型一致，MISMATCH需诊断，不自动改余额。完整步骤见[中文指南](docs/guides/product-console-guide.md)。
-
-消费者数据库故障按1/2/4/8/16/30秒封顶自动退避，DB恢复后无需重启消费者。永久毒消息仍暂停问题分区、不ACK、无未确认DLT或自动跳offset。SENT未消费的正确原事件可由ADMIN在默认300秒等待期后补投，节点重启也有完整冷却。Ledger/Outbox缺失或多事件会显示INTEGRITY_GAP，不能盲目补投或重复业务调用“补统计”。
-
-定向验证：`source .env`后运行`mvn -B -ntp -pl flowgate-control,flowgate-gateway,flowgate-demo -am test package`、`node scripts/v11-c-console-test.mjs`、`python3 scripts/v11-c-smoke.py`。C6脚本在独占随机端口MySQL8.4/Redis7/Kafka4.1.1/双Gateway验证真实ACK/COMMIT后进程崩溃、重放及故障恢复；只清理自己创建的资源。旧身份和默认OFF兼容可运行`python3 scripts/v11-c-off-smoke.py`。真人浏览器1280px/375px/键盘体验、长期压测及主线最终验收留后续授权。
-
-
-### C复审修复：Kafka常驻启动与运维
-
-持久卷实际重建验证在独立随机Compose项目通过，用户现有MySQL/Redis/卷未改。常驻启动涉及创建`flowgate-local_kafka-data`，按修复合同由负责人单独授权后再执行；不会自动迁移旧无卷Kafka日志。已获授权且本机无旧Kafka时只启动该服务，不重建数据库：
-
-```bash
-source .env
-docker compose -f compose.local.yml --profile mq up -d --no-deps kafka
-docker compose -f compose.local.yml --profile mq ps kafka
-```
-
-外部Bootstrap为`127.0.0.1:19092`，内部监听localhost:9092。默认Async仍关闭，启动Broker不会自动激活C或修改.env。需要Control消费时加载明确开关并重启自己的Control实例。若有旧无卷Broker，先备份和安排迁移，不直接替换其数据。不要对用户项目执行`down -v`。
-
-新增SENT补投与FAILED重试区分、数据库自动恢复/毒消息诊断及INTEGRITY_GAP处理，见[中文操作指南](docs/guides/product-console-guide.md)末节。只读角色不能补投，正常已消费或刚ACK的SENT会被409保护。完整性扫描是带日期/应用/API条件和样本上限的只读诊断，不把未知日期归入日报、不自动写权威余额。JSON关联在大表的执行计划与索引工作仍待D，不以小样本通过承诺性能。
-
-复审新增脚本：`node scripts/v11-c-review-console-test.mjs`、`python3 scripts/v11-c-volume-smoke.py`、`python3 scripts/v11-c-review-smoke.py`；只用隔离资源。原C6 `python3 scripts/v11-c-smoke.py`保留并已重新通过，旧证据不覆盖。后续Lab均复制不可变Jar，避免并行构建污染正在运行的嵌套Jar。真人1280/375px/键盘验收仍待负责人。
+当前验证入口：Java17 `mvn test package`、`node scripts/v11-c-console-test.mjs`、`python3 -m unittest discover -s scripts -p test_v11_local.py`、`python3 scripts/v12-b-smoke.py --keep-running --evidence-prefix v12-m5`及`scripts/v12-m-failure-smoke.py`。后两项只对新owner隔离实例，测试完成需按owner停机。完整历史B23/C26矩阵和D压力实验没有借此宣称重跑。

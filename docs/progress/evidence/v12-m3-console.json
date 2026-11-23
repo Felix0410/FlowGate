@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "browser": "real ego Chromium",
+  "runtimeEvidence": "v12-m-final-runtime.json",
+  "viewports": [
+    1280,
+    375
+  ],
+  "checks": [
+    "ADMIN Console real Rabbit legacy main/retry/poison and RABBIT epoch4",
+    "VIEWER Console read successful and no enabled recovery controls; backend read200/write403 separately in final runtime",
+    "Console and Portal keyboard Enter login",
+    "375 navigation Enter opens and Escape closes",
+    "375 Console/Portal no document horizontal overflow; wide data tables own scroll region",
+    "Portal true fulfilled order/SIM receipt and order transitions rendered",
+    "six screenshots visually checked at least Console mobile queue panel and Portal mobile detail"
+  ],
+  "screenshots": {
+    "v12-m-portal-1280.png": {
+      "width": 1280,
+      "height": 1020
+    },
+    "v12-m-console-375.png": {
+      "width": 375,
+      "height": 812
+    },
+    "v12-m-viewer-1280.png": {
+      "width": 1280,
+      "height": 900
+    },
+    "v12-m-queues-375.png": {
+      "width": 375,
+      "height": 812
+    },
+    "v12-m-console-1280.png": {
+      "width": 1280,
+      "height": 900
+    },
+    "v12-m-portal-375.png": {
+      "width": 375,
+      "height": 1295
+    }
+  },
+  "ownerManualAcceptance": "NOT_EXECUTED",
+  "independentReview": "PENDING",
+  "browserToolCorrections": [
+    "initial sandbox ego launch denial; elevated launch succeeded",
+    "order-list wait expected wrong label; actual page verified and continued",
+    "mobile menu Escape required global keyboard because workspace becomes inert",
+    "VIEWER retained async route; duplicate navigation locator replaced by current state"
+  ]
+}

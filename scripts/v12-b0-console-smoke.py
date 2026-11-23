@@ -35,7 +35,7 @@ def main():
     state,env=runtime.fresh(home,source,{k:v for k,v in ports.items() if k!='gateway2'},config)
     runtime.save(home/'env.json',env)
     root_hash=core.file_hash(core.ROOT/'.env');checks=[];requests=[];second=None;success=False
-    result={'runId':run,'scope':'legacy V11 zero V12 schema default OFF safety','designBase':'e77624f','checks':checks,'requests':requests,'notExecuted':['two-Control registration race','100-request concurrency/load','V11 B23/C26 real fault regression','Kafka full fault matrix (V11)','historical-day final MATCH','owner manual acceptance','V11 E6','V11 D performance']}
+    result={'runId':run,'scope':'legacy V11 zero V12 schema default OFF safety','designBase':'e77624f','checks':checks,'requests':requests,'notExecuted':['two-Control registration race','100-request concurrency/load','V11 B23/C26 real fault regression','Rabbit full fault matrix (V11)','historical-day final MATCH','owner manual acceptance','V11 E6','V11 D performance']}
     def wait(fn,label,seconds=65):
         until=time.monotonic()+seconds
         while time.monotonic()<until:

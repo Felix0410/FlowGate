@@ -1,3 +1,15 @@
+# FlowGate 当前状态｜V12-M候选实施完成，等待M8复审与负责人手测
+
+> **负责人随后明确要求同时完成日常运行环境**：本机`flowgate-local`已备份并迁移到RabbitMQ，旧Ledger/Outbox/Consumed/Daily均为0、Kafka三个分区offset均为0，审计`KAFKA1→FROZEN2→RABBIT3`；原业务表/密码保持不变。MySQL/Redis/Rabbit及三个自有JVM现已常驻运行，Console8081、Portal8081、Gateway8080、Rabbit5672/管理15672；旧Kafka容器已移除，3个旧卷保留。`python3 scripts/run-local.py start|status|restart|stop`静态加载根.env，保护IDE及非自有进程，不自动迁移或清库。**不要把这些常驻容器/JVM当成临时测试资源清理**。部署证据`docs/progress/evidence/v12-m-local-deployment.json`，M8独立复审/负责人业务手测仍待完成。下方“用户常驻环境未迁移”是此次追加授权之前的历史状态。
+
+> 本轮授权完成M并清理不用Docker。唯一合同`CODEX_V12_M_EXEC_PROMPT.md`与`docs/progress/v12-m-rabbitmq-convergence.md`；功能分支`feat/v12-m-rabbitmq-only`，base=`docs/v12-m-rabbitmq-convergence@48dc05a`。M0补齐本地B原始证据并实际复测；M1/M2兼容回滚点`f26db25`，真实300秒SENT恢复后11条旧账本逐项追平；M4 Kafka运行/构建依赖已移除，Java94/Python14/Node9与无Kafka三链联调通过。最终Java94/Python16/Node9、Rabbit故障与1280/375真实浏览器已通过；按owner清理38测试容器/56测试卷/10网络，用户常驻服务与旧卷保留。最终故障和浏览器结果见`docs/progress/v12-m-implementation.md`，未独立复审和负责人手测不称正式验收。
+>
+> 当前源码仅Rabbit，旧V11用量、V12-A用量与B Commerce独立队列。控制表缺失/未知模式不领取，FROZEN暂停消费；ADMIN补投保留原eventId并遵守源事件和节点各300秒。最终版不支持回Kafka。用户.env/IDE/常驻数据库/容器/旧Kafka卷继续保护；现有用户环境未迁移。Docker只清理本轮或旧owner清单已验证、停止且独占的测试资源，不做全局prune。
+>
+> M候选交付后停在Draft等待独立源码复审和负责人1280/375/键盘手测，不进入C/D、不合并main、不修改旧PR。下方所有B/A/V11材料仅历史，不能重执行旧Kafka启动或旧阶段合同。
+
+---
+
 # FlowGate 当前任务｜V12-B普通订单与RabbitMQ遗留修复（设计已完成，待本地Codex编码）
 
 > **唯一执行入口：`CODEX_V12_B_EXEC_PROMPT.md`**，唯一完整分段合同`docs/progress/v12-b-order-payment.md`，业务/SQL/状态机`docs/design/v12-b-order-architecture.md`、`docs/design/v12-b-transactions-acceptance.md`。负责人明确要求将A的三项复审P1并入B阶段，**B0先做A的坏JSON/重试、真实Rabbit故障、旧V11无V12表的Console待就绪**；B0定向实测通过后才能B1～B7实现付费API商品→订单→模拟支付→Rabbit Commerce可靠Grant→Gateway消费→受控模拟退款、页面与手册，B8停机交复审。

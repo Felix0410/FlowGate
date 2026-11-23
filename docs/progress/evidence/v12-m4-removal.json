@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "compatibilityCommit": "f26db25",
+  "m2RequiredAndPassed": true,
+  "build": {
+    "command": "Java17 mvn clean test package -DargLine=-javaagent:.../mockito-core-5.23.0.jar",
+    "exitCode": 0,
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "modules": {
+      "contract": 11,
+      "control": 53,
+      "gateway": 26,
+      "demo": 4
+    }
+  },
+  "python": {
+    "tests": 14,
+    "exitCode": 0
+  },
+  "node": {
+    "entrypoints": 9,
+    "exitCode": 0
+  },
+  "dependencyTree": {
+    "exitCode": 0,
+    "kafkaMatches": 0
+  },
+  "sourceRuntimeKafkaImportScanMatches": 0,
+  "controlJarSha256": "4fed0df2c503e8bf7d9c2df157f9206c373dd16c3a0b6df692577ee1abe69a32",
+  "controlJarKafkaEntries": 0,
+  "demoComposeServices": [
+    "mysql",
+    "redis",
+    "rabbitmq"
+  ],
+  "localComposeMqServices": [
+    "mysql",
+    "redis",
+    "rabbitmq"
+  ],
+  "historicalTools": "docs/history/retired-kafka-tools; excluded from current build/run",
+  "existingUserKafkaVolumes": "untouched; not migrated or deleted",
+  "failureNotes": [
+    "initial sandbox Python socket denial; elevated rerun14 pass",
+    "initial dependency tree Maven cache denial; elevated rerun exit0"
+  ]
+}

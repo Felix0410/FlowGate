@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "state": "STOPPED",
+  "project": "flowgate-v11-demo-6749f41dcf84",
+  "volumesRetained": {
+    "mysql": "flowgate-v11-demo-6749f41dcf84_mysql-data",
+    "redis": "flowgate-v11-demo-6749f41dcf84_redis-data",
+    "kafka": "flowgate-v11-demo-6749f41dcf84_kafka-data",
+    "rabbitmq": "flowgate-v11-demo-6749f41dcf84_rabbitmq-data"
+  },
+  "reason": "只停止本实例，保留所有数据卷与账本",
+  "extraJvmsStopped": [
+    33916,
+    32645
+  ],
+  "noVolumeDeletion": true,
+  "scope": "only verified B successful instance; prior failed/B0 instances already stopped with volumes retained",
+  "exactViewportRestartStopped": "STOPPED"
+}

@@ -1,0 +1,479 @@
+{
+  "runId": "20261117t204537-0add",
+  "scope": "targeted V12 functionality; no historical fault matrix or load experiment",
+  "designBase": "e77624f",
+  "checks": [
+    "14-table migration and second idempotent migration passed",
+    "real private V12 release applied by both Gateways; listing published with Free5",
+    "8 concurrent free claims: 1 success + 7 conflicts; other user independent; lifetime claim cannot switch app",
+    "dual Gateway Free5: 5x200 + 429, remaining0, Ledger=Outbox=Consumed=Daily=5; duplicate RabbitMQ events do not aggregate twice; current-day PROVISIONAL",
+    "6-table B schema installed then repeated twice; two Controls + two Gateways + four commerce listeners",
+    "20 concurrent same request across two Controls: one201 + nineteen200 same order; changed key parameters409, free BASE conflicts, unknown price/period400, cross-owner404",
+    "Broker offline + 100 payment POSTs across two Controls: one SIM receipt, one Outbox, zero premature Grant; recovery one fulfilled Grant",
+    "100 actual commerce deliveries -> one Grant/Consumed; paid Free5 dual Gateway 5x200 then429; used refund409 no Ledger reversal",
+    "refund vs real Gateway same APP lock has single winner; unused refund idempotent, subscription SUSPENDED, Gateway403 and GRANTED slot retained",
+    "paid pending refund releases only own HELD; late delivery ignored, replacement holder preserved",
+    "two-Control payment vs cancel only one200 and one409; true expired deadline rejects pay then closes once",
+    "NEXT_MONTH fulfilled but Gateway403 before effective UTC; API-B current free works; API-A paid pool cannot fund API-B"
+  ],
+  "requests": [
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/services",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/1/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/categories",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/register",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/apps/1",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/status",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis?q=%E7%9C%9F%E5%AE%9E",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/free-grants",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/free-grants",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/apps/1/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/me",
+      "status": 401
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 401
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 429
+    },
+    {
+      "path": "/portal/api/quota?applicationId=1&apiId=1&period=202611",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/quota?applicationId=1&apiId=1&period=202611",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/ledger?applicationId=1&apiId=1&period=202611",
+      "status": 404
+    },
+    {
+      "path": "/admin/market/reconciliation?day=2026-11-17",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/1/skus",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 400
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 400
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/orders/23f644a4-0cf9-4f53-bb68-2be8fe4e42f1",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/orders/23f644a4-0cf9-4f53-bb68-2be8fe4e42f1/simulate-pay",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/orders/23f644a4-0cf9-4f53-bb68-2be8fe4e42f1/cancel",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/orders/23f644a4-0cf9-4f53-bb68-2be8fe4e42f1/simulate-refund",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 401
+    },
+    {
+      "path": "/admin/orders",
+      "status": 401
+    },
+    {
+      "path": "/portal/api/orders/23f644a4-0cf9-4f53-bb68-2be8fe4e42f1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/23f644a4-0cf9-4f53-bb68-2be8fe4e42f1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/4/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 429
+    },
+    {
+      "path": "/portal/api/orders/23f644a4-0cf9-4f53-bb68-2be8fe4e42f1/simulate-refund",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/908a1e34-adc8-4b73-b02d-ef79fff8ebe8/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/5/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/075d6bf1-d7f0-4f0f-a807-db43d539566f/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/6/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/075d6bf1-d7f0-4f0f-a807-db43d539566f/simulate-refund",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/075d6bf1-d7f0-4f0f-a807-db43d539566f/simulate-refund",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 403
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/9818c5b9-2be5-4cc4-a754-82e2242112b7/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/9818c5b9-2be5-4cc4-a754-82e2242112b7/simulate-refund",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/9818c5b9-2be5-4cc4-a754-82e2242112b7",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/9818c5b9-2be5-4cc4-a754-82e2242112b7",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/3587de50-ce25-4e4d-b5f6-e37fc5156977",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/7a4207c4-82e1-452a-bfef-cf1f93e65818/simulate-pay",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/orders/7a4207c4-82e1-452a-bfef-cf1f93e65818",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/7a4207c4-82e1-452a-bfef-cf1f93e65818",
+      "status": 200
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/1/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/2/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/2/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/37d645df-103e-4c4d-b891-f002af5b4817/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/free-grants",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/apps/10/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 403
+    },
+    {
+      "path": "/api/v12/other/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/other/1",
+      "status": 403
+    }
+  ],
+  "notExecuted": [
+    "two-Control registration race",
+    "20k C concurrency/load",
+    "full V11 B23/C26 historical fault matrices (key V11 regressions separately recorded)",
+    "historical-day final MATCH",
+    "owner manual acceptance",
+    "V11 E6",
+    "V11 D performance"
+  ],
+  "failure": "AssertionError: 等待超时：B毒消息隔离 at line 46",
+  "passed": false,
+  "rootEnvUnchanged": true,
+  "isolationProject": "flowgate-v11-demo-ce74748c45f3",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261117t204537-0add"
+}

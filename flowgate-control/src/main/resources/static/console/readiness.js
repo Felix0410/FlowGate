@@ -16,9 +16,9 @@ export function readinessFacts(data) {
   if (async?.asyncEnabled === false) c = row('c', 'C 异步用量', 'BLOCKED', '异步关闭，账本可用但日报暂不聚合', '按隔离交付手册启动，不要全局改开关', 'async-events');
   else if (async) {
     const runtime = async.runtime;
-    if (async.broker?.state !== 'BROKER_AVAILABLE') c = row('c', 'C 异步用量', async.broker?.state === 'BROKER_UNAVAILABLE' ? 'BLOCKED' : 'UNKNOWN', 'Kafka协议尚未确认可用', '检查Broker协议状态，不能只检查端口', 'async-events');
-    else if (!runtime || runtime.publisher?.state === 'UNKNOWN' || runtime.consumer?.state === 'UNKNOWN') c = row('c', 'C 异步用量', 'UNKNOWN', 'Broker已连接，Worker或Consumer当前状态未验证', '等待实际调度与分区分配，再重新读取', 'async-events');
-    else if (runtime.publisher?.state !== 'READY' || runtime.consumer?.state !== 'READY') c = row('c', 'C 异步用量', 'BLOCKED', runtime.publisher?.state !== 'READY' ? runtime.publisher?.reason || 'Worker未就绪' : runtime.consumer?.reason || 'Consumer未就绪', '查看异步事件并诊断，禁止跳过offset', 'async-events');
+    if (async.broker?.state !== 'BROKER_AVAILABLE') c = row('c', 'C 异步用量', async.broker?.state === 'BROKER_UNAVAILABLE' ? 'BLOCKED' : 'UNKNOWN', 'RabbitMQ协议尚未确认可用', '检查Broker协议状态，不能只检查端口', 'async-events');
+    else if (!runtime || runtime.publisher?.state === 'UNKNOWN' || runtime.consumer?.state === 'UNKNOWN') c = row('c', 'C 异步用量', 'UNKNOWN', 'Broker已连接，Worker或Consumer当前状态未验证', '等待实际调度与活跃消费者，再重新读取', 'async-events');
+    else if (runtime.publisher?.state !== 'READY' || runtime.consumer?.state !== 'READY') c = row('c', 'C 异步用量', 'BLOCKED', runtime.publisher?.state !== 'READY' ? runtime.publisher?.reason || 'Worker未就绪' : runtime.consumer?.reason || 'Consumer未就绪', '查看异步事件并诊断，先检查源事件和Poison', 'async-events');
     else if (async.failedCount > 0 || async.pendingConsumption > 0) c = row('c', 'C 异步用量', 'BLOCKED', '仍有失败或未消费事件，日报可能滞后', '诊断后安全重试/补投原事件，不重复业务扣额', 'async-events');
     else c = row('c', 'C 异步用量', 'READY', 'Broker协议、Worker和Consumer有当前运行事实', 'SENT不等于已消费，日报不等于实时余额', 'usage');
   }

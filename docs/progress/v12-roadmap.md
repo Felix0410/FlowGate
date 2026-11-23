@@ -1,5 +1,8 @@
 # FlowGate V1.2｜业务化升级阶段路线与验收门槛（2026-11-10）
 
+> **最新进度（2026-11-19）**：V12-M功能分支`feat/v12-m-rabbitmq-only`从真实设计HEAD实施；M0补齐B原始证据并重跑关键链路，M1/M2兼容单路由切换/回滚/双300秒SENT恢复通过，M4当前源码/构建/运行器Kafka-free，M5无Kafka三链真实联调通过。故障、浏览器与未验项以[M实施记录](v12-m-implementation.md)为准。M8独立复审/负责人手测尚未通过，C/D不启动。以下日期更早的状态段为历史，不代表当前代码依赖。
+
+
 > **真实状态（2026-11-10）**：A0～A6已在`feat/v12-a-portal`编码并有定向联调证据，A7含Rabbit三项P1和负责人真人验收仍未完成；**这三项P1按本轮负责人要求纳入V12-B0开发，不等于已经修好**。B订单/模拟支付/Rabbit Commerce只有本设计与[可执行B合同](v12-b-order-payment.md)，代码/迁移/运行均NOT_STARTED；C/D仍为设计或旧债。源基线：`feat/v12-a-portal@f2026c59c7a7359e14e3ecd1d10f0c1a84cac8d8`，设计分支`docs/v12-b-order-design`，不修改旧PR。
 
 ## 0. 决策：先锁业务合同，再逐阶段编码
@@ -58,6 +61,20 @@
 **MVP缩减**：不接支付宝/微信，不做用户付款记录原文泄露、不自动续费、不支持已消耗权益退款、不做活动库存与优惠券；只模拟支付，明确UI文案。价格/购买日期不能在支付后改变。允许普通非活动SKU价为0时按`FREE_TRIAL`流程，不伪造第三方支付成功。
 
 **阶段终点**：普通用户完成“选商品→创建订单→模拟支付→等待权益→APP调用→余额”闭环，且模拟交易具有真实状态机和恢复机制。B通过后才开始大规模抢购。
+
+## V12-M：Kafka退役、旧V11用量Rabbit迁移（B完成后、C开始前）
+
+**这是2026-11-19确认的强制中间阶段，非已经完成的实现。** ADR-14覆盖2026-11-10“长期保留V11 Kafka”的历史结论。执行顺序：**V12-A → V12-B（功能候选待复审）→ V12-M（尚未编码）→ V12-C → V12-D**。
+
+- **M0** B最终代码/证据与旧V11 Kafka/Outbox/Consumer完整性只读核验，找出旧`SENT`未消费/FAILED、旧实例清单和Kafka毒分区积压；旧B数据/测试不完整先停止。
+- **M1** MySQL单行`fg_legacy_mq_cutover`的mode与epoch栅栏 + 旧V11用量独立Rabbit quorum三队列，保持原eventId/chargeId及旧Ledger/Daily/Consumed模型。
+- **M2** 显式`KAFKA→FROZEN→RABBIT`、全部旧Control与Publisher退出/在途确认和租约清理，迁移历史旧SENT/FAILED缺口时只安全补投原事件，DB CAS/管理员审计和回滚演练。
+- **M3** 旧Console用量/异步事件/对账API继续可用，Kafka Topic/Group诊断变Rabbit主/Retry/Poison与Consumer/栅栏真实状态，中文帮助同步。
+- **M4** 最终Kafka Controller配置、Spring Kafka/Maven、Compose服务、当前Python诊断启动器、旧Kafka-only测试/脚本依赖清理，保护历史Git提交/用户Kafka数据卷。
+- **M5–M6** 在**无Kafka Broker和依赖**的新隔离环境中真实测试V11 APP月用量、V12-A API用量、B订单权益三类Rabbit链路，100次重复仅一统计、旧封账日MATCH、Broker停恢复/Poison/TTL/COMMIT后ACK丢失；保留失败与NOT_EXECUTED。
+- **M7–M8** 完整迁移Runbook/README/AGENTS/Console/中文手册与Draft PR，等待源代码复审与负责人手测，不能自动进入C。
+
+M是**迁移消息传输，不迁移或删除旧MySQL权威账本**；旧Kafka生产用户卷只能经单独明确授权后处理。最完整合同[迁移架构](../design/v12-m-rabbitmq-migration-architecture.md)及[逐段M0～M8](v12-m-rabbitmq-convergence.md)，现有旧B Codex任务无须重做。
 
 ## V12-C：限时9.9元/100份抢购与可靠恢复（核心高并发）
 
@@ -121,3 +138,8 @@
 V12-A独立功能分支`feat/v12-a-portal`已远端提交自助Portal、商品免费权益、V12 APP/API月配额、独立**RabbitMQ**用量链路与定向证据，见[实施记录](v12-a-implementation.md)和[首次复审](../reviews/v12-a-rabbitmq-static-review-2026-11-10.md)。A0～A6代码和部分真实测试已交付，A7有三项P1待修及负责人手测；**不能标成整阶段正式验收通过**，当前没开始B/C代码。
 
 **队列选择最终裁决**：V12新业务消息（A用量、B订单付款/权益、C抢购Intent/库存补偿）采用RabbitMQ独立exchange/quorum main/retry/poison队列，保留MySQL Outbox+幂等事务；**旧V11-C Kafka保留不迁移**。此前本路线及交易蓝图里提到未来V12 Kafka Consumer/Topic的文字以[消息适配设计](../design/v12-rabbitmq-adaptation.md)与ADR-13为准。B/C的阶段开发合同必须写Rabbit的publisher confirm、mandatory returns、COMMIT后basicAck、持久重试/隔离和实际容器故障测试。
+
+
+## 最终决策覆盖说明（2026-11-19）
+
+本文2026-11-10旧历史段落中的Kafka4.1.1、长期保留旧V11 Kafka、V12尚未编码等说法，只代表当时方案/测试历史，**不再是M完成后的最终交付标准**。现在B代码已经提交，M0先做真实验收补证，M在独立设计/开发分支完成Kafka退役后才进入C。现行交付只Rabbit，历史Git证据仍完整保存。

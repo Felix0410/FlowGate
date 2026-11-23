@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "guides": [
+    "docs/guides/v12-m-rabbitmq.md",
+    "docs/guides/v12-m-kafka-retirement-runbook.md",
+    "docs/guides/product-console-guide.md",
+    "docs/guides/v11-local-delivery.md",
+    "docs/guides/v12-a-portal.md",
+    "docs/guides/v12-b-orders.md"
+  ],
+  "currentDocs": [
+    "README.md",
+    "AGENTS.md",
+    "docs/progress/v12-roadmap.md",
+    ".env.example"
+  ],
+  "generatedHtmlCheck": {
+    "product": 0,
+    "delivery": 0
+  },
+  "userPersistentMigration": "NOT_EXECUTED",
+  "userKafkaVolumes": "retained untouched",
+  "compatibilityRollbackCommit": "f26db25",
+  "finalRollbackTarget": "previous verified Rabbit-only package; no Kafka target",
+  "ownerManual": "NOT_EXECUTED"
+}
