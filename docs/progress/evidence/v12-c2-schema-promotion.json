@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "partial": {
+    "interruptedAfter": "atomic source CHECK replacement",
+    "resumable": true
+  },
+  "complete": {
+    "tables": 5,
+    "sourceCheck": "ck_fg_order_source_c",
+    "intentForeignKey": true,
+    "repeatable": true
+  },
+  "repeated": {
+    "tables": 5,
+    "sourceCheck": "ck_fg_order_source_c",
+    "intentForeignKey": true,
+    "repeatable": true
+  },
+  "oldOrderRowsUnchangedDuringMigration": true,
+  "allOtherChecksRetained": true,
+  "invalidPromoSourceRejected": true,
+  "newTables": 5,
+  "readiness": {
+    "status": "READY",
+    "message": "活动结构就绪，发布和抢购仍实时核验。"
+  },
+  "sourceCommit": "dd82c18768ecf2a0d377874dfccfd8503bdd0cdd",
+  "controlJarSha256": "c04947376e1a20e3e90010d8c18945f6388355c1d71c2aa5152125bfe7e29fb9",
+  "owner": "93bf9c774e6c487e91826d0c97ee6972",
+  "project": "flowgate-v11-demo-93bf9c774e6c",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "requests": [
+    {
+      "path": "/admin/promotions/readiness",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

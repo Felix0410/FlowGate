@@ -26,21 +26,24 @@ public final class RabbitDelivery {
         return (int)Math.min(MAX_RETRIES,count);
     }
     public static void receive(Message message,Channel channel,RabbitTemplate rabbit,String exchange,java.util.function.Consumer<String> process)throws Exception{
+        receive(message,channel,rabbit,exchange,"retry",process);
+    }
+    public static void receive(Message message,Channel channel,RabbitTemplate rabbit,String exchange,String retryRoute,java.util.function.Consumer<String> process)throws Exception{
         long tag=message.getMessageProperties().getDeliveryTag();int retries;
         try{retries=retries(message);if(message.getBody().length>4096)throw new IllegalArgumentException();}catch(IllegalArgumentException invalid){channel.basicReject(tag,false);return;}
         String payload=new String(message.getBody(),StandardCharsets.UTF_8);
         try{
             process.accept(payload);channel.basicAck(tag,false);
         }catch(IllegalArgumentException permanent){channel.basicReject(tag,false);}
-        catch(ApiFailure failure){if(failure.status<500)channel.basicReject(tag,false);else retry(message,channel,rabbit,exchange,payload,retries);}
+        catch(ApiFailure failure){if(failure.status<500)channel.basicReject(tag,false);else retry(message,channel,rabbit,exchange,retryRoute,payload,retries);}
         catch(org.springframework.dao.NonTransientDataAccessException permanent){
             // 2. 资源连接失败可以恢复；约束/SQL错误等确定性失败保留Poison，不能无限回炉。
-            if(permanent instanceof org.springframework.dao.DataAccessResourceFailureException)retry(message,channel,rabbit,exchange,payload,retries);else channel.basicReject(tag,false);
-        }catch(RuntimeException transientOrUnknown){retry(message,channel,rabbit,exchange,payload,retries);}
+            if(permanent instanceof org.springframework.dao.DataAccessResourceFailureException)retry(message,channel,rabbit,exchange,retryRoute,payload,retries);else channel.basicReject(tag,false);
+        }catch(RuntimeException transientOrUnknown){retry(message,channel,rabbit,exchange,retryRoute,payload,retries);}
     }
-    private static void retry(Message message,Channel channel,RabbitTemplate rabbit,String exchange,String payload,int retries)throws Exception{
+    private static void retry(Message message,Channel channel,RabbitTemplate rabbit,String exchange,String retryRoute,String payload,int retries)throws Exception{
         long tag=message.getMessageProperties().getDeliveryTag();if(retries>=MAX_RETRIES){org.slf4j.LoggerFactory.getLogger(RabbitDelivery.class).warn("V12_MESSAGE_RETRY_EXHAUSTED：消息保留在Poison等待运营检查");channel.basicReject(tag,false);return;}
         // 3. 即使未知Runtime也最多12次；副本confirm且无return才ACK原消息，失败保留原件。
-        confirmed(rabbit,exchange,"retry",payload,message.getMessageProperties().getMessageId(),retries+1);channel.basicAck(tag,false);
+        confirmed(rabbit,exchange,retryRoute,payload,message.getMessageProperties().getMessageId(),retries+1);channel.basicAck(tag,false);
     }
 }

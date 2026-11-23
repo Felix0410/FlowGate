@@ -11,11 +11,11 @@ import static com.flowgate.control.portal.PortalStore.*;
 /** 只模拟退款：持APP→slot→order→订阅/余额锁，和Gateway相同APP锁串行；不改Ledger。 */
 @Service
 public class SimulatedRefundService {
-    private final PortalStore db;private final OrderService orders;private final TransactionTemplate tx;
-    public SimulatedRefundService(PortalStore db,OrderService orders,PlatformTransactionManager manager){this.db=db;this.orders=orders;tx=new TransactionTemplate(manager);tx.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);tx.setTimeout(8);}
+    private final com.flowgate.control.promotion.PromotionOrderStockService promoStock;private final PortalStore db;private final OrderService orders;private final TransactionTemplate tx;
+    public SimulatedRefundService(PortalStore db,OrderService orders,PlatformTransactionManager manager,com.flowgate.control.promotion.PromotionOrderStockService promoStock){this.promoStock=promoStock;this.db=db;this.orders=orders;tx=new TransactionTemplate(manager);tx.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);tx.setTimeout(8);}
     public Object refund(long user,String orderNo){var seed=orders.get(user,orderNo);return tx.execute(status->{
         // 1. 非锁定快照只定位，真正资格必须在订单锁后重读；已退款幂等返回原收据。
-        var order=orders.lock(seed);String before=s(order,"status");long id=n(order,"id");if("REFUNDED".equals(before))return orders.summary(order);
+        var order=orders.lock(seed);String before=s(order,"status");long id=n(order,"id");if("REFUNDED".equals(before))return orders.summary(order);promoStock.lockRefund(order);
         if("FULFILLED".equals(before)){
             var sub=db.need("SELECT * FROM fg_api_subscription WHERE application_id=? AND api_id=? AND period_yyyymm=? FOR UPDATE",order.get("application_id"),order.get("api_id"),order.get("period_yyyymm"));
             var balance=db.need("SELECT * FROM fg_api_quota_balance WHERE subscription_id=? FOR UPDATE",sub.get("id"));
@@ -31,6 +31,7 @@ public class SimulatedRefundService {
         // 3. 唯一模拟退款、终态和追加审计同提交；晚到Worker只可记录忽略终态。
         var payment=db.need("SELECT amount_cents FROM fg_payment_record WHERE order_id=?",id);if(n(payment,"amount_cents")!=n(order,"price_cents"))throw new ApiFailure(409,"PAYMENT_CONFLICT","收据金额不一致");
         db.insert("INSERT INTO fg_simulated_refund(order_id,refund_ref,amount_cents,reason_code) VALUES(?,?,?,?)",id,UUID.randomUUID().toString(),order.get("price_cents"),"SIMULATED_UNUSED_REFUND");
+        promoStock.refunded(order);
         db.update("UPDATE fg_order SET status='REFUNDED',version=version+1 WHERE id=? AND status=?",id,before);orders.transition(id,before,"REFUNDED","PORTAL",user,"SIMULATED_UNUSED_REFUND");return orders.summary(db.need("SELECT * FROM fg_order WHERE id=?",id));
     });}
 }
