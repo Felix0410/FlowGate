@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "promotionId": 9,
+  "intentId": 107,
+  "checks": [
+    "initial real worker transaction COMMIT then real Rabbit Channel closed at basicAck",
+    "broker redelivered on new Channel; one Order/Consumed remains",
+    "real promo retry TTL5sec then duplicate safely consumed",
+    "badJSON retained in separate promo Poison",
+    "B payment/Promo retry routes remain separate"
+  ],
+  "queues": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\tconsumers\nflowgate.usage.v12.poison\t0\t0\nflowgate.commerce.v12.retry\t0\t0\nflowgate.usage.v12.aggregate\t0\t4\nflowgate.commerce.v12.promo.intents\t0\t4\nflowgate.usage.legacy.poison\t0\t0\nflowgate.usage.v12.retry\t0\t0\nflowgate.commerce.v12.orders\t0\t4\nflowgate.commerce.v12.promo.retry\t0\t0\nflowgate.usage.legacy.retry\t0\t0\nflowgate.commerce.v12.poison\t2\t0\nflowgate.usage.legacy.aggregate\t0\t4\nflowgate.commerce.v12.promo.poison\t1\t0",
+  "notExecuted": [
+    "300sec SENT replay cooldown real wait",
+    "full12 retry exhaustion matrix"
+  ],
+  "sourceCommit": "dd82c18768ecf2a0d377874dfccfd8503bdd0cdd",
+  "controlJarSha256": "5718d4802e28a92d791ed4377a785054b08cd69cba30dbb5307cd56a7b36a3fa",
+  "owner": "93bf9c774e6c487e91826d0c97ee6972",
+  "project": "flowgate-v11-demo-93bf9c774e6c",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/9/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/9/claim",
+      "status": 202
+    }
+  ],
+  "rootEnvUnchanged": true
+}

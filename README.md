@@ -443,3 +443,7 @@ python3 scripts/v11-b-smoke.py
 `FLOWGATE_ASYNC_ENABLED=false`仍为默认值。新建的空隔离库显式初始化为RABBIT；已存在的KAFKA/FROZEN/未知模式不会被启动器改成RABBIT。当前构建不提供回退到Kafka的动作，修复失败优先FROZEN，回滚到已验证的Rabbit版本。
 
 当前验证入口：Java17 `mvn test package`、`node scripts/v11-c-console-test.mjs`、`python3 -m unittest discover -s scripts -p test_v11_local.py`、`python3 scripts/v12-b-smoke.py --keep-running --evidence-prefix v12-m5`及`scripts/v12-m-failure-smoke.py`。后两项只对新owner隔离实例，测试完成需按owner停机。完整历史B23/C26矩阵和D压力实验没有借此宣称重跑。
+
+### V12-C候选
+
+公开套餐Redis缓存、限时抢购/异步创单/库存联动及Portal/Console已实施，默认OFF。见[运行与用户指南](docs/guides/v12-c-promotions.md)和[真实验证及未执行范围](docs/progress/v12-c-implementation.md)。仅新隔离实例启用，常驻M环境未迁移；独立复审和负责人手测待完成。

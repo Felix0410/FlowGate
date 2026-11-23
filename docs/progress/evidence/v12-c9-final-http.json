@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "checks": [
+    "real C UI order -> credential -> two actual Gateways200",
+    "used refund409 with two Ledger rows retained",
+    "ADMIN displays actual promo Poison1/consumers4"
+  ],
+  "promotion": {
+    "id": 10,
+    "reserved": 0,
+    "sold": 1,
+    "rabbit": {
+      "retry": 0,
+      "pending": 0,
+      "consumers": 4,
+      "poison": 1,
+      "status": "OBSERVED"
+    }
+  },
+  "sourceCommit": "35f1cbf8fb0ca2c905494e6c979406a451cde435",
+  "controlJarSha256": "66933708d29aab9ce813316824618c9baab97125a2707aca4c4ab69b36159453",
+  "owner": "93bf9c774e6c487e91826d0c97ee6972",
+  "project": "flowgate-v11-demo-93bf9c774e6c",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t101036-9989",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps?limit=100",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/139/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/10/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/2152af48-d9c5-4eca-87e3-9ac7fec75ebc/simulate-refund",
+      "status": 409
+    },
+    {
+      "path": "/admin/promotions/10",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}
