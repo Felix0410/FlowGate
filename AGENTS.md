@@ -1,3 +1,9 @@
+# V12-D Final候选实施状态（2026-11-24）
+
+> 本轮D实现与实测已归档，CONDITIONALLY_READY / PENDING_REVIEW / PENDING_OWNER。核心P1补投、四链恢复、100k账本SQL、两轮Gateway对照、1k/5k/20k请求、1280/375与Java97/Node9/Python20已有真实证据；部分历史精确矩阵与性能profile未执行，不能宣称全PASS。以`docs/acceptance/v12-final-results.md`、`docs/progress/v12-d-final-implementation.md`、`docs/reviews/v12-d-final-source-review.md`和场景映射为当前事实。D持卷恢复已验后停止，三卷保留；`python3 scripts/v12-d-preview.py start`恢复D候选。根.env/常驻flowgate-local/旧卷/IDE未升级或清理。只使用原D Draft PR#22；不得另开E/补尾项分支，不代签、不合并main或旧PR。下方任务书“尚未执行”为实施前历史，保留原合同要求和待验限制。
+
+---
+
 # FlowGate｜当前唯一执行阶段 V12-D Final（2026-11-23总收尾合同已提交）
 
 > **最终阶段已建立，但D0～D8代码/压力/故障与真人验收尚未执行，绝不预填PASS。** 用户明确要求将V12-C剩余P1、V12-M的M8/负责人验收、V11-D旧10万SQL/四组性能、V12-D完整可靠性/缓存/抢购压测、Portal/Console/部署/最终成果全部**放进这一个V12-D Final阶段一次提交GitHub**。禁止再次独立发“C尾项”“M收尾”“E阶段”“Nacos/Sentinel接入”任务。
