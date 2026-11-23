@@ -34,7 +34,7 @@ Intent可先插`order_id=NULL`，Worker成功插入Order后更新`order_id`，�
 2. Redis Lua在单个原子短脚本核对epoch、gate READY、候选用户租约、softRemaining>0，分配带token和TTL的**软候选**。没有Lua资格不代表已经真正售罄，可能悲观欠卖；返回明确SOLD_OUT/RETRY_LATER/503。
 3. DB事务持APP→Slot锁，核验USER/APP、当前活动MySQL`RUNNING`、真实DB UTC时段/固定period、`epoch==Lua epoch`、上架真实API和该月B OrderStateMachine月末保护窗、既有V11同月订阅无冲突；`SELECT ... FOR SHARE`核对活动快照。先插Slot若无，再`FOR UPDATE`要求AVAILABLE；依靠唯一索引限制activity+principal及principal+requestId。
 4. 同事务 `UPDATE fg_promo_stock SET reserved=reserved+1,version=version+1 WHERE promotion_id=? AND total_stock>reserved+sold` 恰一行；插`fg_promo_purchase_intent(ACCEPTED)`、Slot CAS为`HELD(holder_type=PROMO,holder_id=intent.id)`、插唯一`fg_promo_outbox(PROMO_INTENT_ACCEPTED)`，COMMIT。**只有此时HTTP202 +真实intentId**。
-5. DB回滚时通过Lua按token和epoch最多一次补偿softRemaining，补偿Redis失败只导致短期少卖不能导致多卖。DB已COMMIT后HTTP丢失不补偿，用户按`my-claim`从MySQL查询恢复。持久Intent一人只能一个，新requestId也不能重新抢。
+5. DB**确定整笔事务回滚**时通过Lua按token和epoch最多一次补偿softRemaining，补偿Redis失败只导致短期少卖不能导致多卖。遇MySQL COMMIT结果未知/网络断开时先按用户唯一Intent查询判定，仍未知就不补偿、保留软候选到重建；DB已COMMIT后HTTP丢失不补偿，用户按`my-claim`从MySQL查询恢复。持久Intent一人只能一个，新requestId也不能重新抢。
 
 ### 2.2 Rabbit意图Worker（独立quorum队列）
 
