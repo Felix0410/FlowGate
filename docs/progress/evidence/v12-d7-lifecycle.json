@@ -1,0 +1,235 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "sourceCommit": "658810ab4d8faf2b1657587609e6ff8996473593",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "startExitCode": 0,
+  "beforeStop": {
+    "schemaVersion": 1,
+    "profile": "v11",
+    "isolated": true,
+    "state": "READY",
+    "checks": [
+      {
+        "id": "java17",
+        "state": "READY",
+        "reason": "Java17版本检查",
+        "action": "使用JDK17"
+      },
+      {
+        "id": "docker",
+        "state": "READY",
+        "reason": "Docker可访问",
+        "action": ""
+      },
+      {
+        "id": "compose",
+        "state": "READY",
+        "reason": "Compose可用",
+        "action": ""
+      },
+      {
+        "id": "jars",
+        "state": "READY",
+        "reason": "三模块Jar与工作台源码可用",
+        "action": ""
+      },
+      {
+        "id": "mysql",
+        "state": "READY",
+        "reason": "已用当前配置执行只读查询",
+        "action": ""
+      },
+      {
+        "id": "redis",
+        "state": "READY",
+        "reason": "会话服务只读PING",
+        "action": "核对Redis认证/数据库配置"
+      },
+      {
+        "id": "control",
+        "state": "READY",
+        "reason": "control实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "gateway",
+        "state": "READY",
+        "reason": "gateway实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "demo",
+        "state": "READY",
+        "reason": "demo实际HTTP与依赖检查",
+        "action": ""
+      },
+      {
+        "id": "processOwnership",
+        "state": "READY",
+        "reason": "已核对隔离进程身份",
+        "action": "外部进程由负责人管理；可使用up --isolated"
+      },
+      {
+        "id": "schema.v1",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.b",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.c",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "schema.m",
+        "state": "READY",
+        "reason": "所需表存在",
+        "action": ""
+      },
+      {
+        "id": "preflight",
+        "state": "READY",
+        "reason": "四项历史风险必须全零",
+        "action": ""
+      },
+      {
+        "id": "quotaActivation",
+        "state": "READY",
+        "reason": "隔离受管进程已配置计量",
+        "action": "登录工作台读取实际就绪原因；不要全局修改.env开关"
+      },
+      {
+        "id": "nodes",
+        "state": "READY",
+        "reason": "完整名单通过当前数据库只读门禁核对",
+        "action": ""
+      },
+      {
+        "id": "rabbitProtocol",
+        "state": "READY",
+        "reason": "Rabbit真实协议响应",
+        "action": ""
+      },
+      {
+        "id": "asyncActivation",
+        "state": "READY",
+        "reason": "隔离Control配置异步开启",
+        "action": "登录工作台读取C状态；关闭时余额可用、日报暂不聚合"
+      },
+      {
+        "id": "consumer",
+        "state": "READY",
+        "reason": "Legacy主quorum有活跃消费者且DB栅栏RABBIT，不代表所有SENT已统计",
+        "action": ""
+      }
+    ],
+    "project": "flowgate-v11-demo-c1de29e19072",
+    "ports": {
+      "control": 56610,
+      "gateway": 56611,
+      "demo": 56612,
+      "mysql": 56613,
+      "redis": 56614,
+      "rabbitmq": 56615
+    },
+    "volumes": {
+      "mysql": "flowgate-v11-demo-c1de29e19072_mysql-data",
+      "redis": "flowgate-v11-demo-c1de29e19072_redis-data",
+      "rabbitmq": "flowgate-v11-demo-c1de29e19072_rabbitmq-data"
+    },
+    "console": "http://127.0.0.1:56610/console/"
+  },
+  "legacyCounts": [
+    "987",
+    "987",
+    "987",
+    "987"
+  ],
+  "apiCounts": [
+    "961",
+    "961",
+    "961",
+    "961"
+  ],
+  "fence": "RABBIT\t2",
+  "promotionReconciliation": [
+    {
+      "expectedSold": 10,
+      "expectedReserved": 0,
+      "reserved": 0,
+      "intents": 100,
+      "status": "PROVISIONAL",
+      "total": 100,
+      "asOfUtc": "2026-11-23T19:42:02.311Z",
+      "integrityGaps": 0,
+      "available": 90,
+      "sold": 10
+    },
+    {
+      "expectedSold": 0,
+      "expectedReserved": 0,
+      "reserved": 0,
+      "intents": 100,
+      "status": "PROVISIONAL",
+      "total": 100,
+      "asOfUtc": "2026-11-23T19:42:02.473Z",
+      "integrityGaps": 0,
+      "available": 100,
+      "sold": 0
+    },
+    {
+      "expectedSold": 0,
+      "expectedReserved": 0,
+      "reserved": 0,
+      "intents": 100,
+      "status": "PROVISIONAL",
+      "total": 100,
+      "asOfUtc": "2026-11-23T19:42:02.631Z",
+      "integrityGaps": 0,
+      "available": 100,
+      "sold": 0
+    },
+    {
+      "expectedSold": 1,
+      "expectedReserved": 0,
+      "reserved": 0,
+      "intents": 1,
+      "status": "PROVISIONAL",
+      "total": 100,
+      "asOfUtc": "2026-11-23T19:42:02.646Z",
+      "integrityGaps": 0,
+      "available": 99,
+      "sold": 1
+    }
+  ],
+  "runtimeArtifacts": {
+    "flowgate-demo": "c39838f8e07fd3de2235845e66535c413441388cbb37f16167a5d726d1e17ec5",
+    "flowgate-control": "f3e0d7dfa9daf70699f186160c4050a46c6237612726b24c8aa6d6c5db682d98",
+    "flowgate-gateway": "0f0a29655ce242d7871ae68f16aa64f3fffd4dfe5138da3c7b963c001b0faaf8"
+  },
+  "stopExitCode": 0,
+  "stopResult": "{'schemaVersion': 1, 'state': 'STOPPED', 'project': 'flowgate-v11-demo-c1de29e19072', 'volumesRetained': {'mysql': 'flowgate-v11-demo-c1de29e19072_mysql-data', 'redis': 'flowgate-v11-demo-c1de29e19072_redis-data', 'rabbitmq': 'flowgate-v11-demo-c1de29e19072_rabbitmq-data'}, 'reason': '只停止本实例，保留所有数据卷与账本'}",
+  "rootEnvUnchanged": true,
+  "protectedProcessesUnchanged": true,
+  "protectedPids": {
+    "flowgate-demo": 68648,
+    "flowgate-control": 68665,
+    "flowgate-gateway": 68716
+  },
+  "protectedControlStatus": 200,
+  "allDProcessesStopped": true,
+  "volumesRetained": [
+    "flowgate-v11-demo-c1de29e19072_mysql-data",
+    "flowgate-v11-demo-c1de29e19072_redis-data",
+    "flowgate-v11-demo-c1de29e19072_rabbitmq-data"
+  ]
+}

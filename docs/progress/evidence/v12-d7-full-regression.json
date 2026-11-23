@@ -1,0 +1,104 @@
+{
+  "status": "CONDITIONALLY_READY",
+  "sourceCommitAtFinalJavaRun": "720261a",
+  "sourceState": "final Java97 includes D1/D2/D4 production changes; later changes are scenario scripts, HTML/JS explanation and delivery docs",
+  "java": {
+    "command": "JAVA_HOME=<Java17> mvn -B -ntp verify",
+    "exitCode": 0,
+    "tests": 97,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "rawLogSha256": "53ef0ef6a3afd0f7ae2fae4fe5c2cec58c3c1111a33b4a54450420f76deb8883"
+  },
+  "node": {
+    "entries": [
+      {
+        "file": "scripts/product-console-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/v11-a-console-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/v11-b-console-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/v11-c-console-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/v11-c-review-console-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/v11-e-console-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/v12-a-portal-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/v12-b-orders-test.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "scripts/workbench-console-test.mjs",
+        "exitCode": 0
+      }
+    ],
+    "exitCode": 0
+  },
+  "python": {
+    "command": "python3 -m unittest (test_run_local, test_v11_local, test_v12_m_cutover; 20 tests)",
+    "tests": 20,
+    "exitCode": 0,
+    "rawLogSha256": "4a04fee3cf398c02010b06554bfca8eb0fdc90397510e2db97d7b9e449a151e7"
+  },
+  "packageAfterLastStaticCopy": {
+    "command": "JAVA_HOME=<Java17> mvn -B -ntp -DskipTests package",
+    "exitCode": 0,
+    "rawLogSha256": "2e39e268de9f4bd85d013e56d942d0d6f573df65320297a95222b5ea78e72486",
+    "reason": "only final Chinese replay eligibility text/guide packaging; no repeated Java tests"
+  },
+  "runtimeArtifacts": {
+    "flowgate-demo": "c39838f8e07fd3de2235845e66535c413441388cbb37f16167a5d726d1e17ec5",
+    "flowgate-control": "f3e0d7dfa9daf70699f186160c4050a46c6237612726b24c8aa6d6c5db682d98",
+    "flowgate-gateway": "0f0a29655ce242d7871ae68f16aa64f3fffd4dfe5138da3c7b963c001b0faaf8"
+  },
+  "realRuntimeEvidence": [
+    "v12-d0-e2e.json",
+    "v12-d0-schema.json",
+    "v12-d1-outbox-recovery.json",
+    "v12-d2-four-rabbit-recovery.json",
+    "v12-d2-legacy-regressions.json",
+    "v12-d2-identity-rollback.json",
+    "v12-d2-mixed-gateway.json",
+    "v12-d2-utc-transactions.json",
+    "v12-d2-http-commit-loss.json",
+    "v12-d2-lease100.json",
+    "v12-d7-promotion-e2e.json",
+    "v12-d7-redis-db-rabbit-recovery.json",
+    "v12-d7-commit-ack.json",
+    "v12-d6-final-authority.json"
+  ],
+  "failureAttemptsPreserved": [
+    "D0 shell glob/Compose filename corrected before rerun",
+    "UTF8 mysql client explicitly fixed; earlier query mismatch retained in local logs",
+    "old quota probe non-daemon exit fixed in harness",
+    "Gateway owner marker/cold capability wait corrected",
+    "final ACK Poison expected absolute1 corrected to baseline+1 then ACK-only rerun",
+    "final authority API limit100 rejected; resumed with limit20/applicationSummary; no duplicate debit",
+    "extra M cutover wrapper partially stopped D Controls before global guard; no cutover CAS; restored D and added full preflight; blocked exit2 evidence retained"
+  ],
+  "notExecuted": [
+    "extra M all-host offline FROZEN/CAS: protected nonD Control; see v12-d2-cutover-safety.json",
+    "independent external source review",
+    "owner human final acceptance",
+    "production/daily runtime migration"
+  ],
+  "lifecycleEvidence": "v12-d7-lifecycle.json"
+}

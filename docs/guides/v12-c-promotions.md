@@ -25,3 +25,5 @@ python3 scripts/v12-c-preview.py stop
 实测与未执行范围见`docs/progress/v12-c-implementation.md`。20k QPS未达到，5k/20k阶梯未执行；独立源码复审与负责人真人验收待完成。
 
 D Final恢复补充：促销Outbox第8次发送失败后数据库仍为FAILED，运营显示RETRY_EXHAUSTED。管理员可在事件和当前节点均满300秒、无租约且未消费时，审计重新开启一批最多8次的原事件投递。永久坏事件不解封；已过期意向补投只记录忽略终态，不重新占库存。事件列表提供真实可补投时刻和当前节点剩余冷却，条件未到按钮禁用。
+
+D最终工作台“消息与业务消费”手动读取四链真实Outbox状态、Consumed、Broker ready/retry/poison/消费者及促销耗尽计数。UNKNOWN是无法读取，NOT_READY是表未安装；Ready仅Broker待投递，不包括未ACK，也不表示数据库消费完成。当前快照时间明确展示，不当作完整RR财务对账。

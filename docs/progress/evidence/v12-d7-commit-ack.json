@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "promotionId": 12,
+  "intentId": 309,
+  "checks": [
+    "initial real worker transaction COMMIT then real Rabbit Channel closed at basicAck",
+    "broker redelivered on new Channel; one Order/Consumed remains",
+    "real promo retry TTL5sec then duplicate safely consumed",
+    "badJSON retained in separate promo Poison",
+    "B payment/Promo retry routes remain separate"
+  ],
+  "queues": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\tconsumers\nflowgate.usage.v12.poison\t0\t0\nflowgate.commerce.v12.retry\t0\t0\nflowgate.usage.v12.aggregate\t0\t4\nflowgate.commerce.v12.promo.intents\t0\t4\nflowgate.usage.legacy.poison\t0\t0\nflowgate.usage.v12.retry\t0\t0\nflowgate.commerce.v12.orders\t0\t4\nflowgate.commerce.v12.promo.retry\t1\t0\nflowgate.usage.legacy.retry\t0\t0\nflowgate.commerce.v12.poison\t2\t0\nflowgate.usage.legacy.aggregate\t0\t4\nflowgate.commerce.v12.promo.poison\t3\t0",
+  "notExecuted": [
+    "300sec SENT replay cooldown real wait",
+    "full12 retry exhaustion matrix"
+  ],
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "ea2f532e65bef5284407601a8bd1c340a36a53d94c41a2cddc589049d3622709",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/admin/promotions/1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/12/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/12/claim",
+      "status": 202
+    }
+  ],
+  "rootEnvUnchanged": true
+}
