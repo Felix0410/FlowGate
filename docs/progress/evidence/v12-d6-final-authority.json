@@ -1,0 +1,267 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "firstAttempt": "free and paid Gateways passed before invalid limit100 assertion; resumed at refund/remaining promo using limit20/applicationSummary",
+  "uiAccountsActualGateways": [
+    {
+      "kind": "final-free",
+      "gatewaySuccesses": 1
+    },
+    {
+      "kind": "final-paid",
+      "orderSource": "NORMAL",
+      "refundStatus": 409,
+      "gatewaySuccesses": 2
+    },
+    {
+      "kind": "final-promo",
+      "orderSource": "PROMOTION",
+      "refundStatus": 409,
+      "gatewaySuccesses": 2
+    }
+  ],
+  "oldV11LedgerUnchanged": true,
+  "crossOwnerIntent404": true,
+  "clientPriceTamper400": true,
+  "apiLedgerOutboxConsumedSettled": true,
+  "fourPoisonBefore": {
+    "chains": [
+      {
+        "chain": "V11用量",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 987
+          }
+        ],
+        "consumed": 987,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 0,
+          "consumers": 4,
+          "retry": 0
+        }
+      },
+      {
+        "chain": "V12 API用量",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 961
+          }
+        ],
+        "consumed": 961,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 0,
+          "consumers": 4,
+          "retry": 0
+        }
+      },
+      {
+        "chain": "付款权益",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 23
+          }
+        ],
+        "consumed": 23,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 2,
+          "consumers": 4,
+          "retry": 0
+        }
+      },
+      {
+        "chain": "促销意向",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 310
+          }
+        ],
+        "consumed": 310,
+        "retryExhausted": 0,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 3,
+          "consumers": 4,
+          "retry": 0
+        }
+      }
+    ],
+    "sampledAtUtc": "2026-11-23T19:31:11.551560Z",
+    "note": "队列Ready不含未ACK；SENT不等于Consumed，诊断不代替业务对账"
+  },
+  "fourPoisonAfter": {
+    "chains": [
+      {
+        "chain": "V11用量",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 987
+          }
+        ],
+        "consumed": 987,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 1,
+          "consumers": 4,
+          "retry": 0
+        }
+      },
+      {
+        "chain": "V12 API用量",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 961
+          }
+        ],
+        "consumed": 961,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 1,
+          "consumers": 4,
+          "retry": 0
+        }
+      },
+      {
+        "chain": "付款权益",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 23
+          }
+        ],
+        "consumed": 23,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 3,
+          "consumers": 4,
+          "retry": 0
+        }
+      },
+      {
+        "chain": "促销意向",
+        "outbox": [
+          {
+            "status": "SENT",
+            "amount": 310
+          }
+        ],
+        "consumed": 310,
+        "retryExhausted": 0,
+        "state": "OBSERVED",
+        "broker": {
+          "state": "OBSERVED",
+          "ready": 0,
+          "poison": 4,
+          "consumers": 4,
+          "retry": 0
+        }
+      }
+    ],
+    "sampledAtUtc": "2026-11-23T19:31:13.804426Z",
+    "note": "队列Ready不含未ACK；SENT不等于Consumed，诊断不代替业务对账"
+  },
+  "badMessagesDidNotCreateConsumed": true,
+  "sensitiveCredentialsPersistedInEvidence": false,
+  "sourceCommit": "720261ae437ee00c7571b5b2e57a8f799f05b562",
+  "controlJarSha256": "ba3d803b237b24f4bfc8ccfeb0d825ccb2c31652a09844165b0337e80e54196d",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps?limit=100",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/5035/credentials/status",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/5035/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/5036/credentials/status",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/5036/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders?limit=20",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/e2ac9fc7-42ea-422a-b709-1876946f8f25/simulate-refund",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/apps/5037/credentials/status",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/5037/credentials/issue",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders?limit=20",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/85cc19ad-987f-4a90-890e-c529239a92c2/simulate-refund",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/purchase-intents/1",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/promotions/14/claim",
+      "status": 400
+    },
+    {
+      "path": "/admin/messaging/diagnostics",
+      "status": 200
+    },
+    {
+      "path": "/admin/messaging/diagnostics",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

@@ -1,0 +1,61 @@
+{
+  "status": "PASS_WITH_LIMITATIONS",
+  "automationPassed": true,
+  "ownerAcceptance": "PENDING_OWNER",
+  "externalIndependentReview": "PENDING_REVIEW",
+  "browser": "real Chromium via ego-browser; completed task space4; screenshots visually inspected before finishing space",
+  "viewports": [
+    {
+      "width": 1280,
+      "documentScrollWidth": 1280
+    },
+    {
+      "width": 375,
+      "documentScrollWidth": 375
+    }
+  ],
+  "flows": [
+    "normal user registration and three separate applications",
+    "free entitlement visible",
+    "ordinary order e2ac9fc7-42ea-422a-b709-1876946f8f25 simulated paid and FULFILLED",
+    "ADMIN real SKU selection, promotion14 create/publish",
+    "promotion ACCEPTED to order85cc19ad-987f-4a90-890e-c529239a92c2 simulated paid and FULFILLED",
+    "real Console four-chain counts including nonzero Poison",
+    "Tab/Escape dialog dismissal restores focus",
+    "150ms slow network pending/order transition",
+    "404 readable error and navigation recovery",
+    "wrong password401 readable error and cleared password"
+  ],
+  "authorityProof": "v12-d6-final-authority.json: real free/ordinary/promo Gateway charge, used refund409, other-owner404, price tamper400, four real badJSON -> Poison+1 each without Consumed",
+  "screenshots": [
+    {
+      "path": "docs/progress/evidence/v12-d-browser/console-four-chains-1280.png",
+      "sha256": "92e7e5371540c29d2ea22b5c9dd73e52ba3f520f814d7743803ac6d7c468723d",
+      "sensitiveCredentialsVisible": false
+    },
+    {
+      "path": "docs/progress/evidence/v12-d-browser/console-four-chains-375.png",
+      "sha256": "f226382158ae00ae273ba092293f205b6d3e3341fd5b756ab98ff7b47f9196ee",
+      "sensitiveCredentialsVisible": false
+    },
+    {
+      "path": "docs/progress/evidence/v12-d-browser/portal-paid-1280.png",
+      "sha256": "9a2d0655992d44e6f174921539afe64e99c814a4ac1a34079bd93555911ef9f3",
+      "sensitiveCredentialsVisible": false
+    },
+    {
+      "path": "docs/progress/evidence/v12-d-browser/portal-promo-375.png",
+      "sha256": "59e5ec40a935603a35a569ec7966a40eaed9cbecf453dc355d2c93d8b92d8f36",
+      "sensitiveCredentialsVisible": false
+    }
+  ],
+  "notExecuted": [
+    "owner human keyboard/mobile signoff",
+    "full browser visualization of every 403/409/429/503/504 variant (API fault evidence separate)",
+    "live exhausted-event UI screenshot; actual exhausted/replay API and database proof in D1"
+  ],
+  "sourceCommitAtBrowserRun": "720261a",
+  "workingTreeIncludedFinalGuides": true,
+  "recordedAt": "2026-11-23T19:41:12.842971+00:00",
+  "credentials": "private gitignored .local only; no token/password included in public evidence"
+}
