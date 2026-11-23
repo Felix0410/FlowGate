@@ -4,9 +4,9 @@ from pathlib import Path
 import v11_local_core as c
 import v11_local_runtime as r
 class Lab:
- def __init__(self):
-  self.baseline=json.loads((c.ROOT/'docs/progress/evidence/v12-c0-e2e.json').read_text());self.work=Path(self.baseline['localRuntime']);self.cleanup=json.loads((self.work/'cleanup.json').read_text());self.home=Path(self.cleanup['home']);self.state,self.env=r.load(self.home);self.browser=json.loads((self.work/'browser.json').read_text());self.base=self.browser['control'];self.second='http://127.0.0.1:'+str(self.baseline['ports']['control2']);self.java=str(Path(self.env['JAVA_HOME'])/'bin/java');self.admin=self.login();self.requests=[]
- def sql(self,q,write=False):return c.mysql_query(self.env,q,self.state['project'],self.state['owner'],read_only=not write)
+ def __init__(self,authenticate=True):
+  self.baseline=json.loads((c.ROOT/'docs/progress/evidence/v12-c0-e2e.json').read_text());self.work=Path(self.baseline['localRuntime']);self.cleanup=json.loads((self.work/'cleanup.json').read_text());self.home=Path(self.cleanup['home']);self.state,self.env=r.load(self.home);self.browser=json.loads((self.work/'browser.json').read_text());self.base=self.browser['control'];self.second='http://127.0.0.1:'+str(self.baseline['ports']['control2']);self.java=str(Path(self.env['JAVA_HOME'])/'bin/java');self.admin=self.login() if authenticate else None;self.requests=[]
+ def sql(self,q,write=False):return c.mysql_query(self.env,q.rstrip().rstrip(";")+";",self.state['project'],self.state['owner'],read_only=not write)
  def request(self,path,token=None,body=None,expected=200,base=None,method=None):
   code,value=c.http_json(base or self.base,path,token,body,method);self.requests.append({'path':path,'status':code})
   if code!=expected:raise AssertionError((path,code,value.get('code') if isinstance(value,dict) else 'non-json'))

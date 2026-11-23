@@ -19,6 +19,7 @@ public class MarketAdminController {
     @GetMapping("/listings") public Object listings(@RequestParam(defaultValue="0")long afterId,@RequestParam(defaultValue="20")int limit){readiness.require();return market.adminListings(afterId,limit);}
     @PostMapping("/listings") public Object create(@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.save(null,b,actor(r));}
     @PatchMapping("/listings/{id}") public Object save(@PathVariable long id,@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.save(id,b,actor(r));}
+    @GetMapping("/listings/{id}/skus") public Object skus(@PathVariable long id){readiness.require();return market.offers(id);}
     @PostMapping("/listings/{id}/skus") public Object sku(@PathVariable long id,@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.sku(id,b,actor(r));}
     @PostMapping("/listings/{id}/publish") public Object publish(@PathVariable long id,HttpServletRequest r){readiness.require();return market.publish(id,actor(r));}
     @GetMapping("/reconciliation") public Object reconcile(@RequestParam String day){readiness.require();return usage.reconcile(java.time.LocalDate.parse(day));}
