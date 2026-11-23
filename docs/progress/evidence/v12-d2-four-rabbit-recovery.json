@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "queues": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\ttype\tmessages\tconsumers\nflowgate.commerce.v12.retry\tquorum\t0\t0\nflowgate.usage.v12.poison\tquorum\t0\t0\nflowgate.usage.v12.aggregate\tquorum\t0\t4\nflowgate.commerce.v12.promo.intents\tquorum\t0\t4\nflowgate.usage.legacy.poison\tquorum\t0\t0\nflowgate.usage.v12.retry\tquorum\t0\t0\nflowgate.commerce.v12.orders\tquorum\t0\t4\nflowgate.commerce.v12.promo.retry\tquorum\t0\t0\nflowgate.usage.legacy.retry\tquorum\t0\t0\nflowgate.commerce.v12.poison\tquorum\t2\t0\nflowgate.usage.legacy.aggregate\tquorum\t0\t4\nflowgate.commerce.v12.promo.poison\tquorum\t1\t0",
+  "probes": [
+    {
+      "probe": "LegacyRabbitFailureProbe.java",
+      "exitCode": 0,
+      "output": " Spring AMQP is generally compatible with this feature, there\nare some corner cases where problems arise. Spring AMQP\nprefers to use its own recovery mechanisms; when this option is true, you may receive\n'AutoRecoverConnectionNotCurrentlyOpenException's until the connection is recovered.\nIt has therefore been disabled; if you really wish to enable it, use\n'getRabbitConnectionFactory().setAutomaticRecoveryEnabled(true)',\nbut this is discouraged.\n20:20:37.779 [main] INFO org.springframework.amqp.rabbit.connection.CachingConnectionFactory -- Attempting to connect to: 127.0.0.1:56615\n20:20:37.785 [main] INFO org.springframework.amqp.rabbit.connection.CachingConnectionFactory -- Created new connection: SpringAMQP#592e843a:0/SimpleConnection@716a7124 [delegate=amqp://flowgate@127.0.0.1:56615//flowgate-v12, localPort=63923]\n20:20:37.829 [spring-rabbit-deferred-pool-11] WARN org.springframework.amqp.rabbit.core.RabbitTemplate -- Returned message but no callback available\nREAL_NACK_RETURN_PASS\n",
+      "mode": "observed previous completed native run"
+    },
+    {
+      "probe": "D12RetryProbe.java",
+      "exitCode": 0,
+      "output": "20:20:38.590 [main] INFO org.springframework.amqp.rabbit.connection.CachingConnectionFactory -- Attempting to connect to: 127.0.0.1:56615\n20:20:38.625 [main] INFO org.springframework.amqp.rabbit.connection.CachingConnectionFactory -- Created new connection: SpringAMQP#10ded6a9:0/SimpleConnection@1522d8a0 [delegate=amqp://flowgate@127.0.0.1:56615//flowgate-v12, localPort=63947]\n20:21:39.156 [main] WARN com.flowgate.control.messaging.RabbitDelivery -- V12_MESSAGE_RETRY_EXHAUSTED：消息保留在Poison等待运营检查\nREAL_12_RETRIES_13_DELIVERIES_POISON_PASS elapsedSeconds=60.5285645\n",
+      "mode": "observed previous completed native run"
+    }
+  ],
+  "counts": {
+    "fg_quota_ledger": "869",
+    "fg_outbox_event": "869",
+    "fg_consumed_event": "869",
+    "fg_api_quota_ledger": "876",
+    "fg_api_usage_outbox": "876",
+    "fg_api_consumed_event": "876",
+    "fg_order": "312",
+    "fg_payment_record": "20",
+    "fg_entitlement_grant": "22",
+    "fg_promo_purchase_intent": "302",
+    "fg_promo_event_consumed": "302"
+  },
+  "coverage": "fresh D0 real A/B/M/V11 closed loops plus D1 promo longfault/cooldown/100 duplicates and separate handler true12retry TTLprobe",
+  "faultInjection": "12retry probe injects transient business callback error, all Broker delivery/confirm/x-death/TTL/dead-letter are real",
+  "notExecuted": [
+    "independent Kafka-era C26 exact replay (current Rabbit equivalents mapped separately)"
+  ],
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "4e43a6d782bf5a0322debeb79d34475c64257bf68ac9e1d11e760b3d4521b67d",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [],
+  "rootEnvUnchanged": true
+}

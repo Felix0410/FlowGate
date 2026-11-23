@@ -1,3 +1,5 @@
+> **最终唯一工作阶段（2026-11-23）：V12-D Final**。用户要求把所有剩余问题集中到最后一个阶段一次开发提交，而非旧路线按B/M/C/D分拆实施。已实现的B/M/C源码和真实历史证据继续保留；**待办仅由**[V12-D Final D0～D8合同](v12-d-final-delivery.md)、[唯一Codex提示](../../CODEX_V12_D_FINAL_EXEC_PROMPT.md)、[最终架构](../design/v12-d-final-acceptance-architecture.md)、[负责人验收](../guides/v12-d-final-acceptance.md)管理：C Outbox失败8次P1、PR#20/21同Tree审计、M8/C独立审核与真人验收、V11-D旧100k SQL/四组A DIRECT/B PROXY/C GOVERNED/D METERED，V12高并发缓存/抢购1k→5k→20k HTTP请求目标、4 Rabbit链故障与V1/V11/A/B/C全回归、观测/UI/Runbook/最终交付。当前**只有D文档已提交，D0～D8实施/压测/本人签字均NOT_STARTED**；只有一个`feat/v12-d-final-delivery`分支和同一个Draft PR(base `feat/v12-c-promo-cache`)，不再另建新业务阶段，不自动merge main/常驻部署。下文所有“未来需另开D合同”“旧Kafka仍在”均是历史，不再执行。
+
 > 2026-11-23实施更新：C功能候选已实现，真实关键证据见[v12-c-implementation.md](v12-c-implementation.md)。按负责人“快和准”仅100库存/120申请与1000公开读样本；大阶梯和完整旧矩阵未跑，20k QPS未达到。M8/C独立复审与真人验收待完成，不进入D。下方仅设计初始化状态保留为历史。
 
 # FlowGate V1.2｜业务化升级阶段路线与验收门槛（2026-11-10）

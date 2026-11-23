@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "schema": "fgd_lease_af50b66acf",
+  "rows": 100,
+  "claimWorkers": 2,
+  "naturalLeaseWaitSeconds": 31,
+  "seconds": 35.401533792,
+  "lateOwnerUpdates": 0,
+  "reclaimedAndSent": 100,
+  "mainBusinessDatabaseUntouched": true,
+  "fixture": "dedicated schema cloned UTC probe; 100 matching synthetic Ledger/source rows; no actual HTTP debits asserted",
+  "sourceCommit": "720261ae437ee00c7571b5b2e57a8f799f05b562",
+  "controlJarSha256": "ba3d803b237b24f4bfc8ccfeb0d825ccb2c31652a09844165b0337e80e54196d",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [],
+  "rootEnvUnchanged": true
+}

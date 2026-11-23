@@ -1,0 +1,1380 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "fixedArrivalRate": 50,
+  "maxInflight": 16,
+  "warmup": 8,
+  "rounds": 2,
+  "samples": [
+    {
+      "round": 1,
+      "group": "DIRECT",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.994114875000001,
+      "completedQps": 50.14756233639747,
+      "successQps": 50.14756233639747,
+      "successLatency": {
+        "0.5": 5.008833999999851,
+        "0.95": 10.27120900000078,
+        "0.99": 15.208708999999487
+      },
+      "allLatency": {
+        "0.5": 5.008833999999851,
+        "0.95": 10.27120900000078,
+        "0.99": 15.208708999999487
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:06.03 262240\n19026   0:12.75 384512\n19216   0:12.72 421872\n20451   0:36.01 494784\n20469   0:25.41 456032\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t57107\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:06.52 264336\n19026   0:12.75 384512\n19216   0:12.77 421920\n20451   0:36.06 494832\n20469   0:25.44 456112\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t57348\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 1,
+      "group": "DIRECT",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.9947032500000006,
+      "completedQps": 50.132770375743846,
+      "successQps": 50.132770375743846,
+      "successLatency": {
+        "0.5": 16.008583999999715,
+        "0.95": 23.87658299999984,
+        "0.99": 63.52225000000011
+      },
+      "allLatency": {
+        "0.5": 16.008583999999715,
+        "0.95": 23.87658299999984,
+        "0.99": 63.52225000000011
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:06.59 264832\n19026   0:12.77 384544\n19216   0:12.77 421920\n20451   0:36.07 494848\n20469   0:25.45 456144\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t57448\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:07.08 267216\n19026   0:12.77 384544\n19216   0:12.77 421920\n20451   0:36.10 494864\n20469   0:25.49 456176\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t57675\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 1,
+      "group": "PROXY",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.9919837499999993,
+      "completedQps": 50.20121273579668,
+      "successQps": 50.20121273579668,
+      "successLatency": {
+        "0.5": 5.424208000000874,
+        "0.95": 10.333624999997681,
+        "0.99": 22.251207999998357
+      },
+      "allLatency": {
+        "0.5": 5.424208000000874,
+        "0.95": 10.333624999997681,
+        "0.99": 22.251207999998357
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:07.09 267392\n19026   0:12.81 384608\n19216   0:12.81 422064\n20451   0:36.12 494880\n20469   0:25.51 456208\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t57779\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:07.36 268608\n19026   0:13.18 386112\n19216   0:13.14 423856\n20451   0:36.16 494912\n20469   0:25.63 456288\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t57948\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 1,
+      "group": "PROXY",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0046483329999987,
+      "completedQps": 49.88406113622327,
+      "successQps": 49.88406113622327,
+      "successLatency": {
+        "0.5": 17.239374999999058,
+        "0.95": 33.81354200000075,
+        "0.99": 35.81520799999893
+      },
+      "allLatency": {
+        "0.5": 17.239374999999058,
+        "0.95": 33.81354200000075,
+        "0.99": 35.81520799999893
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:07.38 268656\n19026   0:13.22 386224\n19216   0:13.18 424096\n20451   0:36.17 494912\n20469   0:25.63 456288\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t58027\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:07.58 269744\n19026   0:13.65 387456\n19216   0:13.57 425248\n20451   0:36.34 495088\n20469   0:25.84 456384\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t58282\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 1,
+      "group": "GOVERNED",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.9926861659999986,
+      "completedQps": 50.18351695627723,
+      "successQps": 50.18351695627723,
+      "successLatency": {
+        "0.5": 7.670333000000085,
+        "0.95": 18.658708000000246,
+        "0.99": 39.77304100000012
+      },
+      "allLatency": {
+        "0.5": 7.670333000000085,
+        "0.95": 18.658708000000246,
+        "0.99": 39.77304100000012
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:07.59 269776\n19026   0:13.80 388400\n19216   0:13.64 425936\n20451   0:36.34 495088\n20469   0:25.85 456384\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t58361\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:07.77 270448\n19026   0:14.26 389728\n19216   0:14.18 427712\n20451   0:36.39 495120\n20469   0:25.87 456400\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t58614\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 1,
+      "group": "GOVERNED",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0029578750000034,
+      "completedQps": 49.92616232630446,
+      "successQps": 49.92616232630446,
+      "successLatency": {
+        "0.5": 19.649749999999244,
+        "0.95": 29.116249999997734,
+        "0.99": 36.829208000000335
+      },
+      "allLatency": {
+        "0.5": 19.649749999999244,
+        "0.95": 29.116249999997734,
+        "0.99": 36.829208000000335
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:07.78 270448\n19026   0:14.29 389808\n19216   0:14.23 427840\n20451   0:36.40 495120\n20469   0:26.00 456464\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t58699\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:07.94 270512\n19026   0:14.84 391008\n19216   0:14.78 428928\n20451   0:36.42 495120\n20469   0:26.01 456464\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t58938\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 1,
+      "group": "METERED_V11",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0841115409999986,
+      "completedQps": 47.98207679039001,
+      "successQps": 47.98207679039001,
+      "successLatency": {
+        "0.5": 28.63754099999838,
+        "0.95": 102.50462500000168,
+        "0.99": 114.2330829999949
+      },
+      "allLatency": {
+        "0.5": 28.63754099999838,
+        "0.95": 102.50462500000168,
+        "0.99": 114.2330829999949
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:07.95 270512\n19026   0:14.91 391424\n19216   0:14.84 429232\n20451   0:36.57 495392\n20469   0:26.02 456464\n",
+        "sql": "Innodb_row_lock_time\t9890\nInnodb_row_lock_waits\t330\nQuestions\t59247\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:08.08 270592\n19026   0:15.48 393664\n19216   0:15.38 435904\n20451   0:38.02 497488\n20469   0:26.63 460608\n",
+        "sql": "Innodb_row_lock_time\t10008\nInnodb_row_lock_waits\t338\nQuestions\t62398\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 1,
+      "group": "METERED_V11",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0631171670000015,
+      "completedQps": 48.47034458319736,
+      "successQps": 48.47034458319736,
+      "successLatency": {
+        "0.5": 86.05804200000478,
+        "0.95": 186.59720899999854,
+        "0.99": 272.2900420000016
+      },
+      "allLatency": {
+        "0.5": 86.05804200000478,
+        "0.95": 186.59720899999854,
+        "0.99": 272.2900420000016
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:08.10 270592\n19026   0:15.53 393792\n19216   0:15.50 436608\n20451   0:38.37 500944\n20469   0:26.67 460720\n",
+        "sql": "Innodb_row_lock_time\t10009\nInnodb_row_lock_waits\t340\nQuestions\t62800\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:08.23 270608\n19026   0:16.11 394896\n19216   0:16.04 438160\n20451   0:40.28 503072\n20469   0:26.76 461232\n",
+        "sql": "Innodb_row_lock_time\t11819\nInnodb_row_lock_waits\t393\nQuestions\t66001\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 1,
+      "group": "METERED_V12",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.008962582999999,
+      "completedQps": 49.77693504409089,
+      "successQps": 49.77693504409089,
+      "successLatency": {
+        "0.5": 24.50449999999904,
+        "0.95": 43.57162499999845,
+        "0.99": 45.61912500000176
+      },
+      "allLatency": {
+        "0.5": 24.50449999999904,
+        "0.95": 43.57162499999845,
+        "0.99": 45.61912500000176
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:08.25 270640\n19026   0:16.15 394976\n19216   0:16.10 438224\n20451   0:40.39 503296\n20469   0:26.91 461664\n",
+        "sql": "Innodb_row_lock_time\t11829\nInnodb_row_lock_waits\t395\nQuestions\t66368\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:08.37 270944\n19026   0:16.72 397008\n19216   0:16.66 440192\n20451   0:41.70 504176\n20469   0:26.99 462048\n",
+        "sql": "Innodb_row_lock_time\t11843\nInnodb_row_lock_waits\t403\nQuestions\t68825\nThreads_running\t3",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 1,
+      "group": "METERED_V12",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0103081660000015,
+      "completedQps": 49.74361726788107,
+      "successQps": 49.74361726788107,
+      "successLatency": {
+        "0.5": 47.65050000000315,
+        "0.95": 95.10200000000424,
+        "0.99": 109.58037500000017
+      },
+      "allLatency": {
+        "0.5": 47.65050000000315,
+        "0.95": 95.10200000000424,
+        "0.99": 109.58037500000017
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:08.38 270944\n19026   0:16.76 397088\n19216   0:16.70 440208\n20451   0:41.89 504352\n20469   0:27.16 462352\n",
+        "sql": "Innodb_row_lock_time\t11843\nInnodb_row_lock_waits\t403\nQuestions\t69213\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:08.62 270992\n19026   0:17.23 397760\n19216   0:17.19 442224\n20451   0:42.98 504608\n20469   0:27.38 462800\n",
+        "sql": "Innodb_row_lock_time\t12738\nInnodb_row_lock_waits\t456\nQuestions\t71695\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 2,
+      "group": "METERED_V12",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0003732499999956,
+      "completedQps": 49.99067049111971,
+      "successQps": 49.99067049111971,
+      "successLatency": {
+        "0.5": 19.730625000001112,
+        "0.95": 34.51845800000086,
+        "0.99": 49.02770900000064
+      },
+      "allLatency": {
+        "0.5": 19.730625000001112,
+        "0.95": 34.51845800000086,
+        "0.99": 49.02770900000064
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:08.63 270992\n19026   0:17.26 397776\n19216   0:17.22 442256\n20451   0:43.08 504608\n20469   0:27.42 462976\n",
+        "sql": "Innodb_row_lock_time\t12740\nInnodb_row_lock_waits\t458\nQuestions\t72016\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:08.74 271024\n19026   0:17.78 398880\n19216   0:17.72 443424\n20451   0:43.84 504688\n20469   0:27.53 463168\n",
+        "sql": "Innodb_row_lock_time\t12745\nInnodb_row_lock_waits\t461\nQuestions\t74292\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 2,
+      "group": "METERED_V12",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.006960792000001,
+      "completedQps": 49.82658375719776,
+      "successQps": 49.82658375719776,
+      "successLatency": {
+        "0.5": 30.14787499999727,
+        "0.95": 44.83908399999592,
+        "0.99": 64.26250000000522
+      },
+      "allLatency": {
+        "0.5": 30.14787499999727,
+        "0.95": 44.83908399999592,
+        "0.99": 64.26250000000522
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:08.75 271024\n19026   0:17.82 398928\n19216   0:17.76 443504\n20451   0:43.95 504688\n20469   0:27.58 463360\n",
+        "sql": "Innodb_row_lock_time\t12745\nInnodb_row_lock_waits\t461\nQuestions\t74858\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:08.88 271072\n19026   0:18.34 401728\n19216   0:18.31 446656\n20451   0:44.47 504880\n20469   0:27.72 463632\n",
+        "sql": "Innodb_row_lock_time\t12761\nInnodb_row_lock_waits\t464\nQuestions\t77157\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 2,
+      "group": "METERED_V11",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.003754999999998,
+      "completedQps": 49.9063009200227,
+      "successQps": 49.9063009200227,
+      "successLatency": {
+        "0.5": 23.153583999999228,
+        "0.95": 32.19866699999585,
+        "0.99": 36.57879200000025
+      },
+      "allLatency": {
+        "0.5": 23.153583999999228,
+        "0.95": 32.19866699999585,
+        "0.99": 36.57879200000025
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:08.89 271072\n19026   0:18.37 401760\n19216   0:18.33 446688\n20451   0:44.55 504896\n20469   0:27.77 463760\n",
+        "sql": "Innodb_row_lock_time\t12761\nInnodb_row_lock_waits\t464\nQuestions\t77562\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:09.01 271088\n19026   0:18.67 402544\n19216   0:18.64 447536\n20451   0:45.69 505472\n20469   0:27.87 464192\n",
+        "sql": "Innodb_row_lock_time\t12761\nInnodb_row_lock_waits\t464\nQuestions\t80923\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 2,
+      "group": "METERED_V11",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.012016417000005,
+      "completedQps": 49.70138372384848,
+      "successQps": 49.70138372384848,
+      "successLatency": {
+        "0.5": 32.506167000001085,
+        "0.95": 61.23362499999985,
+        "0.99": 68.77958300000131
+      },
+      "allLatency": {
+        "0.5": 32.506167000001085,
+        "0.95": 61.23362499999985,
+        "0.99": 68.77958300000131
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:09.02 271088\n19026   0:18.71 402560\n19216   0:18.68 447552\n20451   0:45.78 505488\n20469   0:27.96 464272\n",
+        "sql": "Innodb_row_lock_time\t12761\nInnodb_row_lock_waits\t464\nQuestions\t81358\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:09.12 271120\n19026   0:19.06 403456\n19216   0:19.00 448384\n20451   0:46.78 505936\n20469   0:28.07 464336\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t466\nQuestions\t84733\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 2,
+      "group": "GOVERNED",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.994514500000001,
+      "completedQps": 50.13751466835661,
+      "successQps": 50.13751466835661,
+      "successLatency": {
+        "0.5": 8.240749999998798,
+        "0.95": 16.33362500000146,
+        "0.99": 24.70091600000046
+      },
+      "allLatency": {
+        "0.5": 8.240749999998798,
+        "0.95": 16.33362500000146,
+        "0.99": 24.70091600000046
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:09.13 271120\n19026   0:19.08 403472\n19216   0:19.02 448400\n20451   0:46.81 505952\n20469   0:28.09 464336\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t466\nQuestions\t84956\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:09.24 271152\n19026   0:19.36 403584\n19216   0:19.32 448464\n20451   0:46.87 505984\n20469   0:28.21 464384\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t466\nQuestions\t85625\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 2,
+      "group": "GOVERNED",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0085975829999967,
+      "completedQps": 49.785980450420645,
+      "successQps": 49.785980450420645,
+      "successLatency": {
+        "0.5": 19.961124999994695,
+        "0.95": 35.351332999994156,
+        "0.99": 38.25933400000281
+      },
+      "allLatency": {
+        "0.5": 19.961124999994695,
+        "0.95": 35.351332999994156,
+        "0.99": 38.25933400000281
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:09.25 271152\n19026   0:19.38 403584\n19216   0:19.35 448480\n20451   0:46.89 505984\n20469   0:28.25 464384\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t466\nQuestions\t85850\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:09.45 271312\n19026   0:19.72 404208\n19216   0:19.64 448800\n20451   0:46.96 506064\n20469   0:28.36 464496\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t466\nQuestions\t86285\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 2,
+      "group": "PROXY",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.9925054160000002,
+      "completedQps": 50.188069350773596,
+      "successQps": 50.188069350773596,
+      "successLatency": {
+        "0.5": 3.4750000000087766,
+        "0.95": 12.002292000005355,
+        "0.99": 16.5879169999954
+      },
+      "allLatency": {
+        "0.5": 3.4750000000087766,
+        "0.95": 12.002292000005355,
+        "0.99": 16.5879169999954
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:09.46 271312\n19026   0:19.74 404288\n19216   0:19.68 448976\n20451   0:46.98 506064\n20469   0:28.38 464496\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t466\nQuestions\t86520\nThreads_running\t3",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:09.73 271328\n19026   0:19.98 404448\n19216   0:19.88 449168\n20451   0:47.06 506080\n20469   0:28.47 464528\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t466\nQuestions\t87186\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 2,
+      "group": "PROXY",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 2.0035235,
+      "completedQps": 49.91206741523121,
+      "successQps": 49.91206741523121,
+      "successLatency": {
+        "0.5": 18.626166999993643,
+        "0.95": 27.985457999989194,
+        "0.99": 44.98616600000105
+      },
+      "allLatency": {
+        "0.5": 18.626166999993643,
+        "0.95": 27.985457999989194,
+        "0.99": 44.98616600000105
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:09.73 271328\n19026   0:20.00 404448\n19216   0:19.90 449168\n20451   0:47.08 506080\n20469   0:28.50 464560\n",
+        "sql": "Innodb_row_lock_time\t12767\nInnodb_row_lock_waits\t467\nQuestions\t87405\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:09.88 271328\n19026   0:20.17 404688\n19216   0:20.06 449280\n20451   0:47.14 506096\n20469   0:28.56 464576\n",
+        "sql": "Innodb_row_lock_time\t12773\nInnodb_row_lock_waits\t470\nQuestions\t88008\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    },
+    {
+      "round": 2,
+      "group": "DIRECT",
+      "kind": "fast",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.9879990830000054,
+      "completedQps": 50.30183406779757,
+      "successQps": 50.30183406779757,
+      "successLatency": {
+        "0.5": 2.815374999997289,
+        "0.95": 11.103958000006742,
+        "0.99": 23.644957999991334
+      },
+      "allLatency": {
+        "0.5": 2.815374999997289,
+        "0.95": 11.103958000006742,
+        "0.99": 23.644957999991334
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:09.89 271328\n19026   0:20.18 404688\n19216   0:20.06 449280\n20451   0:47.15 506096\n20469   0:28.58 464576\n",
+        "sql": "Innodb_row_lock_time\t12773\nInnodb_row_lock_waits\t470\nQuestions\t88094\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:10.08 271440\n19026   0:20.18 404688\n19216   0:20.08 449280\n20451   0:47.22 506112\n20469   0:28.70 464608\n",
+        "sql": "Innodb_row_lock_time\t12782\nInnodb_row_lock_waits\t476\nQuestions\t88725\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        70
+      ]
+    },
+    {
+      "round": 2,
+      "group": "DIRECT",
+      "kind": "slow",
+      "planned": 100,
+      "sent": 100,
+      "completed": 100,
+      "clientShed": 0,
+      "statusCounts": {
+        "200": 100
+      },
+      "seconds": 1.9968232500000056,
+      "completedQps": 50.07954509744401,
+      "successQps": 50.07954509744401,
+      "successLatency": {
+        "0.5": 13.850540999996497,
+        "0.95": 21.381707999992727,
+        "0.99": 29.707708999993088
+      },
+      "allLatency": {
+        "0.5": 13.850540999996497,
+        "0.95": 21.381707999992727,
+        "0.99": 29.707708999993088
+      },
+      "resourcesBefore": {
+        "ps": "18962   0:10.09 271440\n19026   0:20.20 404704\n19216   0:20.08 449280\n20451   0:47.26 506128\n20469   0:28.73 464624\n",
+        "sql": "Innodb_row_lock_time\t12790\nInnodb_row_lock_waits\t477\nQuestions\t88950\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "resourcesAfter": {
+        "ps": "18962   0:10.27 271536\n19026   0:20.20 404704\n19216   0:20.08 449280\n20451   0:47.30 506160\n20469   0:28.83 464640\n",
+        "sql": "Innodb_row_lock_time\t12805\nInnodb_row_lock_waits\t484\nQuestions\t89555\nThreads_running\t2",
+        "rabbit": "Timeout: 60.0 seconds ...\nListing queues for vhost /flowgate-v12 ...\nname\tmessages\nflowgate.usage.v12.poison\t0\nflowgate.commerce.v12.retry\t0\nflowgate.usage.v12.aggregate\t0\nflowgate.commerce.v12.promo.intents\t0\nflowgate.usage.legacy.poison\t0\nflowgate.usage.v12.retry\t0\nflowgate.commerce.v12.orders\t0\nflowgate.commerce.v12.promo.retry\t0\nflowgate.usage.legacy.retry\t0\nflowgate.commerce.v12.poison\t2\nflowgate.usage.legacy.aggregate\t0\nflowgate.commerce.v12.promo.poison\t1"
+      },
+      "responseBytes": [
+        65
+      ]
+    }
+  ],
+  "metrics": {
+    "0:flowgate.quota.hop": {
+      "status": 200,
+      "data": {
+        "availableTags": [
+          {
+            "tag": "routeId",
+            "values": [
+              "v11-legacy",
+              "v12-other",
+              "d-metered_v11-slow",
+              "d-metered_v11-fast",
+              "d-metered_v12-slow",
+              "v12-fast",
+              "d-metered_v12-fast"
+            ]
+          }
+        ],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "COUNT",
+            "value": 445.0
+          },
+          {
+            "statistic": "TOTAL_TIME",
+            "value": 11.914396999000001
+          },
+          {
+            "statistic": "MAX",
+            "value": 0.158438958
+          }
+        ],
+        "name": "flowgate.quota.hop"
+      }
+    },
+    "0:jvm.gc.pause": {
+      "status": 200,
+      "data": {
+        "availableTags": [
+          {
+            "tag": "cause",
+            "values": [
+              "G1 Evacuation Pause",
+              "Metadata GC Threshold"
+            ]
+          },
+          {
+            "tag": "action",
+            "values": [
+              "end of minor GC"
+            ]
+          },
+          {
+            "tag": "gc",
+            "values": [
+              "G1 Young Generation"
+            ]
+          }
+        ],
+        "baseUnit": "seconds",
+        "description": "Time spent in GC pause",
+        "measurements": [
+          {
+            "statistic": "COUNT",
+            "value": 4.0
+          },
+          {
+            "statistic": "TOTAL_TIME",
+            "value": 0.019
+          },
+          {
+            "statistic": "MAX",
+            "value": 0.007
+          }
+        ],
+        "name": "jvm.gc.pause"
+      }
+    },
+    "0:hikaricp.connections.active": {
+      "status": 404,
+      "data": null
+    },
+    "1:flowgate.quota.hop": {
+      "status": 200,
+      "data": {
+        "availableTags": [
+          {
+            "tag": "routeId",
+            "values": [
+              "v11-legacy",
+              "v12-other",
+              "d-metered_v11-slow",
+              "d-metered_v11-fast",
+              "d-metered_v12-slow",
+              "v12-fast",
+              "d-metered_v12-fast"
+            ]
+          }
+        ],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "COUNT",
+            "value": 442.0
+          },
+          {
+            "statistic": "TOTAL_TIME",
+            "value": 11.883414715
+          },
+          {
+            "statistic": "MAX",
+            "value": 0.255689
+          }
+        ],
+        "name": "flowgate.quota.hop"
+      }
+    },
+    "1:jvm.gc.pause": {
+      "status": 200,
+      "data": {
+        "availableTags": [
+          {
+            "tag": "cause",
+            "values": [
+              "G1 Evacuation Pause",
+              "Metadata GC Threshold"
+            ]
+          },
+          {
+            "tag": "action",
+            "values": [
+              "end of minor GC"
+            ]
+          },
+          {
+            "tag": "gc",
+            "values": [
+              "G1 Young Generation"
+            ]
+          }
+        ],
+        "baseUnit": "seconds",
+        "description": "Time spent in GC pause",
+        "measurements": [
+          {
+            "statistic": "COUNT",
+            "value": 3.0
+          },
+          {
+            "statistic": "TOTAL_TIME",
+            "value": 0.02
+          },
+          {
+            "statistic": "MAX",
+            "value": 0.01
+          }
+        ],
+        "name": "jvm.gc.pause"
+      }
+    },
+    "1:hikaricp.connections.active": {
+      "status": 404,
+      "data": null
+    }
+  },
+  "quotaHopP95": "NOT_EXPOSED by existing actuator Timer; total/max recorded; no fabricatedp95",
+  "workload": "same existing Demo fast/slow10ms, same method and X-Request-Id length; no new compute/DB-heavy fixture",
+  "notes": [
+    "GOVERNED uses old Caller; METERED uses APP purpose as required; auth overhead is part of measured path",
+    "quota sufficiently funded through real subscriptions/order/Grant",
+    "not a max throughput test, no0cost claim"
+  ],
+  "notExecuted": [
+    "compute/DB-heavy upstream absent in existing Demo",
+    "GC percentile/histogram",
+    "quotaHop p95 distribution not exposed by current actuator"
+  ],
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "44ee0a7b50d9bf39ada9fd4b1112a510262d2a24bb89a768d9a10be245fc233e",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/admin/services",
+      "status": 200
+    },
+    {
+      "path": "/admin/plans",
+      "status": 201
+    },
+    {
+      "path": "/admin/developers",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps/14/credentials",
+      "status": 200
+    },
+    {
+      "path": "/admin/callers",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/3/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/4/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/5/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/6/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/7/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/8/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/9/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/10/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/11/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/12/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/13/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/14/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/15/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/16/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/17/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/18/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/19/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/20/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/21/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/22/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/23/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/24/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/categories",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/3/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/3/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/09789517-d410-4679-abea-722158ac2340/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/09789517-d410-4679-abea-722158ac2340",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/09789517-d410-4679-abea-722158ac2340",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/4/skus",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/listings/4/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/orders/c8901b6d-90eb-4bf2-ad87-af244470ab77/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/c8901b6d-90eb-4bf2-ad87-af244470ab77",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/c8901b6d-90eb-4bf2-ad87-af244470ab77",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/c8901b6d-90eb-4bf2-ad87-af244470ab77",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/c8901b6d-90eb-4bf2-ad87-af244470ab77",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/15/credentials/issue",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

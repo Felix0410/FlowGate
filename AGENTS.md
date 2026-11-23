@@ -1,3 +1,25 @@
+# V12-D Final候选实施状态（2026-11-24）
+
+> 本轮D实现与实测已归档，CONDITIONALLY_READY / PENDING_REVIEW / PENDING_OWNER。核心P1补投、四链恢复、100k账本SQL、两轮Gateway对照、1k/5k/20k请求、1280/375与Java97/Node9/Python20已有真实证据；部分历史精确矩阵与性能profile未执行，不能宣称全PASS。以`docs/acceptance/v12-final-results.md`、`docs/progress/v12-d-final-implementation.md`、`docs/reviews/v12-d-final-source-review.md`和场景映射为当前事实。D持卷恢复已验后停止，三卷保留；`python3 scripts/v12-d-preview.py start`恢复D候选。根.env/常驻flowgate-local/旧卷/IDE未升级或清理。只使用原D Draft PR#22；不得另开E/补尾项分支，不代签、不合并main或旧PR。下方任务书“尚未执行”为实施前历史，保留原合同要求和待验限制。
+
+---
+
+# FlowGate｜当前唯一执行阶段 V12-D Final（2026-11-23总收尾合同已提交）
+
+> **最终阶段已建立，但D0～D8代码/压力/故障与真人验收尚未执行，绝不预填PASS。** 用户明确要求将V12-C剩余P1、V12-M的M8/负责人验收、V11-D旧10万SQL/四组性能、V12-D完整可靠性/缓存/抢购压测、Portal/Console/部署/最终成果全部**放进这一个V12-D Final阶段一次提交GitHub**。禁止再次独立发“C尾项”“M收尾”“E阶段”“Nacos/Sentinel接入”任务。
+
+> **唯一Codex任务入口：`CODEX_V12_D_FINAL_EXEC_PROMPT.md`**；唯一阶段合同：`docs/progress/v12-d-final-delivery.md`；技术验收架构：`docs/design/v12-d-final-acceptance-architecture.md`；GitHub已知缺口/P1审计：`docs/reviews/v12-d-final-preflight-2026-11-23.md`；负责人最后验收：`docs/guides/v12-d-final-acceptance.md`；最高技术裁决ADR-16。原C/M/B/A及V11提示词、NOT_STARTED状态在这条声明以下属于历史，不是下一次任务入口。
+
+> **Git基线**：V12-C真实代码已提交于`feat/v12-c-promo-cache@678701973a077d2dd6484405c91184e4f082fe18`，现在唯一最终功能分支`feat/v12-d-final-delivery`，只使用**一个**D Draft PR，base=`feat/v12-c-promo-cache`；直接在同一分支逐包D0～D8 commit，**不再另建docs/D实施分支/PR**。旧B/M/C PR#17～#21不改base/head、不强推、不自动merge main。PR#20与#21最新Git Tree一致但不同提交历史，C已实现不等于两个PR都应合并；D0给出安全审查/冗余关闭计划交负责人决定。
+
+> **立即修P1**：`PromotionService.claimOutbox()`有`attempt_count<8`过滤，`failed()`会让长期Rabbit故障变成`FAILED attempt_count>=8`，原`replay()`只接收SENT；因此可能永远无法补投，必须先扩展真实ADMIN受控补投（不改原eventId/Intent/Stock、不自动恢复坏事件）并实测Rabbit长故障/300秒冷却/竞态/迟到终态。旧V11/V12账本、Cache-Aside、Redis候选/DB库存、Rabbit四链仍是权威既有架构，**不增加Kafka/Nacos/Sentinel/Redisson/Seata/新服务/真支付**。
+
+> **保护资产**：用户根.env、常驻`flowgate-local`的MySQL/Redis/Rabbit、原IDE/JVM、旧Kafka卷及旧Ledger/Outbox/Consumed/Daily，本轮D**没有新的操作授权**，严格只读。所有性能SQL≥100k、Redis FLUSHDB、Broker停恢复、双Gateway/2Control实验都在新随机owner/端口/隔离卷运行；严禁DROP/TRUNCATE用户库、docker prune/down -v原项目、reset-hard、clean-fd、force push、覆盖未提交文件。每段同步Console/Portal真实界面及中文指南，Java复杂业务按1/2/3分点中文注释，记录真实SHA/exitCode、失败与NOT_EXECUTED，不能冒充20k QPS、独立审核或负责人真人验收已通过。
+
+> **D的最后出口**：P1补投真实恢复；4 Rabbit链/V11老5/6/V12-A/B/C全业务；10万SQL与Gateway DIRECT/PROXY/GOVERNED/METERED公平实测；C 1k/5k/20k**请求数**目标（未达必须记NOT_REACHED）；1280/375浏览器；中文runbook；`docs/acceptance/v12-final-results.md`和`docs/progress/v12-d-final-implementation.md`必须在**实际运行后**填写。用户尚未真人签字则`PENDING_OWNER`，原PR/main不自动合并。下方所有旧“下一步”段落仅为历史。
+
+---
+
 # FlowGate 当前状态：V12-C候选已实施，等待独立复审与负责人手测
 
 > 负责人明确授权完成C，并要求功能优先、少量关键测试。当前分支`feat/v12-c-promo-cache`，base=`docs/v12-c-high-concurrency-cache`。已实现公开套餐Redis缓存、C五表/原B CHECK兼容迁移、Lua软候选、MySQL持久202、独立Rabbit促销意图三队列、B订单/付款/取消/超时/退款库存联动，以及Portal/Console。证据与限制以`docs/progress/v12-c-implementation.md`为准。100库存120真实HTTP申请恰100受理/唯一订单；本机1000次公开缓存查询无新增公开投影回源，不称20k QPS；5k/20k阶梯和完整旧矩阵未展开。

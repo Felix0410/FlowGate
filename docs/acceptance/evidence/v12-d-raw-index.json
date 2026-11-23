@@ -1,0 +1,26 @@
+[
+  {
+    "path": "docs/acceptance/evidence/v12-d-gateway.csv.gz",
+    "sha256": "b876ea75d99928a64b4a996737f5158ca70e22ecae5a8fc3cdbf1e43ba3fefd6",
+    "uncompressedSha256": "2d612f1bf4d21fdf41344085fdf3c936e866c1112179404673ee3f80aa6a838f",
+    "rowsIncludingHeader": 2001
+  },
+  {
+    "path": "docs/acceptance/evidence/v12-d-gateway-before-observability.csv.gz",
+    "sha256": "293c335f128456c5a5ad73ba034a75b9bfd9129426e4b3707fa1cdf745efbf2f",
+    "uncompressedSha256": "0ceb26c8c78acbb12189087f0292c4a4682de0f0fdee377d4dee2477ccde64e2",
+    "rowsIncludingHeader": 2001
+  },
+  {
+    "path": "docs/acceptance/evidence/v12-d-sql-benchmark.csv.gz",
+    "sha256": "1dd299e7dc3b644928603f9c7a4cbe94f333c662ca2e00f8f72f29ef6b13df27",
+    "uncompressedSha256": "65bb90f2e4ffd60921f2ebb83d55fafbbd4ba45f1ee6c2b22f9cb17b65656e2f",
+    "rowsIncludingHeader": 41
+  },
+  {
+    "path": "docs/acceptance/evidence/v12-d-promo-load.csv.gz",
+    "sha256": "fe84ca59320f8be853515ce33db190a4bda950e6485741ab04b72a1474a5daf2",
+    "uncompressedSha256": "8fbca10776f5fd09d9e4276d8f1a9101273f07e5e8f76f009f22501b516055cd",
+    "rowsIncludingHeader": 26001
+  }
+]

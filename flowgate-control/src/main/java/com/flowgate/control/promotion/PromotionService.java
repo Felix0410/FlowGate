@@ -70,8 +70,42 @@ public class PromotionService {
     public List<Map<String,Object>> claimOutbox(){return tx.execute(status->{var rows=db.rows("SELECT * FROM fg_promo_outbox WHERE ((status IN ('NEW','FAILED') AND next_attempt_at<=UTC_TIMESTAMP(3)) OR (status='IN_FLIGHT' AND lease_until<UTC_TIMESTAMP(3))) AND attempt_count<8 ORDER BY id LIMIT 2 FOR UPDATE SKIP LOCKED");for(var row:rows){String lease=UUID.randomUUID().toString();db.update("UPDATE fg_promo_outbox SET status='IN_FLIGHT',lease_owner=?,lease_until=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 30 SECOND),attempt_count=attempt_count+1 WHERE id=?",lease,row.get("id"));row.put("lease_owner",lease);}return rows;});}
     public void published(Map<String,Object> row){db.update("UPDATE fg_promo_outbox SET status='SENT',lease_owner=NULL,lease_until=NULL,next_attempt_at=UTC_TIMESTAMP(3),last_error_code=NULL WHERE id=? AND status='IN_FLIGHT' AND lease_owner=? AND lease_until>=UTC_TIMESTAMP(3)",row.get("id"),row.get("lease_owner"));}
     public void failed(Map<String,Object> row,boolean permanent){db.update("UPDATE fg_promo_outbox SET status=?,lease_owner=NULL,lease_until=NULL,next_attempt_at=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 5 SECOND),last_error_code=? WHERE id=? AND status='IN_FLIGHT' AND lease_owner=? AND lease_until>=UTC_TIMESTAMP(3)",permanent?"FAILED_PERMANENT":"FAILED",permanent?"INVALID_EVENT":"BROKER_UNAVAILABLE",row.get("id"),row.get("lease_owner"));}
-    public Object events(long promotion){ready.require();return db.rows("SELECT o.id,o.event_id,o.intent_id,o.status,o.attempt_count,o.last_error_code,c.consumed_at FROM fg_promo_outbox o JOIN fg_promo_purchase_intent i ON i.id=o.intent_id LEFT JOIN fg_promo_event_consumed c ON c.event_id=o.event_id WHERE i.promotion_id=? ORDER BY o.id DESC LIMIT 100",promotion);}
-    public Object replay(String event,long actor){ready.require();if(System.nanoTime()-started<java.util.concurrent.TimeUnit.SECONDS.toNanos(300))throw conflict("REPLAY_COOLDOWN","节点启动后300秒内不补投");return tx.execute(status->{var row=db.need("SELECT o.* FROM fg_promo_outbox o WHERE event_id=? FOR UPDATE",event);if(!"SENT".equals(row.get("status"))||db.nowUtc().isBefore(OrderService.instant(row,"next_attempt_at").plusSeconds(300))||db.one("SELECT event_id FROM fg_promo_event_consumed WHERE event_id=?",event)!=null)throw conflict("REPLAY_NOT_ELIGIBLE","仅超过300秒且未消费SENT原事件可补投");var e=PromotionIntentEvent.parse(s(row,"payload_json"));if(!e.eventId().equals(event)||e.intentId()!=n(row,"intent_id"))throw conflict("PROMO_EVENT_CONFLICT","事件来源不一致");validate(e,db.need("SELECT * FROM fg_promo_purchase_intent WHERE id=?",e.intentId()));if(db.update("UPDATE fg_promo_outbox SET status='NEW',attempt_count=0,next_attempt_at=UTC_TIMESTAMP(3) WHERE id=? AND status='SENT'",row.get("id"))!=1)throw conflict("REPLAY_NOT_ELIGIBLE","事件已被其他操作处理");audit.record(actor,"REPLAY_PROMO_EVENT","promotion",event,null,"原eventId补投，指纹="+e.fingerprint());return Map.of("status","QUEUED");});}
+    private long uptimeSeconds() { return java.util.concurrent.TimeUnit.NANOSECONDS.toSeconds(System.nanoTime()-started); }
+    public Object events(long promotion) {
+        ready.require();
+        var rows=db.rows("SELECT o.id,o.event_id,o.intent_id,o.status,o.attempt_count,o.last_error_code,o.next_attempt_at,o.lease_owner,o.lease_until,c.consumed_at FROM fg_promo_outbox o JOIN fg_promo_purchase_intent i ON i.id=o.intent_id LEFT JOIN fg_promo_event_consumed c ON c.event_id=o.event_id WHERE i.promotion_id=? ORDER BY o.id DESC LIMIT 100",promotion);
+        Instant now=db.nowUtc();
+        return rows.stream().map(row->{
+            var view=new LinkedHashMap<>(row);String raw=s(row,"status");boolean consumed=row.get("consumed_at")!=null;
+            view.put("raw_status",raw);
+            view.put("status",PromotionReplayPolicy.display(raw,n(row,"attempt_count"),consumed));
+            view.put("replay_available_at",OrderService.instant(row,"next_attempt_at").plusSeconds(300).toString());
+            view.put("node_cooldown_remaining_seconds",Math.max(0,300-uptimeSeconds()));
+            view.put("can_replay",PromotionReplayPolicy.eligible(raw,n(row,"attempt_count"),row.get("lease_owner")!=null||row.get("lease_until")!=null,consumed,OrderService.instant(row,"next_attempt_at"),now,uptimeSeconds()));
+            view.remove("lease_owner");return view;
+        }).toList();
+    }
+    public Object replay(String event,long actor) {
+        ready.require();
+        if(uptimeSeconds()<300)throw conflict("REPLAY_COOLDOWN","节点启动后300秒内不补投");
+        return tx.execute(status->{
+            // 1. 先锁原Outbox，再核对租约、源时间与Consumed；并发管理员只允许一方重新开启下一批。
+            var row=db.need("SELECT * FROM fg_promo_outbox WHERE event_id=? FOR UPDATE",event);
+            String before=s(row,"status");long attempts=n(row,"attempt_count");
+            boolean consumed=db.one("SELECT event_id FROM fg_promo_event_consumed WHERE event_id=?",event)!=null;
+            if(!PromotionReplayPolicy.eligible(before,attempts,row.get("lease_owner")!=null||row.get("lease_until")!=null,consumed,OrderService.instant(row,"next_attempt_at"),db.nowUtc(),uptimeSeconds()))
+                throw conflict("REPLAY_NOT_ELIGIBLE","仅无租约、满300秒且未消费的SENT或重试耗尽事件可补投");
+            // 2. 只复用原eventId、payload与冻结Intent，不重扣库存，不复活已超时意向。
+            var e=PromotionIntentEvent.parse(s(row,"payload_json"));
+            if(!e.eventId().equals(event)||e.intentId()!=n(row,"intent_id"))throw conflict("PROMO_EVENT_CONFLICT","事件来源不一致");
+            validate(e,db.need("SELECT * FROM fg_promo_purchase_intent WHERE id=?",e.intentId()));
+            if(db.update("UPDATE fg_promo_outbox SET status='NEW',attempt_count=0,next_attempt_at=UTC_TIMESTAMP(3),last_error_code=NULL WHERE id=? AND status=? AND attempt_count=? AND lease_owner IS NULL AND lease_until IS NULL",row.get("id"),before,attempts)!=1)
+                throw conflict("REPLAY_NOT_ELIGIBLE","事件已被其他操作处理");
+            // 3. 审计与CAS同事务；后续仍走confirm/mandatory和COMMIT后ACK，不直接向Broker发第二份业务。
+            audit.record(actor,"REPLAY_PROMO_EVENT","promotion",event,null,"原事件补投，原状态="+before+"，次数="+attempts+"，指纹="+e.fingerprint());
+            return Map.of("status","QUEUED","eventId",event,"previousStatus",PromotionReplayPolicy.display(before,attempts,false));
+        });
+    }
     public Object reconciliation(long promotion){ready.require();return read.execute(status->{var p=admin.detail(promotion);var intents=db.rows("SELECT i.*,o.source,o.promo_intent_id,o.status order_status,o.principal_id order_principal,o.application_id order_app,o.api_id order_api,o.sku_id order_sku,o.period_yyyymm order_period,o.price_cents order_price,o.units_snapshot order_units,p.id payment_id,p.amount_cents,c.event_id consumed_id FROM fg_promo_purchase_intent i LEFT JOIN fg_order o ON o.id=i.order_id LEFT JOIN fg_payment_record p ON p.order_id=o.id LEFT JOIN fg_promo_event_consumed c ON c.intent_id=i.id WHERE i.promotion_id=? ORDER BY i.id LIMIT 1001",promotion);if(intents.size()>1000)return Map.of("status","UNKNOWN","reason","超过1000条检查范围");long reserved=0,sold=0,gaps=0,pending=0;for(var i:intents){String state=s(i,"status");if(Set.of("ACCEPTED","ORDER_READY").contains(state))reserved++;if(Set.of("PAID","REFUNDED").contains(state)){sold++;if(i.get("payment_id")==null||n(i,"amount_cents")!=n(i,"price_cents"))gaps++;}if("ACCEPTED".equals(state))pending++;if(i.get("order_id")!=null&&(!"PROMOTION".equals(i.get("source"))||n(i,"promo_intent_id")!=n(i,"id")||i.get("consumed_id")==null))gaps++;
             var slot=db.one("SELECT * FROM fg_api_entitlement_slot WHERE application_id=? AND api_id=? AND period_yyyymm=?",i.get("application_id"),i.get("api_id"),i.get("period_yyyymm"));if("ACCEPTED".equals(state)&&(slot==null||!"HELD".equals(slot.get("state"))||!"PROMO".equals(slot.get("holder_type"))||n(slot,"holder_id")!=n(i,"id")))gaps++;
             // 5. 对账检查冻结订单、付款Outbox及真实Grant链，不以单纯数量相等冒充闭环。

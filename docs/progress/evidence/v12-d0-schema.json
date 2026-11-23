@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "migration": {
+    "tables": 5,
+    "sourceCheck": "ck_fg_order_source_c",
+    "intentForeignKey": true,
+    "repeatable": true
+  },
+  "defaultOffWithoutC500": false,
+  "defaultOffWithoutCTested": true,
+  "freshOwner": true,
+  "exitCode": 0,
+  "sourceCommit": "5541eb32f0dfcb0fac3972f38c7e082a0486405c",
+  "controlJarSha256": "44ee0a7b50d9bf39ada9fd4b1112a510262d2a24bb89a768d9a10be245fc233e",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/admin/promotions/readiness",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/readiness",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

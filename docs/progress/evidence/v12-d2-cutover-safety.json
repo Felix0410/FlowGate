@@ -1,0 +1,8 @@
+{
+  "status": "NOT_EXECUTED",
+  "reason": "原M离线切换要求全机Control退出；存在受保护的非D常驻Control，本轮无停机授权。前置扫描拒绝执行，不停止任何进程。",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "foreignControlCount": 1,
+  "priorAttempt": "旧包装器在逐项检查时已停止部分D Control后才触发保护断言；未执行切换CAS，D已由owner安全预览入口恢复。",
+  "observedAt": "2026-11-23T19:39:25.815323+00:00"
+}

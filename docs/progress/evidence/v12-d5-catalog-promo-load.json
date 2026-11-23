@@ -1,0 +1,603 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "fixtures": "5000 relational isolated identities/apps/sessions,20k stage repeats same request4times; not registrations",
+  "hardResourceLimits": {
+    "maxInflight": 128,
+    "maxRequests": 20000,
+    "perRequestClientTimeoutSeconds": 6
+  },
+  "stages": [
+    {
+      "planned": 1000,
+      "sent": 1000,
+      "completed": 1000,
+      "clientShed": 0,
+      "timeouts": 0,
+      "concurrency": 24,
+      "seconds": 2.201255959,
+      "actualQps": 454.28610694336794,
+      "p50Ms": 37.57191700000018,
+      "p95Ms": 172.47966599999964,
+      "p99Ms": 251.3686660000003,
+      "httpCounts": {
+        "202": 100,
+        "409": 900
+      },
+      "uniqueAcceptedIntents": 100,
+      "uniqueOrders": 100,
+      "promotionId": 3,
+      "authorityTotalReservedSoldPaymentGrant": "100\t90\t10\t10\t10",
+      "reconciliation": {
+        "total": 100,
+        "asOfUtc": "2026-11-23T12:13:30.746Z",
+        "integrityGaps": 0,
+        "available": 0,
+        "sold": 0,
+        "expectedSold": 0,
+        "expectedReserved": 100,
+        "reserved": 100,
+        "intents": 100,
+        "status": "PROVISIONAL"
+      },
+      "sqlBefore": "Innodb_row_lock_time\t13045\nInnodb_row_lock_waits\t612\nQuestions\t105145\nThreads_running\t2",
+      "sqlAfter": "Innodb_row_lock_time\t21313\nInnodb_row_lock_waits\t711\nQuestions\t123079\nThreads_running\t2",
+      "cacheBefore": [
+        {
+          "HIT": 0,
+          "MISS": 8,
+          "DB_LOAD": 8,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 0,
+          "DEGRADED": 0,
+          "INVALIDATED": 15,
+          "INVALIDATION_FAILED": 0
+        },
+        {
+          "HIT": 0,
+          "MISS": 0,
+          "DB_LOAD": 0,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 0,
+          "DEGRADED": 0,
+          "INVALIDATED": 0,
+          "INVALIDATION_FAILED": 0
+        }
+      ],
+      "cacheAfter": [
+        {
+          "HIT": 499,
+          "MISS": 16,
+          "DB_LOAD": 9,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 7,
+          "DEGRADED": 0,
+          "INVALIDATED": 15,
+          "INVALIDATION_FAILED": 0
+        },
+        {
+          "HIT": 500,
+          "MISS": 0,
+          "DB_LOAD": 0,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 0,
+          "DEGRADED": 0,
+          "INVALIDATED": 0,
+          "INVALIDATION_FAILED": 0
+        }
+      ]
+    },
+    {
+      "planned": 5000,
+      "sent": 5000,
+      "completed": 5000,
+      "clientShed": 0,
+      "timeouts": 0,
+      "concurrency": 64,
+      "seconds": 7.128195375000004,
+      "actualQps": 701.4398086696658,
+      "p50Ms": 68.93937499999936,
+      "p95Ms": 214.50074999999913,
+      "p99Ms": 456.3039169999996,
+      "httpCounts": {
+        "409": 4900,
+        "202": 100
+      },
+      "uniqueAcceptedIntents": 100,
+      "uniqueOrders": 100,
+      "promotionId": 4,
+      "authorityTotalReservedSoldPaymentGrant": "100\t100\t0\t0\t0",
+      "reconciliation": {
+        "total": 100,
+        "asOfUtc": "2026-11-23T12:14:00.475Z",
+        "integrityGaps": 0,
+        "available": 0,
+        "sold": 0,
+        "expectedSold": 0,
+        "expectedReserved": 100,
+        "reserved": 100,
+        "intents": 100,
+        "status": "PROVISIONAL"
+      },
+      "sqlBefore": "Innodb_row_lock_time\t21313\nInnodb_row_lock_waits\t711\nQuestions\t123187\nThreads_running\t2",
+      "sqlAfter": "Innodb_row_lock_time\t32064\nInnodb_row_lock_waits\t809\nQuestions\t177744\nThreads_running\t2",
+      "cacheBefore": [
+        {
+          "HIT": 499,
+          "MISS": 18,
+          "DB_LOAD": 11,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 7,
+          "DEGRADED": 0,
+          "INVALIDATED": 18,
+          "INVALIDATION_FAILED": 0
+        },
+        {
+          "HIT": 500,
+          "MISS": 0,
+          "DB_LOAD": 0,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 0,
+          "DEGRADED": 0,
+          "INVALIDATED": 0,
+          "INVALIDATION_FAILED": 0
+        }
+      ],
+      "cacheAfter": [
+        {
+          "HIT": 2997,
+          "MISS": 36,
+          "DB_LOAD": 13,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 23,
+          "DEGRADED": 0,
+          "INVALIDATED": 18,
+          "INVALIDATION_FAILED": 0
+        },
+        {
+          "HIT": 3000,
+          "MISS": 18,
+          "DB_LOAD": 0,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 18,
+          "DEGRADED": 0,
+          "INVALIDATED": 0,
+          "INVALIDATION_FAILED": 0
+        }
+      ]
+    },
+    {
+      "planned": 20000,
+      "sent": 20000,
+      "completed": 20000,
+      "clientShed": 0,
+      "timeouts": 0,
+      "concurrency": 128,
+      "seconds": 20.815882457999997,
+      "actualQps": 960.8048104784318,
+      "p50Ms": 103.92291600000192,
+      "p95Ms": 330.69658300000526,
+      "p99Ms": 497.20516600000053,
+      "httpCounts": {
+        "409": 19600,
+        "202": 400
+      },
+      "uniqueAcceptedIntents": 100,
+      "uniqueOrders": 100,
+      "promotionId": 5,
+      "authorityTotalReservedSoldPaymentGrant": "100\t100\t0\t0\t0",
+      "reconciliation": {
+        "total": 100,
+        "asOfUtc": "2026-11-23T12:14:31.550Z",
+        "integrityGaps": 0,
+        "available": 0,
+        "sold": 0,
+        "expectedSold": 0,
+        "expectedReserved": 100,
+        "reserved": 100,
+        "intents": 100,
+        "status": "PROVISIONAL"
+      },
+      "sqlBefore": "Innodb_row_lock_time\t32064\nInnodb_row_lock_waits\t809\nQuestions\t177830\nThreads_running\t2",
+      "sqlAfter": "Innodb_row_lock_time\t38293\nInnodb_row_lock_waits\t905\nQuestions\t368179\nThreads_running\t2",
+      "cacheBefore": [
+        {
+          "HIT": 2997,
+          "MISS": 38,
+          "DB_LOAD": 15,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 23,
+          "DEGRADED": 0,
+          "INVALIDATED": 21,
+          "INVALIDATION_FAILED": 0
+        },
+        {
+          "HIT": 3000,
+          "MISS": 18,
+          "DB_LOAD": 0,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 18,
+          "DEGRADED": 0,
+          "INVALIDATED": 0,
+          "INVALIDATION_FAILED": 0
+        }
+      ],
+      "cacheAfter": [
+        {
+          "HIT": 12835,
+          "MISS": 177,
+          "DB_LOAD": 21,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 156,
+          "DEGRADED": 0,
+          "INVALIDATED": 21,
+          "INVALIDATION_FAILED": 0
+        },
+        {
+          "HIT": 12855,
+          "MISS": 125,
+          "DB_LOAD": 1,
+          "NEGATIVE_HIT": 0,
+          "SINGLE_FLIGHT_WAIT": 124,
+          "DEGRADED": 0,
+          "INVALIDATED": 0,
+          "INVALIDATION_FAILED": 0
+        }
+      ]
+    }
+  ],
+  "publicHot": {
+    "count": 1000,
+    "seconds": 0.33747120799999664,
+    "publicProjectionDbLoads": 0,
+    "sqlBefore": "Innodb_row_lock_time\t38293\nInnodb_row_lock_waits\t905\nQuestions\t368187\nThreads_running\t2",
+    "sqlAfter": "Innodb_row_lock_time\t38293\nInnodb_row_lock_waits\t905\nQuestions\t368267\nThreads_running\t2",
+    "before": [
+      {
+        "HIT": 12835,
+        "MISS": 178,
+        "DB_LOAD": 22,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 156,
+        "DEGRADED": 0,
+        "INVALIDATED": 21,
+        "INVALIDATION_FAILED": 0
+      },
+      {
+        "HIT": 12855,
+        "MISS": 125,
+        "DB_LOAD": 1,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 124,
+        "DEGRADED": 0,
+        "INVALIDATED": 0,
+        "INVALIDATION_FAILED": 0
+      }
+    ],
+    "after": [
+      {
+        "HIT": 13335,
+        "MISS": 178,
+        "DB_LOAD": 22,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 156,
+        "DEGRADED": 0,
+        "INVALIDATED": 21,
+        "INVALIDATION_FAILED": 0
+      },
+      {
+        "HIT": 13355,
+        "MISS": 125,
+        "DB_LOAD": 1,
+        "NEGATIVE_HIT": 0,
+        "SINGLE_FLIGHT_WAIT": 124,
+        "DEGRADED": 0,
+        "INVALIDATED": 0,
+        "INVALIDATION_FAILED": 0
+      }
+    ]
+  },
+  "negative404Repeated": 3,
+  "qpsClaim": "20k HTTP requests completed; not20k QPS",
+  "notExecuted": [
+    "production or independent Linux load",
+    "max sustained saturation",
+    "Redis adversarial slow-reader test in separate D cache probe"
+  ],
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "44ee0a7b50d9bf39ada9fd4b1112a510262d2a24bb89a768d9a10be245fc233e",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/3/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/3/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/733be779-343e-4119-96ad-d4d49ebc6678/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/6698c6ab-f909-4844-bead-8dfe09e89dd9/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/7ffd4112-9108-49d7-a520-24291fbb67ab/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/a82a48ab-389c-465c-b5a9-511c94528930/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/4f1ba65d-ec66-4254-af6c-52e2b3595ee3/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/058554ba-5c9b-40d5-9579-53db5b72a0b9/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/8ba7feb8-52f3-4ee5-aba5-14d011b4c3d9/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/91058171-f961-4732-96d7-462f733281a5/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/a58274d0-6220-42b3-8482-0e0b48a5d254/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/3/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/orders/85e5b026-f0f4-465a-bd3d-b75062ca4d59/simulate-pay",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/4/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/4/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/4/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/5/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/5/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/5/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis?limit=20",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/admin/market/cache",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/999999999",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis/999999999",
+      "status": 404
+    },
+    {
+      "path": "/portal/api/catalog/apis/999999999",
+      "status": 404
+    }
+  ],
+  "rootEnvUnchanged": true
+}

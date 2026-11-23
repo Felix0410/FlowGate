@@ -1,3 +1,5 @@
+> **最终阶段移交（2026-11-23）**：此文件记录V12-C已实现功能及Codex原始测试证据，不改写历史结果。下一次**唯一执行合同**是[V12-D Final D0～D8](v12-d-final-delivery.md)与根`CODEX_V12_D_FINAL_EXEC_PROMPT.md`，将已知`PromotionService` FAILED达到8次不能自动/人工恢复的P1、C #20/#21同Tree审查、5k/20k HTTP请求阶梯、Rabbit重试/300s、真实M/C验收一起处理，不再新开C收尾阶段。本页“正式验收未完成”事实继续有效，D文档创建不等于P1已修。
+
 # V12-C实施记录
 
 候选已交付 [Draft PR #21](https://github.com/Felix0410/FlowGate/pull/21)，base为C设计分支。原生push403，GitHub App逐段交付，native fetch独立核对四段tree与有序parent全部相符；完整本地/远端SHA映射见`evidence/v12-c-delivery.json`。未改main/B/M ref。独立源码复审和负责人真人验收待完成。

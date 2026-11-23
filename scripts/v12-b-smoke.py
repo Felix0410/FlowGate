@@ -17,7 +17,7 @@ import v11_local_runtime as runtime
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--keep-running',action='store_true',help='保留本轮自有隔离实例供浏览器验证，之后必须显式stop');parser.add_argument('--evidence-prefix',choices=['v12-b','v12-m5'],default='v12-b');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--keep-running',action='store_true',help='保留本轮自有隔离实例供浏览器验证，之后必须显式stop');parser.add_argument('--evidence-prefix',choices=['v12-b','v12-m5','v12-d0'],default='v12-b');args=parser.parse_args()
     run=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S').lower()+'-'+secrets.token_hex(2)
     work=core.ROOT/'.local'/'v12-b'/run;runtime.private_directory(work.parent);runtime.private_directory(work)
     home=runtime.instance_home('v12b-'+run)
@@ -252,7 +252,7 @@ def main():
         result['failure']=type(error).__name__+': '+str(error)+' at line '+str(traceback.extract_tb(error.__traceback__)[-1].lineno);print('主链路失败：'+result['failure'],flush=True)
     finally:
         result['passed']=success;result['rootEnvUnchanged']=root_hash==core.file_hash(core.ROOT/'.env');result['isolationProject']=state['project'];result['localRuntime']=str(work)
-        out=core.ROOT/('docs/progress/evidence/'+('v12-m5-kafka-free-e2e.json' if args.evidence_prefix=='v12-m5' else 'v12-b7-e2e.json') if success else 'docs/progress/evidence/'+args.evidence_prefix+'-failed-'+run+'.json');out.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+        out=core.ROOT/('docs/progress/evidence/'+('v12-m5-kafka-free-e2e.json' if args.evidence_prefix=='v12-m5' else 'v12-d0-e2e.json' if args.evidence_prefix=='v12-d0' else 'v12-b7-e2e.json') if success else 'docs/progress/evidence/'+args.evidence_prefix+'-failed-'+run+'.json');out.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
         # 成功时保留运行实例用于同轮浏览器检查，后续由显式stop收尾；失败立即停自有进程/容器。
         runtime.save(work/'cleanup.json',{'home':str(home),'secondControlPid':second_control.pid if second_control else None,'secondPid':second.pid if second else None,'owner':state['owner']})
         if not success or not args.keep_running:

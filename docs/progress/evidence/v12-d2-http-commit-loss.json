@@ -1,0 +1,141 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "realHttpAttempts": 2,
+  "sameChargeId": true,
+  "ledgerRows": 1,
+  "downstreamPostCalls": 1,
+  "businessStatus": 201,
+  "bodyPreserved": true,
+  "extraGatewayStopped": true,
+  "extraNodeMetadataRemoved": true,
+  "mode": "actual proxy discards first successful quota HTTP response after server commit; no mocked transport",
+  "sourceCommit": "720261ae437ee00c7571b5b2e57a8f799f05b562",
+  "controlJarSha256": "ba3d803b237b24f4bfc8ccfeb0d825ccb2c31652a09844165b0337e80e54196d",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/admin/services",
+      "status": 200
+    },
+    {
+      "path": "/admin/apis",
+      "status": 201
+    },
+    {
+      "path": "/admin/routes",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies",
+      "status": 201
+    },
+    {
+      "path": "/admin/policies/55/bindings",
+      "status": 201
+    },
+    {
+      "path": "/admin/releases/current",
+      "status": 200
+    },
+    {
+      "path": "/admin/releases/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/developers",
+      "status": 201
+    },
+    {
+      "path": "/admin/plans",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/subscriptions",
+      "status": 201
+    },
+    {
+      "path": "/admin/apps/5038/credentials",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    },
+    {
+      "path": "/admin/nodes",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

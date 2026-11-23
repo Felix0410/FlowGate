@@ -1,0 +1,859 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "window": "separate fresh20 perroute perGateway diagnostics after fair benchmark; not global or pooled percentile",
+  "samples": [
+    {
+      "gateway": 0,
+      "routeId": "d-3b80a96e-metered_v11-fast",
+      "mode": "metered_v11",
+      "kind": "fast",
+      "sampleCount": 20,
+      "p95Seconds": 0.0262144,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.0262144
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    },
+    {
+      "gateway": 1,
+      "routeId": "d-3b80a96e-metered_v11-fast",
+      "mode": "metered_v11",
+      "kind": "fast",
+      "sampleCount": 20,
+      "p95Seconds": 0.030408704,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.030408704
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    },
+    {
+      "gateway": 0,
+      "routeId": "d-3b80a96e-metered_v12-fast",
+      "mode": "metered_v12",
+      "kind": "fast",
+      "sampleCount": 20,
+      "p95Seconds": 0.024641536,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.024641536
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    },
+    {
+      "gateway": 1,
+      "routeId": "d-3b80a96e-metered_v12-fast",
+      "mode": "metered_v12",
+      "kind": "fast",
+      "sampleCount": 20,
+      "p95Seconds": 0.019398656,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.019398656
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    },
+    {
+      "gateway": 0,
+      "routeId": "d-3b80a96e-metered_v11-slow",
+      "mode": "metered_v11",
+      "kind": "slow",
+      "sampleCount": 20,
+      "p95Seconds": 0.026738688,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.026738688
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    },
+    {
+      "gateway": 1,
+      "routeId": "d-3b80a96e-metered_v11-slow",
+      "mode": "metered_v11",
+      "kind": "slow",
+      "sampleCount": 20,
+      "p95Seconds": 0.023068672,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.023068672
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    },
+    {
+      "gateway": 0,
+      "routeId": "d-3b80a96e-metered_v12-slow",
+      "mode": "metered_v12",
+      "kind": "slow",
+      "sampleCount": 20,
+      "p95Seconds": 0.015204352,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.015204352
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    },
+    {
+      "gateway": 1,
+      "routeId": "d-3b80a96e-metered_v12-slow",
+      "mode": "metered_v12",
+      "kind": "slow",
+      "sampleCount": 20,
+      "p95Seconds": 0.022544384,
+      "raw": {
+        "availableTags": [],
+        "baseUnit": "seconds",
+        "measurements": [
+          {
+            "statistic": "VALUE",
+            "value": 0.022544384
+          }
+        ],
+        "name": "flowgate.quota.hop.percentile"
+      }
+    }
+  ],
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "ea2f532e65bef5284407601a8bd1c340a36a53d94c41a2cddc589049d3622709",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps?limit=100",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps/5018/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/admin/apis",
+      "status": 200
+    },
+    {
+      "path": "/admin/apps/5017/credentials/rotate",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v11-fast&tag=phi:0.95",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v11-fast&tag=phi:0.95",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v12-fast&tag=phi:0.95",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/fast/1",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v12-fast&tag=phi:0.95",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v11-slow&tag=phi:0.95",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v11/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v11-slow&tag=phi:0.95",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v12-slow&tag=phi:0.95",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/api/d-bench/3b80a96e/metered_v12/slow?delayMs=10",
+      "status": 200
+    },
+    {
+      "path": "/actuator/metrics/flowgate.quota.hop.percentile?tag=routeId:d-3b80a96e-metered_v12-slow&tag=phi:0.95",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}

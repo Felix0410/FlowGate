@@ -1,0 +1,2505 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "eventId": "394c30c4-ee3c-4ad5-a319-d77f4be8cecc",
+  "sentEventId": "f1d8a791-2ff5-41bc-bee2-e89d9823fc43",
+  "states": [
+    "NEW\t0",
+    "FAILED\t1",
+    "FAILED\t2",
+    "FAILED\t3",
+    "FAILED\t4",
+    "FAILED\t5",
+    "FAILED\t6",
+    "FAILED\t7",
+    "FAILED\t8"
+  ],
+  "display": "RETRY_EXHAUSTED",
+  "originalEventPreserved": true,
+  "naturalCooldownWaitSeconds": 310.01098875,
+  "dualAdminStatuses": [
+    409,
+    200
+  ],
+  "consumedEach": 1,
+  "ordersEach": 0,
+  "lateResult": "IGNORED_TERMINAL",
+  "auditRows": 1,
+  "duplicateActualMessages": 100,
+  "inventoryReserved": 0,
+  "inventorySold": 0,
+  "nodeColdStart409": true,
+  "roles403": [
+    "OPERATOR",
+    "VIEWER"
+  ],
+  "fixture": "only new Intent price briefly conflicted to hold SENT in Poison, repaired; no clock/date manipulation or historical Ledger edit",
+  "sourceCommit": "72166df48dc6b703e9b45cb04024c9887818f076",
+  "controlJarSha256": "44ee0a7b50d9bf39ada9fd4b1112a510262d2a24bb89a768d9a10be245fc233e",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/publish",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/events/11111111-1111-4111-8111-111111111111/replay",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/promotions/2/claim",
+      "status": 202
+    },
+    {
+      "path": "/admin/promotions/events/f1d8a791-2ff5-41bc-bee2-e89d9823fc43/replay",
+      "status": 409
+    },
+    {
+      "path": "/portal/api/promotions/1/claim",
+      "status": 202
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/events/394c30c4-ee3c-4ad5-a319-d77f4be8cecc/replay",
+      "status": 403
+    },
+    {
+      "path": "/admin/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/events/394c30c4-ee3c-4ad5-a319-d77f4be8cecc/replay",
+      "status": 403
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2/events",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/events/f1d8a791-2ff5-41bc-bee2-e89d9823fc43/replay",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/1",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/2",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/events/394c30c4-ee3c-4ad5-a319-d77f4be8cecc/replay",
+      "status": 409
+    }
+  ],
+  "rootEnvUnchanged": true
+}

@@ -1,3 +1,5 @@
+> **历史提示词（2026-11-23更新）：V12-C的C0～C9已在真实功能分支实现。请不要重新运行这个文件来“从头做C”。所有剩余C P1与性能/恢复/安全/验收统一纳入最后阶段`CODEX_V12_D_FINAL_EXEC_PROMPT.md`和`docs/progress/v12-d-final-delivery.md`，并直接在`feat/v12-d-final-delivery`同一个Draft PR交付。下面NOT_STARTED是C最初设计时刻的历史状态，不代表当前功能代码。**
+
 # 本地Codex唯一执行入口｜FlowGate V12-C 高并发套餐缓存、限时抢购和RabbitMQ异步订单
 
 > **当前只完成设计，C0～C9代码与测试全部NOT_STARTED。** 用户明确要求“设计C，并且高并发套餐需要缓存”：**商品分类/列表/详情/SKU报价及活动公开页Redis Cache-Aside是必做功能**；活动Lua软候选、MySQL库存/Intent强约束和Rabbit异步创单是另一个必做环节。V12-M已将Kafka运行依赖退役，C**绝不引回Kafka**。不可把Redis预扣称为买到、不可把20k压测目标称为已实现20k QPS。

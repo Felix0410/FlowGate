@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "realRedis": true,
+  "slowReaderGenerationInvalidation": "PASS",
+  "stdout": "20:31:09.925 [main] WARN io.netty.resolver.dns.DnsServerAddressStreamProviders -- Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'\nREAL_REDIS_GENERATION_CAS_PASS {counters={HIT=1, MISS=2, DB_LOAD=2, NEGATIVE_HIT=0, SINGLE_FLIGHT_WAIT=0, DEGRADED=0, INVALIDATED=1, INVALIDATION_FAILED=0}, lastInvalidatedAt=2026-11-23T12:31:10.485486Z, scope=本实例公开投影计数；不是所有SQL查询量, enabled=true}\n",
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "4e43a6d782bf5a0322debeb79d34475c64257bf68ac9e1d11e760b3d4521b67d",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [],
+  "rootEnvUnchanged": true
+}

@@ -1,0 +1,54 @@
+{
+  "passed": true,
+  "exitCode": 0,
+  "independentSchema": "fgd_utc_f1ba50ca06",
+  "probes": [
+    {
+      "file": "V11QuotaDbProbe.java",
+      "exitCode": 0,
+      "seconds": 5.147569000000001,
+      "result": {
+        "passed": true,
+        "differentChargeConcurrency": 100,
+        "grants": 5,
+        "exhausted": 95,
+        "duplicateConcurrency": 100,
+        "duplicateLedger": 1,
+        "outboxMatchesLedger": true,
+        "crossMonthOriginalPeriod": "202611",
+        "disabledReplayDenied": true
+      }
+    },
+    {
+      "file": "V11UsageAggregationProbe.java",
+      "exitCode": 0,
+      "seconds": 4.673212667,
+      "result": {
+        "passed": true,
+        "duplicateConcurrency": 100,
+        "newAggregates": 1,
+        "rollbackWithoutOrphan": true,
+        "dayFromOutbox": true,
+        "chargeConflictDenied": true
+      }
+    }
+  ],
+  "clock": "only fresh Hikari connections in independent schema have nextmonth session timestamp; OS/business controls unchanged",
+  "covers": [
+    "100 different charges Free5",
+    "100 samecharge transactions",
+    "next month duplicate returns original month without second balance",
+    "100 same event consumer concurrency",
+    "real RENAME daily failure rolls back consumed marker",
+    "late Ledger insertion date does not change source event UTC day",
+    "duplicate charge/source conflict rejected"
+  ],
+  "mainBusinessDatabaseUntouched": true,
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "ea2f532e65bef5284407601a8bd1c340a36a53d94c41a2cddc589049d3622709",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [],
+  "rootEnvUnchanged": true
+}

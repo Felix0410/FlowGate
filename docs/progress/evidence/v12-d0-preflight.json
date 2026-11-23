@@ -1,0 +1,421 @@
+{
+  "sourceCommit": "5541eb32f0dfcb0fac3972f38c7e082a0486405c",
+  "java": {
+    "exitCode": 0,
+    "summaryLines": [
+      [
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        11,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        0,
+        0
+      ],
+      [
+        53,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        0,
+        0
+      ],
+      [
+        26,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0
+      ]
+    ],
+    "command": "JAVA_HOME=ms-17.0.18 mvn -B -ntp verify",
+    "tests": 94
+  },
+  "commands": [
+    {
+      "command": [
+        "node",
+        "scripts/product-console-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-0.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v11-a-console-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-1.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v11-b-console-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-2.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v11-c-console-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-3.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v11-c-review-console-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-4.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v11-e-console-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-5.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v12-a-portal-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-6.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v12-b-orders-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-7.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/workbench-console-test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-8.log"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_run_local.py"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-9.log"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_v11_local.py"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-10.log"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_v12_m_cutover.py"
+      ],
+      "exitCode": 0,
+      "log": ".local/v12-d0-check-11.log"
+    }
+  ],
+  "prs": [
+    {
+      "number": 17,
+      "base": "docs/v12-b-order-design",
+      "baseSha": "f228cd3e64ebad44625538a60319b38aac3228e7",
+      "head": "feat/v12-b-orders",
+      "headSha": "c857d3b8532ae98dcfb208d10dd140efa0a3037b",
+      "draft": true,
+      "files": 55,
+      "headTree": "e3157516289690f60d7b19d6d41412066b02c732",
+      "mergeBase": "0a69307672e4492d2482acab0237bb81f16062bd",
+      "diffFiles": 60
+    },
+    {
+      "number": 18,
+      "base": "feat/v12-b-orders",
+      "baseSha": "c857d3b8532ae98dcfb208d10dd140efa0a3037b",
+      "head": "docs/v12-m-rabbitmq-convergence",
+      "headSha": "87b27c292c4718bc48bfdd5add7e02372fc28c4c",
+      "draft": true,
+      "files": 122,
+      "headTree": "2f4d64819cee3101e783bd521da4a355ae784dc5",
+      "mergeBase": "c857d3b8532ae98dcfb208d10dd140efa0a3037b",
+      "diffFiles": 122
+    },
+    {
+      "number": 19,
+      "base": "docs/v12-m-rabbitmq-convergence",
+      "baseSha": "48dc05abf33c7bab7e5c1a90bc306d79f82aef3f",
+      "head": "feat/v12-m-rabbitmq-only",
+      "headSha": "d6c1f33371690071c4bb7199dc9e7db5598d8079",
+      "draft": true,
+      "files": 118,
+      "headTree": "2f4d64819cee3101e783bd521da4a355ae784dc5",
+      "mergeBase": "48dc05abf33c7bab7e5c1a90bc306d79f82aef3f",
+      "diffFiles": 118
+    },
+    {
+      "number": 20,
+      "base": "feat/v12-m-rabbitmq-only",
+      "baseSha": "d6c1f33371690071c4bb7199dc9e7db5598d8079",
+      "head": "docs/v12-c-high-concurrency-cache",
+      "headSha": "97a01d436df37e4e48b64a53bf3e2012c4423c9d",
+      "draft": true,
+      "files": 65,
+      "headTree": "3faf3c2cebe7bdb3f8c71c35e91deb052843ee0c",
+      "mergeBase": "d6c1f33371690071c4bb7199dc9e7db5598d8079",
+      "diffFiles": 65
+    },
+    {
+      "number": 21,
+      "base": "docs/v12-c-high-concurrency-cache",
+      "baseSha": "a4a48b78b04f04f728c2bb6614942eaf4f100e27",
+      "head": "feat/v12-c-promo-cache",
+      "headSha": "678701973a077d2dd6484405c91184e4f082fe18",
+      "draft": true,
+      "files": 59,
+      "headTree": "3faf3c2cebe7bdb3f8c71c35e91deb052843ee0c",
+      "mergeBase": "a4a48b78b04f04f728c2bb6614942eaf4f100e27",
+      "diffFiles": 59
+    },
+    {
+      "number": 22,
+      "base": "feat/v12-c-promo-cache",
+      "baseSha": "678701973a077d2dd6484405c91184e4f082fe18",
+      "head": "feat/v12-d-final-delivery",
+      "headSha": "5541eb32f0dfcb0fac3972f38c7e082a0486405c",
+      "draft": true,
+      "files": 13,
+      "headTree": "c4b99bf46febc64b040414811d630f3f2b6df364",
+      "mergeBase": "678701973a077d2dd6484405c91184e4f082fe18",
+      "diffFiles": 13
+    }
+  ],
+  "rootEnvHash": "a80e734d45f4a68f5923b502ee9b73ba042b9fc16c50471a953ca6a959caaaa7",
+  "userAssetsTouched": false,
+  "M8": "PENDING_OWNER",
+  "CReview": "PENDING_REVIEW",
+  "E6": "PENDING_OWNER",
+  "passed": true,
+  "rabbitOnly": {
+    "composeConfigExitCode": 0,
+    "kafkaDependencyTreeExitCode": 0,
+    "kafkaArtifacts": 0
+  },
+  "firstCommandFailures": [
+    "zsh unquoted Maven wildcard rejected; quoted and reran0",
+    "compose.yml absent; used real compose.local.yml config0"
+  ],
+  "newIsolatedBaseline": "v12-d0-e2e.json",
+  "newIsolatedSchema": "v12-d0-schema.json"
+}

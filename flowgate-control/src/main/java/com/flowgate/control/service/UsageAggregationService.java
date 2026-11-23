@@ -13,7 +13,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class UsageAggregationService {
  private final OutboxEventEntryMapper outbox;private final QuotaLedgerEntryMapper ledger;private final ConsumedEventMapper consumed;private final UsageDailyMapper daily;private final TransactionTemplate tx;
  public UsageAggregationService(OutboxEventEntryMapper outbox,QuotaLedgerEntryMapper ledger,ConsumedEventMapper consumed,UsageDailyMapper daily,PlatformTransactionManager manager){this.outbox=outbox;this.ledger=ledger;this.consumed=consumed;this.daily=daily;tx=new TransactionTemplate(manager);tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);tx.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);tx.setTimeout(4);}
- private ApiFailure conflict(String code){return new ApiFailure(409,code,"事件与本地权威记录不一致，已停止该分区等待诊断");}
+ private ApiFailure conflict(String code){return new ApiFailure(409,code,"事件与本地权威记录不一致，消息将由投递边界隔离，等待运营核查");}
  private void validate(UsageGrantedEvent e){
   // 1. Rabbit不是可信数字来源；完整八字段必须与本地Outbox一致，并交叉校验Ledger。
   var source=outbox.selectOne(new QueryWrapper<OutboxEventEntry>().eq("event_id",e.eventId()));

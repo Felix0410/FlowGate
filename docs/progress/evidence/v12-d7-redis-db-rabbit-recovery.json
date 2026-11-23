@@ -1,0 +1,167 @@
+{
+  "passed": true,
+  "checks": [
+    "actual isolated Redis FLUSHDB fails claim503 without MySQL reservation",
+    "ADMIN rebuild advances DB epoch and derives capacity from DB",
+    "SCRIPT FLUSH with EVALSHA fallback",
+    "real Rabbit container stopped: HTTP202 durable before broker confirmation",
+    "ACCEPTED creation deadline releases stock/own slot",
+    "Rabbit restart late event ignored without resurrecting order",
+    "MySQL pause/unpause: public response or client timeout, then recovery",
+    "existing isolated API Ledger rows/units unchanged",
+    "100-stock Intent/Order/Payment/Outbox/Consumed/Slot/Grant enhanced RR check has zero gaps"
+  ],
+  "promotionId": 10,
+  "epochBefore": 2,
+  "epochAfter": 3,
+  "reconciliation": {
+    "reserved": 0,
+    "intents": 1,
+    "status": "PROVISIONAL",
+    "total": 3,
+    "asOfUtc": "2026-11-23T12:36:47.393Z",
+    "integrityGaps": 0,
+    "available": 3,
+    "sold": 0,
+    "expectedSold": 0,
+    "expectedReserved": 0
+  },
+  "loadReconciliation": {
+    "reserved": 0,
+    "intents": 100,
+    "status": "PROVISIONAL",
+    "total": 100,
+    "asOfUtc": "2026-11-23T12:36:47.648Z",
+    "integrityGaps": 0,
+    "available": 100,
+    "sold": 0,
+    "expectedSold": 0,
+    "expectedReserved": 0
+  },
+  "mysqlPauseStatus": 503,
+  "notExecuted": [
+    "full historical B23/C26 matrices",
+    "5000/20000 load levels",
+    "owner manual acceptance"
+  ],
+  "sourceCommit": "fe37d4250dc124b05439492c3b990ba0e7f3cffe",
+  "controlJarSha256": "ea2f532e65bef5284407601a8bd1c340a36a53d94c41a2cddc589049d3622709",
+  "owner": "c1de29e190724915b45e13b03b58568a",
+  "project": "flowgate-v11-demo-c1de29e19072",
+  "localRuntime": "/Users/felix/Files/03-Code/Java/FlowGate/.local/v12-b/20261123t115939-9a97",
+  "requests": [
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/my-developers",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/catalog/apis/1/offers",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/10/publish",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/apps",
+      "status": 201
+    },
+    {
+      "path": "/admin/promotions/10",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/10/claim",
+      "status": 503
+    },
+    {
+      "path": "/portal/api/promotions/10/my-claim",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/10/rebuild",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/promotions/10/claim",
+      "status": 202
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/portal/api/purchase-intents/307",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/10",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/10/reconciliation",
+      "status": 200
+    },
+    {
+      "path": "/admin/promotions/5/reconciliation",
+      "status": 200
+    }
+  ],
+  "rootEnvUnchanged": true
+}
