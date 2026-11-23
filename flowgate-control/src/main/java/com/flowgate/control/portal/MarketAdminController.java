@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/admin/market")
 public class MarketAdminController {
-    private final MarketReadiness readiness;private final MarketCatalogService market;private final ApiUsageService usage;
-    public MarketAdminController(MarketCatalogService market,ApiUsageService usage,MarketReadiness readiness){this.readiness=readiness;this.market=market;this.usage=usage;}
+    private final CatalogCacheService cache;private final MarketReadiness readiness;private final MarketCatalogService market;private final ApiUsageService usage;
+    public MarketAdminController(MarketCatalogService market,ApiUsageService usage,MarketReadiness readiness,CatalogCacheService cache){this.cache=cache;this.readiness=readiness;this.market=market;this.usage=usage;}
     private long actor(HttpServletRequest r){return ((Session)r.getAttribute("session")).principalId();}
+    @GetMapping("/cache") public Object cache(){return cache.diagnostics();}
     @GetMapping("/readiness") public Object readiness(){return readiness.status();}
     @GetMapping("/categories") public Object categories(){readiness.require();return market.categories(true);}
     @PostMapping("/categories") public Object category(@RequestBody Map<String,Object> b,HttpServletRequest r){readiness.require();return market.category(b,actor(r));}
