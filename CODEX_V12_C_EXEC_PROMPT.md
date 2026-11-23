@@ -36,7 +36,7 @@
 
 **C7 对账/后台/恢复**：用MySQL RR有限查询核对`stock.reserved==ACCEPTED+ORDER_READY`、`sold==PAID+REFUNDED(有Payment)`、Intent↔Order↔Payment/Outbox/Consumed↔Slot/Grant；超过1000UNKNOWN，不把今日称MATCH。ADMIN真实活动编辑/暂停/库存审计/Redis rebuild/Poison与Outbox补投；OPER/VIEWER只读；两Control Redis失忆恢复和Rabbit断连、旧V11/M/普通B同时正常。真实页面非标语风。保存`v12-c7-reconciliation.json`。
 
-**C8 实测缓存和高并发**：冷/热套餐查询、缓存失效回源、Lua候选、全链路100库存分场分别测，2Control/2Gateway，1k→5k→20k请求**逐级探索**，严格记录真实完成请求数、QPS、p50/p95/p99、DB查询量、cache hit/miss、MySQL连接池、Stock/Intent/Order/Payment/Grant、Ruby? **不得引用不存在技术**；本机不支持20k就记NOT_REACHED，不能声称20k QPS或设计即实测。Redis/MySQL/Rabbit真实停恢复、混合重复请求不超卖。保存`v12-c8-performance.json`，与V11-D独立性能实验区分。
+**C8 实测缓存和高并发**：冷/热套餐查询、缓存失效回源、Lua候选、全链路100库存分场分别测，2Control/2Gateway，1k→5k→20k请求**逐级探索**，严格记录真实完成请求数、QPS、p50/p95/p99、DB查询量、cache hit/miss、MySQL连接池、Stock/Intent/Order/Payment/Grant、库存/付款/权益回归各自的真实计数，**不得引用不存在技术**；本机不支持20k就记NOT_REACHED，不能声称20k QPS或设计即实测。Redis/MySQL/Rabbit真实停恢复、混合重复请求不超卖。保存`v12-c8-performance.json`，与V11-D独立性能实验区分。
 
 **C9 完成UI/指南/回归但停在Draft**：Portal真实价/单位/时间/APP选择/抢购排队→订单→付款→权益与Gateway用量、Console活动/库存/缓存/死信/补投；真实1280/375 Chromium与键盘；`docs/guides/v12-c-promotions.md`、README/AGENTS/路线图/产品指南、`docs/progress/v12-c-implementation.md`同步。Java17/Node/Python/真实MySQL/Redis/Rabbit所有预定关键回归与失败、NOT_EXECUTED如实记录。只推独立`feat/v12-c-promo-cache` Draft PR，base本设计分支；**不合并main、不重新引入Kafka、不修改旧PR head/base、不开始D、不迁移用户常驻环境**。请交ChatGPT远端源码复审并由负责人真人验收。
 
