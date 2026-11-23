@@ -1,5 +1,8 @@
 # FlowGate V1.2｜V12-B订单与V12-C限时抢购详细设计蓝图
 
+> **2026-11-23更新：以下是2026-11-10早期蓝图，不可作为当前C编码唯一合同。** V12-M已完成Kafka-free实现候选，用户新要求高并发套餐**必须有Redis公开商品/套餐Cache-Aside**。所有C业务、B表真实CHECK兼容、MySQL权威库存、活动Intent、独立Rabbit Promo队列、Redis epoch恢复、C0～C9任务以[最新C完整架构](v12-c-high-concurrency-promotion-architecture.md)、[C交易/迁移](v12-c-concurrency-transactions.md)、[C缓存](v12-c-cache-consistency.md)、[最新Codex合同](../progress/v12-c-high-concurrency.md)与ADR-15为准。下面“Kakfa仍保留/直接混投BusinessOutbox”等早期文字只属历史设计，不是现行实现要求；C仍未编码。
+
+
 > **2026-11-10消息架构补充**：V12-B普通订单及V12-C抢购消息均按[ RabbitMQ修订合同 ](v12-rabbitmq-adaptation.md)采用独立Commerce Exchange、quorum主/TTL重试/Poison队列和业务Outbox；**本文件涉及V12新Kafka Topic/Group、offset ACK的旧措辞不再适用**。V11-C Kafka保留，不做全量迁移。
 
 > **更新状态：早期B/C共用技术蓝图，仅保留C的未来设计参考。V12-B最新详细架构、数据库字典、订单状态机、Rabbit Commerce和B0修复、执行任务已经单独定稿**：见[订单架构](v12-b-order-architecture.md)、[事务与故障验收](v12-b-transactions-acceptance.md)、[B进度合同](../progress/v12-b-order-payment.md)、根目录[Codex B提示词](../../CODEX_V12_B_EXEC_PROMPT.md)。旧B表中任何Kafka/旧支付截止/可选退款语句以最新B文件为准；B新业务仍未编码。C只保留设计，不执行。** 适用前置`docs/design/v12-architecture-decisions.md`、`docs/design/v12-transaction-invariants.md`、`docs/progress/v12-a-portal-free-subscription.md`。如有实现冲突以最近ADR为准。此文档只是把后续阶段业务合同锁定，防止V12-A完成后临时重选订单方案。
