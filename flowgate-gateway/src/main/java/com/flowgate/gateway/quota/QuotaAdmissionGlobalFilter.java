@@ -52,7 +52,7 @@ public class QuotaAdmissionGlobalFilter implements GlobalFilter,Ordered,QuotaSup
     .doOnNext(outcome->metrics.counter("flowgate.quota.admission","routeId",plan.routeId(),"outcome",outcome).increment())
     .doOnError(error->metrics.counter("flowgate.quota.admission","routeId",plan.routeId(),"outcome",error instanceof QuotaDenied denied?denied.code:"QUOTA_UNAVAILABLE").increment())
     // 3. Grant以后才代理；无论下游结果/取消都不退款，但原并发许可和本机hop槽必释放。
-    .doFinally(signal->{inflight.decrementAndGet();metrics.timer("flowgate.quota.hop","routeId",plan.routeId()).record(System.nanoTime()-began,TimeUnit.NANOSECONDS);})
+    .doFinally(signal->{inflight.decrementAndGet();io.micrometer.core.instrument.Timer.builder("flowgate.quota.hop").tag("routeId",plan.routeId()).publishPercentiles(0.95).register(metrics).record(System.nanoTime()-began,TimeUnit.NANOSECONDS);})
     .flatMap(ignored->chain.filter(exchange));
   });
  }
