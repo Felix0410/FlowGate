@@ -1,3 +1,5 @@
+> **2026-11-23状态覆盖说明**：C0～C9核心功能已由`feat/v12-c-promo-cache@678701973a077d2dd6484405c91184e4f082fe18`实现并有定向真实提交证据，下面NOT_STARTED状态是C设计创建日的历史初始进度，**不是当前代码尚未开发**。所有剩余C可靠性P1、Rabbit12次/300秒实测、5k/20k请求阶梯、全量独立审核与负责人真人验收统一迁移到[唯一V12-D Final](v12-d-final-delivery.md)的D0～D8，后续不再单独执行C合同。唯一入口`../../CODEX_V12_D_FINAL_EXEC_PROMPT.md`；已测试/未测详情见`v12-c-implementation.md`。下方旧任务为历史追溯，不重复造新C功能。
+
 > 实施状态更新：C0～C9候选功能与必要实测见[v12-c-implementation.md](v12-c-implementation.md)，本文件保留原合同。负责人明确要求快和准、避免过多测试，因此5k/20k阶梯、完整历史矩阵、12次耗尽与300秒SENT补投实等不再展开；这些项保持NOT_EXECUTED，不把原设计目标当作PASS。独立复审和负责人真人验收仍待完成。
 
 # FlowGate V12-C｜高并发套餐缓存、限时抢购与Rabbit异步订单——C0～C9 Codex实施合同
