@@ -101,3 +101,17 @@
 - **工程边界**：C功能开关与缓存开关默认OFF，旧B/M库未装C表时安全空态；只用既有Java17/Boot4/Gateway/MySQL8.4/Redis7/RabbitMQ3.13/原生ESM，禁止再加Kafka、Redisson/分布式事务中间件、真实支付、额外微服务。20k请求仅为**待测压力阶梯目标**，实际QPS/p95/DB查询下降必须隔离测量后才可声称。所有测试用新owner/随机容器/端口/卷，用户常驻`flowgate-local`、根.env、IDE/JVM、历史Ledger及原Kafka卷未经新授权不改动；C最后保持Draft PR/手测待确认，不自行进入D。
 
 **本ADR标志设计裁决，不代表C库存、缓存或抢购代码已实施。**
+
+
+## ADR-16：V12-D Final合并全部余项，单一功能分支/PR一次性验收（2026-11-23）
+
+**优先级：本ADR-16覆盖旧路线图中“C结束另开多个D阶段”“Nacos/Sentinel可作为下一业务阶段”或“继续用Kafka测试当前运行链”的规划，与ADR-14 Rabbit-only和ADR-15 MySQL权威库存/Redis候选共同有效。** 负责人确定：V12-C Outbox P1、M8/C/V11-E6真人及独立复审、V11-D旧≥10万行SQL/四组Gateway公平性能、V12-D缓存/限时抢购更大负载与四Rabbit链故障、后台运营/安全/可观测性/完整部署/最终签字，都纳入**唯一最后阶段V12-D Final**。内部D0～D8仅为同一个阶段的工作包，**不再拆阶段或增加新的业务依赖**。
+
+- **唯一现行合同**：`CODEX_V12_D_FINAL_EXEC_PROMPT.md`、`docs/progress/v12-d-final-delivery.md`、`docs/design/v12-d-final-acceptance-architecture.md`、`docs/reviews/v12-d-final-preflight-2026-11-23.md`、`docs/guides/v12-d-final-acceptance.md`。继承真实C功能`feat/v12-c-promo-cache@678701973a077d2dd6484405c91184e4f082fe18`；**本轮直接创建唯一功能分支`feat/v12-d-final-delivery`与一个Draft PR(base C功能)**，Codex在此分支提交所有D源码、脚本、证据和Runbook，不再创建docs D PR。禁止修改旧#17～#21/main、force/rebase共享分支、auto merge/tag。
+- **P1优先**：C Promo Outbox存在`claimOutbox() attempt_count<8`与仅SENT replay的实际恢复漏洞。未修复并真实注入Rabbit长故障（FAILED>=8、ADMIN审计重排/迟到EXPIRED、300秒冷却、重复100次/坏事件隔离）前不得标全项目PASS；优先利用现有FAILED+次数派生RETRY_EXHAUSTED运营状态，不因技术炫耀增表/中间件。C MySQL Stock、APP Slot、Intent、B Payment/Grant/QuotaLedger不变；退款sold不返售。
+- **真实性能**：旧V11-D的10万合法脱敏SQL+EXPLAIN ANALYZE、DIRECT/PROXY/GOVERNED/METERED四组公平两轮（METERED分V11_APP与V12_APP_API）及V12-C冷/热套餐缓存、100库存的1k/5k/20k**HTTP请求数目标**都要在新隔离资源实际测量CPU/RSS、completed/CLIENT_SHED、QPS和业务成功p95/p99、连接池/MySQL锁等待/Redis hit/Rabbit lag、库存和账本零超额；实际资源不足明确NOT_REACHED且负责人可选择条件接受，禁止宣称20k QPS/0成本/性能必涨。已C候选数据是旧证据，D必须区分本轮再测。
+- **四Rabbit逻辑链**：V11 Legacy Usage、V12 API Usage、B Commerce Payment、C Promo Intent皆MySQL原Outbox/Consumed+业务唯一键、publish confirm+mandatory return/COMMIT后manual ACK/Retry/Poison。现行运行/依赖Kafka-free；不得启动Kafka以满足历史测试。旧V11 Ledger/日报、V12 APP/API Ledger、B Order/Grant、C Stock/Intent权威均不接受Redis或MQ反向重建。真实混版/多副本、超时/退款/幂等/Cache epoch恢复、P1长故障补投必须全部实证。
+- **技术/运营边界**：继续Java17、Spring Boot4/Gateway WebFlux、Redis7 Lua、MySQL8.4、RabbitMQ3.13、Resilience4j、原生ESM；**不增加Nacos、Sentinel、Kafka、Redisson、Seata、CDC、新Web框架、真实支付或新微服务**。按实际瓶颈最小优化SQL/Redis/Gateway，不重复叠加已有令牌桶/熔断层。Portal/Console同步真实数据、中文使用/故障指南和角色安全，不加假KPI/标语。
+- **资产与完成定义**：用户root.env、常驻`flowgate-local`、原数据库、IDE/JVM、旧Kafka卷及历史Ledger未得新授权一律只读；全D压测、故障注入及迁移仅新随机owner/端口/隔离持久卷，不自动常驻部署/合并main。真实D证据填`docs/progress/v12-d-final-implementation.md`和`docs/acceptance/v12-final-results.md`（当前尚未生成实际运行结果）。源码审查与负责人真人验收**分开记**，未真人确认保持PENDING_OWNER；允许性能受限的CONDITIONALLY_ACCEPTED但必须负责人书面同意剩余限制，不能自行宣布完成。
+
+**此ADR只是最后阶段的合并设计与执行授权，不等于D0～D8已经实现/测试/正式验收。**
